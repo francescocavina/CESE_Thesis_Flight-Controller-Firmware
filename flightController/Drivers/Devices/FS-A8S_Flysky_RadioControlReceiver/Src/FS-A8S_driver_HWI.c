@@ -24,7 +24,7 @@
 /*
  * @file:    FS-A8S_driver_HWI.C
  * @date:    20/08/2023
- * @author:  francescocavina98@gmail.com
+ * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
  * @brief:   This is a template for source files.
@@ -60,7 +60,7 @@ static void Error_Handler(void);
 
 /* --- Private function implementation --------------------------------------------------------- */
 static void MX_UART_Init(UART_HandleTypeDef * huart) {
-    huart->Instance = USART2;
+    huart->Instance = FSA8S_RC_UART_INSTANCE;
     huart->Init.BaudRate = 115200;
     huart->Init.WordLength = UART_WORDLENGTH_8B;
     huart->Init.StopBits = UART_STOPBITS_1;

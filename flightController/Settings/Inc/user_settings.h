@@ -22,16 +22,16 @@
  */
 
 /*
- * @file:    inc_template.h
- * @date:    20/08/2023
+ * @file:    user_settings.h
+ * @date:    26/08/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
  * @brief:   This is a template for header files.
  */
 
-#ifndef INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
-#define INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
+#ifndef USER_SETTINGS_H
+#define USER_SETTINGS_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 
@@ -53,6 +53,6 @@ extern "C" {
 }
 #endif
 
-#endif /* INC_TEMPLATE_H */ /* !%!%! MODIFY !%!%! */
+#endif /* USER_SETTINGS_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

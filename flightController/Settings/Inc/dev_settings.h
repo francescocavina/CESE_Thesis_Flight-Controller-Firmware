@@ -22,16 +22,16 @@
  */
 
 /*
- * @file:    inc_template.h
- * @date:    20/08/2023
+ * @file:    dev_settings.h
+ * @date:    26/08/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
  * @brief:   This is a template for header files.
  */
 
-#ifndef INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
-#define INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
+#ifndef DEV_SETTINGS_H
+#define DEV_SETTINGS_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 
@@ -41,6 +41,9 @@ extern "C" {
 #endif
 
 /* --- Public macros definitions --------------------------------------------------------------- */
+
+/* FS-A8S Radio Controller Settings */
+#define FSA8S_RC_UART_INSTANCE (USART2)
 
 /* --- Public data type declarations ----------------------------------------------------------- */
 
@@ -53,6 +56,6 @@ extern "C" {
 }
 #endif
 
-#endif /* INC_TEMPLATE_H */ /* !%!%! MODIFY !%!%! */
+#endif /* DEV_SETTINGS_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

@@ -24,7 +24,7 @@
 /*
  * @file:    FS-A8S_driver_UAI.h
  * @date:    20/08/2023
- * @author:  francescocavina98@gmail.com
+ * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
  * @brief:   This is a template for header files.
@@ -68,7 +68,18 @@ typedef enum {
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+/**
+ * @brief
+ * @param
+ * @retval
+ */
 iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * buffer);
+
+/**
+ * @brief
+ * @param
+ * @retval
+ */
 uint16_t FSA8S_RC_ReadChannel(iBus_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */

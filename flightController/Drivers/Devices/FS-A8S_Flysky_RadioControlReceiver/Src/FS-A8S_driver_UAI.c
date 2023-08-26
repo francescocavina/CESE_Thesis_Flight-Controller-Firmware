@@ -24,7 +24,7 @@
 /*
  * @file:    FS-A8S_driver_UAI.c
  * @date:    20/08/2023
- * @author:  francescocavina98@gmail.com
+ * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
  * @brief:   This is a template for source files.
@@ -34,6 +34,8 @@
 #include "FS-A8S_driver_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
+// #define USE_FREERTOS
+
 #define IBUS_BUFFER_LENGHT (0X20)
 #define IBUS_CHANNELS      (0x40)
 
@@ -42,8 +44,25 @@
 /* --- Private variable declarations ----------------------------------------------------------- */
 
 /* --- Private function declarations ----------------------------------------------------------- */
+/**
+ * @brief
+ * @param
+ * @retval
+ */
 static bool_t FSA8S_RC_CheckFirstByte();
+
+/**
+ * @brief
+ * @param
+ * @retval
+ */
 static bool_t FSA8S_RC_Checksum();
+
+/**
+ * @brief
+ * @param
+ * @retval
+ */
 static bool_t FSA8S_RC_AmendData();
 
 /* --- Public variable definitions ------------------------------------------------------------- */
@@ -87,7 +106,12 @@ static bool_t FSA8S_RC_AmendData(iBus_HandleTypeDef_t * hibus) {
 
 /* --- Public function implementation ---------------------------------------------------------- */
 iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * buffer) {
+
+#ifdef USE_FREERTOS
+    iBus_HandleTypeDef_t * hibus = pvPortmalloc(sizeof(iBus_HandleTypeDef_t));
+#else
     iBus_HandleTypeDef_t * hibus = malloc(sizeof(iBus_HandleTypeDef_t));
+#endif
 
     if (hibus) {
         hibus->huart = huart;

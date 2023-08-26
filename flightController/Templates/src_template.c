@@ -24,7 +24,7 @@
 /*
  * @file:    src_template.c
  * @date:    20/08/2023
- * @author:  francescocavina98@gmail.com
+ * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
  * @brief:   This is a template for source files.
