@@ -22,7 +22,7 @@
  */
 
 /*
- * @file:    inc_template.h
+ * @file:    FS-A8S_driver_UAI.h
  * @date:    20/08/2023
  * @author:  francescocavina98@gmail.com
  * @version: v1.0.0
@@ -30,10 +30,15 @@
  * @brief:   This is a template for header files.
  */
 
-#ifndef INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
-#define INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
+#ifndef INC_FS_A8S_DRIVER_UAI_H
+#define INC_FS_A8S_DRIVER_UAI_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "FS-A8S_driver_HWI.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -43,16 +48,34 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
+typedef enum {
+    CHANNEL_1 = 1,
+    CHANNEL_2 = 2,
+    CHANNEL_3 = 3,
+    CHANNEL_4 = 4,
+    CHANNEL_5 = 5,
+    CHANNEL_6 = 6,
+    CHANNEL_7 = 7,
+    CHANNEL_8 = 8,
+    CHANNEL_9 = 9,
+    CHANNEL_10 = 10,
+    CHANNEL_11 = 11,
+    CHANNEL_12 = 12,
+    CHANNEL_13 = 13,
+    CHANNEL_14 = 14,
+} FSA8S_RC_CHANNEL_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * buffer);
+uint16_t FSA8S_RC_ReadChannel(iBus_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_TEMPLATE_H */ /* !%!%! MODIFY !%!%! */
+#endif /* INC_FS_A8S_DRIVER_UAI_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

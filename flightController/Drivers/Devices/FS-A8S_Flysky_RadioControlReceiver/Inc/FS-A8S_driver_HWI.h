@@ -22,7 +22,7 @@
  */
 
 /*
- * @file:    inc_template.h
+ * @file:    FS-A8S_driver_HWI.h
  * @date:    20/08/2023
  * @author:  francescocavina98@gmail.com
  * @version: v1.0.0
@@ -30,10 +30,15 @@
  * @brief:   This is a template for header files.
  */
 
-#ifndef INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
-#define INC_TEMPLATE_H /* !%!%! MODIFY !%!%! */
+#ifndef INC_FS_A8S_DRIVER_HWI_H
+#define INC_FS_A8S_DRIVER_HWI_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "stm32f4xx_hal.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -43,16 +48,24 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
+typedef struct {
+    UART_HandleTypeDef * huart;
+    uint8_t * buffer;
+    uint8_t bufferSize;
+} iBus_HandleTypeDef_t;
+
+typedef bool bool_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+bool_t iBus_Init(iBus_HandleTypeDef_t * hibus);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_TEMPLATE_H */ /* !%!%! MODIFY !%!%! */
+#endif /* INC_FS_A8S_DRIVER_HWI_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */
