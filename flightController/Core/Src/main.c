@@ -70,22 +70,21 @@ int main(void) {
     /* USER CODE END 2 */
 
     /* Infinite loop */
-    /* USER CODE BEGIN WHILE *
+    /* USER CODE BEGIN WHILE */
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
     uint8_t buffer[32];
     uint8_t str[32] = {0};
+    uint8_t channel = CHANNEL_3;
 
     iBus_HandleTypeDef_t * rc_controller = FSA8S_RC_Init(&huart2, buffer);
 
     while (1) {
-        for (uint8_t i = 1; i <= 4; i++) {
-            uint16_t value = FSA8S_RC_ReadChannel(rc_controller, i);
-            sprintf(str, "Channel %i: %d\r\n", i, value);
-            CDC_Transmit_FS(str, sizeof(str));
-            // HAL_Delay(10);
-        }
+        uint16_t value = FSA8S_RC_ReadChannel(rc_controller, channel);
+        sprintf(str, "Channel %d: %d\r\n", channel, value);
+
+        CDC_Transmit_FS(str, sizeof(str));
 
         HAL_Delay(1000);
     }

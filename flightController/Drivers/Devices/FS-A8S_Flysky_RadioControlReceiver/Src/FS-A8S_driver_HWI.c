@@ -25,10 +25,17 @@
  * @file:    FS-A8S_driver_HWI.C
  * @date:    20/08/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
- * @brief:   This is a template for source files.
- */
+ * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
+ *           It is divided in two parts: One high level abstraction layer
+ *           (FS-A8S_driver_UAI.c and FS-A8S_driver_UAI.h) for interface with the
+ *           user application and one low level abstraction layer
+ *           (FS-A8S_driver_HWI.c and FS-A8S_driver_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver
+ *           to another platform, please only modify the low layer abstraction
+ *           layer files where the labels indicate it.
+ * */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "FS-A8S_driver_HWI.h"
@@ -41,25 +48,28 @@
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /**
- * @brief USART2 Initialization Function
- * @param None
- * @retval None
+ * @brief  UART Initialization Function
+ * @param  huart: Pointer to a UART_HandleTypeDef structure that contains
+ *                the configuration information for the specified UART module.
+ * @retval true:  If uart could be initialized.
+ *         false: If uart couldn't be initialized.
  */
-static void MX_UART_Init(UART_HandleTypeDef * huart);
+static bool_t MX_UART_Init(UART_HandleTypeDef * huart);
 
 /**
- * Enable DMA controller clock
+ * @brief  Enable DMA controller clock
+ * @param  None
+ * @retval None
  */
 static void MX_DMA_Init(void);
-
-static void Error_Handler(void);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static void MX_UART_Init(UART_HandleTypeDef * huart) {
+static bool_t MX_UART_Init(UART_HandleTypeDef * huart) {
+    /* BEGIN MODIFY 1*/
     huart->Instance = FSA8S_RC_UART_INSTANCE;
     huart->Init.BaudRate = 115200;
     huart->Init.WordLength = UART_WORDLENGTH_8B;
@@ -68,26 +78,37 @@ static void MX_UART_Init(UART_HandleTypeDef * huart) {
     huart->Init.Mode = UART_MODE_RX;
     huart->Init.HwFlowCtl = UART_HWCONTROL_NONE;
     huart->Init.OverSampling = UART_OVERSAMPLING_16;
+    /* END MODIFY 1 */
 
-    if (HAL_UART_Init(huart) != HAL_OK) {
-        Error_Handler();
+    /* BEGIN MODIFY 2 */
+    if (HAL_OK != HAL_UART_Init(huart)) {
+        /* END MODIFY 2 */
+        return false;
     }
-}
 
-static void Error_Handler(void) {
-    /* TODO */
+    return true;
 }
 
 static void MX_DMA_Init(void) {
     /* DMA controller clock enable */
+    /* BEGIN MODIFY 3 */
     __HAL_RCC_DMA1_CLK_ENABLE();
+    /* END MODIFY 3 */
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
 bool_t iBus_Init(iBus_HandleTypeDef_t * hibus) {
     MX_DMA_Init();
-    MX_UART_Init(hibus->huart);
-    HAL_UART_Receive_DMA(hibus->huart, hibus->buffer, hibus->bufferSize);
+
+    if (!MX_UART_Init(hibus->huart)) {
+        return false;
+    }
+
+    /* BEGIN MODIFY 4 */
+    if (HAL_OK != HAL_UART_Receive_DMA(hibus->huart, hibus->buffer, hibus->bufferSize)) {
+        /* END MODIFY 4 */
+        return false;
+    }
 
     return true;
 }

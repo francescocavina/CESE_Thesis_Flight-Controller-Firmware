@@ -25,10 +25,17 @@
  * @file:    FS-A8S_driver_UAI.h
  * @date:    20/08/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
- * @brief:   This is a template for header files.
- */
+ * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
+ *           It is divided in two parts: One high level abstraction layer
+ *           (FS-A8S_driver_UAI.c and FS-A8S_driver_UAI.h) for interface with the
+ *           user application and one low level abstraction layer
+ *           (FS-A8S_driver_HWI.c and FS-A8S_driver_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver
+ *           to another platform, please only modify the low layer abstraction
+ *           layer files where the labels indicate it.
+ * */
 
 #ifndef INC_FS_A8S_DRIVER_UAI_H
 #define INC_FS_A8S_DRIVER_UAI_H
@@ -69,16 +76,21 @@ typedef enum {
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /**
- * @brief
- * @param
- * @retval
+ * @brief  Initializes the radio control receiver driver.
+ * @param  huart: Pointer to a UART_HandleTypeDef structure that contains
+ *                the configuration information for the specified UART module.
+ *         data:  Buffer in which UART DMA will put the received data.
+ * @retval hibus: Pointer to a iBus_HandleTypeDef structure that contains
+ *                the configuration information for the iBus communication.
  */
-iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * buffer);
+iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * data);
 
 /**
- * @brief
- * @param
- * @retval
+ * @brief  Reads a radio control receiver channel (14 available).
+ * @param  hibus:   Pointer to a iBus_HandleTypeDef structure that contains
+ *                  the configuration information for the iBus communication.
+ *         channel: Channel number to be read.
+ * @retval channelValue
  */
 uint16_t FSA8S_RC_ReadChannel(iBus_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel);
 
