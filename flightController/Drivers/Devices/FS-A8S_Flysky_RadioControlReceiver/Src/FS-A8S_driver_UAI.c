@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_UAI.c
- * @date:    20/08/2023
+ * @date:    07/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.1.0
+ * @version: v1.2.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -35,7 +35,7 @@
  *           hardware (also known as port). In case of need to port this driver
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
- * */
+ */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "FS-A8S_driver_UAI.h"
@@ -43,7 +43,7 @@
 /* --- Macros definitions ---------------------------------------------------------------------- */
 // #define USE_FREERTOS
 
-#define IBUS_BUFFER_LENGHT     (0X20) // 32 BYTES
+#define IBUS_BUFFER_LENGTH     (0X20) // 32 BYTES
 #define IBUS_COMMAND           (0x40) // 40
 #define IBUS_CHANNELS          (0x0E) // 14
 #define IBUS_CHANNEL_MAX_VALUE (10000)
@@ -83,7 +83,7 @@ static void FSA8S_RC_AmendData();
 
 /* --- Private function implementation --------------------------------------------------------- */
 static bool_t FSA8S_RC_CheckFirstByte(iBus_HandleTypeDef_t * hibus) {
-    if (IBUS_BUFFER_LENGHT == hibus->buffer[0] && IBUS_COMMAND == hibus->buffer[1]) {
+    if (IBUS_BUFFER_LENGTH == hibus->buffer[0] && IBUS_COMMAND == hibus->buffer[1]) {
         return true;
     } else {
         return false;
@@ -142,7 +142,7 @@ iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * buffe
     if (hibus) {
         hibus->huart = huart;
         hibus->buffer = buffer;
-        hibus->bufferSize = IBUS_BUFFER_LENGHT;
+        hibus->bufferSize = IBUS_BUFFER_LENGTH;
         hibus->data = data;
         hibus->channels = IBUS_CHANNELS;
     }

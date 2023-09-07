@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_UAI.h
- * @date:    20/08/2023
+ * @date:    07/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.1.0
+ * @version: v1.2.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -35,7 +35,7 @@
  *           hardware (also known as port). In case of need to port this driver
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
- * */
+ */
 
 #ifndef INC_FS_A8S_DRIVER_UAI_H
 #define INC_FS_A8S_DRIVER_UAI_H

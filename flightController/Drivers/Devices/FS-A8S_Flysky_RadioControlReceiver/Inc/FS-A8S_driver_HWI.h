@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_HWI.h
- * @date:    20/08/2023
+ * @date:    07/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.1.0
+ * @version: v1.2.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -35,7 +35,17 @@
  *           hardware (also known as port). In case of need to port this driver
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
- * */
+ *
+ * @details: This driver uses UART for the communication with the radio control.
+ *           The configuration of the UART peripheral MUST be BAUDRATE = 115200,
+ *           WORDLENGTH = 8, STOPBITS = 1, PARITY = NONE and MODE = RX (optional)
+ *           to be able to communicate with the radio control receiver.
+ *           Moreover, this driver uses DMA and it is optional. But it is worth
+ *           mentioning that the type of driver (polling, interrupt or DMA) will
+ *           have an effect on the final application.
+ *           As mentioned before, the configuration here set uses DMA, in circular
+ *           mode with data width of a byte and it is associated to the UART RX.
+ */
 
 #ifndef INC_FS_A8S_DRIVER_HWI_H
 #define INC_FS_A8S_DRIVER_HWI_H
