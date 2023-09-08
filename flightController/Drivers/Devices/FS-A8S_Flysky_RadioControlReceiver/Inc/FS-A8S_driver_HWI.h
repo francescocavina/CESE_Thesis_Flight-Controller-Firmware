@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_HWI.h
- * @date:    07/09/2023
+ * @date:    08/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.2.0
+ * @version: v1.3.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -54,9 +54,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <dev_settings.h>
 
 #include "stm32f4xx_hal.h"
+#include "dev_settings.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus

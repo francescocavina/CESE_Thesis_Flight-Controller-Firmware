@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_HWI.C
- * @date:    07/09/2023
+ * @date:    08/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.2.0
+ * @version: v1.3.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -51,6 +51,7 @@
 #include "FS-A8S_driver_HWI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
+#define FSA8S_RC_UART_INSTANCE (USART2)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -105,10 +106,10 @@ static bool_t MX_UART_Init(UART_HandleTypeDef * huart) {
 
 static void MX_DMA_Init(void) {
 
-	/* The DMA initialization happens on the background when HAL_UART_MspInit() is called.
-	 * This function is located on the "stm32f4xx_hal_msp.c" file and calls the function
-	 * HAL_DMA_Init() on the "stm32f4xx_hal_dma.c" file which sets all the configuration.
-	 */
+    /* The DMA initialization happens on the background when HAL_UART_MspInit() is called.
+     * This function is located on the "stm32f4xx_hal_msp.c" file and calls the function
+     * HAL_DMA_Init() on the "stm32f4xx_hal_dma.c" file which sets all the configuration.
+     */
 
     /* DMA controller clock enable */
     /* BEGIN MODIFY 3 */
@@ -120,16 +121,22 @@ static void MX_DMA_Init(void) {
 bool_t iBus_Init(iBus_HandleTypeDef_t * hibus) {
     MX_DMA_Init();
 
+    /* Initialize UART */
     if (!MX_UART_Init(hibus->huart)) {
+        /* UART initialization was unsuccessful */
         return false;
     }
 
+    /* Initialize DMA reception */
     /* BEGIN MODIFY 4 */
     if (HAL_OK != HAL_UART_Receive_DMA(hibus->huart, hibus->buffer, hibus->bufferSize)) {
         /* END MODIFY 4 */
+
+        /* DMA initialization was unsuccessful */
         return false;
     }
 
+    /* iBus initialization was successful */
     return true;
 }
 

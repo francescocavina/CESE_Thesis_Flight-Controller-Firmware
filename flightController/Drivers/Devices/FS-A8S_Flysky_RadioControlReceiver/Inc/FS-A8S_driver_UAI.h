@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_UAI.h
- * @date:    07/09/2023
+ * @date:    08/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.2.0
+ * @version: v1.3.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -55,6 +55,9 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
+/*
+ * @brief  Enumeration for channel number.
+ */
 typedef enum {
     CHANNEL_1 = 1,
     CHANNEL_2 = 2,
@@ -81,7 +84,11 @@ typedef enum {
  *                the configuration information for the specified UART module.
  *         data:  Buffer in which UART DMA will put the received data.
  * @retval hibus: Pointer to a iBus_HandleTypeDef structure that contains
- *                the configuration information for the iBus communication.
+ *                the configuration information for the iBus communication
+ *                if the initialization was successful.
+ *         NULL:  If initialization was not successful. This may happen because
+ *                of an initialization error or because the driver had already
+ *                been initialized before.
  */
 iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * data);
 
@@ -90,7 +97,8 @@ iBus_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart, uint8_t * data)
  * @param  hibus:   Pointer to a iBus_HandleTypeDef structure that contains
  *                  the configuration information for the iBus communication.
  *         channel: Channel number to be read.
- * @retval channelValue
+ * @retval value:   Channel value from 0 to a defined maximum number.
+ *
  */
 uint16_t FSA8S_RC_ReadChannel(iBus_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel);
 

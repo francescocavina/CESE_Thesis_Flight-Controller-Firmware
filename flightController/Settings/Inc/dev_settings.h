@@ -42,9 +42,6 @@ extern "C" {
 
 /* --- Public macros definitions --------------------------------------------------------------- */
 
-/* FS-A8S Radio Controller Settings */
-#define FSA8S_RC_UART_INSTANCE (USART2)
-
 /* --- Public data type declarations ----------------------------------------------------------- */
 
 /* --- Public variable declarations ------------------------------------------------------------ */

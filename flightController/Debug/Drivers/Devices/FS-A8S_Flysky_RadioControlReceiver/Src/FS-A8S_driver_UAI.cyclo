@@ -1,5 +1,5 @@
-../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:85:15:FSA8S_RC_CheckFirstByte	3
-../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:93:15:FSA8S_RC_Checksum	3
-../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:111:13:FSA8S_RC_AmendData	4
-../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:132:24:FSA8S_RC_Init	3
-../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:157:10:FSA8S_RC_ReadChannel	1
+../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:85:15:FSA8S_RC_CheckFirstBytes	3
+../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:96:15:FSA8S_RC_Checksum	3
+../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:120:13:FSA8S_RC_AmendData	4
+../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:143:24:FSA8S_RC_Init	4
+../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c:182:10:FSA8S_RC_ReadChannel	3
