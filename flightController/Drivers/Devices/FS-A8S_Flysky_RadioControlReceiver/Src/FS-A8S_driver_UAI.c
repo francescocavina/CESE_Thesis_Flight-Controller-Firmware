@@ -155,7 +155,7 @@ static void FSA8S_RC_AmendData(iBus_HandleTypeDef_t * hibus) {
 /* --- Public function implementation ---------------------------------------------------------- */
 iBus_HandleTypeDef_t * FSA8S_RC_Init() {
 
-    static uint8_t alreadyInitialized = 0;
+    static uint8_t alreadyInitialized = false;
 
     /* Check if driver was already initialized */
     if (alreadyInitialized) {
@@ -166,12 +166,12 @@ iBus_HandleTypeDef_t * FSA8S_RC_Init() {
      * data */
 #ifdef USE_FREERTOS
     iBus_HandleTypeDef_t * hibus = pvPortmalloc(sizeof(iBus_HandleTypeDef_t));
-    uint16_t * data = pvortMalloc(sizeof(uint16_t) * IBUS_CHANNELS);
     uint8_t * buffer = pvortMalloc(sizeof(IBUS_BUFFER_LENGTH));
+    uint16_t * data = pvortMalloc(sizeof(uint16_t) * IBUS_CHANNELS);
 #else
     iBus_HandleTypeDef_t * hibus = malloc(sizeof(iBus_HandleTypeDef_t));
-    uint16_t * data = malloc(sizeof(uint16_t));
     uint8_t * buffer = malloc(sizeof(IBUS_BUFFER_LENGTH));
+    uint16_t * data = malloc(sizeof(uint16_t));
 #endif
 
     /* Initialize iBus_HandleTypeDef structure */
@@ -185,7 +185,7 @@ iBus_HandleTypeDef_t * FSA8S_RC_Init() {
     /* Initialize iBus communication */
     if (iBus_Init(hibus)) {
         /* Initialization was successful */
-        alreadyInitialized = 1;
+        alreadyInitialized = true;
         return hibus;
     } else {
         /* Initialization was unsuccessful */
