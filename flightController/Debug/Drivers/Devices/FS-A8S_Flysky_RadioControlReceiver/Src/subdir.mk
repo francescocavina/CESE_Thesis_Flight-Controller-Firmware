@@ -3,18 +3,21 @@
 # Toolchain: GNU Tools for STM32 (11.3.rel1)
 ################################################################################
 
-# Add inputs and outputs from these tool invocations to the build variables 
+# Add inputs and outputs from these tool invocations to the build variables
 C_SRCS += \
 ../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.c \
-../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c 
+../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.c \
+../Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS_A8S_driver_demo.c
 
 OBJS += \
 ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.o \
-./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.o 
+./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.o \
+./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS_A8S_driver_demo.o
 
 C_DEPS += \
 ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.d \
-./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.d 
+./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.d \
+./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS_A8S_driver_demo.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -24,7 +27,6 @@ Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/%.o Drivers/Devices/FS-A8
 clean: clean-Drivers-2f-Devices-2f-FS-2d-A8S_Flysky_RadioControlReceiver-2f-Src
 
 clean-Drivers-2f-Devices-2f-FS-2d-A8S_Flysky_RadioControlReceiver-2f-Src:
-	-$(RM) ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.cyclo ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.d ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.o ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.su ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.cyclo ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.d ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.o ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.su
+	-$(RM) ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.cyclo ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.d ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.o ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_HWI.su ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.cyclo ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.d ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.o ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS-A8S_driver_UAI.su ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS_A8S_driver_demo.cyclo ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS_A8S_driver_demo.d ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS_A8S_driver_demo.o ./Drivers/Devices/FS-A8S_Flysky_RadioControlReceiver/Src/FS_A8S_driver_demo.su
 
 .PHONY: clean-Drivers-2f-Devices-2f-FS-2d-A8S_Flysky_RadioControlReceiver-2f-Src
-

@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_HWI.C
- * @date:    08/09/2023
+ * @date:    09/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -54,6 +54,7 @@
 #define FSA8S_RC_UART_INSTANCE (USART2)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
+static UART_HandleTypeDef huart;
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 
@@ -62,8 +63,8 @@
  * @brief  UART Initialization Function
  * @param  huart: Pointer to a UART_HandleTypeDef structure that contains
  *                the configuration information for the specified UART module.
- * @retval true:  If uart could be initialized.
- *         false: If uart couldn't be initialized.
+ * @retval true:  If UART could be initialized.
+ *         false: If UART couldn't be initialized.
  */
 static bool_t MX_UART_Init(UART_HandleTypeDef * huart);
 
@@ -75,6 +76,7 @@ static bool_t MX_UART_Init(UART_HandleTypeDef * huart);
 static void MX_DMA_Init(void);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
@@ -119,6 +121,9 @@ static void MX_DMA_Init(void) {
 
 /* --- Public function implementation ---------------------------------------------------------- */
 bool_t iBus_Init(iBus_HandleTypeDef_t * hibus) {
+
+    hibus->huart = &huart;
+
     MX_DMA_Init();
 
     /* Initialize UART */

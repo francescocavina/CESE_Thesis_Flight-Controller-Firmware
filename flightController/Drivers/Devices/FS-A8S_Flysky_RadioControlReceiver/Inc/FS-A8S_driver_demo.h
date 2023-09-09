@@ -22,7 +22,7 @@
  */
 
 /*
- * @file:    FS-A8S_driver_HWI.h
+ * @file:    FS-A8S_driver_demo.h
  * @date:    09/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.4.0
@@ -36,26 +36,14 @@
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
  *
- * @details: This driver uses UART for the communication with the radio control.
- *           The configuration of the UART peripheral MUST be BAUDRATE = 115200,
- *           WORDLENGTH = 8, STOPBITS = 1, PARITY = NONE and MODE = RX (optional)
- *           to be able to communicate with the radio control receiver.
- *           Moreover, this driver uses DMA and it is optional. But it is worth
- *           mentioning that the type of driver (polling, interrupt or DMA) will
- *           have an effect on the final application.
- *           As mentioned before, the configuration here set uses DMA, in circular
- *           mode with data width of a byte and it is associated to the UART RX.
+ * @details: On this file there is a demo to test the driver.
  */
 
-#ifndef INC_FS_A8S_DRIVER_HWI_H
-#define INC_FS_A8S_DRIVER_HWI_H
+#ifndef INC_FS_A8S_DRIVER_DEMO_H
+#define INC_FS_A8S_DRIVER_DEMO_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "stm32f4xx_hal.h"
+#include "FS-A8S_driver_UAI.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -65,41 +53,22 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
-extern DMA_HandleTypeDef hdma_usart2_rx;
-
-/**
- * @brief iBus handle structure definition
- */
-typedef struct {
-    UART_HandleTypeDef * huart; /* Pointer to a iBus_HandleTypeDef structure */
-    uint8_t * buffer;           /* Buffer in which UART DMA will put the received data */
-    uint8_t bufferSize;         /* Buffer size */
-    uint16_t * data;            /* Channels data */
-    uint8_t channels;           /* Number of channels */
-} iBus_HandleTypeDef_t;
-
-/**
- * @brief bool_t type definition
- */
-typedef bool bool_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /**
- * @brief  Initializes the iBus communication with the RC receiver.
- * @param  hibus: Pointer to a iBus_HandleTypeDef structure that contains
- *                the configuration information for the iBus communication.
- * @retval true:  If communication could be initialized
- *         false: If communication couldn't be initialized
+ * @brief  Initializes the driver and gets a channel value from the radio control.
+ * @param  None
+ * @retval None
  */
-bool_t iBus_Init(iBus_HandleTypeDef_t * hibus);
+void FSA8S_RC_Demo(void);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_FS_A8S_DRIVER_HWI_H */
+#endif /* INC_FS_A8S_DRIVER_DEMO_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */
