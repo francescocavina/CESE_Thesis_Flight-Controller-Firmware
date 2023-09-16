@@ -38,8 +38,8 @@
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+#include <FS-A8S_driver_calibration.h>
 #include "FS-A8S_driver_UAI.h"
-#include "FS_A8S_driver_calibration.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 // #define USE_FREERTOS

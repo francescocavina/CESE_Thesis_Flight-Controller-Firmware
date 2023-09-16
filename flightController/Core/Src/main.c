@@ -6,7 +6,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "FS-A8S_driver_UAI.h"
 #include "usbd_cdc_if.h"
 
 /* USER CODE END Includes */
@@ -72,16 +71,8 @@ int main(void) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    uint8_t str[32] = {0};
-    uint8_t channel = CHANNEL_3;
-
-    iBus_HandleTypeDef_t * rc_controller = FSA8S_RC_Init();
 
     while (1) {
-        uint16_t value = FSA8S_RC_ReadChannel(rc_controller, channel);
-        sprintf(str, (const char *)"Channel %d: %d\r\n", channel, value);
-
-        CDC_Transmit_FS(str, sizeof(str));
     }
     /* USER CODE END 3 */
 }
