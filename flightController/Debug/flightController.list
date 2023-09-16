@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000ad6  00000000  00000000  00036d30  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  00018d02  00000000  00000000  00037806  2**0
+ 17 .debug_macro  00018d1a  00000000  00000000  00037806  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   000141cc  00000000  00000000  00050508  2**0
+ 18 .debug_line   000141cc  00000000  00000000  00050520  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0008916d  00000000  00000000  000646d4  2**0
+ 19 .debug_str    000891e5  00000000  00000000  000646ec  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00003f18  00000000  00000000  000ed844  2**2
+ 20 .debug_frame  00003f18  00000000  00000000  000ed8d4  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000008d  00000000  00000000  000f175c  2**0
+ 21 .debug_line_str 0000008d  00000000  00000000  000f17ec  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1311,7 +1311,7 @@ static bool_t MX_UART_Init(UART_HandleTypeDef * huart) {
  80009b0:	687b      	ldr	r3, [r7, #4]
  80009b2:	4a12      	ldr	r2, [pc, #72]	; (80009fc <MX_UART_Init+0x54>)
  80009b4:	601a      	str	r2, [r3, #0]
-    huart->Init.BaudRate = 115200;
+    huart->Init.BaudRate = UART_BAUD_RATE;
  80009b6:	687b      	ldr	r3, [r7, #4]
  80009b8:	f44f 32e1 	mov.w	r2, #115200	; 0x1c200
  80009bc:	605a      	str	r2, [r3, #4]
@@ -1643,14 +1643,14 @@ static void FSA8S_RC_AmendData(iBus_HandleTypeDef_t * hibus) {
  8000b78:	81fb      	strh	r3, [r7, #14]
 
         /* Map channel value from 0 to IBUS_CHANNEL_MAX_VALUE */
-        if ((1000 <= channelValue) && (2000 >= channelValue)) {
+        if ((1000 <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
  8000b7a:	89fb      	ldrh	r3, [r7, #14]
  8000b7c:	f5b3 7f7a 	cmp.w	r3, #1000	; 0x3e8
  8000b80:	d308      	bcc.n	8000b94 <FSA8S_RC_AmendData+0x64>
  8000b82:	89fb      	ldrh	r3, [r7, #14]
  8000b84:	f5b3 6ffa 	cmp.w	r3, #2000	; 0x7d0
  8000b88:	d804      	bhi.n	8000b94 <FSA8S_RC_AmendData+0x64>
-            channelValue -= 1000;
+            channelValue -= IBUS_CHANNEL_MIN_RAW_VALUE;
  8000b8a:	89fb      	ldrh	r3, [r7, #14]
  8000b8c:	f5a3 737a 	sub.w	r3, r3, #1000	; 0x3e8
  8000b90:	81fb      	strh	r3, [r7, #14]
@@ -1711,8 +1711,6 @@ static void FSA8S_RC_AmendData(iBus_HandleTypeDef_t * hibus) {
  8000bfa:	429a      	cmp	r2, r3
  8000bfc:	dc9f      	bgt.n	8000b3e <FSA8S_RC_AmendData+0xe>
              1000);
-
-        // hibus->data[(i - 2) / 2] = channelValue;
     }
 }
  8000bfe:	bf00      	nop
@@ -1866,7 +1864,7 @@ uint16_t FSA8S_RC_ReadChannel(iBus_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t c
  8000cc0:	6878      	ldr	r0, [r7, #4]
  8000cc2:	f7ff ff35 	bl	8000b30 <FSA8S_RC_AmendData>
 
-    return hibus->data[channel - 1];
+    return hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
  8000cc6:	687b      	ldr	r3, [r7, #4]
  8000cc8:	68da      	ldr	r2, [r3, #12]
  8000cca:	78fb      	ldrb	r3, [r7, #3]

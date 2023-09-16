@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_HWI.C
- * @date:    09/09/2023
+ * @date:    16/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.4.0
+ * @version: v1.5.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -52,6 +52,7 @@
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 #define FSA8S_RC_UART_INSTANCE (USART2)
+#define UART_BAUD_RATE         (115200)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 static UART_HandleTypeDef huart;
@@ -84,7 +85,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 static bool_t MX_UART_Init(UART_HandleTypeDef * huart) {
     /* BEGIN MODIFY 1*/
     huart->Instance = FSA8S_RC_UART_INSTANCE;
-    huart->Init.BaudRate = 115200;
+    huart->Init.BaudRate = UART_BAUD_RATE;
     huart->Init.WordLength = UART_WORDLENGTH_8B;
     huart->Init.StopBits = UART_STOPBITS_1;
     huart->Init.Parity = UART_PARITY_NONE;

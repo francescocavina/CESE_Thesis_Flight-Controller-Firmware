@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_UAI.c
- * @date:    09/09/2023
+ * @date:    16/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.4.0
+ * @version: v1.5.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -43,10 +43,13 @@
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 // #define USE_FREERTOS
-#define IBUS_BUFFER_LENGTH     (0X20) // 32 BYTES
-#define IBUS_COMMAND           (0x40) // 40
-#define IBUS_CHANNELS          (0x0E) // 14
-#define IBUS_CHANNEL_MAX_VALUE (1000) // This value MUST be between 100 and 65535
+#define IBUS_BUFFER_LENGTH         (0X20) // 32 BYTES
+#define IBUS_COMMAND               (0x40) // 40
+#define IBUS_CHANNELS              (0x0E) // 14
+#define IBUS_CHANNEL_MAX_VALUE     (1000) // This value MUST be between 100 and 65535
+#define IBUS_CHANNEL_MIN_RAW_VALUE (1000)
+#define IBUS_CHANNEL_MAX_RAW_VALUE (2000)
+#define IBUS_CHANNEL_NUM_OFFSET    (1)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -136,8 +139,8 @@ static void FSA8S_RC_AmendData(iBus_HandleTypeDef_t * hibus) {
             ((hibus->buffer[i + 1] << 8) | (hibus->buffer[i])) - calibrationValues[(i - 2) / 2];
 
         /* Map channel value from 0 to IBUS_CHANNEL_MAX_VALUE */
-        if ((1000 <= channelValue) && (2000 >= channelValue)) {
-            channelValue -= 1000;
+        if ((1000 <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
+            channelValue -= IBUS_CHANNEL_MIN_RAW_VALUE;
         } else {
             channelValue = 0;
         }
@@ -147,8 +150,6 @@ static void FSA8S_RC_AmendData(iBus_HandleTypeDef_t * hibus) {
             ((float)(IBUS_CHANNEL_MAX_VALUE +
                      (calibrationValues[(i - 2) / 2] * ((float)IBUS_CHANNEL_MAX_VALUE / 1000))) /
              1000);
-
-        // hibus->data[(i - 2) / 2] = channelValue;
     }
 }
 
@@ -214,6 +215,6 @@ uint16_t FSA8S_RC_ReadChannel(iBus_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t c
     /* Get channels data in little-endian */
     FSA8S_RC_AmendData(hibus);
 
-    return hibus->data[channel - 1];
+    return hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
 }
 /* --- End of file ----------------------------------------------------------------------------- */
