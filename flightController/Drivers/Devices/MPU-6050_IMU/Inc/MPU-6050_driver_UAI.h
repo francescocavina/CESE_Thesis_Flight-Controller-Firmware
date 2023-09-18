@@ -48,7 +48,19 @@ extern "C" {
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
 MPU6050_HandleTypeDef_t * MPU6050_IMU_Init();
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+void MPU6050_IMU_ReadDataRegister(MPU6050_HandleTypeDef_t * hmpu, uint8_t * buffer);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

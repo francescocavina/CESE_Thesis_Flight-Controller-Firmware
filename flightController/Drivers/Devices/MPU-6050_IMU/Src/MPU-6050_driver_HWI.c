@@ -34,7 +34,9 @@
 #include "MPU-6050_driver_HWI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define WHO_AM_I_REG 0x75
+#define MPU_6050_I2C_TIMEOUT               (100)
+#define MPU_6050_DATA_REG_VALUE_WHO_AM_I   (0x68)
+#define MPU_6050_DATA_REG_ADDRESS_WHO_AM_I (0x75)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 static I2C_HandleTypeDef hi2c;
@@ -43,32 +45,33 @@ static I2C_HandleTypeDef hi2c;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /**
- * @brief I2C1 Initialization Function
- * @param None
- * @retval None
+ * @brief  I2C1 Initialization Function
+ * @param  TODO
+ * @retval TODO
  */
-static bool_t MX_I2C_Init(void);
+static bool_t MX_I2C_Init(I2C_HandleTypeDef * hi2c);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t MX_I2C_Init(void) {
+static bool_t MX_I2C_Init(I2C_HandleTypeDef * hi2c) {
     /* BEGIN MODIFY 1*/
-    hi2c.Instance = I2C1;
-    hi2c.Init.ClockSpeed = 400000;
-    hi2c.Init.DutyCycle = I2C_DUTYCYCLE_2;
-    hi2c.Init.OwnAddress1 = 0;
-    hi2c.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-    hi2c.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-    hi2c.Init.OwnAddress2 = 0;
-    hi2c.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-    hi2c.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+    hi2c->Instance = I2C1;
+    hi2c->Init.ClockSpeed = 400000;
+    hi2c->Init.DutyCycle = I2C_DUTYCYCLE_2;
+    hi2c->Init.OwnAddress1 = 0;
+    hi2c->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+    hi2c->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+    hi2c->Init.OwnAddress2 = 0;
+    hi2c->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+    hi2c->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
     /* END MODIFY 1 */
 
     /* BEGIN MODIFY 2 */
-    if (HAL_OK != HAL_I2C_Init(&hi2c)) {
+    if (HAL_OK != HAL_I2C_Init(hi2c)) {
+        /* END MODIFY 2 */
         return false;
     }
 
@@ -77,24 +80,39 @@ static bool_t MX_I2C_Init(void) {
 
 /* --- Public function implementation ---------------------------------------------------------- */
 bool_t i2c_Init(MPU6050_HandleTypeDef_t * hmpu6050) {
-    uint8_t check;
+    uint8_t who_am_I_value;
 
+    /* Set I2C_HandleTypeDef to MPU6050 instance */
     if (hmpu6050->instance == 1) {
 
         hmpu6050->hi2c = &hi2c;
     } else if (hmpu6050->instance == 2) {
+        // TODO
         return true;
     }
 
-    MX_I2C_Init();
-
-    HAL_I2C_Mem_Read(hmpu6050->hi2c, hmpu6050->address, WHO_AM_I_REG, 1, &check, 1, 100);
-
-    if (check == 104) {
-        return true;
-    } else {
+    /* Initialize I2C */
+    if (!MX_I2C_Init(hmpu6050->hi2c)) {
+        /* I2C initialization was unsuccessful */
         return false;
     }
+
+    /* Read IMU device ID */
+    i2c_Read(hmpu6050, MPU_6050_DATA_REG_ADDRESS_WHO_AM_I, &who_am_I_value);
+    /* Check IMU device ID */
+    if (who_am_I_value == MPU_6050_DATA_REG_VALUE_WHO_AM_I) {
+        /* Right IMU device ID */
+        return true;
+    } else {
+        /* Wrong IMU device ID */
+        return false;
+    }
+}
+
+void i2c_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * buffer) {
+
+    /* Read IMU data by passing a data register */
+    HAL_I2C_Mem_Read(hmpu6050->hi2c, hmpu6050->address, reg, 1, buffer, 1, MPU_6050_I2C_TIMEOUT);
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

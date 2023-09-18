@@ -34,8 +34,8 @@
 #include "MPU-6050_driver_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define MPU6050_ADDR1                (0xD0) // First address for first MPU-6050 device
-#define MPU6050_ADDR2                (0xD1) // Second address for second MPU-6050 device
+#define MPU6050_I2C_ADDRESS1         (0xD0) // First address for first MPU-6050 device
+#define MPU6050_I2C_ADDRESS2         (0xD1) // Second address for second MPU-6050 device
 #define MPU6050_MAX_NUMBER_INSTANCES (2) // Maximum number of possible IMUs connected to the i2c bus
 
 /* --- Private data type declarations ---------------------------------------------------------- */
@@ -45,9 +45,9 @@ static uint8_t instancesNumber = 0;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
- * @brief
- * @param
- * @retval
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
  */
 static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit();
 
@@ -96,10 +96,10 @@ static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit() {
         /* Initialize MPU6050_HandleTypeDef_t structure */
         if (instancesNumber == 0) {
             hmpu6050->instance = 1;
-            hmpu6050->address = MPU6050_ADDR1;
+            hmpu6050->address = MPU6050_I2C_ADDRESS1;
         } else if (instancesNumber == 1) {
             hmpu6050->instance = 2;
-            hmpu6050->address = MPU6050_ADDR2;
+            hmpu6050->address = MPU6050_I2C_ADDRESS2;
         }
         hmpu6050->buffer = buffer;
     }
@@ -145,6 +145,9 @@ MPU6050_HandleTypeDef_t * MPU6050_IMU_Init() {
         /* Instance couldn't be created */
         return NULL;
     }
+}
+
+void MPU6050_IMU_ReadDataRegister(MPU6050_HandleTypeDef_t * hmpu, uint8_t * buffer) {
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

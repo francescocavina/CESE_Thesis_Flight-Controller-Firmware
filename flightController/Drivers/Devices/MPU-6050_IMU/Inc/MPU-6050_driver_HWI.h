@@ -69,11 +69,18 @@ typedef bool bool_t;
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /*
- * @brief
- * @param
- * @retval
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
  */
 bool_t i2c_Init(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+void i2c_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * buffer);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

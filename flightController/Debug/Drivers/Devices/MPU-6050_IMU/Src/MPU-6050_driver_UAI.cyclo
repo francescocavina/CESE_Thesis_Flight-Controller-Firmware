@@ -1,2 +1,3 @@
 ../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:59:34:MPU6050_IMU_InstanceInit	6
 ../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:112:27:MPU6050_IMU_Init	3
+../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:150:6:MPU6050_IMU_ReadDataRegister	1
