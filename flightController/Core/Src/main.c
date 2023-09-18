@@ -7,6 +7,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
+#include "MPU-6050_driver_UAI.h"
+#include "MPU-6050_driver_HWI.h"
 
 /* USER CODE END Includes */
 
@@ -23,7 +25,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-// DMA_HandleTypeDef hdma_usart2_rx;
+I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
 /* USER CODE END PV */
@@ -65,7 +67,7 @@ int main(void) {
     MX_USB_DEVICE_Init();
     /* USER CODE BEGIN 2 */
     /* USER CODE END 2 */
-
+    char str[17] = "Initialized\r\n";
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     /* USER CODE END WHILE */
@@ -73,6 +75,15 @@ int main(void) {
     /* USER CODE BEGIN 3 */
 
     while (1) {
+        MPU6050_HandleTypeDef_t * hmpu6050 = MPU6050_IMU_Init();
+        // str[12] = hmpu6050->instance + 48;
+        HAL_Delay(1000);
+
+        if (hmpu6050->instance == 1 || hmpu6050->instance == 2) {
+            CDC_Transmit_FS(str, 17);
+        } else {
+            CDC_Transmit_FS((char *)"Not initialized\r\n", 18);
+        }
     }
     /* USER CODE END 3 */
 }
@@ -131,6 +142,7 @@ static void MX_GPIO_Init(void) {
     /* GPIO Ports Clock Enable */
     __HAL_RCC_GPIOH_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
 
     /* USER CODE BEGIN MX_GPIO_Init_2 */
     /* USER CODE END MX_GPIO_Init_2 */
