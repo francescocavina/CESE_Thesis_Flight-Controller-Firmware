@@ -1,0 +1,3 @@
+../Drivers/Devices/FS-A8S_FlySky_RadioControlReceiver/Src/FS-A8S_driver_HWI.c:85:15:MX_UART_Init	2
+../Drivers/Devices/FS-A8S_FlySky_RadioControlReceiver/Src/FS-A8S_driver_HWI.c:110:13:MX_DMA_Init	1
+../Drivers/Devices/FS-A8S_FlySky_RadioControlReceiver/Src/FS-A8S_driver_HWI.c:124:8:iBus_Init	3

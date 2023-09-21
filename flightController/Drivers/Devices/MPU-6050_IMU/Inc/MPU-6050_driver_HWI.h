@@ -80,7 +80,14 @@ bool_t i2c_Init(MPU6050_HandleTypeDef_t * hmpu6050);
  * @param  TODO
  * @retval TODO
  */
-void i2c_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * buffer);
+void i2c_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+void i2c_Write(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

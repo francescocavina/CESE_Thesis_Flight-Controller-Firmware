@@ -32,11 +32,14 @@
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "MPU-6050_driver_HWI.h"
+#include "MPU-6050_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define MPU_6050_I2C_TIMEOUT               (100)
-#define MPU_6050_DATA_REG_VALUE_WHO_AM_I   (0x68)
-#define MPU_6050_DATA_REG_ADDRESS_WHO_AM_I (0x75)
+#define MPU_6050_I2C_READ_TIMEOUT     (100) // 100 ms
+#define MPU_6050_I2C_WRITE_TIMEOUT    (100) // 100 ms
+#define MPU_6050_ADDR_SIZE            (1)   // 1 Byte
+#define MPU_6050_READ_READ_DATA_SIZE  (1)   // 1 Byte
+#define MPU_6050_READ_WRITE_DATA_SIZE (1)   // 1 Byte
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 static I2C_HandleTypeDef hi2c;
@@ -98,9 +101,9 @@ bool_t i2c_Init(MPU6050_HandleTypeDef_t * hmpu6050) {
     }
 
     /* Read IMU device ID */
-    i2c_Read(hmpu6050, MPU_6050_DATA_REG_ADDRESS_WHO_AM_I, &who_am_I_value);
+    i2c_Read(hmpu6050, MPU_6050_REG_WHO_AM_I_MPU6050, &who_am_I_value, 1);
     /* Check IMU device ID */
-    if (who_am_I_value == MPU_6050_DATA_REG_VALUE_WHO_AM_I) {
+    if (who_am_I_value == MPU_6050_VALUE_WHO_AM_I) {
         /* Right IMU device ID */
         return true;
     } else {
@@ -109,10 +112,17 @@ bool_t i2c_Init(MPU6050_HandleTypeDef_t * hmpu6050) {
     }
 }
 
-void i2c_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * buffer) {
+void i2c_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize) {
 
     /* Read IMU data by passing a data register */
-    HAL_I2C_Mem_Read(hmpu6050->hi2c, hmpu6050->address, reg, 1, buffer, 1, MPU_6050_I2C_TIMEOUT);
+    HAL_I2C_Mem_Read(hmpu6050->hi2c, hmpu6050->address, reg, MPU_6050_ADDR_SIZE, data, dataSize,
+                     MPU_6050_I2C_READ_TIMEOUT);
+}
+
+void i2c_Write(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize) {
+
+    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, reg, MPU_6050_ADDR_SIZE, data, dataSize,
+                      MPU_6050_I2C_WRITE_TIMEOUT);
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

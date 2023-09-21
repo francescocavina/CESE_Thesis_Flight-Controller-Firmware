@@ -55,12 +55,14 @@ extern "C" {
  */
 MPU6050_HandleTypeDef_t * MPU6050_IMU_Init();
 
+void MPU6050_IMU_Reset(MPU6050_HandleTypeDef_t * hmpu6050);
+
 /*
  * @brief  TODO
  * @param  TODO
  * @retval TODO
  */
-void MPU6050_IMU_ReadDataRegister(MPU6050_HandleTypeDef_t * hmpu, uint8_t * buffer);
+uint16_t MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
