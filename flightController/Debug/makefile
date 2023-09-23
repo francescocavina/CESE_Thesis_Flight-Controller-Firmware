@@ -18,6 +18,7 @@ RM := rm -rf
 -include Drivers/Devices/FS-A8S_FlySky_RadioControlReceiver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
+-include APIs/Main_Application/Src/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)

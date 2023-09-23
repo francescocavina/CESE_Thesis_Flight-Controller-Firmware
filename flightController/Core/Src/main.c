@@ -6,11 +6,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "usbd_cdc_if.h"
-// #include "MPU-6050_driver_UAI.h"
-// #include "MPU-6050_driver_HWI.h"
-#include "FS-A8S_driver_UAI.h"
-
+#include "main_app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,6 +72,7 @@ int main(void) {
     MX_I2C1_Init();
     MX_USART2_UART_Init();
     /* USER CODE BEGIN 2 */
+    flightController_App();
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -83,29 +80,6 @@ int main(void) {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-    static IBUS_HandleTypeDef_t * rc_controller;
-    uint8_t channel = CHANNEL_1;
-    static uint16_t channelValue;
-    uint8_t str[20];
-
-    rc_controller = FSA8S_RC_Init(&huart2);
-
-    while (1) {
-        //        MPU6050_HandleTypeDef_t * hmpu6050 = MPU6050_IMU_Init();
-        //        // str[12] = hmpu6050->instance + 48;
-        //        HAL_Delay(1000);
-        //
-        //        if (hmpu6050->instance == 1 || hmpu6050->instance == 2) {
-        //            CDC_Transmit_FS(str, 17);
-        //        } else {
-        //            CDC_Transmit_FS((char *)"Not initialized\r\n", 18);
-        //        }
-
-        channelValue = FSA8S_RC_ReadChannel(rc_controller, channel);
-        sprintf((char *)str, (const char *)"Channel %d: %d\r\n", channel, channelValue);
-        CDC_Transmit_FS(str, strlen((const char *)str));
-    }
     /* USER CODE END 3 */
 }
 
@@ -159,11 +133,9 @@ void SystemClock_Config(void) {
 static void MX_I2C1_Init(void) {
 
     /* USER CODE BEGIN I2C1_Init 0 */
-
     /* USER CODE END I2C1_Init 0 */
 
     /* USER CODE BEGIN I2C1_Init 1 */
-
     /* USER CODE END I2C1_Init 1 */
     hi2c1.Instance = I2C1;
     hi2c1.Init.ClockSpeed = 400000;
@@ -178,7 +150,6 @@ static void MX_I2C1_Init(void) {
         Error_Handler();
     }
     /* USER CODE BEGIN I2C1_Init 2 */
-
     /* USER CODE END I2C1_Init 2 */
 }
 
@@ -190,11 +161,9 @@ static void MX_I2C1_Init(void) {
 static void MX_USART2_UART_Init(void) {
 
     /* USER CODE BEGIN USART2_Init 0 */
-
     /* USER CODE END USART2_Init 0 */
 
     /* USER CODE BEGIN USART2_Init 1 */
-
     /* USER CODE END USART2_Init 1 */
     huart2.Instance = USART2;
     huart2.Init.BaudRate = 115200;
@@ -208,7 +177,6 @@ static void MX_USART2_UART_Init(void) {
         Error_Handler();
     }
     /* USER CODE BEGIN USART2_Init 2 */
-
     /* USER CODE END USART2_Init 2 */
 }
 
