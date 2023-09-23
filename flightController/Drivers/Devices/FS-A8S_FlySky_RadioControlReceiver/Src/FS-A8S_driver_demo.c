@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_demo.c
- * @date:    16/09/2023
+ * @date:    23/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.5.0
+ * @version: v1.6.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -36,19 +36,26 @@
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
  *
- * @details: On this file there is a demo to test the driver.
+ * @details: On this file there is a demo to test the driver. In order to be able
+ *           to use it, an UART peripheral must be initialized.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+#include <stdio.h>
+
 #include "FS-A8S_driver_demo.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 
 /* --- Private data type declarations ---------------------------------------------------------- */
-static iBus_HandleTypeDef_t * rc_controller;
+UART_HandleTypeDef huart;
 
-uint8_t channel = CHANNEL_1;
+static IBUS_HandleTypeDef_t * rc_controller;
+
+static uint8_t channel = CHANNEL_1;
 static uint16_t channelValue;
+
+static uint8_t str[20];
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 
@@ -63,13 +70,19 @@ static uint16_t channelValue;
 /* --- Public function implementation ---------------------------------------------------------- */
 void FSA8S_RC_Demo(void) {
 
-    rc_controller = FSA8S_RC_Init();
+    /* Initialize RC device */
+    rc_controller = FSA8S_RC_Init(&huart);
 
     while (1) {
 
+        /* Read RC device channel */
         channelValue = FSA8S_RC_ReadChannel(rc_controller, channel);
 
         /* From this point, channelValue can be used for any purpose */
+
+        /* Optional */
+        sprintf((char *)str, (const char *)"Channel %d: %d\r\n", channel, channelValue);
+        // CDC_Transmit_FS(str, strlen((const char *) str));
     }
 }
 

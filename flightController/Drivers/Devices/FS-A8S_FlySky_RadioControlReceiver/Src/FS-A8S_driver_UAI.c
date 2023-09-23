@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_UAI.c
- * @date:    16/09/2023
+ * @date:    23/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.5.0
+ * @version: v1.6.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -91,8 +91,14 @@ static void FSA8S_RC_AmendData();
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t FSA8S_RC_CheckFirstBytes(iBus_HandleTypeDef_t * hibus) {
+static bool_t FSA8S_RC_CheckFirstBytes(IBUS_HandleTypeDef_t * hibus) {
 
+    /* Check parameter */
+    if (NULL == hibus) {
+        return false;
+    }
+
+    /* Check first bytes*/
     if (IBUS_BUFFER_LENGTH == hibus->buffer[0] && IBUS_COMMAND == hibus->buffer[1]) {
         /* First two bytes are correct */
         return true;
@@ -102,10 +108,15 @@ static bool_t FSA8S_RC_CheckFirstBytes(iBus_HandleTypeDef_t * hibus) {
     }
 }
 
-static bool_t FSA8S_RC_Checksum(iBus_HandleTypeDef_t * hibus) {
+static bool_t FSA8S_RC_Checksum(IBUS_HandleTypeDef_t * hibus) {
 
     uint16_t sentChecksum;
     uint16_t receivedChecksum = 0xFFFF;
+
+    /* Check parameter */
+    if (NULL == hibus) {
+        return false;
+    }
 
     /* Get received checksum value */
     sentChecksum =
@@ -126,75 +137,117 @@ static bool_t FSA8S_RC_Checksum(iBus_HandleTypeDef_t * hibus) {
     }
 }
 
-static void FSA8S_RC_AmendData(iBus_HandleTypeDef_t * hibus) {
+static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
 
     uint16_t channelValue;
 
-    for (uint8_t i = 2; i <= (hibus->bufferSize - 2); i += 2) {
+    /* Check parameter */
+    if (NULL != hibus) {
 
-        channelValue = 0;
+        /* Ammend data */
+        for (uint8_t i = 2; i <= (hibus->bufferSize - 2); i += 2) {
 
-        /* Swap channel bytes */
-        channelValue =
-            ((hibus->buffer[i + 1] << 8) | (hibus->buffer[i])) - calibrationValues[(i - 2) / 2];
-
-        /* Map channel value from 0 to IBUS_CHANNEL_MAX_VALUE */
-        if ((1000 <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
-            channelValue -= IBUS_CHANNEL_MIN_RAW_VALUE;
-        } else {
             channelValue = 0;
-        }
 
-        hibus->data[(i - 2) / 2] =
-            channelValue *
-            ((float)(IBUS_CHANNEL_MAX_VALUE +
-                     (calibrationValues[(i - 2) / 2] * ((float)IBUS_CHANNEL_MAX_VALUE / 1000))) /
-             1000);
+            /* Swap channel bytes */
+            channelValue =
+                ((hibus->buffer[i + 1] << 8) | (hibus->buffer[i])) - calibrationValues[(i - 2) / 2];
+
+            /* Map channel value from 0 to IBUS_CHANNEL_MAX_VALUE */
+            if ((1000 <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
+                channelValue -= IBUS_CHANNEL_MIN_RAW_VALUE;
+            } else {
+                channelValue = 0;
+            }
+
+            hibus->data[(i - 2) / 2] =
+                channelValue *
+                ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] *
+                                                   ((float)IBUS_CHANNEL_MAX_VALUE / 1000))) /
+                 1000);
+        }
     }
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
-iBus_HandleTypeDef_t * FSA8S_RC_Init() {
+IBUS_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart) {
 
     static uint8_t alreadyInitialized = false;
+
+    /* Check parameter */
+    if (NULL == huart) {
+        return NULL;
+    }
 
     /* Check if driver was already initialized */
     if (alreadyInitialized) {
         return NULL;
     }
 
-    /* Allocate dynamic memory for the iBus_HandleTypeDef structure and for the buffer to receive
+    /* Allocate dynamic memory for the IBUS_HandleTypeDef_t structure and for the buffer to receive
      * data */
 #ifdef USE_FREERTOS
-    iBus_HandleTypeDef_t * hibus = pvPortmalloc(sizeof(iBus_HandleTypeDef_t));
+    IBUS_HandleTypeDef_t * hibus = pvPortmalloc(sizeof(IBUS_HandleTypeDef_t));
     uint8_t * buffer = pvortMalloc(sizeof(IBUS_BUFFER_LENGTH));
     uint16_t * data = pvortMalloc(sizeof(uint16_t) * IBUS_CHANNELS);
 #else
-    iBus_HandleTypeDef_t * hibus = malloc(sizeof(iBus_HandleTypeDef_t));
+    IBUS_HandleTypeDef_t * hibus = malloc(sizeof(IBUS_HandleTypeDef_t));
     uint8_t * buffer = malloc(sizeof(IBUS_BUFFER_LENGTH));
     uint16_t * data = malloc(sizeof(uint16_t));
 #endif
 
     /* Initialize iBus_HandleTypeDef structure */
     if (hibus) {
+        hibus->huart = huart;
         hibus->buffer = buffer;
         hibus->bufferSize = IBUS_BUFFER_LENGTH;
         hibus->data = data;
         hibus->channels = IBUS_CHANNELS;
+    } else {
+        /* Dynamic memory allocation was not successful */
+#ifdef USE_FREERTOS
+        /* Free up dynamic allocated memory */
+        vPortFree(hibus->buffer);
+        vPortFree(hibus);
+#else
+        /* Free up dynamic allocated memory */
+        hibus->buffer = 0;
+        free(hibus->buffer);
+        free(hibus);
+#endif
     }
 
     /* Initialize iBus communication */
-    if (iBus_Init(hibus)) {
+    if (IBUS_Init(hibus)) {
         /* Initialization was successful */
         alreadyInitialized = true;
         return hibus;
     } else {
         /* Initialization was unsuccessful */
+#ifdef USE_FREERTOS
+        /* Free up dynamic allocated memory */
+        vPortFree(hibus->buffer);
+        vPortFree(hibus);
+#else
+        /* Free up dynamic allocated memory */
+        hibus->buffer = 0;
+        free(hibus->buffer);
+        free(hibus);
+#endif
         return NULL;
     }
 }
 
-uint16_t FSA8S_RC_ReadChannel(iBus_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel) {
+uint16_t FSA8S_RC_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel) {
+
+    /* Check parameter */
+    if (NULL == hibus) {
+        return 0;
+    }
+    /* Check parameter */
+    if (!(channel > 0 && channel <= IBUS_CHANNELS)) {
+        return 0;
+    }
 
     /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */
     while (1) {

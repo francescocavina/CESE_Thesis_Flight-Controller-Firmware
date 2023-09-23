@@ -138,21 +138,21 @@ static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit() {
 static void MPU6050_IMU_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
 
     /* Configure MPU6050 device */
-    uint8_t value;
+    uint8_t regValue;
 
     /* --- Wake up device ---------------------------------------------------------------------- */
-    value = 0x00;
+    regValue = 0x00;
     /* Write '0' to PWR_MGMT_1 register on SLEEP_MODE bit (6) */
-    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_PWR_MGMT_1, &value, sizeof(value));
+    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_PWR_MGMT_1, &regValue, sizeof(regValue));
 
     /* --- Set clock source -------------------------------------------------------------------- */
-    value = 0x01;
+    regValue = 0x01;
     /* Write '001' to PWR_MGMT_1 register on CLKSEL bits [2:0] */
     /* Set clock source to be PLL with X axis gyroscope reference */
-    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_PWR_MGMT_1, &value, sizeof(value));
+    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_PWR_MGMT_1, &regValue, sizeof(regValue));
 
     /* --- Set sample rate divider ------------------------------------------------------------- */
-    value = (MPU6050_GYROSCOPE_SAMPLE_RATE - MPU6050_SAMPLE_RATE) / MPU6050_SAMPLE_RATE;
+    regValue = (MPU6050_GYROSCOPE_SAMPLE_RATE - MPU6050_SAMPLE_RATE) / MPU6050_SAMPLE_RATE;
     /*
      * Sample Rate = Gyroscope Output Rate / (1 + SMPLRT_DIV)
      * SMPLRT_DIV = (Gyroscope Output Rate - Sample Rate) / Sample Rate
@@ -160,18 +160,18 @@ static void MPU6050_IMU_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
      * SAMPLRT_DIVE = Gyroscope Output Rate = 1 kHz when the DLPF is enabled, for sample rate = 500
      * Hz, S
      */
-    /* Write value to SMPLRT_DIV register bits [7:0] */
-    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_SMPLRT_DIV, &value, sizeof(value));
+    /* Write regValue to SMPLRT_DIV register bits [7:0] */
+    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_SMPLRT_DIV, &regValue, sizeof(regValue));
 
     /* --- Configure gyroscope ----------------------------------------------------------------- */
-    value = 11 << 3;
+    regValue = 11 << 3;
     /* Write '11' to GYRO_CONFIG register on FS_SEL bits [4:3] */
-    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_GYRO_CONFIG, &value, sizeof(value));
+    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_GYRO_CONFIG, &regValue, sizeof(regValue));
 
     /* --- Configure accelerometer ------------------------------------------------------------- */
-    value = 11 << 3;
+    regValue = 11 << 3;
     /* Write '11' to ACCEL_CONFIG register on FS_SEL bits [4:3] */
-    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_ACCEL_CONFIG, &value, sizeof(value));
+    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_ACCEL_CONFIG, &regValue, sizeof(regValue));
 }
 
 static void MPU6050_IMU_ReadRegister(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg,
@@ -231,10 +231,10 @@ MPU6050_HandleTypeDef_t * MPU6050_IMU_Init() {
 void MPU6050_IMU_Reset(MPU6050_HandleTypeDef_t * hmpu6050) {
 
     /* Reset device */
-    uint8_t value = 1 << 7;
+    uint8_t regValue = 1 << 7;
 
     /* Write '1' to PWR_MGMT_1 register to DEVICE_RESET bit (7) */
-    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_PWR_MGMT_1, &value, sizeof(value));
+    MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_PWR_MGMT_1, &regValue, sizeof(regValue));
 }
 
 uint16_t MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050) {

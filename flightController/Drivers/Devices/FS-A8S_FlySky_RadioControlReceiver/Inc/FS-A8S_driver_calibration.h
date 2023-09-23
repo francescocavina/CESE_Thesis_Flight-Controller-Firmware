@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_calibration.h
- * @date:    16/09/2023
+ * @date:    23/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.5.0
+ * @version: v1.6.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer

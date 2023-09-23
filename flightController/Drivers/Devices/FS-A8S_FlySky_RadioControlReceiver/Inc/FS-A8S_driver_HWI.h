@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_HWI.h
- * @date:    16/09/2023
+ * @date:    23/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.5.0
+ * @version: v1.6.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -65,8 +65,6 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
-extern DMA_HandleTypeDef hdma_usart2_rx;
-
 /**
  * @brief iBus handle structure definition
  */
@@ -76,7 +74,7 @@ typedef struct {
     uint8_t bufferSize;         /* Buffer size */
     uint16_t * data;            /* Channels data */
     uint8_t channels;           /* Number of channels */
-} iBus_HandleTypeDef_t;
+} IBUS_HandleTypeDef_t;
 
 /**
  * @brief bool_t type definition
@@ -88,12 +86,12 @@ typedef bool bool_t;
 /* --- Public function declarations ------------------------------------------------------------ */
 /**
  * @brief  Initializes the iBus communication with the RC receiver.
- * @param  hibus: Pointer to a iBus_HandleTypeDef structure that contains
+ * @param  hibus: Pointer to a IBUS_HandleTypeDef structure that contains
  *                the configuration information for the iBus communication.
  * @retval true:  If communication could be initialized
  *         false: If communication couldn't be initialized
  */
-bool_t iBus_Init(iBus_HandleTypeDef_t * hibus);
+bool_t IBUS_Init(IBUS_HandleTypeDef_t * hibus);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

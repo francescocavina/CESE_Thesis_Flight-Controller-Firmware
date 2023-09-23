@@ -23,9 +23,9 @@
 
 /*
  * @file:    FS-A8S_driver_demo.h
- * @date:    16/09/2023
+ * @date:    23/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.5.0
+ * @version: v1.6.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -36,7 +36,8 @@
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
  *
- * @details: On this file there is a demo to test the driver.
+ * @details: On this file there is a demo to test the driver. In order to be able
+ *           to use it, an UART peripheral must be initialized.
  */
 
 #ifndef INC_FS_A8S_DRIVER_DEMO_H
