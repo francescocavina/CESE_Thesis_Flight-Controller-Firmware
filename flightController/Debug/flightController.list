@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000d32  00000000  00000000  0003a1a8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0001980a  00000000  00000000  0003aeda  2**0
+ 17 .debug_macro  00019810  00000000  00000000  0003aeda  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   0001bcd4  00000000  00000000  000546e4  2**0
+ 18 .debug_line   0001bcd5  00000000  00000000  000546ea  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0008b90f  00000000  00000000  000703b8  2**0
+ 19 .debug_str    0008b92b  00000000  00000000  000703bf  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00004bfc  00000000  00000000  000fbcc8  2**2
+ 20 .debug_frame  00004bfc  00000000  00000000  000fbcec  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000008d  00000000  00000000  001008c4  2**0
+ 21 .debug_line_str 0000008d  00000000  00000000  001008e8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1828,7 +1828,7 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
  8000c70:	737b      	strb	r3, [r7, #13]
  8000c72:	e059      	b.n	8000d28 <FSA8S_RC_AmendData+0xc8>
 
-            channelValue = 0;
+            channelValue = IBUS_CHANNEL_VALUE_NULL;
  8000c74:	2300      	movs	r3, #0
  8000c76:	81fb      	strh	r3, [r7, #14]
 
@@ -1866,7 +1866,7 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
  8000cae:	81fb      	strh	r3, [r7, #14]
 
             /* Map channel value from 0 to IBUS_CHANNEL_MAX_VALUE */
-            if ((1000 <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
+            if ((IBUS_CHANNEL_MIN_RAW_VALUE <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
  8000cb0:	89fb      	ldrh	r3, [r7, #14]
  8000cb2:	f5b3 7f7a 	cmp.w	r3, #1000	; 0x3e8
  8000cb6:	d308      	bcc.n	8000cca <FSA8S_RC_AmendData+0x6a>
@@ -1879,7 +1879,7 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
  8000cc6:	81fb      	strh	r3, [r7, #14]
  8000cc8:	e001      	b.n	8000cce <FSA8S_RC_AmendData+0x6e>
             } else {
-                channelValue = 0;
+                channelValue = IBUS_CHANNEL_VALUE_NULL;
  8000cca:	2300      	movs	r3, #0
  8000ccc:	81fb      	strh	r3, [r7, #14]
             }
@@ -1889,7 +1889,7 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
  8000cce:	89fb      	ldrh	r3, [r7, #14]
  8000cd0:	ee07 3a90 	vmov	s15, r3
  8000cd4:	eeb8 7ae7 	vcvt.f32.s32	s14, s15
-                ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] *
+                ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] * ((float)IBUS_CHANNEL_MAX_VALUE / IBUS_CHANNEL_MIN_RAW_VALUE))) / IBUS_CHANNEL_MIN_RAW_VALUE);
  8000cd8:	7b7b      	ldrb	r3, [r7, #13]
  8000cda:	3b02      	subs	r3, #2
  8000cdc:	0fda      	lsrs	r2, r3, #31
@@ -1902,7 +1902,6 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
  8000cec:	eef8 7ae7 	vcvt.f32.s32	s15, s15
  8000cf0:	eddf 6a14 	vldr	s13, [pc, #80]	; 8000d44 <FSA8S_RC_AmendData+0xe4>
  8000cf4:	ee77 6aa6 	vadd.f32	s13, s15, s13
-                                                   ((float)IBUS_CHANNEL_MAX_VALUE / 1000))) /
  8000cf8:	ed9f 6a12 	vldr	s12, [pc, #72]	; 8000d44 <FSA8S_RC_AmendData+0xe4>
  8000cfc:	eec6 7a86 	vdiv.f32	s15, s13, s12
                 channelValue *
@@ -1931,7 +1930,6 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
  8000d2e:	7b7b      	ldrb	r3, [r7, #13]
  8000d30:	429a      	cmp	r2, r3
  8000d32:	dc9f      	bgt.n	8000c74 <FSA8S_RC_AmendData+0x14>
-                 1000);
         }
     }
 }
@@ -2100,7 +2098,7 @@ uint16_t FSA8S_RC_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t c
  8000e08:	687b      	ldr	r3, [r7, #4]
  8000e0a:	2b00      	cmp	r3, #0
  8000e0c:	d101      	bne.n	8000e12 <FSA8S_RC_ReadChannel+0x16>
-        return 0;
+        return IBUS_CHANNEL_VALUE_NULL;
  8000e0e:	2300      	movs	r3, #0
  8000e10:	e029      	b.n	8000e66 <FSA8S_RC_ReadChannel+0x6a>
     }
@@ -2112,7 +2110,7 @@ uint16_t FSA8S_RC_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t c
  8000e18:	78fb      	ldrb	r3, [r7, #3]
  8000e1a:	2b0e      	cmp	r3, #14
  8000e1c:	d901      	bls.n	8000e22 <FSA8S_RC_ReadChannel+0x26>
-        return 0;
+        return IBUS_CHANNEL_VALUE_NULL;
  8000e1e:	2300      	movs	r3, #0
  8000e20:	e021      	b.n	8000e66 <FSA8S_RC_ReadChannel+0x6a>
     }

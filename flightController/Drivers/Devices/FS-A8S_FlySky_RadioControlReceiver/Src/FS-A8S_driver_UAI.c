@@ -47,9 +47,10 @@
 #define IBUS_COMMAND               (0x40) // 40
 #define IBUS_CHANNELS              (0x0E) // 14
 #define IBUS_CHANNEL_MAX_VALUE     (1000) // This value MUST be between 100 and 65535
-#define IBUS_CHANNEL_MIN_RAW_VALUE (1000)
-#define IBUS_CHANNEL_MAX_RAW_VALUE (2000)
+#define IBUS_CHANNEL_MIN_RAW_VALUE (1000) // Minimum raw value received from receiver
+#define IBUS_CHANNEL_MAX_RAW_VALUE (2000) // Maximum raw value received from receiver
 #define IBUS_CHANNEL_NUM_OFFSET    (1)
+#define IBUS_CHANNEL_VALUE_NULL    (0) // Null channel value
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -147,24 +148,25 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
         /* Ammend data */
         for (uint8_t i = 2; i <= (hibus->bufferSize - 2); i += 2) {
 
-            channelValue = 0;
+            channelValue = IBUS_CHANNEL_VALUE_NULL;
 
             /* Swap channel bytes */
             channelValue =
                 ((hibus->buffer[i + 1] << 8) | (hibus->buffer[i])) - calibrationValues[(i - 2) / 2];
 
             /* Map channel value from 0 to IBUS_CHANNEL_MAX_VALUE */
-            if ((1000 <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
+            if ((IBUS_CHANNEL_MIN_RAW_VALUE <= channelValue) &&
+                (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
                 channelValue -= IBUS_CHANNEL_MIN_RAW_VALUE;
             } else {
-                channelValue = 0;
+                channelValue = IBUS_CHANNEL_VALUE_NULL;
             }
 
             hibus->data[(i - 2) / 2] =
-                channelValue *
-                ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] *
-                                                   ((float)IBUS_CHANNEL_MAX_VALUE / 1000))) /
-                 1000);
+                channelValue * ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] *
+                                                                  ((float)IBUS_CHANNEL_MAX_VALUE /
+                                                                   IBUS_CHANNEL_MIN_RAW_VALUE))) /
+                                IBUS_CHANNEL_MIN_RAW_VALUE);
         }
     }
 }
@@ -242,11 +244,11 @@ uint16_t FSA8S_RC_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t c
 
     /* Check parameter */
     if (NULL == hibus) {
-        return 0;
+        return IBUS_CHANNEL_VALUE_NULL;
     }
     /* Check parameter */
     if (!(channel > 0 && channel <= IBUS_CHANNELS)) {
-        return 0;
+        return IBUS_CHANNEL_VALUE_NULL;
     }
 
     /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */

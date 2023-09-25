@@ -99,7 +99,8 @@ IBUS_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart);
  *                  the configuration information for the iBus communication.
  *         channel: Channel number to be read (CHANNEL_1 to CHANNEL_14).
  * @retval value:   Channel value from 0 to a defined maximum number.
- *
+ *         0:       If hibus param is NULL or channel number is not between
+ *                  CHANNEL_1 to CHANNEL_14.
  */
 uint16_t FSA8S_RC_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel);
 
