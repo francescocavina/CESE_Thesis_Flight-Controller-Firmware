@@ -33,13 +33,6 @@
 #ifndef INC_MPU_6050_DRIVER_REGISTER_MAP_H
 #define INC_MPU_6050_DRIVER_REGISTER_MAP_H
 
-/* --- Headers files inclusions ---------------------------------------------------------------- */
-
-/* --- C++ guard ------------------------------------------------------------------------------- */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* --- Public macros definitions --------------------------------------------------------------- */
 /*
  * @brief MPU-6000 and MPU-6050 Register Map and Descriptions Revision 4.0
@@ -228,17 +221,6 @@ extern "C" {
 /* --- MPU-6050 ID - READ ONLY ----------------------------------------------------------------- */
 #define MPU_6050_REG_WHO_AM_I_MPU6050 (0x75) // Who Am I: Should return 0x68
 #define MPU_6050_VALUE_WHO_AM_I       (0x68)
-
-/* --- Public data type declarations ----------------------------------------------------------- */
-
-/* --- Public variable declarations ------------------------------------------------------------ */
-
-/* --- Public function declarations ------------------------------------------------------------ */
-
-/* --- End of C++ guard ------------------------------------------------------------------------ */
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* INC_MPU_6050_DRIVER_REGISTER_MAP_H  */
 

@@ -5,4 +5,4 @@
 ../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:186:27:MPU6050_IMU_Init	4
 ../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:231:6:MPU6050_IMU_Reset	1
 ../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:240:6:MPU6050_IMU_ReadGyroscope	1
-../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:261:6:MPU6050_IMU_ReadAccelerometer	1
+../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c:265:6:MPU6050_IMU_ReadAccelerometer	1
