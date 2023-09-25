@@ -44,6 +44,17 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
+typedef struct gyroscopeValues {
+    int16_t gyroscopeX;
+    int16_t gyroscopeY;
+    int16_t gyroscopeZ;
+} gyroscopeValues_t;
+
+typedef struct accelerometerValues {
+    int16_t accelerometerX;
+    int16_t accelerometerY;
+    int16_t accelerometerZ;
+} accelerometerValues_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
@@ -53,8 +64,13 @@ extern "C" {
  * @param  TODO
  * @retval TODO
  */
-MPU6050_HandleTypeDef_t * MPU6050_IMU_Init();
+MPU6050_HandleTypeDef_t * MPU6050_IMU_Init(I2C_HandleTypeDef * hi2c);
 
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
 void MPU6050_IMU_Reset(MPU6050_HandleTypeDef_t * hmpu6050);
 
 /*
@@ -62,7 +78,16 @@ void MPU6050_IMU_Reset(MPU6050_HandleTypeDef_t * hmpu6050);
  * @param  TODO
  * @retval TODO
  */
-uint16_t MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050);
+void MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050,
+                               gyroscopeValues_t * gyroscopeValues);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+void MPU6050_IMU_ReadAccelerometer(MPU6050_HandleTypeDef_t * hmpu6050,
+                                   accelerometerValues_t * accelerometerValues);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU-6050_driver_UAI.c
- * @date:    16/09/2023
+ * @date:    25/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
  * @brief:   This is a template for source files.
  */
@@ -52,7 +52,7 @@ static uint8_t instancesNumber = 0;
  * @param  TODO
  * @retval TODO
  */
-static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit();
+static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit(I2C_HandleTypeDef * hi2c);
 
 /*
  * @brief  TODO
@@ -82,12 +82,7 @@ static void MPU6050_IMU_WriteRegister(MPU6050_HandleTypeDef_t * hmpu6050, uint8_
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit() {
-
-    /* Check if driver was already once or twice initialized */
-    if (MPU6050_MAX_NUMBER_INSTANCES == instancesNumber) {
-        return NULL;
-    }
+static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit(I2C_HandleTypeDef * hi2c) {
 
 #ifdef USE_FREERTOS
     /* Allocate dynamic memory for the MPU6050_HandleTypeDef_t structure */
@@ -128,6 +123,7 @@ static MPU6050_HandleTypeDef_t * MPU6050_IMU_InstanceInit() {
             hmpu6050->instance = 2;
             hmpu6050->address = MPU6050_I2C_ADDR2;
         }
+        hmpu6050->hi2c = hi2c;
         hmpu6050->buffer = buffer;
     }
 
@@ -158,7 +154,7 @@ static void MPU6050_IMU_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
      * SMPLRT_DIV = (Gyroscope Output Rate - Sample Rate) / Sample Rate
      * Gyroscope Output Rate = 8 kHz when the DLPF is disabled, for sample rate = 500 Hz,
      * SAMPLRT_DIVE = Gyroscope Output Rate = 1 kHz when the DLPF is enabled, for sample rate = 500
-     * Hz, S
+     * Hz
      */
     /* Write regValue to SMPLRT_DIV register bits [7:0] */
     MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_SMPLRT_DIV, &regValue, sizeof(regValue));
@@ -177,31 +173,36 @@ static void MPU6050_IMU_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
 static void MPU6050_IMU_ReadRegister(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg,
                                      uint8_t * data, uint8_t dataSize) {
 
-    i2c_Read(hmpu6050, reg, data, dataSize);
+    I2C_Read(hmpu6050, reg, data, dataSize);
 }
 
 static void MPU6050_IMU_WriteRegister(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg,
                                       uint8_t * data, uint8_t dataSize) {
 
-    i2c_Write(hmpu6050, reg, data, dataSize);
+    I2C_Write(hmpu6050, reg, data, dataSize);
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
-MPU6050_HandleTypeDef_t * MPU6050_IMU_Init() {
+MPU6050_HandleTypeDef_t * MPU6050_IMU_Init(I2C_HandleTypeDef * hi2c) {
+
+    /* Check if driver was already once or twice initialized */
+    if (MPU6050_MAX_NUMBER_INSTANCES == instancesNumber) {
+        return NULL;
+    }
 
     /* Create an instance of the MPU6050_IMU device */
-    MPU6050_HandleTypeDef_t * hmpu6050 = MPU6050_IMU_InstanceInit();
+    MPU6050_HandleTypeDef_t * hmpu6050 = MPU6050_IMU_InstanceInit(hi2c);
 
     /* Check if instance was successfully created */
     if (NULL != hmpu6050) {
         /* Instance was successfully created */
 
         /* Initialize I2C communication */
-        if (i2c_Init(hmpu6050)) {
+        if (I2C_Init(hmpu6050)) {
 
             /* Initialization was successful */
             /* Configure device */
-            // MPU6050_IMU_Config(hmpu6050);
+            MPU6050_IMU_Config(hmpu6050);
 
             instancesNumber++;
 
@@ -218,7 +219,6 @@ MPU6050_HandleTypeDef_t * MPU6050_IMU_Init() {
             free(hmpu6050->buffer);
             free(hmpu6050);
 #endif
-
             return NULL;
         }
     } else {
@@ -237,19 +237,57 @@ void MPU6050_IMU_Reset(MPU6050_HandleTypeDef_t * hmpu6050) {
     MPU6050_IMU_WriteRegister(hmpu6050, MPU_6050_REG_PWR_MGMT_1, &regValue, sizeof(regValue));
 }
 
-uint16_t MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050) {
+void MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050,
+                               gyroscopeValues_t * gyroscopeValues) {
 
-    /* Read gyroscope */
-    uint16_t gyroValue;
-    uint8_t gyroValue_L;
-    uint8_t gyroValue_H;
+    gyroscopeValues->gyroscopeX = 0;
+    gyroscopeValues->gyroscopeY = 0;
+    gyroscopeValues->gyroscopeZ = 0;
 
-    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_GYRO_XOUT_L, &gyroValue_L, sizeof(gyroValue_L));
-    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_GYRO_XOUT_H, &gyroValue_H, sizeof(gyroValue_H));
+    uint8_t gyroscopeRawData[2];
 
-    gyroValue = gyroValue_H << 8 | gyroValue_L;
+    /* Read gyroscope in axis X */
+    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_GYRO_XOUT_H, gyroscopeRawData,
+                             sizeof(uint16_t));
+    gyroscopeValues->gyroscopeX = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
 
-    return gyroValue;
+    /* Read gyroscope in axis Y */
+    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_GYRO_YOUT_H, gyroscopeRawData,
+                             sizeof(uint16_t));
+    gyroscopeValues->gyroscopeY = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
+
+    /* Read gyroscope in axis Z */
+    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_GYRO_ZOUT_H, gyroscopeRawData,
+                             sizeof(uint16_t));
+    gyroscopeValues->gyroscopeZ = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
+}
+
+void MPU6050_IMU_ReadAccelerometer(MPU6050_HandleTypeDef_t * hmpu6050,
+                                   accelerometerValues_t * accelerometerValues) {
+
+    accelerometerValues->accelerometerX = 0;
+    accelerometerValues->accelerometerY = 0;
+    accelerometerValues->accelerometerZ = 0;
+
+    uint8_t accelerometerRawData[2];
+
+    /* Read accelerometer in axis X */
+    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_ACCEL_XOUT_H, accelerometerRawData,
+                             sizeof(uint16_t));
+    accelerometerValues->accelerometerX =
+        (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
+
+    /* Read accelerometer in axis Y */
+    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_ACCEL_YOUT_H, accelerometerRawData,
+                             sizeof(uint16_t));
+    accelerometerValues->accelerometerY =
+        (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
+
+    /* Read accelerometer in axis Z */
+    MPU6050_IMU_ReadRegister(hmpu6050, MPU_6050_REG_ACCEL_ZOUT_H, accelerometerRawData,
+                             sizeof(uint16_t));
+    accelerometerValues->accelerometerZ =
+        (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

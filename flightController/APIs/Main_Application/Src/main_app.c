@@ -33,9 +33,8 @@
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "main_app.h"
 #include "usbd_cdc_if.h"
-// #include "MPU-6050_driver_UAI.h"
-// #include "MPU-6050_driver_HWI.h"
 #include "FS-A8S_driver_UAI.h"
+#include "MPU-6050_driver_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 
@@ -59,25 +58,54 @@ void flightController_App(void) {
     static IBUS_HandleTypeDef_t * rc_controller;
     uint8_t channel = CHANNEL_1;
     static uint16_t channelValue;
-    uint8_t str[20];
+    uint8_t str1[40];
+    uint8_t str2[40];
+
+    MPU6050_HandleTypeDef_t * hmpu6050;
 
     rc_controller = FSA8S_RC_Init(&huart2);
 
-    while (1) {
-        channelValue = FSA8S_RC_ReadChannel(rc_controller, channel);
-        sprintf((char *)str, (const char *)"Channel %d: %d\r\n", channel, channelValue);
-        CDC_Transmit_FS(str, strlen((const char *)str));
-    }
+    hmpu6050 = MPU6050_IMU_Init(&hi2c1);
 
-    //        MPU6050_HandleTypeDef_t * hmpu6050 = MPU6050_IMU_Init();
-    //        // str[12] = hmpu6050->instance + 48;
-    //        HAL_Delay(1000);
+    //    while (1) {
+    //        channelValue = FSA8S_RC_ReadChannel(rc_controller, channel);
+    //        sprintf((char *)str, (const char *)"Channel %d: %d\r\n", channel, channelValue);
+    //        CDC_Transmit_FS(str, strlen((const char *)str));
+    //    }
+
     //
-    //        if (hmpu6050->instance == 1 || hmpu6050->instance == 2) {
-    //            CDC_Transmit_FS(str, 17);
-    //        } else {
-    //            CDC_Transmit_FS((char *)"Not initialized\r\n", 18);
-    //        }
+
+    gyroscopeValues_t * gyroscopeValues;
+    accelerometerValues_t * accelerometerValues;
+    while (1) {
+        HAL_Delay(1000);
+
+        //		MPU6050_IMU_ReadGyroscope(hmpu6050, gyroscopeValues);
+        //
+        //		sprintf((char *)str1, (const char *)"Value Gyro X: %d\r\n",
+        // gyroscopeValues->gyroscopeX); 		CDC_Transmit_FS(str1, strlen((const char *)str1));
+        //		HAL_Delay(10);
+        //		sprintf((char *)str1, (const char *)"Value Gyro Y: %d\r\n",
+        // gyroscopeValues->gyroscopeY); 		CDC_Transmit_FS(str1, strlen((const char *)str1));
+        //		HAL_Delay(10);
+        //		sprintf((char *)str1, (const char *)"Value Gyro Z: %d\r\n\n",
+        // gyroscopeValues->gyroscopeZ); 		CDC_Transmit_FS(str1, strlen((const char *)str1));
+        //		HAL_Delay(10);
+
+        MPU6050_IMU_ReadAccelerometer(hmpu6050, accelerometerValues);
+        sprintf((char *)str2, (const char *)"Value Accel X: %d\r\n",
+                accelerometerValues->accelerometerX);
+        CDC_Transmit_FS(str2, strlen((const char *)str2));
+        HAL_Delay(10);
+        sprintf((char *)str2, (const char *)"Value Accel Y: %d\r\n",
+                accelerometerValues->accelerometerY);
+        CDC_Transmit_FS(str2, strlen((const char *)str2));
+        HAL_Delay(10);
+        sprintf((char *)str2, (const char *)"Value Accel Z: %d\r\n\n\n\n\n",
+                accelerometerValues->accelerometerZ);
+        CDC_Transmit_FS(str2, strlen((const char *)str2));
+        HAL_Delay(10);
+    }
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

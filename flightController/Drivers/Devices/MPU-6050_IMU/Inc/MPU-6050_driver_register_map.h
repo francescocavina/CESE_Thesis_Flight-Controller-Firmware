@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU-6050_driver_register_map.h
- * @date:    20/08/2023
+ * @date:    25/08/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
  * @brief:   This is a template for header files.
  */
@@ -184,7 +184,6 @@ extern "C" {
 /* --- MOTION DETECTION STATUS - READ ONLY ----------------------------------------------------- */
 #define MPU_6050_REG_MOT_DETECT_STATUS                                                             \
     (0x61) // Motion Detection Status: reports axis and polarity of motion which generate a motion
-           // detection interrupt
 
 /* --- I2C SLAVE DATA OUT - READ/WRITE --------------------------------------------------------- */
 #define MPU_6050_REG_I2C_SLV0_DO (0x63) // I2C Slave 0 Data Out

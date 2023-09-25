@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU-6050_driver_HWI.h
- * @date:    16/09/2023
+ * @date:    25/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
  * @brief:   This is a template for header files.
  */
@@ -73,21 +73,21 @@ typedef bool bool_t;
  * @param  TODO
  * @retval TODO
  */
-bool_t i2c_Init(MPU6050_HandleTypeDef_t * hmpu6050);
+bool_t I2C_Init(MPU6050_HandleTypeDef_t * hmpu6050);
 
 /*
  * @brief  TODO
  * @param  TODO
  * @retval TODO
  */
-void i2c_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize);
+bool_t I2C_Read(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize);
 
 /*
  * @brief  TODO
  * @param  TODO
  * @retval TODO
  */
-void i2c_Write(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize);
+bool_t I2C_Write(MPU6050_HandleTypeDef_t * hmpu6050, uint8_t reg, uint8_t * data, uint8_t dataSize);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
