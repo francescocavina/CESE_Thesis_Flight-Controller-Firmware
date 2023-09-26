@@ -25,7 +25,7 @@
  * @file:    MPU-6050_driver_demo.h
  * @date:    25/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.1.0
+ * @version: v1.2.0
  *
  * @brief:   This is a template for header files.
  */

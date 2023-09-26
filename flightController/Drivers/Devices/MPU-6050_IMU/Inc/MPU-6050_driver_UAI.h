@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU-6050_driver_UAI.h
- * @date:    16/09/2023
+ * @date:    25/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.2.0
  *
  * @brief:   This is a template for header files.
  */
@@ -55,6 +55,12 @@ typedef struct accelerometerValues {
     int16_t accelerometerY;
     int16_t accelerometerZ;
 } accelerometerValues_t;
+
+typedef struct magnetometerValues {
+    int16_t magnetometerX;
+    int16_t magnetometerY;
+    int16_t magnetometerZ;
+} magnetometerValues_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
@@ -88,6 +94,21 @@ void MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050,
  */
 void MPU6050_IMU_ReadAccelerometer(MPU6050_HandleTypeDef_t * hmpu6050,
                                    accelerometerValues_t * accelerometerValues);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+int16_t MPU6050_IMU_ReadTemperatureSensor(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+void MPU6050_IMU_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050,
+                                  magnetometerValues_t * magnetometerValues);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

@@ -59,6 +59,8 @@ void flightController_App(void) {
 
     uint8_t str1[40];
     uint8_t str2[40];
+    uint8_t str3[50];
+    uint8_t str4[50];
 
     MPU6050_HandleTypeDef_t * hmpu6050;
 
@@ -76,6 +78,7 @@ void flightController_App(void) {
 
     gyroscopeValues_t * gyroscopeValues;
     accelerometerValues_t * accelerometerValues;
+    magnetometerValues_t * magnetometerValues;
     while (1) {
         HAL_Delay(1000);
 
@@ -87,9 +90,10 @@ void flightController_App(void) {
         sprintf((char *)str1, (const char *)"Value Gyro Y: %d\r\n", gyroscopeValues->gyroscopeY);
         CDC_Transmit_FS(str1, strlen((const char *)str1));
         HAL_Delay(10);
-        sprintf((char *)str1, (const char *)"Value Gyro Z: %d\r\n\n", gyroscopeValues->gyroscopeZ);
+        sprintf((char *)str1, (const char *)"Value Gyro Z: %d\r\n\n\n\n",
+                gyroscopeValues->gyroscopeZ);
         CDC_Transmit_FS(str1, strlen((const char *)str1));
-        HAL_Delay(10);
+        HAL_Delay(100);
 
         MPU6050_IMU_ReadAccelerometer(hmpu6050, accelerometerValues);
         sprintf((char *)str2, (const char *)"Value Accel X: %d\r\n",
@@ -100,9 +104,28 @@ void flightController_App(void) {
                 accelerometerValues->accelerometerY);
         CDC_Transmit_FS(str2, strlen((const char *)str2));
         HAL_Delay(10);
-        sprintf((char *)str2, (const char *)"Value Accel Z: %d\r\n\n\n\n\n",
+        sprintf((char *)str2, (const char *)"Value Accel Z: %d\r\n\n\n\n",
                 accelerometerValues->accelerometerZ);
         CDC_Transmit_FS(str2, strlen((const char *)str2));
+        HAL_Delay(100);
+
+        sprintf((char *)str3, (const char *)"Value Temperature: %d\r\n\n\n\n\n",
+                MPU6050_IMU_ReadTemperatureSensor(hmpu6050));
+        CDC_Transmit_FS(str3, strlen((const char *)str3));
+        HAL_Delay(100);
+
+        MPU6050_IMU_ReadMagnetometer(hmpu6050, magnetometerValues);
+        sprintf((char *)str4, (const char *)"Value Mag X: %d\r\n",
+                magnetometerValues->magnetometerX);
+        CDC_Transmit_FS(str4, strlen((const char *)str4));
+        HAL_Delay(10);
+        sprintf((char *)str4, (const char *)"Value Mag Y: %d\r\n",
+                magnetometerValues->magnetometerY);
+        CDC_Transmit_FS(str4, strlen((const char *)str4));
+        HAL_Delay(10);
+        sprintf((char *)str4, (const char *)"Value Mag Z: %d\r\n\n\n\n",
+                magnetometerValues->magnetometerZ);
+        CDC_Transmit_FS(str4, strlen((const char *)str4));
         HAL_Delay(10);
     }
 }
