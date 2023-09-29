@@ -22,23 +22,22 @@
  */
 
 /*
- * @file:    MPU-6050_driver_register_map.h
- * @date:    25/08/2023
+ * @file:    MPU6050_driver_register_map.h
+ * @date:    28/08/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.2.0
  *
  * @brief:   This is a template for header files.
  */
 
-#ifndef INC_MPU_6050_DRIVER_REGISTER_MAP_H
-#define INC_MPU_6050_DRIVER_REGISTER_MAP_H
+#ifndef INC_MPU6050_DRIVER_REGISTER_MAP_H
+#define INC_MPU6050_DRIVER_REGISTER_MAP_H
 
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /*
  * @brief MPU-6000 and MPU-6050 Register Map and Descriptions Revision 4.0
  */
-
 /* --- GYROSCOPE OFFSET - REGISTERS ADDRESSES - READ/WRITE ------------------------------------- */
 #define MPU_6050_REG_XGOFFS_TC (0x00) // Bit 7 PWR_MODE, bits 6:1 XG_OFFS_TC, bit 0 OTP_BNK_VLD
 #define MPU_6050_REG_YGOFFS_TC (0x01)
@@ -77,8 +76,7 @@
 #define MPU_6050_REG_GYRO_CONFIG  (0x1B) // REG ADDR: Gyroscope Configuration
 #define MPU_6050_REG_ACCEL_CONFIG (0x1C) // REG ADDR: Accelerometer Configuration
 /* --- CONFIGURATION - REGISTERS VALUES -------------------------------------------------------- */
-#define MPU_6050_VAL_SMPLRT_DIV                                                                    \
-    ((MPU_6050_AUX_VAL_GYRO_SMPLRT - MPU_6050_AUX_VAL_SMPLRT) / MPU_6050_AUX_VAL_SMPLRT)
+#define MPU_6050_VAL_SMPLRT_DIV            ((MPU_6050_AUX_VAL_GYRO_SMPLRT - MPU_6050_AUX_VAL_SMPLRT) / MPU_6050_AUX_VAL_SMPLRT)
 #define MPU_6050_VAL_GYRO_CONFIG_FS_SEL_0  (0X00) // REG VAL: Set Full Range Scale = ± 0250 °/s
 #define MPU_6050_VAL_GYRO_CONFIG_FS_SEL_1  (0X08) // REG VAL: Set Full Range Scale = ± 0500 °/s
 #define MPU_6050_VAL_GYRO_CONFIG_FS_SEL_2  (0X10) // REG VAL: Set Full Range Scale = ± 1000 °/s
@@ -88,36 +86,24 @@
 #define MPU_6050_VAL_ACCEL_CONFIG_FS_SEL_2 (0X10) // REG VAL: Set Full Range Scale = ± 08 g
 #define MPU_6050_VAL_ACCEL_CONFIG_FS_SEL_3 (0X18) // REG VAL: Set Full Range Scale = ± 16 g
 /* --- CONFIGURATION - AUXILIARY VALUES -------------------------------------------------------- */
-#define MPU_6050_AUX_VAL_GYRO_SMPLRT  (8000) // AUX VAL: Gyroscope Sample Rate = 8 kHz
-#define MPU_6050_AUX_VAL_SMPLRT       (0500) // AUX VAL: Desired Sample Rate = 5OO Hz
-#define MPU_6050_AUX_VAL_GYRO_FS_0250 (0250) // AUX VAL: Full Range Scale = ± 0250 °/s
-#define MPU_6050_AUX_VAL_GYRO_FS_0500 (0500) // AUX VAL: Full Range Scale = ± 0500 °/s
-#define MPU_6050_AUX_VAL_GYRO_FS_1000 (1000) // AUX VAL: Full Range Scale = ± 1000 °/s
-#define MPU_6050_AUX_VAL_GYRO_FS_2000 (2000) // AUX VAL: Full Range Scale = ± 2000 °/s
-#define MPU_6050_AUX_VAL_GYRO_SF_0250                                                              \
-    (32768 /                                                                                       \
-     MPU_6050_AUX_VAL_GYRO_FS_0250) // AUX VAL: Scale Factor for Full Range Scale = ± 0250 °/s
-#define MPU_6050_AUX_VAL_GYRO_SF_0500                                                              \
-    (32768 /                                                                                       \
-     MPU_6050_AUX_VAL_GYRO_FS_0500) // AUX VAL: Scale Factor for Full Range Scale = ± 0500 °/s
-#define MPU_6050_AUX_VAL_GYRO_SF_1000                                                              \
-    (32768 /                                                                                       \
-     MPU_6050_AUX_VAL_GYRO_FS_1000) // AUX VAL: Scale Factor for Full Range Scale = ± 1000 °/s
-#define MPU_6050_AUX_VAL_GYRO_SF_2000                                                              \
-    (32768 /                                                                                       \
-     MPU_6050_AUX_VAL_GYRO_FS_2000) // AUX VAL: Scale Factor for Full Range Scale = ± 2000 °/s
-#define MPU_6050_AUX_VAL_ACCEL_FS_02 (02) // AUX VAL: Full Range Scale = ± 02 g
-#define MPU_6050_AUX_VAL_ACCEL_FS_04 (04) // AUX VAL: Full Range Scale = ± 04 g
-#define MPU_6050_AUX_VAL_ACCEL_FS_08 (08) // AUX VAL: Full Range Scale = ± 08 g
-#define MPU_6050_AUX_VAL_ACCEL_FS_16 (16) // AUX VAL: Full Range Scale = ± 16 g
-#define MPU_6050_AUX_VAL_ACCEL_SF_02                                                               \
-    (32768 / MPU_6050_AUX_VAL_ACCEL_FS_02) // AUX VAL: Scale Factor for Full Range Scale = ± 02 g
-#define MPU_6050_AUX_VAL_ACCEL_SF_04                                                               \
-    (32768 / MPU_6050_AUX_VAL_ACCEL_FS_04) // AUX VAL: Scale Factor for Full Range Scale = ± 04 g
-#define MPU_6050_AUX_VAL_ACCEL_SF_08                                                               \
-    (32768 / MPU_6050_AUX_VAL_ACCEL_FS_08) // AUX VAL: Scale Factor for Full Range Scale = ± 08 g
-#define MPU_6050_AUX_VAL_ACCEL_SF_16                                                               \
-    (32768 / MPU_6050_AUX_VAL_ACCEL_FS_16) // AUX VAL: Scale Factor for Full Range Scale = ± 16 g
+#define MPU_6050_AUX_VAL_GYRO_SMPLRT  (8000)                                  // AUX VAL: Gyroscope Sample Rate = 8 kHz
+#define MPU_6050_AUX_VAL_SMPLRT       (0500)                                  // AUX VAL: Desired Sample Rate = 5OO Hz
+#define MPU_6050_AUX_VAL_GYRO_FS_0250 (0250)                                  // AUX VAL: Full Range Scale = ± 0250 °/s
+#define MPU_6050_AUX_VAL_GYRO_FS_0500 (0500)                                  // AUX VAL: Full Range Scale = ± 0500 °/s
+#define MPU_6050_AUX_VAL_GYRO_FS_1000 (1000)                                  // AUX VAL: Full Range Scale = ± 1000 °/s
+#define MPU_6050_AUX_VAL_GYRO_FS_2000 (2000)                                  // AUX VAL: Full Range Scale = ± 2000 °/s
+#define MPU_6050_AUX_VAL_GYRO_SF_0250 (32768 / MPU_6050_AUX_VAL_GYRO_FS_0250) // AUX VAL: Scale Factor for Full Range Scale = ± 0250 °/s
+#define MPU_6050_AUX_VAL_GYRO_SF_0500 (32768 / MPU_6050_AUX_VAL_GYRO_FS_0500) // AUX VAL: Scale Factor for Full Range Scale = ± 0500 °/s
+#define MPU_6050_AUX_VAL_GYRO_SF_1000 (32768 / MPU_6050_AUX_VAL_GYRO_FS_1000) // AUX VAL: Scale Factor for Full Range Scale = ± 1000 °/s
+#define MPU_6050_AUX_VAL_GYRO_SF_2000 (32768 / MPU_6050_AUX_VAL_GYRO_FS_2000) // AUX VAL: Scale Factor for Full Range Scale = ± 2000 °/s
+#define MPU_6050_AUX_VAL_ACCEL_FS_02  (02)                                    // AUX VAL: Full Range Scale = ± 02 g
+#define MPU_6050_AUX_VAL_ACCEL_FS_04  (04)                                    // AUX VAL: Full Range Scale = ± 04 g
+#define MPU_6050_AUX_VAL_ACCEL_FS_08  (08)                                    // AUX VAL: Full Range Scale = ± 08 g
+#define MPU_6050_AUX_VAL_ACCEL_FS_16  (16)                                    // AUX VAL: Full Range Scale = ± 16 g
+#define MPU_6050_AUX_VAL_ACCEL_SF_02  (32768 / MPU_6050_AUX_VAL_ACCEL_FS_02)  // AUX VAL: Scale Factor for Full Range Scale = ± 02 g
+#define MPU_6050_AUX_VAL_ACCEL_SF_04  (32768 / MPU_6050_AUX_VAL_ACCEL_FS_04)  // AUX VAL: Scale Factor for Full Range Scale = ± 04 g
+#define MPU_6050_AUX_VAL_ACCEL_SF_08  (32768 / MPU_6050_AUX_VAL_ACCEL_FS_08)  // AUX VAL: Scale Factor for Full Range Scale = ± 08 g
+#define MPU_6050_AUX_VAL_ACCEL_SF_16  (32768 / MPU_6050_AUX_VAL_ACCEL_FS_16)  // AUX VAL: Scale Factor for Full Range Scale = ± 16 g
 
 /* --- FREE FALL - REGISTERS ADDRESSES - READ/WRITE -------------------------------------------- */
 #define MPU_6050_REG_FF_THR (0x1D) // Free Fall Acceleration Threshold
@@ -218,8 +204,7 @@
 #define MPU_6050_REG_EXT_SENS_DATA_23 (0x60) // External Sensor Data 23
 
 /* --- MOTION DETECTION STATUS - REGISTERS ADDRESSES - READ ONLY ------------------------------- */
-#define MPU_6050_REG_MOT_DETECT_STATUS                                                             \
-    (0x61) // Motion Detection Status: reports axis and polarity of motion which generate a motion
+#define MPU_6050_REG_MOT_DETECT_STATUS (0x61) // Motion Detection Status: reports axis and polarity of motion which generate a motion
 
 /* --- I2C SLAVE DATA OUT - REGISTERS ADDRESSES - READ/WRITE ----------------------------------- */
 #define MPU_6050_REG_I2C_SLV0_DO (0x63) // I2C Slave 0 Data Out
@@ -248,17 +233,16 @@
 /* --- POWER MANAGEMENT - REGISTERS VALUES ----------------------------------------------------- */
 #define MPU_6050_VAL_PWR_MGMT_1_DEVICE_RESET (0X80)
 #define MPU_6050_VAL_PWR_MGMT_1_SLEEP_MODE   (0x40) // Puts the MPU-6050 into sleep mode
-#define MPU_6050_VAL_PWR_MGMT_1_CLKSEL_1                                                           \
-    (0X01) // Clock Source = PLL with X axis gyroscope reference
+#define MPU_6050_VAL_PWR_MGMT_1_WAKEUP       (0x00) // Wake the MPU-6050 up
+#define MPU_6050_VAL_PWR_MGMT_1_CLKSEL_1     (0X01) // Clock Source = PLL with X axis gyroscope reference
+#define MPU_6050_VAL_PWR_MGMT_1_RESET        (0x80) // Reset device
 
 /* --- DIGITAL MOTION PROCESSOR - REGISTERS ADDRESSES - READ/WRITE ----------------------------- */
-#define MPU_6050_REG_DMP_BANK_SEL                                                                  \
-    (0x6D) // DMP Memory Bank Selection: activates a specific bank in the DMP
-#define MPU_6050_REG_DMP_RW_PNT                                                                    \
-    (0x6E) // DMP Memory Start Address: set read/write pointer to a specific start address in
-           // specified DMP bank
-#define MPU_6050_REG_DMP_REG                                                                       \
-    (0x6F) // DMP Memory Read/Write: register in DMP from which to read or to which to write
+#define MPU_6050_REG_DMP_BANK_SEL (0x6D) // DMP Memory Bank Selection: activates a specific bank in the DMP
+#define MPU_6050_REG_DMP_RW_PNT                                                                                                                      \
+    (0x6E)                              // DMP Memory Start Address: set read/write pointer to a specific start address in
+                                        // specified DMP bank
+#define MPU_6050_REG_DMP_REG     (0x6F) // DMP Memory Read/Write: register in DMP from which to read or to which to write
 #define MPU_6050_REG_DMP_CONFIG1 (0x70) // DMP Configuration 1
 #define MPU_6050_REG_DMP_CONFIG2 (0x71) // DMP Configuration 2
 
@@ -292,6 +276,6 @@
 #define HMC5883L_REG_IDENT_B      (0x0B)
 #define HMC5883L_REG_IDENT_C      (0x0C)
 
-#endif /* INC_MPU_6050_DRIVER_REGISTER_MAP_H  */
+#endif /* INC_MPU6050_DRIVER_REGISTER_MAP_H  */
 
 /* --- End of file ----------------------------------------------------------------------------- */

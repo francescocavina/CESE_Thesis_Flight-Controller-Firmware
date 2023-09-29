@@ -22,37 +22,30 @@
  */
 
 /*
- * @file:    MPU-6050_driver_demo.h
- * @date:    25/09/2023
+ * @file:    MPU6050_driver_demo.c
+ * @date:    28/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.2.0
  *
- * @brief:   This is a template for header files.
+ * @brief:   This is a template for source files.
  */
-
-#ifndef INC_MPU_6050_DRIVER_DEMO_H
-#define INC_MPU_6050_DRIVER_DEMO_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 
-/* --- C++ guard ------------------------------------------------------------------------------- */
-#ifdef __cplusplus
-extern "C" {
-#endif
+/* --- Macros definitions ---------------------------------------------------------------------- */
 
-/* --- Public macros definitions --------------------------------------------------------------- */
+/* --- Private data type declarations ---------------------------------------------------------- */
 
-/* --- Public data type declarations ----------------------------------------------------------- */
+/* --- Private variable declarations ----------------------------------------------------------- */
 
-/* --- Public variable declarations ------------------------------------------------------------ */
+/* --- Private function declarations ----------------------------------------------------------- */
 
-/* --- Public function declarations ------------------------------------------------------------ */
+/* --- Public variable definitions ------------------------------------------------------------- */
 
-/* --- End of C++ guard ------------------------------------------------------------------------ */
-#ifdef __cplusplus
-}
-#endif
+/* --- Private variable definitions ------------------------------------------------------------ */
 
-#endif /* INC_MPU_6050_DRIVER_DEMO_H*/
+/* --- Private function implementation --------------------------------------------------------- */
+
+/* --- Public function implementation ---------------------------------------------------------- */
 
 /* --- End of file ----------------------------------------------------------------------------- */

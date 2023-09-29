@@ -22,8 +22,8 @@
  */
 
 /*
- * @file:    MPU-6050_driver_HWI.c
- * @date:    25/09/2023
+ * @file:    MPU6050_driver_HWI.c
+ * @date:    28/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.2.0
  *
@@ -31,8 +31,8 @@
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include "MPU-6050_driver_HWI.h"
-#include "MPU-6050_driver_register_map.h"
+#include "MPU6050_driver_HWI.h"
+#include "MPU6050_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 #define MPU_6050_I2C_READ_TIMEOUT  (100) // 100 ms
@@ -77,8 +77,7 @@ bool_t I2C_Init(MPU6050_HandleTypeDef_t * hmpu6050) {
     }
 }
 
-bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data,
-                uint8_t dataSize) {
+bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
 
     /* Check parameters */
     if (NULL == hi2c) {
@@ -98,8 +97,7 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
     }
 
     /* Read IMU data by passing a data register */
-    if (HAL_OK != HAL_I2C_Mem_Read(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize,
-                                   MPU_6050_I2C_READ_TIMEOUT)) {
+    if (HAL_OK != HAL_I2C_Mem_Read(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize, MPU_6050_I2C_READ_TIMEOUT)) {
 
         /* Data couldn't be read */
         return false;
@@ -110,8 +108,7 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
     }
 }
 
-bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data,
-                 uint8_t dataSize) {
+bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
 
     /* Check parameters */
     if (NULL == hi2c) {
@@ -131,8 +128,7 @@ bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t
     }
 
     /* Write to IMU */
-    if (HAL_OK != HAL_I2C_Mem_Write(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize,
-                                    MPU_6050_I2C_WRITE_TIMEOUT)) {
+    if (HAL_OK != HAL_I2C_Mem_Write(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize, MPU_6050_I2C_WRITE_TIMEOUT)) {
 
         /* Data couldn't be written */
         return false;

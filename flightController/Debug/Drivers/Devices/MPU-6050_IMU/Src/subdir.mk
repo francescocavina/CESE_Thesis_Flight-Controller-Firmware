@@ -5,19 +5,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables
 C_SRCS += \
-../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_HWI.c \
-../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.c \
-../Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_demo.c
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_HWI.c \
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c \
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_demo.c
 
 OBJS += \
-./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_HWI.o \
-./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.o \
-./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_demo.o
+./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_HWI.o \
+./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.o \
+./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_demo.o
 
 C_DEPS += \
-./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_HWI.d \
-./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.d \
-./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_demo.d
+./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_HWI.d \
+./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.d \
+./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_demo.d
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -27,6 +27,6 @@ Drivers/Devices/MPU-6050_IMU/Src/%.o Drivers/Devices/MPU-6050_IMU/Src/%.su Drive
 clean: clean-Drivers-2f-Devices-2f-MPU-2d-6050_IMU-2f-Src
 
 clean-Drivers-2f-Devices-2f-MPU-2d-6050_IMU-2f-Src:
-	-$(RM) ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_HWI.cyclo ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_HWI.d ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_HWI.o ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_HWI.su ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.cyclo ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.d ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.o ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_UAI.su ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_demo.cyclo ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_demo.d ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_demo.o ./Drivers/Devices/MPU-6050_IMU/Src/MPU-6050_driver_demo.su
+	-$(RM) ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_HWI.cyclo ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_HWI.d ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_HWI.o ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_HWI.su ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.cyclo ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.d ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.o ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.su ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_demo.cyclo ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_demo.d ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_demo.o ./Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_demo.su
 
 .PHONY: clean-Drivers-2f-Devices-2f-MPU-2d-6050_IMU-2f-Src

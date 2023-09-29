@@ -1,0 +1,9 @@
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:81:34:MPU6050_InstanceInit	5
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:130:13:MPU6050_Config	1
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:208:13:MPU6050_ReadRegister	1
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:214:13:MPU6050_WriteRegister	1
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:221:27:MPU6050_Init	4
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:266:6:MPU6050_Reset	1
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:276:6:MPU6050_ReadGyroscope	1
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:305:6:MPU6050_ReadAccelerometer	1
+../Drivers/Devices/MPU-6050_IMU/Src/MPU6050_driver_UAI.c:334:9:MPU6050_ReadTemperatureSensor	1

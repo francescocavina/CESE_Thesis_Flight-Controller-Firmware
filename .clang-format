@@ -9,7 +9,7 @@ AllowShortFunctionsOnASingleLine: false
 AllowShortLambdasOnASingleLine: false
 SortIncludes: false
 IndentCaseLabels: false
-ColumnLimit: 100
+ColumnLimit: 150
 AccessModifierOffset: -4
 FixNamespaceComments: false
 PointerAlignment: Middle

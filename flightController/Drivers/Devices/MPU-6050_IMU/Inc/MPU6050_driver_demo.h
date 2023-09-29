@@ -22,19 +22,18 @@
  */
 
 /*
- * @file:    MPU-6050_driver_UAI.h
- * @date:    25/09/2023
+ * @file:    MPU6050_driver_demo.h
+ * @date:    28/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.2.0
  *
  * @brief:   This is a template for header files.
  */
 
-#ifndef INC_MPU_6050_DRIVER_UAI_H
-#define INC_MPU_6050_DRIVER_UAI_H
+#ifndef INC_MPU6050_DRIVER_DEMO_H
+#define INC_MPU6050_DRIVER_DEMO_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include "MPU-6050_driver_HWI.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -44,77 +43,16 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
-typedef struct gyroscopeValues {
-    int16_t gyroscopeX;
-    int16_t gyroscopeY;
-    int16_t gyroscopeZ;
-} gyroscopeValues_t;
-
-typedef struct accelerometerValues {
-    int16_t accelerometerX;
-    int16_t accelerometerY;
-    int16_t accelerometerZ;
-} accelerometerValues_t;
-
-typedef struct magnetometerValues {
-    int16_t magnetometerX;
-    int16_t magnetometerY;
-    int16_t magnetometerZ;
-} magnetometerValues_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
-/*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
- */
-MPU6050_HandleTypeDef_t * MPU6050_IMU_Init(I2C_HandleTypeDef * hi2c);
-
-/*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
- */
-void MPU6050_IMU_Reset(MPU6050_HandleTypeDef_t * hmpu6050);
-
-/*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
- */
-void MPU6050_IMU_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050,
-                               gyroscopeValues_t * gyroscopeValues);
-
-/*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
- */
-void MPU6050_IMU_ReadAccelerometer(MPU6050_HandleTypeDef_t * hmpu6050,
-                                   accelerometerValues_t * accelerometerValues);
-
-/*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
- */
-int16_t MPU6050_IMU_ReadTemperatureSensor(MPU6050_HandleTypeDef_t * hmpu6050);
-
-/*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
- */
-void MPU6050_IMU_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050,
-                                  magnetometerValues_t * magnetometerValues);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_MPU_6050_DRIVER_UAI_H */
+#endif /* INC_MPU6050_DRIVER_DEMO_H*/
 
 /* --- End of file ----------------------------------------------------------------------------- */
