@@ -75,16 +75,16 @@
 #define MPU_6050_REG_CONFIG       (0x1A) // REG ADDR: Configuration
 #define MPU_6050_REG_GYRO_CONFIG  (0x1B) // REG ADDR: Gyroscope Configuration
 #define MPU_6050_REG_ACCEL_CONFIG (0x1C) // REG ADDR: Accelerometer Configuration
-/* --- CONFIGURATION - REGISTERS VALUES -------------------------------------------------------- */
-#define MPU_6050_VAL_SMPLRT_DIV            ((MPU_6050_AUX_VAL_GYRO_SMPLRT - MPU_6050_AUX_VAL_SMPLRT) / MPU_6050_AUX_VAL_SMPLRT)
-#define MPU_6050_VAL_GYRO_CONFIG_FS_SEL_0  (0X00) // REG VAL: Set Full Range Scale = ± 0250 °/s
-#define MPU_6050_VAL_GYRO_CONFIG_FS_SEL_1  (0X08) // REG VAL: Set Full Range Scale = ± 0500 °/s
-#define MPU_6050_VAL_GYRO_CONFIG_FS_SEL_2  (0X10) // REG VAL: Set Full Range Scale = ± 1000 °/s
-#define MPU_6050_VAL_GYRO_CONFIG_FS_SEL_3  (0X18) // REG VAL: Set Full Range Scale = ± 2000 °/s
-#define MPU_6050_VAL_ACCEL_CONFIG_FS_SEL_0 (0X00) // REG VAL: Set Full Range Scale = ± 02 g
-#define MPU_6050_VAL_ACCEL_CONFIG_FS_SEL_1 (0X08) // REG VAL: Set Full Range Scale = ± 04 g
-#define MPU_6050_VAL_ACCEL_CONFIG_FS_SEL_2 (0X10) // REG VAL: Set Full Range Scale = ± 08 g
-#define MPU_6050_VAL_ACCEL_CONFIG_FS_SEL_3 (0X18) // REG VAL: Set Full Range Scale = ± 16 g
+/* --- CONFIGURATION - REGISTERS BITS ---------------------------------------------------------- */
+#define MPU_6050_BIT_SMPLRT_DIV            ((MPU_6050_AUX_VAL_GYRO_SMPLRT - MPU_6050_AUX_VAL_SMPLRT) / MPU_6050_AUX_VAL_SMPLRT)
+#define MPU_6050_BIT_GYRO_CONFIG_FS_SEL_0  (0X00) // REG BIT: Set Full Range Scale = ± 0250 °/s
+#define MPU_6050_BIT_GYRO_CONFIG_FS_SEL_1  (0X08) // REG BIT: Set Full Range Scale = ± 0500 °/s
+#define MPU_6050_BIT_GYRO_CONFIG_FS_SEL_2  (0X10) // REG BIT: Set Full Range Scale = ± 1000 °/s
+#define MPU_6050_BIT_GYRO_CONFIG_FS_SEL_3  (0X18) // REG BIT: Set Full Range Scale = ± 2000 °/s
+#define MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_0 (0X00) // REG VAL: Set Full Range Scale = ± 02 g
+#define MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_1 (0X08) // REG BIT: Set Full Range Scale = ± 04 g
+#define MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_2 (0X10) // REG BIT: Set Full Range Scale = ± 08 g
+#define MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_3 (0X18) // REG BIT: Set Full Range Scale = ± 16 g
 /* --- CONFIGURATION - AUXILIARY VALUES -------------------------------------------------------- */
 #define MPU_6050_AUX_VAL_GYRO_SMPLRT  (8000)                                  // AUX VAL: Gyroscope Sample Rate = 8 kHz
 #define MPU_6050_AUX_VAL_SMPLRT       (0500)                                  // AUX VAL: Desired Sample Rate = 5OO Hz
@@ -137,8 +137,8 @@
 #define MPU_6050_REG_I2C_SLV4_DO   (0x33) // I2C Slave 4 Control
 #define MPU_6050_REG_I2C_SLV4_CTRL (0x34) // I2C Slave 4 Control
 #define MPU_6050_REG_I2C_SLV4_DI   (0x35) // I2C Slave 4 Control
-/* --- AUXILIARY I2C BUS - REGISTERS VALUES ---------------------------------------------------- */
-#define MPU_6050_VAL_I2C_MST_CTRL_CLK_13 (0x0D) // REG VAL: Set I2C Master Clock to 400 kHz
+/* --- AUXILIARY I2C BUS - REGISTERS BITS ------------------------------------------------------ */
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_13 (0x0D) // REG BIT: Set I2C Master Clock to 400 kHz
 
 /* --- AUXILIARY I2C BUS - REGISTERS ADDRESSES - READ ONLY ------------------------------------- */
 #define MPU_6050_REG_I2C_MST_STATUS (0x36) // I2C Master Status
@@ -146,9 +146,9 @@
 /* --- INTERRUPTS - REGISTERS ADDRESSES - READ/WRITE ------------------------------------------- */
 #define MPU_6050_REG_INT_PIN_CFG (0x37) // REG ADDR: Interrupt Pin/Bypass Enable Configuration
 #define MPU_6050_REG_INT_ENABLE  (0x38) // REG ADDR: Interrupt Enable
-/* --- INTERRUPTS - REGISTERS VALUES ----------------------------------------------------------- */
-#define MPU_6050_REG_INT_PIN_CFG_I2C_BP_EN  (0x02) // REG VAL: Enable Bypass
-#define MPU_6050_REG_INT_PIN_CFG_I2C_BP_DIS (0x02) // REG VAL: Disable Bypass
+/* --- INTERRUPTS - REGISTERS BITS ------------------------------------------------------------- */
+#define MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN  (0x02) // REG BIT: Enable Bypass
+#define MPU_6050_BIT_INT_PIN_CFG_I2C_BP_DIS (0x02) // REG BIT: Disable Bypass
 
 /* --- INTERRUPTS - REGISTERS ADDRESSES - READ ONLY -------------------------------------------- */
 #define MPU_6050_REG_DMP_INT_STATUS (0x39) // DMP Interrupt Status
@@ -223,19 +223,17 @@
 
 /* --- USER CONTROL - REGISTERS ADDRESSES - READ/WRITE ----------------------------------------- */
 #define MPU_6050_REG_USER_CTRL (0x6A) // REG ADDR: User Control
-/* --- USER CONTROL - REGISTERS VALUES --------------------------------------------------------- */
-#define MPU_6050_VAL_USER_CTRL_MST_EN  (0X20) // REG VAL: Enable I2C Master Mode
-#define MPU_6050_VAL_USER_CTRL_MST_DIS (0X00) // REG VAL: Disable I2C Master Mode
+/* --- USER CONTROL - REGISTERS BITS ----------------------------------------------------------- */
+#define MPU_6050_BIT_USER_CTRL_MST_EN  (0X20) // REG BIT: Enable I2C Master Mode
+#define MPU_6050_BIT_USER_CTRL_MST_DIS (0X00) // REG BIT: Disable I2C Master Mode
 
 /* --- POWER MANAGEMENT - REGISTERS ADDRESSES - READ/WRITE ------------------------------------- */
 #define MPU_6050_REG_PWR_MGMT_1 (0x6B) // Power Management 1: Device defaults to the SLEEP mode
 #define MPU_6050_REG_PWR_MGMT_2 (0x6C) // Power Management 1
-/* --- POWER MANAGEMENT - REGISTERS VALUES ----------------------------------------------------- */
-#define MPU_6050_VAL_PWR_MGMT_1_DEVICE_RESET (0X80)
-#define MPU_6050_VAL_PWR_MGMT_1_SLEEP_MODE   (0x40) // Puts the MPU-6050 into sleep mode
-#define MPU_6050_VAL_PWR_MGMT_1_WAKEUP       (0x00) // Wake the MPU-6050 up
-#define MPU_6050_VAL_PWR_MGMT_1_CLKSEL_1     (0X01) // Clock Source = PLL with X axis gyroscope reference
-#define MPU_6050_VAL_PWR_MGMT_1_RESET        (0x80) // Reset device
+/* --- POWER MANAGEMENT - REGISTERS BITS ------------------------------------------------------- */
+#define MPU_6050_BIT_PWR_MGMT_1_DEVICE_RESET (0X80) // REG BIT: Reset Device
+#define MPU_6050_BIT_PWR_MGMT_1_SLEEP        (0x40) // REG BIT: Puts the MPU-6050 into sleep mode
+#define MPU_6050_BIT_PWR_MGMT_1_CLKSEL_1     (0X01) // REG BIT: Clock Source = PLL with X axis gyroscope reference
 
 /* --- DIGITAL MOTION PROCESSOR - REGISTERS ADDRESSES - READ/WRITE ----------------------------- */
 #define MPU_6050_REG_DMP_BANK_SEL (0x6D) // DMP Memory Bank Selection: activates a specific bank in the DMP
@@ -255,8 +253,8 @@
 
 /* --- MPU-6050 ID - REGISTERS ADDRESSES - READ ONLY ------------------------------------------- */
 #define MPU_6050_REG_WHO_AM_I (0x75) // Who Am I: Should return 0x68
-/* --- MPU-6050 ID - REGISTERS VALUES ---------------------------------------------------------- */
-#define MPU_6050_VAL_WHO_AM_I (0x68)
+/* --- MPU-6050 ID - REGISTERS BITS ------------------------------------------------------------ */
+#define MPU_6050_BIT_WHO_AM_I (0x68)
 /* --- MPU-6050 ID - AUXILIARY VALUES ---------------------------------------------------------- */
 #define MPU6050_AUX_VAL_I2C_ADDR1 (0xD0) // First address for first MPU-6050 device
 #define MPU6050_AUX_VAL_I2C_ADDR2 (0xD1) // Second address for second MPU-6050 device

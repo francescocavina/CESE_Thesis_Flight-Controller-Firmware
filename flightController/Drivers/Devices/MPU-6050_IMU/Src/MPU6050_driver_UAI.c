@@ -69,7 +69,7 @@ static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint
  * @param  TODO
  * @retval TODO
  */
-static void MPU6050_WriteRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize);
+static void MPU6050_WriteRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 
@@ -131,24 +131,24 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
     uint8_t regValue;
 
     /* Wake up device */
-    regValue = MPU_6050_VAL_PWR_MGMT_1_WAKEUP;
-    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regValue, sizeof(regValue));
+    regValue = 0;
+    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regValue);
 
     /* Set clock source */
-    regValue = MPU_6050_VAL_PWR_MGMT_1_CLKSEL_1;
-    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regValue, sizeof(regValue));
+    regValue = MPU_6050_BIT_PWR_MGMT_1_CLKSEL_1;
+    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regValue);
 
     /* Set sample rate divider */
-    regValue = MPU_6050_VAL_SMPLRT_DIV;
-    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_SMPLRT_DIV, &regValue, sizeof(regValue));
+    regValue = MPU_6050_BIT_SMPLRT_DIV;
+    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_SMPLRT_DIV, &regValue);
 
     /* Configure gyroscope full scale range */
-    regValue = MPU_6050_VAL_GYRO_CONFIG_FS_SEL_3;
-    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_GYRO_CONFIG, &regValue, sizeof(regValue));
+    regValue = MPU_6050_BIT_GYRO_CONFIG_FS_SEL_3;
+    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_GYRO_CONFIG, &regValue);
 
     /* Configure accelerometer full scale range */
-    regValue = MPU_6050_VAL_ACCEL_CONFIG_FS_SEL_3;
-    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_ACCEL_CONFIG, &regValue, sizeof(regValue));
+    regValue = MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_3;
+    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_ACCEL_CONFIG, &regValue);
 
     //    /* Disable I2C Master Mode */
     //    regValue = MPU_6050_VAL_USER_CTRL_MST_DIS;
@@ -203,9 +203,9 @@ static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint
     I2C_Read(hi2c, address, reg, data, dataSize);
 }
 
-static void MPU6050_WriteRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
+static void MPU6050_WriteRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data) {
 
-    I2C_Write(hi2c, address, reg, data, dataSize);
+    I2C_Write(hi2c, address, reg, data);
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
@@ -257,10 +257,10 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
 void MPU6050_Reset(MPU6050_HandleTypeDef_t * hmpu6050) {
 
     /* Reset device */
-    uint8_t regValue = MPU_6050_VAL_PWR_MGMT_1_RESET;
+    uint8_t regValue = MPU_6050_BIT_PWR_MGMT_1_DEVICE_RESET;
 
     /* Write '1' to PWR_MGMT_1 register to DEVICE_RESET bit (7) */
-    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regValue, sizeof(regValue));
+    MPU6050_WriteRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regValue);
 }
 
 void MPU6050_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050, gyroscopeValues_t * gyroscopeValues) {

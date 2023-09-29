@@ -68,7 +68,7 @@ bool_t I2C_Init(MPU6050_HandleTypeDef_t * hmpu6050) {
     /* Read IMU device ID */
     I2C_Read(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_WHO_AM_I, &who_am_I_value, 1);
     /* Check IMU device ID */
-    if (who_am_I_value == MPU_6050_VAL_WHO_AM_I) {
+    if (who_am_I_value == MPU_6050_BIT_WHO_AM_I) {
         /* Right IMU device ID */
         return true;
     } else {
@@ -108,7 +108,7 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
     }
 }
 
-bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
+bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data) {
 
     /* Check parameters */
     if (NULL == hi2c) {
@@ -123,12 +123,9 @@ bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t
     if (NULL == data) {
         return false;
     }
-    if (dataSize < MPU_6050_MIN_DATA_SIZE || dataSize > MPU_6050_MAX_DATA_SIZE) {
-        return false;
-    }
 
     /* Write to IMU */
-    if (HAL_OK != HAL_I2C_Mem_Write(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize, MPU_6050_I2C_WRITE_TIMEOUT)) {
+    if (HAL_OK != HAL_I2C_Mem_Write(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, sizeof(*data), MPU_6050_I2C_WRITE_TIMEOUT)) {
 
         /* Data couldn't be written */
         return false;

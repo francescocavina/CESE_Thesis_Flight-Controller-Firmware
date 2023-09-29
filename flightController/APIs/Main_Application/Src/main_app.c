@@ -31,10 +31,10 @@
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <MPU6050_driver_UAI.h>
 #include "main_app.h"
 #include "usbd_cdc_if.h"
-#include "../../../Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Inc/FSA8S_driver_UAI.h"
+#include "MPU6050_driver_UAI.h"
+#include "FSA8S_driver_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 
@@ -92,7 +92,7 @@ void flightController_App(void) {
         HAL_Delay(10);
         sprintf((char *)str1, (const char *)"Value Gyro Z: %d\r\n\n\n\n", gyroscopeValues->gyroscopeZ);
         CDC_Transmit_FS(str1, strlen((const char *)str1));
-        HAL_Delay(100);
+        HAL_Delay(1000);
 
         MPU6050_ReadAccelerometer(hmpu6050, accelerometerValues);
         sprintf((char *)str2, (const char *)"Value Accel X: %d\r\n", accelerometerValues->accelerometerX);
