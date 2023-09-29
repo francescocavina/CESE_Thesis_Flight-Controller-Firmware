@@ -239,7 +239,7 @@
 
 /* --- DIGITAL MOTION PROCESSOR - REGISTERS ADDRESSES - READ/WRITE ----------------------------- */
 #define MPU_6050_REG_DMP_BANK_SEL (0x6D) // DMP Memory Bank Selection: activates a specific bank in the DMP
-#define MPU_6050_REG_DMP_RW_PNT                                                                                                                      \
+#define MPU_6050_REG_DMP_RW_PNT                                                                                                                                                                        \
     (0x6E)                              // DMP Memory Start Address: set read/write pointer to a specific start address in
                                         // specified DMP bank
 #define MPU_6050_REG_DMP_REG     (0x6F) // DMP Memory Read/Write: register in DMP from which to read or to which to write
