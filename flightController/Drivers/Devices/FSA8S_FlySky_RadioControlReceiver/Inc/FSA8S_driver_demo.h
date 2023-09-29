@@ -22,29 +22,29 @@
  */
 
 /*
- * @file:    FS-A8S_driver_demo.h
- * @date:    23/09/2023
+ * @file:    FSA8S_driver_demo.h
+ * @date:    26/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.6.0
+ * @version: v1.6.1
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
- *           (FS-A8S_driver_UAI.c and FS-A8S_driver_UAI.h) for interface with the
+ *           (FSA8S_driver_UAI.c and FSA8S_driver_UAI.h) for interface with the
  *           user application and one low level abstraction layer
- *           (FS-A8S_driver_HWI.c and FS-A8S_driver_HWI.h) for interface with the
+ *           (FSA8S_driver_HWI.c and FSA8S_driver_HWI.h) for interface with the
  *           hardware (also known as port). In case of need to port this driver
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
  *
- * @details: On this file there is a demo to test the driver. In order to be able
+ * @details: In this file there is a demo to test the driver. In order to be able
  *           to use it, an UART peripheral must be initialized.
  */
 
-#ifndef INC_FS_A8S_DRIVER_DEMO_H
-#define INC_FS_A8S_DRIVER_DEMO_H
+#ifndef INC_FSA8S_DRIVER_DEMO_H
+#define INC_FSA8S_DRIVER_DEMO_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include "FS-A8S_driver_UAI.h"
+#include "FSA8S_driver_UAI.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -63,13 +63,13 @@ extern "C" {
  * @param  None
  * @retval None
  */
-void FSA8S_RC_Demo(void);
+void FSA8S_Demo(void);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* INC_FS_A8S_DRIVER_DEMO_H */
+#endif /* INC_FSA8S_DRIVER_DEMO_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

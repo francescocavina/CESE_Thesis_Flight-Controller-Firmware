@@ -22,39 +22,45 @@
  */
 
 /*
- * @file:    FS-A8S_driver_UAI.c
- * @date:    23/09/2023
+ * @file:    FSA8S_driver_UAI.c
+ * @date:    26/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.6.0
+ * @version: v1.6.1
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
- *           (FS-A8S_driver_UAI.c and FS-A8S_driver_UAI.h) for interface with the
+ *           (FSA8S_driver_UAI.c and FSA8S_driver_UAI.h) for interface with the
  *           user application and one low level abstraction layer
- *           (FS-A8S_driver_HWI.c and FS-A8S_driver_HWI.h) for interface with the
+ *           (FSA8S_driver_HWI.c and FSA8S_driver_HWI.h) for interface with the
  *           hardware (also known as port). In case of need to port this driver
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
+ *
+ * @details: In order to be able to use the radio control device, it must be
+ *           initialized first. Only one device can be initialized and therefore
+ *           used.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include "FS-A8S_driver_UAI.h"
-#include "FS-A8S_driver_calibration.h"
+#include "FSA8S_driver_calibration.h"
+#include "FSA8S_driver_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-// #define USE_FREERTOS
-#define IBUS_BUFFER_LENGTH         (0X20) // 32 BYTES
-#define IBUS_COMMAND               (0x40) // 40
-#define IBUS_CHANNELS              (0x0E) // 14
+// #define USE_FREERTOS                   // Remove comment when using FreeRTOS
+
+#define IBUS_BUFFER_LENGTH         (0X20) // 32 bytes of data for every transaction in iBus protocol
+#define IBUS_COMMAND               (0x40) // 40 is default value for second data byte
+#define IBUS_CHANNELS              (0x0E) // 14 channels allows iBus protocol
 #define IBUS_CHANNEL_MAX_VALUE     (1000) // This value MUST be between 100 and 65535
 #define IBUS_CHANNEL_MIN_RAW_VALUE (1000) // Minimum raw value received from receiver
 #define IBUS_CHANNEL_MAX_RAW_VALUE (2000) // Maximum raw value received from receiver
-#define IBUS_CHANNEL_NUM_OFFSET    (1)
-#define IBUS_CHANNEL_VALUE_NULL    (0) // Null channel value
+#define IBUS_CHANNEL_NUM_OFFSET    (1)    // Offset because Channel_1 has value 0 in enumeration
+#define IBUS_CHANNEL_VALUE_NULL    (0)    // Null channel value
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
+/* Define array with channels calibration values */
 static uint8_t calibrationValues[IBUS_CHANNELS] = {
     CHANNEL_01_CALIBRATION_VALUE, CHANNEL_02_CALIBRATION_VALUE, CHANNEL_03_CALIBRATION_VALUE,
     CHANNEL_04_CALIBRATION_VALUE, CHANNEL_05_CALIBRATION_VALUE, CHANNEL_06_CALIBRATION_VALUE,
@@ -69,7 +75,7 @@ static uint8_t calibrationValues[IBUS_CHANNELS] = {
  * @retval true:  If first two bytes are correct.
  *         false: If first two bytes are not correct.
  */
-static bool_t FSA8S_RC_CheckFirstBytes();
+static bool_t FSA8S_CheckFirstBytes();
 
 /**
  * @brief  Checks if data received is not corrupted calculating a checksum.
@@ -77,7 +83,7 @@ static bool_t FSA8S_RC_CheckFirstBytes();
  * @retval true:  If data is is correct.
  *         false: If data is corrupted.
  */
-static bool_t FSA8S_RC_Checksum();
+static bool_t FSA8S_Checksum();
 
 /**
  * @brief  Swaps bytes for each channel as the data is sent in big-endian system and stores it
@@ -85,14 +91,14 @@ static bool_t FSA8S_RC_Checksum();
  * @param  None
  * @retval None
  */
-static void FSA8S_RC_AmendData();
+static void FSA8S_AmendData();
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t FSA8S_RC_CheckFirstBytes(IBUS_HandleTypeDef_t * hibus) {
+static bool_t FSA8S_CheckFirstBytes(IBUS_HandleTypeDef_t * hibus) {
 
     /* Check parameter */
     if (NULL == hibus) {
@@ -109,9 +115,12 @@ static bool_t FSA8S_RC_CheckFirstBytes(IBUS_HandleTypeDef_t * hibus) {
     }
 }
 
-static bool_t FSA8S_RC_Checksum(IBUS_HandleTypeDef_t * hibus) {
+static bool_t FSA8S_Checksum(IBUS_HandleTypeDef_t * hibus) {
 
+    /* Declare variable for checksum value in data received */
     uint16_t sentChecksum;
+
+    /* Define variable for checksum to calculate using the data received */
     uint16_t receivedChecksum = 0xFFFF;
 
     /* Check parameter */
@@ -138,14 +147,15 @@ static bool_t FSA8S_RC_Checksum(IBUS_HandleTypeDef_t * hibus) {
     }
 }
 
-static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
+static void FSA8S_AmendData(IBUS_HandleTypeDef_t * hibus) {
 
+    /* Declare variable for channel value */
     uint16_t channelValue;
 
     /* Check parameter */
     if (NULL != hibus) {
 
-        /* Ammend data */
+        /* Amend data */
         for (uint8_t i = 2; i <= (hibus->bufferSize - 2); i += 2) {
 
             channelValue = IBUS_CHANNEL_VALUE_NULL;
@@ -162,6 +172,7 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
                 channelValue = IBUS_CHANNEL_VALUE_NULL;
             }
 
+            /* Map channel value between minimum and maximum values and store it */
             hibus->data[(i - 2) / 2] =
                 channelValue * ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] *
                                                                   ((float)IBUS_CHANNEL_MAX_VALUE /
@@ -172,8 +183,9 @@ static void FSA8S_RC_AmendData(IBUS_HandleTypeDef_t * hibus) {
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
-IBUS_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart) {
+IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
 
+    /* Define variable to track number of initializations */
     static uint8_t alreadyInitialized = false;
 
     /* Check parameter */
@@ -240,7 +252,7 @@ IBUS_HandleTypeDef_t * FSA8S_RC_Init(UART_HandleTypeDef * huart) {
     }
 }
 
-uint16_t FSA8S_RC_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t channel) {
+uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel) {
 
     /* Check parameter */
     if (NULL == hibus) {
@@ -253,23 +265,27 @@ uint16_t FSA8S_RC_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_RC_CHANNEL_t c
 
     /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */
     while (1) {
-        while (!FSA8S_RC_CheckFirstBytes(hibus)) {
+        while (!FSA8S_CheckFirstBytes(hibus)) {
             /* Wait until a data frame with the right format is received */
         }
 
         /* Perform a checksum */
-        if (!FSA8S_RC_Checksum(hibus)) {
+        if (!FSA8S_Checksum(hibus)) {
             /* Received data is corrupted */
+            /* Wait another transaction and check first to bytes */
             continue;
         } else {
             /* Received data is correct */
+            /* Quit outer while loop */
             break;
         }
     }
 
     /* Get channels data in little-endian */
-    FSA8S_RC_AmendData(hibus);
+    FSA8S_AmendData(hibus);
 
+    /* Return channel value */
     return hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
 }
+
 /* --- End of file ----------------------------------------------------------------------------- */

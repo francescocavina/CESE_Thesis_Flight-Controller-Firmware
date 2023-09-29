@@ -25,7 +25,7 @@ SUBDIRS := \
 APIs/Main_Application/Src \
 Core/Src \
 Core/Startup \
-Drivers/Devices/FS-A8S_FlySky_RadioControlReceiver/Src \
+Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Src \
 Drivers/Devices/MPU-6050_IMU/Src \
 Drivers/STM32F4xx_HAL_Driver/Src \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src \

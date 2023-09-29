@@ -22,29 +22,29 @@
  */
 
 /*
- * @file:    FS-A8S_driver_calibration.h
- * @date:    23/09/2023
+ * @file:    FSA8S_driver_calibration.h
+ * @date:    26/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.6.0
+ * @version: v1.6.1
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
- *           (FS-A8S_driver_UAI.c and FS-A8S_driver_UAI.h) for interface with the
+ *           (FSA8S_driver_UAI.c and FSA8S_driver_UAI.h) for interface with the
  *           user application and one low level abstraction layer
- *           (FS-A8S_driver_HWI.c and FS-A8S_driver_HWI.h) for interface with the
+ *           (FSA8S_driver_HWI.c and FSA8S_driver_HWI.h) for interface with the
  *           hardware (also known as port). In case of need to port this driver
  *           to another platform, please only modify the low layer abstraction
  *           layer files where the labels indicate it.
  *
  * @details: The radio control device must be calibrated in order to have the right
- *           minimum and maximum values. As the left with horizontal movement
+ *           minimum and maximum values. As the left horizontal movement
  *           joystick is the one that can permanently stay in a position without
  *           returning to the center, it might have some deviation. Therefore, it
  *           might be necessary to calibrate it.
  */
 
-#ifndef INC_FS_A8S_DRIVER_CALIBRATION_H_
-#define INC_FS_A8S_DRIVER_CALIBRATION_H_
+#ifndef INC_FSA8S_DRIVER_CALIBRATION_H_
+#define INC_FSA8S_DRIVER_CALIBRATION_H_
 
 /* --- Public macros definitions --------------------------------------------------------------- */
 #define CHANNEL_01_CALIBRATION_VALUE (0) // Calibrated with IBUS_CHANNEL_MAX_VALUE = 1000
@@ -66,6 +66,6 @@
 #define CHANNEL_14_CALIBRATION_VALUE                                                               \
     (0) // FlySkyfly FS-i6X model only supports 10 channel using iBus
 
-#endif /* INC_FS_A8S_DRIVER_CALIBRATION_H_ */
+#endif /* INC_FSA8S_DRIVER_CALIBRATION_H_ */
 
 /* --- End of file ----------------------------------------------------------------------------- */
