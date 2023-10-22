@@ -26,7 +26,8 @@ APIs/Main_Application/Src \
 Core/Src \
 Core/Startup \
 Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Src \
-Drivers/Devices/MPU-6050_IMU/Src \
+Drivers/Devices/GY87_IMU/Src \
+Drivers/Devices/LoggingSystem/Src \
 Drivers/STM32F4xx_HAL_Driver/Src \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src \

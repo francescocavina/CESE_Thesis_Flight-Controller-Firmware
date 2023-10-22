@@ -71,57 +71,45 @@ typedef struct {
     uint32_t PeripheralMode; /*!< Specifies the peripheral mode.
                                   This parameter can be a value of @ref I2C_LL_EC_PERIPHERAL_MODE
 
-                                  This feature can be modified afterwards using unitary function
-                                @ref LL_I2C_SetMode(). */
+                                  This feature can be modified afterwards using unitary function @ref LL_I2C_SetMode(). */
 
     uint32_t ClockSpeed; /*!< Specifies the clock frequency.
                               This parameter must be set to a value lower than 400kHz (in Hz)
 
-                              This feature can be modified afterwards using unitary function @ref
-                            LL_I2C_SetClockPeriod() or @ref LL_I2C_SetDutyCycle() or @ref
-                            LL_I2C_SetClockSpeedMode() or @ref LL_I2C_ConfigSpeed(). */
+                              This feature can be modified afterwards using unitary function @ref LL_I2C_SetClockPeriod()
+                              or @ref LL_I2C_SetDutyCycle() or @ref LL_I2C_SetClockSpeedMode() or @ref LL_I2C_ConfigSpeed(). */
 
     uint32_t DutyCycle; /*!< Specifies the I2C fast mode duty cycle.
                              This parameter can be a value of @ref I2C_LL_EC_DUTYCYCLE
 
-                             This feature can be modified afterwards using unitary function @ref
-                           LL_I2C_SetDutyCycle(). */
+                             This feature can be modified afterwards using unitary function @ref LL_I2C_SetDutyCycle(). */
 
 #if defined(I2C_FLTR_ANOFF) && defined(I2C_FLTR_DNF)
-    uint32_t
-        AnalogFilter; /*!< Enables or disables analog noise filter.
-                           This parameter can be a value of @ref I2C_LL_EC_ANALOGFILTER_SELECTION
+    uint32_t AnalogFilter; /*!< Enables or disables analog noise filter.
+                                This parameter can be a value of @ref I2C_LL_EC_ANALOGFILTER_SELECTION
 
-                           This feature can be modified afterwards using unitary functions @ref
-                         LL_I2C_EnableAnalogFilter() or LL_I2C_DisableAnalogFilter(). */
+                                This feature can be modified afterwards using unitary functions @ref LL_I2C_EnableAnalogFilter() or LL_I2C_DisableAnalogFilter(). */
 
     uint32_t DigitalFilter; /*!< Configures the digital noise filter.
-                                 This parameter can be a number between Min_Data = 0x00 and Max_Data
-                               = 0x0F
+                                 This parameter can be a number between Min_Data = 0x00 and Max_Data = 0x0F
 
-                                 This feature can be modified afterwards using unitary function @ref
-                               LL_I2C_SetDigitalFilter(). */
+                                 This feature can be modified afterwards using unitary function @ref LL_I2C_SetDigitalFilter(). */
 
 #endif
     uint32_t OwnAddress1; /*!< Specifies the device own address 1.
-                               This parameter must be a value between Min_Data = 0x00 and Max_Data =
-                             0x3FF
+                               This parameter must be a value between Min_Data = 0x00 and Max_Data = 0x3FF
 
-                               This feature can be modified afterwards using unitary function @ref
-                             LL_I2C_SetOwnAddress1(). */
+                               This feature can be modified afterwards using unitary function @ref LL_I2C_SetOwnAddress1(). */
 
-    uint32_t TypeAcknowledge; /*!< Specifies the ACKnowledge or Non ACKnowledge condition after the
-                                 address receive match code or next received byte. This parameter
-                                 can be a value of @ref I2C_LL_EC_I2C_ACKNOWLEDGE
+    uint32_t TypeAcknowledge; /*!< Specifies the ACKnowledge or Non ACKnowledge condition after the address receive match code or next received byte.
+                                   This parameter can be a value of @ref I2C_LL_EC_I2C_ACKNOWLEDGE
 
-                                   This feature can be modified afterwards using unitary function
-                                 @ref LL_I2C_AcknowledgeNextData(). */
+                                   This feature can be modified afterwards using unitary function @ref LL_I2C_AcknowledgeNextData(). */
 
     uint32_t OwnAddrSize; /*!< Specifies the device own address 1 size (7-bit or 10-bit).
                                This parameter can be a value of @ref I2C_LL_EC_OWNADDRESS1
 
-                               This feature can be modified afterwards using unitary function @ref
-                             LL_I2C_SetOwnAddress1(). */
+                               This feature can be modified afterwards using unitary function @ref LL_I2C_SetOwnAddress1(). */
 } LL_I2C_InitTypeDef;
 /**
  * @}
@@ -138,8 +126,8 @@ typedef struct {
  * @{
  */
 #define LL_I2C_SR1_SB I2C_SR1_SB /*!< Start Bit (master mode)                   */
-#define LL_I2C_SR1_ADDR                                                                            \
-    I2C_SR1_ADDR                                 /*!< Address sent (master mode) or                \
+#define LL_I2C_SR1_ADDR                                                                                                                                                                                                                                  \
+    I2C_SR1_ADDR                                 /*!< Address sent (master mode) or                                                                                                                                                                      \
                                                       Address matched flag (slave mode)         */
 #define LL_I2C_SR1_BTF        I2C_SR1_BTF        /*!< Byte Transfer Finished flag               */
 #define LL_I2C_SR1_ADD10      I2C_SR1_ADD10      /*!< 10-bit header sent (master mode)          */
@@ -189,9 +177,8 @@ typedef struct {
 /** @defgroup I2C_LL_EC_OWNADDRESS1 Own Address 1 Length
  * @{
  */
-#define LL_I2C_OWNADDRESS1_7BIT 0x00004000U /*!< Own address 1 is a 7-bit address.   */
-#define LL_I2C_OWNADDRESS1_10BIT                                                                   \
-    (uint32_t)(I2C_OAR1_ADDMODE | 0x00004000U) /*!< Own address 1 is a 10-bit address.  */
+#define LL_I2C_OWNADDRESS1_7BIT  0x00004000U                                /*!< Own address 1 is a 7-bit address.   */
+#define LL_I2C_OWNADDRESS1_10BIT (uint32_t)(I2C_OAR1_ADDMODE | 0x00004000U) /*!< Own address 1 is a 10-bit address.  */
 /**
  * @}
  */
@@ -208,9 +195,8 @@ typedef struct {
 /** @defgroup I2C_LL_EC_CLOCK_SPEED_MODE Master Clock Speed Mode
  * @{
  */
-#define LL_I2C_CLOCK_SPEED_STANDARD_MODE                                                           \
-    0x00000000U                                 /*!< Master clock speed range is standard mode */
-#define LL_I2C_CLOCK_SPEED_FAST_MODE I2C_CCR_FS /*!< Master clock speed range is fast mode     */
+#define LL_I2C_CLOCK_SPEED_STANDARD_MODE 0x00000000U /*!< Master clock speed range is standard mode */
+#define LL_I2C_CLOCK_SPEED_FAST_MODE     I2C_CCR_FS  /*!< Master clock speed range is fast mode     */
 /**
  * @}
  */
@@ -218,15 +204,10 @@ typedef struct {
 /** @defgroup I2C_LL_EC_PERIPHERAL_MODE Peripheral Mode
  * @{
  */
-#define LL_I2C_MODE_I2C                                                                            \
-    0x00000000U /*!< I2C Master or Slave mode                                    */
-#define LL_I2C_MODE_SMBUS_HOST                                                                     \
-    (uint32_t)(I2C_CR1_SMBUS | I2C_CR1_SMBTYPE |                                                   \
-               I2C_CR1_ENARP) /*!< SMBus Host address acknowledge                              */
-#define LL_I2C_MODE_SMBUS_DEVICE                                                                   \
-    I2C_CR1_SMBUS /*!< SMBus Device default mode (Default address not acknowledge) */
-#define LL_I2C_MODE_SMBUS_DEVICE_ARP                                                               \
-    (uint32_t)(I2C_CR1_SMBUS | I2C_CR1_ENARP) /*!< SMBus Device Default address acknowledge */
+#define LL_I2C_MODE_I2C              0x00000000U                                                 /*!< I2C Master or Slave mode                                    */
+#define LL_I2C_MODE_SMBUS_HOST       (uint32_t)(I2C_CR1_SMBUS | I2C_CR1_SMBTYPE | I2C_CR1_ENARP) /*!< SMBus Host address acknowledge                              */
+#define LL_I2C_MODE_SMBUS_DEVICE     I2C_CR1_SMBUS                                               /*!< SMBus Device default mode (Default address not acknowledge) */
+#define LL_I2C_MODE_SMBUS_DEVICE_ARP (uint32_t)(I2C_CR1_SMBUS | I2C_CR1_ENARP)                   /*!< SMBus Device Default address acknowledge                    */
 /**
  * @}
  */
@@ -269,8 +250,7 @@ typedef struct {
  * @param  __VALUE__ Value to be written in the register
  * @retval None
  */
-#define LL_I2C_WriteReg(__INSTANCE__, __REG__, __VALUE__)                                          \
-    WRITE_REG(__INSTANCE__->__REG__, (__VALUE__))
+#define LL_I2C_WriteReg(__INSTANCE__, __REG__, __VALUE__) WRITE_REG(__INSTANCE__->__REG__, (__VALUE__))
 
 /**
  * @brief  Read a value in I2C register
@@ -307,10 +287,7 @@ typedef struct {
  * @param  __SPEED__ This parameter must be a value lower than 400kHz (in Hz).
  * @retval Value between Min_Data=0x02 and Max_Data=0x3F
  */
-#define __LL_I2C_RISE_TIME(__FREQRANGE__, __SPEED__)                                               \
-    (uint32_t)(((__SPEED__) <= LL_I2C_MAX_SPEED_STANDARD)                                          \
-                   ? ((__FREQRANGE__) + 1U)                                                        \
-                   : ((((__FREQRANGE__)*300U) / 1000U) + 1U))
+#define __LL_I2C_RISE_TIME(__FREQRANGE__, __SPEED__) (uint32_t)(((__SPEED__) <= LL_I2C_MAX_SPEED_STANDARD) ? ((__FREQRANGE__) + 1U) : ((((__FREQRANGE__)*300U) / 1000U) + 1U))
 
 /**
  * @brief  Compute Speed clock range to a Clock Control Register (I2C_CCR_CCR) value.
@@ -319,13 +296,10 @@ typedef struct {
  * @param  __DUTYCYCLE__ This parameter can be one of the following values:
  *         @arg @ref LL_I2C_DUTYCYCLE_2
  *         @arg @ref LL_I2C_DUTYCYCLE_16_9
- * @retval Value between Min_Data=0x004 and Max_Data=0xFFF, except in FAST DUTY mode where
- * Min_Data=0x001.
+ * @retval Value between Min_Data=0x004 and Max_Data=0xFFF, except in FAST DUTY mode where Min_Data=0x001.
  */
-#define __LL_I2C_SPEED_TO_CCR(__PCLK__, __SPEED__, __DUTYCYCLE__)                                  \
-    (uint32_t)(((__SPEED__) <= LL_I2C_MAX_SPEED_STANDARD)                                          \
-                   ? (__LL_I2C_SPEED_STANDARD_TO_CCR((__PCLK__), (__SPEED__)))                     \
-                   : (__LL_I2C_SPEED_FAST_TO_CCR((__PCLK__), (__SPEED__), (__DUTYCYCLE__))))
+#define __LL_I2C_SPEED_TO_CCR(__PCLK__, __SPEED__, __DUTYCYCLE__)                                                                                                                                                                                        \
+    (uint32_t)(((__SPEED__) <= LL_I2C_MAX_SPEED_STANDARD) ? (__LL_I2C_SPEED_STANDARD_TO_CCR((__PCLK__), (__SPEED__))) : (__LL_I2C_SPEED_FAST_TO_CCR((__PCLK__), (__SPEED__), (__DUTYCYCLE__))))
 
 /**
  * @brief  Compute Speed Standard clock range to a Clock Control Register (I2C_CCR_CCR) value.
@@ -333,55 +307,41 @@ typedef struct {
  * @param  __SPEED__ This parameter must be a value lower than 100kHz (in Hz).
  * @retval Value between Min_Data=0x004 and Max_Data=0xFFF.
  */
-#define __LL_I2C_SPEED_STANDARD_TO_CCR(__PCLK__, __SPEED__)                                        \
-    (uint32_t)(((((__PCLK__) / ((__SPEED__) << 1U)) & I2C_CCR_CCR) < 4U)                           \
-                   ? 4U                                                                            \
-                   : ((__PCLK__) / ((__SPEED__) << 1U)))
+#define __LL_I2C_SPEED_STANDARD_TO_CCR(__PCLK__, __SPEED__) (uint32_t)(((((__PCLK__) / ((__SPEED__) << 1U)) & I2C_CCR_CCR) < 4U) ? 4U : ((__PCLK__) / ((__SPEED__) << 1U)))
 
 /**
  * @brief  Compute Speed Fast clock range to a Clock Control Register (I2C_CCR_CCR) value.
  * @param  __PCLK__ This parameter must be a value of peripheral clock (in Hz).
- * @param  __SPEED__ This parameter must be a value between Min_Data=100Khz and Max_Data=400Khz (in
- * Hz).
+ * @param  __SPEED__ This parameter must be a value between Min_Data=100Khz and Max_Data=400Khz (in Hz).
  * @param  __DUTYCYCLE__ This parameter can be one of the following values:
  *         @arg @ref LL_I2C_DUTYCYCLE_2
  *         @arg @ref LL_I2C_DUTYCYCLE_16_9
  * @retval Value between Min_Data=0x001 and Max_Data=0xFFF
  */
-#define __LL_I2C_SPEED_FAST_TO_CCR(__PCLK__, __SPEED__, __DUTYCYCLE__)                             \
-    (uint32_t)(((__DUTYCYCLE__) == LL_I2C_DUTYCYCLE_2)                                             \
-                   ? (((((__PCLK__) / ((__SPEED__)*3U)) & I2C_CCR_CCR) == 0U)                      \
-                          ? 1U                                                                     \
-                          : ((__PCLK__) / ((__SPEED__)*3U)))                                       \
-                   : (((((__PCLK__) / ((__SPEED__)*25U)) & I2C_CCR_CCR) == 0U)                     \
-                          ? 1U                                                                     \
-                          : ((__PCLK__) / ((__SPEED__)*25U))))
+#define __LL_I2C_SPEED_FAST_TO_CCR(__PCLK__, __SPEED__, __DUTYCYCLE__)                                                                                                                                                                                   \
+    (uint32_t)(((__DUTYCYCLE__) == LL_I2C_DUTYCYCLE_2) ? (((((__PCLK__) / ((__SPEED__)*3U)) & I2C_CCR_CCR) == 0U) ? 1U : ((__PCLK__) / ((__SPEED__)*3U)))                                                                                                \
+                                                       : (((((__PCLK__) / ((__SPEED__)*25U)) & I2C_CCR_CCR) == 0U) ? 1U : ((__PCLK__) / ((__SPEED__)*25U))))
 
 /**
  * @brief  Get the Least significant bits of a 10-Bits address.
  * @param  __ADDRESS__ This parameter must be a value of a 10-Bits slave address.
  * @retval Value between Min_Data=0x00 and Max_Data=0xFF
  */
-#define __LL_I2C_10BIT_ADDRESS(__ADDRESS__)                                                        \
-    ((uint8_t)((uint16_t)((__ADDRESS__) & (uint16_t)(0x00FF))))
+#define __LL_I2C_10BIT_ADDRESS(__ADDRESS__) ((uint8_t)((uint16_t)((__ADDRESS__) & (uint16_t)(0x00FF))))
 
 /**
  * @brief  Convert a 10-Bits address to a 10-Bits header with Write direction.
  * @param  __ADDRESS__ This parameter must be a value of a 10-Bits slave address.
  * @retval Value between Min_Data=0xF0 and Max_Data=0xF6
  */
-#define __LL_I2C_10BIT_HEADER_WRITE(__ADDRESS__)                                                   \
-    ((uint8_t)((uint16_t)((uint16_t)(((uint16_t)((__ADDRESS__) & (uint16_t)(0x0300))) >> 7) |      \
-                          (uint16_t)(0xF0))))
+#define __LL_I2C_10BIT_HEADER_WRITE(__ADDRESS__) ((uint8_t)((uint16_t)((uint16_t)(((uint16_t)((__ADDRESS__) & (uint16_t)(0x0300))) >> 7) | (uint16_t)(0xF0))))
 
 /**
  * @brief  Convert a 10-Bits address to a 10-Bits header with Read direction.
  * @param  __ADDRESS__ This parameter must be a value of a 10-Bits slave address.
  * @retval Value between Min_Data=0xF1 and Max_Data=0xF7
  */
-#define __LL_I2C_10BIT_HEADER_READ(__ADDRESS__)                                                    \
-    ((uint8_t)((uint16_t)((uint16_t)(((uint16_t)((__ADDRESS__) & (uint16_t)(0x0300))) >> 7) |      \
-                          (uint16_t)(0xF1))))
+#define __LL_I2C_10BIT_HEADER_READ(__ADDRESS__) ((uint8_t)((uint16_t)((uint16_t)(((uint16_t)((__ADDRESS__) & (uint16_t)(0x0300))) >> 7) | (uint16_t)(0xF1))))
 
 /**
  * @}
@@ -442,14 +402,11 @@ __STATIC_INLINE uint32_t LL_I2C_IsEnabled(I2C_TypeDef * I2Cx) {
  * @param  AnalogFilter This parameter can be one of the following values:
  *         @arg @ref LL_I2C_ANALOGFILTER_ENABLE
  *         @arg @ref LL_I2C_ANALOGFILTER_DISABLE
- * @param  DigitalFilter This parameter must be a value between Min_Data=0x00 (Digital filter
- * disabled) and Max_Data=0x0F (Digital filter enabled and filtering capability up to 15*TPCLK1)
- *               This parameter is used to configure the digital noise filter on SDA and SCL input.
- * The digital filter will suppress the spikes with a length of up to DNF[3:0]*TPCLK1.
+ * @param  DigitalFilter This parameter must be a value between Min_Data=0x00 (Digital filter disabled) and Max_Data=0x0F (Digital filter enabled and filtering capability up to 15*TPCLK1)
+ *               This parameter is used to configure the digital noise filter on SDA and SCL input. The digital filter will suppress the spikes with a length of up to DNF[3:0]*TPCLK1.
  * @retval None
  */
-__STATIC_INLINE void LL_I2C_ConfigFilters(I2C_TypeDef * I2Cx, uint32_t AnalogFilter,
-                                          uint32_t DigitalFilter) {
+__STATIC_INLINE void LL_I2C_ConfigFilters(I2C_TypeDef * I2Cx, uint32_t AnalogFilter, uint32_t DigitalFilter) {
     MODIFY_REG(I2Cx->FLTR, I2C_FLTR_ANOFF | I2C_FLTR_DNF, AnalogFilter | DigitalFilter);
 }
 #endif
@@ -461,10 +418,8 @@ __STATIC_INLINE void LL_I2C_ConfigFilters(I2C_TypeDef * I2Cx, uint32_t AnalogFil
  *         This filter can only be programmed when the I2C is disabled (PE = 0).
  * @rmtoll FLTR         DNF           LL_I2C_SetDigitalFilter
  * @param  I2Cx I2C Instance.
- * @param  DigitalFilter This parameter must be a value between Min_Data=0x00 (Digital filter
- * disabled) and Max_Data=0x0F (Digital filter enabled and filtering capability up to 15*TPCLK1)
- *               This parameter is used to configure the digital noise filter on SDA and SCL input.
- * The digital filter will suppress the spikes with a length of up to DNF[3:0]*TPCLK1.
+ * @param  DigitalFilter This parameter must be a value between Min_Data=0x00 (Digital filter disabled) and Max_Data=0x0F (Digital filter enabled and filtering capability up to 15*TPCLK1)
+ *               This parameter is used to configure the digital noise filter on SDA and SCL input. The digital filter will suppress the spikes with a length of up to DNF[3:0]*TPCLK1.
  * @retval None
  */
 __STATIC_INLINE void LL_I2C_SetDigitalFilter(I2C_TypeDef * I2Cx, uint32_t DigitalFilter) {
@@ -663,10 +618,8 @@ __STATIC_INLINE uint32_t LL_I2C_IsEnabledGeneralCall(I2C_TypeDef * I2Cx) {
  *         @arg @ref LL_I2C_OWNADDRESS1_10BIT
  * @retval None
  */
-__STATIC_INLINE void LL_I2C_SetOwnAddress1(I2C_TypeDef * I2Cx, uint32_t OwnAddress1,
-                                           uint32_t OwnAddrSize) {
-    MODIFY_REG(I2Cx->OAR1, I2C_OAR1_ADD0 | I2C_OAR1_ADD1_7 | I2C_OAR1_ADD8_9 | I2C_OAR1_ADDMODE,
-               OwnAddress1 | OwnAddrSize);
+__STATIC_INLINE void LL_I2C_SetOwnAddress1(I2C_TypeDef * I2Cx, uint32_t OwnAddress1, uint32_t OwnAddrSize) {
+    MODIFY_REG(I2Cx->OAR1, I2C_OAR1_ADD0 | I2C_OAR1_ADD1_7 | I2C_OAR1_ADD8_9 | I2C_OAR1_ADDMODE, OwnAddress1 | OwnAddrSize);
 }
 
 /**
@@ -809,8 +762,7 @@ __STATIC_INLINE uint32_t LL_I2C_GetRiseTime(I2C_TypeDef * I2Cx) {
  * @note   This bit can only be programmed when the I2C is disabled (PE = 0).
  * @rmtoll CCR          CCR           LL_I2C_SetClockPeriod
  * @param  I2Cx I2C Instance.
- * @param  ClockPeriod This parameter must be a value between Min_Data=0x004 and Max_Data=0xFFF,
- * except in FAST DUTY mode where Min_Data=0x001.
+ * @param  ClockPeriod This parameter must be a value between Min_Data=0x004 and Max_Data=0xFFF, except in FAST DUTY mode where Min_Data=0x001.
  * @retval None
  */
 __STATIC_INLINE void LL_I2C_SetClockPeriod(I2C_TypeDef * I2Cx, uint32_t ClockPeriod) {
@@ -821,8 +773,7 @@ __STATIC_INLINE void LL_I2C_SetClockPeriod(I2C_TypeDef * I2Cx, uint32_t ClockPer
  * @brief  Get the SCL high and low period.
  * @rmtoll CCR          CCR           LL_I2C_GetClockPeriod
  * @param  I2Cx I2C Instance.
- * @retval Value between Min_Data=0x004 and Max_Data=0xFFF, except in FAST DUTY mode where
- * Min_Data=0x001.
+ * @retval Value between Min_Data=0x004 and Max_Data=0xFFF, except in FAST DUTY mode where Min_Data=0x001.
  */
 __STATIC_INLINE uint32_t LL_I2C_GetClockPeriod(I2C_TypeDef * I2Cx) {
     return (uint32_t)(READ_BIT(I2Cx->CCR, I2C_CCR_CCR));
@@ -844,8 +795,7 @@ __STATIC_INLINE uint32_t LL_I2C_GetClockPeriod(I2C_TypeDef * I2Cx) {
  *         @arg @ref LL_I2C_DUTYCYCLE_16_9
  * @retval None
  */
-__STATIC_INLINE void LL_I2C_ConfigSpeed(I2C_TypeDef * I2Cx, uint32_t PeriphClock,
-                                        uint32_t ClockSpeed, uint32_t DutyCycle) {
+__STATIC_INLINE void LL_I2C_ConfigSpeed(I2C_TypeDef * I2Cx, uint32_t PeriphClock, uint32_t ClockSpeed, uint32_t DutyCycle) {
     uint32_t freqrange = 0x0U;
     uint32_t clockconfig = 0x0U;
 
@@ -861,12 +811,10 @@ __STATIC_INLINE void LL_I2C_ConfigSpeed(I2C_TypeDef * I2Cx, uint32_t PeriphClock
     /* Configure Speed mode, Duty Cycle and Clock control register value */
     if (ClockSpeed > LL_I2C_MAX_SPEED_STANDARD) {
         /* Set Speed mode at fast and duty cycle for Clock Speed request in fast clock range */
-        clockconfig = LL_I2C_CLOCK_SPEED_FAST_MODE |
-                      __LL_I2C_SPEED_FAST_TO_CCR(PeriphClock, ClockSpeed, DutyCycle) | DutyCycle;
+        clockconfig = LL_I2C_CLOCK_SPEED_FAST_MODE | __LL_I2C_SPEED_FAST_TO_CCR(PeriphClock, ClockSpeed, DutyCycle) | DutyCycle;
     } else {
         /* Set Speed mode at standard for Clock Speed request in standard clock range */
-        clockconfig = LL_I2C_CLOCK_SPEED_STANDARD_MODE |
-                      __LL_I2C_SPEED_STANDARD_TO_CCR(PeriphClock, ClockSpeed);
+        clockconfig = LL_I2C_CLOCK_SPEED_STANDARD_MODE | __LL_I2C_SPEED_STANDARD_TO_CCR(PeriphClock, ClockSpeed);
     }
 
     /* Configure I2Cx: Clock control register */
@@ -1030,8 +978,7 @@ __STATIC_INLINE void LL_I2C_DisableIT_TX(I2C_TypeDef * I2Cx) {
  * @retval State of bit (1 or 0).
  */
 __STATIC_INLINE uint32_t LL_I2C_IsEnabledIT_TX(I2C_TypeDef * I2Cx) {
-    return (READ_BIT(I2Cx->CR2, I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN) ==
-            (I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN));
+    return (READ_BIT(I2Cx->CR2, I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN) == (I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN));
 }
 
 /**
@@ -1064,8 +1011,7 @@ __STATIC_INLINE void LL_I2C_DisableIT_RX(I2C_TypeDef * I2Cx) {
  * @retval State of bit (1 or 0).
  */
 __STATIC_INLINE uint32_t LL_I2C_IsEnabledIT_RX(I2C_TypeDef * I2Cx) {
-    return (READ_BIT(I2Cx->CR2, I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN) ==
-            (I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN));
+    return (READ_BIT(I2Cx->CR2, I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN) == (I2C_CR2_ITEVTEN | I2C_CR2_ITBUFEN));
 }
 
 /**
@@ -1077,9 +1023,9 @@ __STATIC_INLINE uint32_t LL_I2C_IsEnabledIT_RX(I2C_TypeDef * I2Cx) {
  *         Stop detection  (STOPF)
  *         Byte transfer finished (BTF)
  *
- * @note   Any of these events will generate interrupt if Buffer interrupts are enabled too(using
- * unitary function @ref LL_I2C_EnableIT_BUF()) : Receive buffer not empty (RXNE) Transmit buffer
- * empty (TXE)
+ * @note   Any of these events will generate interrupt if Buffer interrupts are enabled too(using unitary function @ref LL_I2C_EnableIT_BUF()) :
+ *         Receive buffer not empty (RXNE)
+ *         Transmit buffer empty (TXE)
  * @rmtoll CR2          ITEVTEN       LL_I2C_EnableIT_EVT
  * @param  I2Cx I2C Instance.
  * @retval None
@@ -1118,9 +1064,9 @@ __STATIC_INLINE uint32_t LL_I2C_IsEnabledIT_EVT(I2C_TypeDef * I2Cx) {
 
 /**
  * @brief  Enable Buffer interrupts.
- * @note   Any of these Buffer events will generate interrupt if Events interrupts are enabled
- * too(using unitary function @ref LL_I2C_EnableIT_EVT()) : Receive buffer not empty (RXNE) Transmit
- * buffer empty (TXE)
+ * @note   Any of these Buffer events will generate interrupt if Events interrupts are enabled too(using unitary function @ref LL_I2C_EnableIT_EVT()) :
+ *         Receive buffer not empty (RXNE)
+ *         Transmit buffer empty (TXE)
  * @rmtoll CR2          ITBUFEN       LL_I2C_EnableIT_BUF
  * @param  I2Cx I2C Instance.
  * @retval None
@@ -1261,8 +1207,7 @@ __STATIC_INLINE uint32_t LL_I2C_IsActiveFlag_SB(I2C_TypeDef * I2Cx) {
 /**
  * @brief  Indicate the status of Address sent (master mode) or Address matched flag (slave mode).
  * @note   RESET: Clear default value.
- *         SET: When the address is fully sent (master mode) or when the received slave address
- * matched with one of the enabled slave address (slave mode).
+ *         SET: When the address is fully sent (master mode) or when the received slave address matched with one of the enabled slave address (slave mode).
  * @rmtoll SR1          ADDR          LL_I2C_IsActiveFlag_ADDR
  * @param  I2Cx I2C Instance.
  * @retval State of bit (1 or 0).
@@ -1603,8 +1548,7 @@ __STATIC_INLINE uint32_t LL_I2C_IsResetEnabled(I2C_TypeDef * I2Cx) {
 }
 
 /**
- * @brief  Prepare the generation of a ACKnowledge or Non ACKnowledge condition after the address
- * receive match code or next received byte.
+ * @brief  Prepare the generation of a ACKnowledge or Non ACKnowledge condition after the address receive match code or next received byte.
  * @note   Usage in Slave or Master mode.
  * @rmtoll CR1          ACK           LL_I2C_AcknowledgeNextData
  * @param  I2Cx I2C Instance.
@@ -1641,8 +1585,7 @@ __STATIC_INLINE void LL_I2C_GenerateStopCondition(I2C_TypeDef * I2Cx) {
 
 /**
  * @brief  Enable bit POS (master/host mode).
- * @note   In that case, the ACK bit controls the (N)ACK of the next byte received or the PEC bit
- * indicates that the next byte in shift register is a PEC.
+ * @note   In that case, the ACK bit controls the (N)ACK of the next byte received or the PEC bit indicates that the next byte in shift register is a PEC.
  * @rmtoll CR1          POS           LL_I2C_EnableBitPOS
  * @param  I2Cx I2C Instance.
  * @retval None
@@ -1653,8 +1596,7 @@ __STATIC_INLINE void LL_I2C_EnableBitPOS(I2C_TypeDef * I2Cx) {
 
 /**
  * @brief  Disable bit POS (master/host mode).
- * @note   In that case, the ACK bit controls the (N)ACK of the current byte received or the PEC bit
- * indicates that the current byte in shift register is a PEC.
+ * @note   In that case, the ACK bit controls the (N)ACK of the current byte received or the PEC bit indicates that the current byte in shift register is a PEC.
  * @rmtoll CR1          POS           LL_I2C_DisableBitPOS
  * @param  I2Cx I2C Instance.
  * @retval None
@@ -1720,8 +1662,7 @@ __STATIC_INLINE uint32_t LL_I2C_IsEnabledLastDMA(I2C_TypeDef * I2Cx) {
 }
 
 /**
- * @brief  Enable transfer or internal comparison of the SMBus Packet Error byte (transmission or
- * reception mode).
+ * @brief  Enable transfer or internal comparison of the SMBus Packet Error byte (transmission or reception mode).
  * @note   Macro @ref IS_SMBUS_ALL_INSTANCE(I2Cx) can be used to check whether or not
  *         SMBus feature is supported by the I2Cx Instance.
  * @note   This feature is cleared by hardware when the PEC byte is transferred or compared,
@@ -1735,8 +1676,7 @@ __STATIC_INLINE void LL_I2C_EnableSMBusPECCompare(I2C_TypeDef * I2Cx) {
 }
 
 /**
- * @brief  Disable transfer or internal comparison of the SMBus Packet Error byte (transmission or
- * reception mode).
+ * @brief  Disable transfer or internal comparison of the SMBus Packet Error byte (transmission or reception mode).
  * @note   Macro @ref IS_SMBUS_ALL_INSTANCE(I2Cx) can be used to check whether or not
  *         SMBus feature is supported by the I2Cx Instance.
  * @rmtoll CR1          PEC           LL_I2C_DisableSMBusPECCompare

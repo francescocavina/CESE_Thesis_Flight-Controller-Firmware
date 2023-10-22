@@ -32,9 +32,10 @@
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "main_app.h"
-#include "usbd_cdc_if.h"
-#include "MPU6050_driver_UAI.h"
+
 #include "FSA8S_driver_UAI.h"
+#include "MPU6050_driver_UAI.h"
+#include "LoggingSystem_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 
@@ -78,6 +79,7 @@ void flightController_App(void) {
     uint8_t str4[50];
     gyroscopeValues_t * gyroscopeValues;
     accelerometerValues_t * accelerometerValues;
+    uint16_t tempVal;
     magnetometerValues_t * magnetometerValues;
 
     while (1) {
@@ -85,44 +87,51 @@ void flightController_App(void) {
 
         MPU6050_ReadGyroscope(hmpu6050, gyroscopeValues);
         sprintf((char *)str1, (const char *)"Value Gyro X: %d\r\n", gyroscopeValues->gyroscopeX);
-        CDC_Transmit_FS(str1, strlen((const char *)str1));
+        LOG(str1, LOG_DEBUGGING);
         HAL_Delay(10);
         sprintf((char *)str1, (const char *)"Value Gyro Y: %d\r\n", gyroscopeValues->gyroscopeY);
-        CDC_Transmit_FS(str1, strlen((const char *)str1));
+        LOG(str1, LOG_DEBUGGING);
         HAL_Delay(10);
-        sprintf((char *)str1, (const char *)"Value Gyro Z: %d\r\n\n\n\n", gyroscopeValues->gyroscopeZ);
-        CDC_Transmit_FS(str1, strlen((const char *)str1));
-        HAL_Delay(1000);
+        sprintf((char *)str1, (const char *)"Value Gyro Z: %d\r\n\n", gyroscopeValues->gyroscopeZ);
+        LOG(str1, LOG_DEBUGGING);
+        HAL_Delay(10);
 
         MPU6050_ReadAccelerometer(hmpu6050, accelerometerValues);
         sprintf((char *)str2, (const char *)"Value Accel X: %d\r\n", accelerometerValues->accelerometerX);
-        CDC_Transmit_FS(str2, strlen((const char *)str2));
+        LOG(str2, LOG_DEBUGGING);
         HAL_Delay(10);
         sprintf((char *)str2, (const char *)"Value Accel Y: %d\r\n", accelerometerValues->accelerometerY);
-        CDC_Transmit_FS(str2, strlen((const char *)str2));
+        LOG(str2, LOG_DEBUGGING);
         HAL_Delay(10);
-        sprintf((char *)str2, (const char *)"Value Accel Z: %d\r\n\n\n\n", accelerometerValues->accelerometerZ);
-        CDC_Transmit_FS(str2, strlen((const char *)str2));
-        HAL_Delay(100);
+        sprintf((char *)str2, (const char *)"Value Accel Z: %d\r\n\n", accelerometerValues->accelerometerZ);
+        LOG(str2, LOG_DEBUGGING);
+        HAL_Delay(10);
 
-        sprintf((char *)str3, (const char *)"Value Temperature: %d\r\n\n\n\n\n", MPU6050_ReadTemperatureSensor(hmpu6050));
-        CDC_Transmit_FS(str3, strlen((const char *)str3));
-        HAL_Delay(100);
+        tempVal = MPU6050_ReadTemperatureSensor(hmpu6050);
+        sprintf((char *)str3, (const char *)"Value Temperature: %d\r\n\n", tempVal);
+        LOG(str3, LOG_DEBUGGING);
+        HAL_Delay(10);
 
-        //		MPU6050_ReadMagnetometer(hmpu6050, magnetometerValues);
-        //		sprintf((char *)str4, (const char *)"Value Mag X: %d\r\n",
-        //				magnetometerValues->magnetometerX);
-        //		CDC_Transmit_FS(str4, strlen((const char *)str4));
-        //		HAL_Delay(10);
-        //		sprintf((char *)str4, (const char *)"Value Mag Y: %d\r\n",
-        //				magnetometerValues->magnetometerY);
-        //		CDC_Transmit_FS(str4, strlen((const char *)str4));
-        //		HAL_Delay(10);
-        //		sprintf((char *)str4, (const char *)"Value Mag Z: %d\r\n\n\n\n",
-        //				magnetometerValues->magnetometerZ);
-        //		CDC_Transmit_FS(str4, strlen((const char *)str4));
-        //		HAL_Delay(10);
+        MPU6050_ReadMagnetometer(hmpu6050, magnetometerValues);
+        sprintf((char *)str4, (const char *)"Value Mag X: %d\r\n", magnetometerValues->magnetometerX);
+        LOG(str4, LOG_DEBUGGING);
+        HAL_Delay(10);
+        sprintf((char *)str4, (const char *)"Value Mag Y: %d\r\n", magnetometerValues->magnetometerY);
+        LOG(str4, LOG_DEBUGGING);
+        HAL_Delay(10);
+        sprintf((char *)str4, (const char *)"Value Mag Z: %d\r\n\n", magnetometerValues->magnetometerZ);
+        LOG(str4, LOG_DEBUGGING);
+        HAL_Delay(10);
     }
+
+    //    /* Logging System Demo */
+    //    uint8_t str1[40];
+    //
+    //    while(1) {
+    //    	strcpy((char *) str1, "Initializing Flight Controller\r\n");
+    //    	LOG((uint8_t *) "Initializing Flight Controller\r\n", LOG_ERROR);
+    //    	HAL_Delay(1000);
+    //    }
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

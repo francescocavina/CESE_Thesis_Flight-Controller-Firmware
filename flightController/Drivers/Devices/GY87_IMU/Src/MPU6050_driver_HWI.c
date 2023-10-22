@@ -23,11 +23,11 @@
 
 /*
  * @file:    MPU6050_driver_HWI.c
- * @date:    28/09/2023
+ * @date:    29/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.2.0
+ * @version: v1.3.0
  *
- * @brief:   This is a template for source files.
+ * @brief:   TODO
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */

@@ -14,7 +14,8 @@ RM := rm -rf
 -include Middlewares/ST/STM32_USB_Device_Library/Core/Src/subdir.mk
 -include Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/subdir.mk
 -include Drivers/STM32F4xx_HAL_Driver/Src/subdir.mk
--include Drivers/Devices/MPU-6050_IMU/Src/subdir.mk
+-include Drivers/Devices/LoggingSystem/Src/subdir.mk
+-include Drivers/Devices/GY87_IMU/Src/subdir.mk
 -include Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk

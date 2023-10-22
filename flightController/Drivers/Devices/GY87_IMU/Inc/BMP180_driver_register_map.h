@@ -22,16 +22,16 @@
  */
 
 /*
- * @file:    MPU6050_driver_demo.h
- * @date:    28/09/2023
+ * @file:    BMP180_driver_register_map.h
+ * @date:    29/09/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.2.0
+ * @version: v1.3.0
  *
- * @brief:   This is a template for header files.
+ * @brief:   TODO
  */
 
-#ifndef INC_MPU6050_DRIVER_DEMO_H
-#define INC_MPU6050_DRIVER_DEMO_H
+#ifndef INC_BMP180_DRIVER_REGISTER_MAP_H
+#define INC_BMP180_DRIVER_REGISTER_MAP_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 
@@ -53,6 +53,6 @@ extern "C" {
 }
 #endif
 
-#endif /* INC_MPU6050_DRIVER_DEMO_H*/
+#endif /* INC_BMP180_DRIVER_REGISTER_MAP_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

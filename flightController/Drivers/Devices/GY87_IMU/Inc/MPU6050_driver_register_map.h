@@ -23,11 +23,11 @@
 
 /*
  * @file:    MPU6050_driver_register_map.h
- * @date:    28/08/2023
+ * @date:    29/08/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.2.0
+ * @version: v1.3.0
  *
- * @brief:   This is a template for header files.
+ * @brief:   This file contains the register map for the MPU-6050 IMU module.
  */
 
 #ifndef INC_MPU6050_DRIVER_REGISTER_MAP_H
@@ -147,8 +147,7 @@
 #define MPU_6050_REG_INT_PIN_CFG (0x37) // REG ADDR: Interrupt Pin/Bypass Enable Configuration
 #define MPU_6050_REG_INT_ENABLE  (0x38) // REG ADDR: Interrupt Enable
 /* --- INTERRUPTS - REGISTERS BITS ------------------------------------------------------------- */
-#define MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN  (0x02) // REG BIT: Enable Bypass
-#define MPU_6050_BIT_INT_PIN_CFG_I2C_BP_DIS (0x02) // REG BIT: Disable Bypass
+#define MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN (0x02) // REG BIT: Enable Bypass
 
 /* --- INTERRUPTS - REGISTERS ADDRESSES - READ ONLY -------------------------------------------- */
 #define MPU_6050_REG_DMP_INT_STATUS (0x39) // DMP Interrupt Status
@@ -224,8 +223,7 @@
 /* --- USER CONTROL - REGISTERS ADDRESSES - READ/WRITE ----------------------------------------- */
 #define MPU_6050_REG_USER_CTRL (0x6A) // REG ADDR: User Control
 /* --- USER CONTROL - REGISTERS BITS ----------------------------------------------------------- */
-#define MPU_6050_BIT_USER_CTRL_MST_EN  (0X20) // REG BIT: Enable I2C Master Mode
-#define MPU_6050_BIT_USER_CTRL_MST_DIS (0X00) // REG BIT: Disable I2C Master Mode
+#define MPU_6050_BIT_USER_CTRL_MST_EN (0X20) // REG BIT: Enable I2C Master Mode
 
 /* --- POWER MANAGEMENT - REGISTERS ADDRESSES - READ/WRITE ------------------------------------- */
 #define MPU_6050_REG_PWR_MGMT_1 (0x6B) // Power Management 1: Device defaults to the SLEEP mode
@@ -237,7 +235,7 @@
 
 /* --- DIGITAL MOTION PROCESSOR - REGISTERS ADDRESSES - READ/WRITE ----------------------------- */
 #define MPU_6050_REG_DMP_BANK_SEL (0x6D) // DMP Memory Bank Selection: activates a specific bank in the DMP
-#define MPU_6050_REG_DMP_RW_PNT                                                                                                                                                                        \
+#define MPU_6050_REG_DMP_RW_PNT                                                                                                                                                                                                                          \
     (0x6E)                              // DMP Memory Start Address: set read/write pointer to a specific start address in
                                         // specified DMP bank
 #define MPU_6050_REG_DMP_REG     (0x6F) // DMP Memory Read/Write: register in DMP from which to read or to which to write
@@ -258,21 +256,6 @@
 /* --- MPU-6050 ID - AUXILIARY VALUES ---------------------------------------------------------- */
 #define MPU6050_AUX_VAL_I2C_ADDR1 (0xD0) // First address for first MPU-6050 device
 #define MPU6050_AUX_VAL_I2C_ADDR2 (0xD1) // Second address for second MPU-6050 device
-
-#define HMC5883L_AUX_VAL_I2C_ADDR (0x1E)
-#define HMC5883L_REG_CONFIG_A     (0x00)
-#define HMC5883L_REG_CONFIG_B     (0x01)
-#define HMC5883L_REG_MODE         (0x02)
-#define HMC5883L_REG_OUT_X_M      (0x03)
-#define HMC5883L_REG_OUT_X_L      (0x04)
-#define HMC5883L_REG_OUT_Z_M      (0x05)
-#define HMC5883L_REG_OUT_Z_L      (0x06)
-#define HMC5883L_REG_OUT_Y_M      (0x07)
-#define HMC5883L_REG_OUT_Y_L      (0x08)
-#define HMC5883L_REG_STATUS       (0x09)
-#define HMC5883L_REG_IDENT_A      (0x0A)
-#define HMC5883L_REG_IDENT_B      (0x0B)
-#define HMC5883L_REG_IDENT_C      (0x0C)
 
 #endif /* INC_MPU6050_DRIVER_REGISTER_MAP_H  */
 

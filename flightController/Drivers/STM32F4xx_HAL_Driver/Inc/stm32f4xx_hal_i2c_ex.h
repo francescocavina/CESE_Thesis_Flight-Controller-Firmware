@@ -89,8 +89,7 @@ HAL_StatusTypeDef HAL_I2CEx_ConfigDigitalFilter(I2C_HandleTypeDef * hi2c, uint32
 /** @defgroup I2CEx_Private_Macros I2C Private Macros
  * @{
  */
-#define IS_I2C_ANALOG_FILTER(FILTER)                                                               \
-    (((FILTER) == I2C_ANALOGFILTER_ENABLE) || ((FILTER) == I2C_ANALOGFILTER_DISABLE))
+#define IS_I2C_ANALOG_FILTER(FILTER)  (((FILTER) == I2C_ANALOGFILTER_ENABLE) || ((FILTER) == I2C_ANALOGFILTER_DISABLE))
 #define IS_I2C_DIGITAL_FILTER(FILTER) ((FILTER) <= 0x0000000FU)
 /**
  * @}
