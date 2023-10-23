@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_register_map.h
- * @date:    29/08/2023
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   This file contains the register map for the MPU-6050 IMU module.
  */

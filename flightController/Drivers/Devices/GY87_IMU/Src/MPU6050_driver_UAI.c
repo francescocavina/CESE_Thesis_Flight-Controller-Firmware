@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_UAI.c
- * @date:    29/09/2023
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   TODO
  */
@@ -33,12 +33,23 @@
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "MPU6050_driver_UAI.h"
 #include "MPU6050_driver_register_map.h"
-#include "HMC5883L_driver_register_map.h"
+#include "QMC5883L_driver_register_map.h"
+#include "BMP180_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 #define MPU6050_MAX_NUMBER_INSTANCES (2) // Maximum number of possible IMUs connected to the i2c bus
 #define MPU6050_SET_BIT              (1)
 #define MPU6050_CLEAR_BIT            (0)
+#define QMC5883L_SET_BIT             (1)
+#define QMC5883L_CLEAR_BIT           (0)
+#define BMP180_SET_BIT               (1)
+#define BMP180_CLEAR_BIT             (0)
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+
+#define RADIANS_TO_DEGREES_CONST (180 / M_PI)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -52,6 +63,104 @@ static uint8_t instancesNumber = 0;
  * @retval TODO
  */
 static MPU6050_HandleTypeDef_t * MPU6050_InstanceInit(I2C_HandleTypeDef * hi2c);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_WakeUpDevice(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_SetClockSource(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_SetSampleDivider(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_SetGyroscopeRange(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_SetAccelerometerRange(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_EnableI2CMasterMode(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_DisableI2CMasterMode(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_EnableBypassMode(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_DisableBypassMode(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void MPU6050_SetMasterClock(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+static bool_t MPU6050_TestConnection_QMC5883L(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+static bool_t MPU6050_TestConnection_BMP180(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void QMC5883L_Configure(MPU6050_HandleTypeDef_t * hmpu6050);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+static void BMP180_Configure(MPU6050_HandleTypeDef_t * hmpu6050);
 
 /*
  * @brief  TODO
@@ -135,82 +244,231 @@ static MPU6050_HandleTypeDef_t * MPU6050_InstanceInit(I2C_HandleTypeDef * hi2c) 
     return hmpu6050;
 }
 
+static void MPU6050_WakeUpDevice(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Wake up device */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_PWR_MGMT_1_SLEEP;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regData, MPU6050_CLEAR_BIT);
+}
+
+static void MPU6050_SetClockSource(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Set clock source */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_PWR_MGMT_1_CLKSEL_1;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regData, MPU6050_SET_BIT);
+}
+
+static void MPU6050_SetSampleDivider(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Set sample rate divider */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_SMPLRT_DIV;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_SMPLRT_DIV, &regData, MPU6050_SET_BIT);
+}
+
+static void MPU6050_SetGyroscopeRange(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Set gyroscope range */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_GYRO_CONFIG_FS_SEL_3; // Full range
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_GYRO_CONFIG, &regData, MPU6050_SET_BIT);
+}
+
+static void MPU6050_SetAccelerometerRange(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Set accelerometer range */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_3; // Full range
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_ACCEL_CONFIG, &regData, MPU6050_SET_BIT);
+}
+
+static void MPU6050_EnableI2CMasterMode(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Enable I2C Master mode */
+    uint8_t regData;
+
+    regData = 0b00100010; // TODO
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_USER_CTRL, &regData, MPU6050_SET_BIT);
+}
+
+static void MPU6050_DisableI2CMasterMode(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Disable I2C Master mode */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_USER_CTRL_MST_EN;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_USER_CTRL, &regData, MPU6050_CLEAR_BIT);
+}
+
+static void MPU6050_EnableBypassMode(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Enable Bypass mode */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_INT_PIN_CFG, &regData, MPU6050_SET_BIT);
+}
+
+static void MPU6050_DisableBypassMode(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Disable Bypass mode */
+    uint8_t regData;
+
+    regData = MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_INT_PIN_CFG, &regData, MPU6050_SET_BIT);
+}
+
+static void MPU6050_SetMasterClock(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Set Master Clock */
+    uint8_t regData;
+
+    regData = 0b00001101; // 400 kHz TODO
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_MST_CTRL, &regData, MPU6050_SET_BIT);
+}
+
+static bool_t MPU6050_TestConnection_QMC5883L(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Test QMC5883L magnetometer connection */
+    uint8_t regData;
+
+    MPU6050_ReadRegister(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CHIP_ID, &regData, sizeof(regData));
+
+    if (QMC5883L_BIT_CHIP_ID != regData) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+static bool_t MPU6050_TestConnection_BMP180(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Test BMP180 barometer connection */
+    uint8_t regData;
+
+    MPU6050_ReadRegister(hmpu6050->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xD0, &regData, sizeof(regData));
+
+    if (0x55 != regData) { // TODO
+        return false;
+    } else {
+        return true;
+    }
+}
+
+static void QMC5883L_Configure(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Configure QMC5883L magnetometer */
+    uint8_t regData;
+
+    /* Reset QMC5883L magnetometer */
+    regData = 0b00000001;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_RESET, &regData, QMC5883L_SET_BIT);
+
+    /* Configure QMC5883L magnetometer: Control Register 1 */
+    regData = 0b00011101;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CONFIG1, &regData, QMC5883L_SET_BIT);
+
+    /* Configure QMC5883L magnetometer: Control Register 2 */
+    regData = 0b00000000;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CONFIG2, &regData, QMC5883L_SET_BIT);
+}
+
+static void BMP180_Configure(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Configure BMP180 barometer */
+    uint8_t regData;
+
+    regData = 0b01000000;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF4, &regData, BMP180_SET_BIT);
+}
+
+static void MPU6050_Configure_QMC5883l(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Configure slave QMC5883L magnetometer */
+    uint8_t regData;
+
+    /* Set slave QMC5883L magnetometer device address */
+    regData = QMC5883L_AUX_VAL_I2C_ADDR | 0x80;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_ADDR, &regData, MPU6050_SET_BIT);
+
+    /* Set slave QMC5883L magnetometer registers addresses to read */
+    regData = QMC5883L_REG_X_LSB;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_REG, &regData, MPU6050_SET_BIT);
+
+    /* Set slave QMC5883L magnetometer number of registers to read*/
+    regData = 0x80 | 0x06;
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_CTRL, &regData, MPU6050_SET_BIT);
+}
+
 static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
 
     /* Configure MPU6050 device */
-    uint8_t regData;
 
     /* Wake up device */
-    regData = MPU_6050_BIT_PWR_MGMT_1_SLEEP;
-    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regData, MPU6050_CLEAR_BIT);
+    MPU6050_WakeUpDevice(hmpu6050);
 
     /* Set clock source */
-    regData = MPU_6050_BIT_PWR_MGMT_1_CLKSEL_1;
-    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, &regData, MPU6050_SET_BIT);
+    MPU6050_SetClockSource(hmpu6050);
 
     /* Set sample rate divider */
-    regData = MPU_6050_BIT_SMPLRT_DIV;
-    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_SMPLRT_DIV, &regData, MPU6050_SET_BIT);
+    MPU6050_SetSampleDivider(hmpu6050);
 
-    /* Configure gyroscope full scale range */
-    regData = MPU_6050_BIT_GYRO_CONFIG_FS_SEL_3;
-    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_GYRO_CONFIG, &regData, MPU6050_SET_BIT);
+    /* Set gyroscope range */
+    MPU6050_SetGyroscopeRange(hmpu6050);
 
-    /* Configure accelerometer full scale range */
-    regData = MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_3;
-    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_ACCEL_CONFIG, &regData, MPU6050_SET_BIT);
+    /* Set accelerometer range */
+    MPU6050_SetAccelerometerRange(hmpu6050);
 
-    /* Disable I2C Master Mode */
-    regData = MPU_6050_BIT_USER_CTRL_MST_EN;
-    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_USER_CTRL, &regData, MPU6050_CLEAR_BIT);
+    /* Disable I2C Master mode */
+    MPU6050_DisableI2CMasterMode(hmpu6050);
 
-    /* Enable Bypass */
-    regData = MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN;
-    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_INT_PIN_CFG, &regData, MPU6050_SET_BIT);
+    /* Enable Bypass mode */
+    MPU6050_EnableBypassMode(hmpu6050);
 
-    /* Configure HMC5883L */
-    regData = 0b00011000;
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, HMC5883L_AUX_VAL_I2C_ADDR << 1, HMC5883L_REG_CONFIG_A, 1, &regData, 1, 100);
-    HAL_Delay(10);
+    /* Test QMC5883L magnetometer connection */
+    if (!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
 
-    regData = 0b00000000;
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, HMC5883L_AUX_VAL_I2C_ADDR << 1, HMC5883L_REG_CONFIG_B, 1, &regData, 1, 100);
-    HAL_Delay(10);
+        LOG((uint8_t *)"QMC5883L Magnetometer not detected.\r\n\n", LOG_ERROR);
+        // return -1; TODO
+    } else {
 
-    regData = 0x00; // Mode: Continuous
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, HMC5883L_AUX_VAL_I2C_ADDR << 1, HMC5883L_REG_MODE, 1, &regData, 1, 100);
-    HAL_Delay(10);
+        LOG((uint8_t *)"QMC5883L Magnetometer detected.\r\n\n", LOG_INFORMATION);
+    }
+
+    /* Configure QMC5883L magnetometer */
+    QMC5883L_Configure(hmpu6050);
+
+    /* Test BMP180 barometer connection */
+    if (!MPU6050_TestConnection_BMP180(hmpu6050)) {
+
+        LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
+        // return -1; TODO
+    } else {
+
+        LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
+    }
+
+    /* Configure BMP180 barometer */
+    BMP180_Configure(hmpu6050);
 
     /* Disable Bypass */
-    regData = 0x00;
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_INT_PIN_CFG, 1, &regData, 1, 100);
-    HAL_Delay(10);
+    MPU6050_DisableBypassMode(hmpu6050);
 
-    /* Enable I2C Master Mode */
-    regData = 0b00100010;
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_USER_CTRL, 1, &regData, 1, 100);
-    HAL_Delay(10);
+    /* Enable I2C Master mode */
+    MPU6050_EnableI2CMasterMode(hmpu6050);
 
-    /* Set Master Clock to 400 kHz */
-    regData = 0b00001101; //
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_MST_CTRL, 1, &regData, 1, 100);
-    HAL_Delay(10);
+    /* Set Master clock */
+    MPU6050_SetMasterClock(hmpu6050);
 
-    regData = 0x00;
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_PWR_MGMT_1, 1, &regData, 1, 100);
-    HAL_Delay(10);
-
-    regData = HMC5883L_AUX_VAL_I2C_ADDR | 0x80; // Access Slave into read mode
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_ADDR, 1, &regData, 1, 100);
-    HAL_Delay(10);
-
-    regData = 0x03; // Slave REG for reading to take place
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_REG, 1, &regData, 1, 100);
-    HAL_Delay(10);
-
-    regData = 0x80 | 0x06; // Number of data bytes
-    HAL_I2C_Mem_Write(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_CTRL, 1, &regData, 1, 100);
-    HAL_Delay(10);
+    /* Configure slave QMC5883L magnetometer */
+    MPU6050_Configure_QMC5883l(hmpu6050);
 }
 
 static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
@@ -271,6 +529,8 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
         if (I2C_Init(hmpu6050)) {
 
             /* Initialization was successful */
+            LOG((uint8_t *)"MPU6050 IMU detected.\r\n\n", LOG_INFORMATION);
+
             /* Configure device */
             MPU6050_Config(hmpu6050);
 
@@ -289,11 +549,14 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
             free(hmpu6050->buffer);
             free(hmpu6050);
 #endif
+
+            LOG((uint8_t *)"MPU6050 IMU not detected.\r\n\n", LOG_ERROR);
             return NULL;
         }
     } else {
 
         /* Instance couldn't be created */
+        LOG((uint8_t *)"MPU6050 IMU couldn't be initialized.\r\n\n", LOG_ERROR);
         return NULL;
     }
 }
@@ -400,24 +663,73 @@ int16_t MPU6050_ReadTemperatureSensor(MPU6050_HandleTypeDef_t * hmpu6050) {
 
 void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerValues_t * magnetometerValues) {
 
-    magnetometerValues->magnetometerX = 0;
-    magnetometerValues->magnetometerY = 0;
-    magnetometerValues->magnetometerZ = 0;
-
+    /* Declare variable for raw data */
     uint8_t magnetometerRawData[2];
+
+    /* Define variable for scale factoring raw data */
     int16_t scaleFactor = 1;
 
-    /* Read magnetometer in axis X */
-    MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_00, magnetometerRawData, sizeof(uint16_t));
-    magnetometerValues->magnetometerX = (int16_t)(magnetometerRawData[0] << 8 | magnetometerRawData[1]) / scaleFactor;
+    /* Check parameters */
+    if (NULL != hmpu6050 && NULL != magnetometerValues) {
 
-    /* Read magnetometer in axis Y */
-    MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_02, magnetometerRawData, sizeof(uint16_t));
-    magnetometerValues->magnetometerY = (int16_t)(magnetometerRawData[0] << 8 | magnetometerRawData[1]) / scaleFactor;
+        /* Read magnetometer in axis X */
+        MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_00, magnetometerRawData, sizeof(uint16_t));
+        magnetometerValues->magnetometerX = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
 
-    /* Read magnetometer in axis Z */
-    MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_04, magnetometerRawData, sizeof(uint16_t));
-    magnetometerValues->magnetometerZ = (int16_t)(magnetometerRawData[0] << 8 | magnetometerRawData[1]) / scaleFactor;
+        /* Read magnetometer in axis Y */
+        MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_02, magnetometerRawData, sizeof(uint16_t));
+        magnetometerValues->magnetometerY = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
+
+        /* Read magnetometer in axis Z */
+        MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_04, magnetometerRawData, sizeof(uint16_t));
+        magnetometerValues->magnetometerZ = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
+
+    } else {
+        /* Wrong parameters */
+        magnetometerValues->magnetometerX = 0;
+        magnetometerValues->magnetometerY = 0;
+        magnetometerValues->magnetometerZ = 0;
+    }
+}
+
+int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    /* Allocate dynamic memory for the magnetometerValues_t structure */
+#ifdef USE_FREERTOS
+    magnetometerValues_t * magnetometerValues = pvPortmalloc(sizeof(magnetometerValues_t));
+#else
+    magnetometerValues_t * magnetometerValues = malloc(sizeof(magnetometerValues_t));
+#endif
+
+    /* Declare variable for compass heading */
+    float heading;
+
+    /* Check parameters */
+    if (NULL != hmpu6050) {
+
+        MPU6050_ReadMagnetometer(hmpu6050, magnetometerValues);
+
+        /* Calculate heading */
+        heading = atan2(magnetometerValues->magnetometerY, magnetometerValues->magnetometerX) * RADIANS_TO_DEGREES_CONST;
+
+        /* Check if heading is within 0 and 360 degrees */
+        if (heading < 0) {
+            heading += 360;
+        }
+
+    } else {
+
+        heading = -1;
+    }
+
+    /* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+    vPortFree(magnetometerValues);
+#else
+    free(magnetometerValues);
+#endif
+
+    return heading;
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

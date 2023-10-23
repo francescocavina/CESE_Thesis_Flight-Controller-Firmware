@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_UAI.h
- * @date:    29/09/2023
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   TODO
  */
@@ -106,6 +106,13 @@ int16_t MPU6050_ReadTemperatureSensor(MPU6050_HandleTypeDef_t * hmpu6050);
  * @retval TODO
  */
 void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerValues_t * magnetometerValues);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

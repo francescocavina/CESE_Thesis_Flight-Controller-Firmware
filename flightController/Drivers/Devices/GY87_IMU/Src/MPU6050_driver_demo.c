@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_demo.c
- * @date:    29/09/2023
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   This is a template for source files.
  */

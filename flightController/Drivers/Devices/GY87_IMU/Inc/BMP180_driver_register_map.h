@@ -23,9 +23,9 @@
 
 /*
  * @file:    BMP180_driver_register_map.h
- * @date:    29/09/2023
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   TODO
  */
@@ -33,25 +33,11 @@
 #ifndef INC_BMP180_DRIVER_REGISTER_MAP_H
 #define INC_BMP180_DRIVER_REGISTER_MAP_H
 
-/* --- Headers files inclusions ---------------------------------------------------------------- */
-
-/* --- C++ guard ------------------------------------------------------------------------------- */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* --- Public macros definitions --------------------------------------------------------------- */
-
-/* --- Public data type declarations ----------------------------------------------------------- */
-
-/* --- Public variable declarations ------------------------------------------------------------ */
-
-/* --- Public function declarations ------------------------------------------------------------ */
-
-/* --- End of C++ guard ------------------------------------------------------------------------ */
-#ifdef __cplusplus
-}
-#endif
+/*
+ * @brief BMP180 Register Map and Descriptions
+ */
+#define BMP180_AUX_VAL_I2C_ADDR (0x77)
 
 #endif /* INC_BMP180_DRIVER_REGISTER_MAP_H */
 

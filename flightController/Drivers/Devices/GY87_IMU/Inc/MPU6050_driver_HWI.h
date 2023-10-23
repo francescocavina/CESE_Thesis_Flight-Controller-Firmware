@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_HWI.h
- * @date:    29/09/2023
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   TODO
  */
@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <math.h>
 
 #include "stm32f4xx_hal.h"
 #include "LoggingSystem_UAI.h"

@@ -22,41 +22,38 @@
  */
 
 /*
- * @file:    HMC5883L_driver_register_map.h
- * @date:    29/09/2023
+ * @file:    QMC5883L_driver_register_map.h
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
- * @brief:   This file contains the register map for the HMC5883L magnetometer.
+ * @brief:   This file contains the register map for the QMC5883L magnetometer.
  */
 
-#ifndef INC_HMC5883L_DRIVER_REGISTER_MAP_H
-#define INC_HMC5883L_DRIVER_REGISTER_MAP_H
+#ifndef INC_QMC5883L_DRIVER_REGISTER_MAP_H
+#define INC_QMC5883L_DRIVER_REGISTER_MAP_H
 
 /* --- Public macros definitions --------------------------------------------------------------- */
-
 /*
- * @brief HMC5883L Register Map and Descriptions
+ * @brief QMC5883L Register Map and Descriptions
  */
-#define HMC5883L_AUX_VAL_I2C_ADDR (0x1E)
-#define HMC5883L_REG_CONFIG_A     (0x00)
-#define HMC5883L_REG_CONFIG_B     (0x01)
-#define HMC5883L_REG_MODE         (0x02)
-#define HMC5883L_REG_OUT_X_M      (0x03)
-#define HMC5883L_REG_OUT_X_L      (0x04)
-#define HMC5883L_REG_OUT_Z_M      (0x05)
-#define HMC5883L_REG_OUT_Z_L      (0x06)
-#define HMC5883L_REG_OUT_Y_M      (0x07)
-#define HMC5883L_REG_OUT_Y_L      (0x08)
-#define HMC5883L_REG_STATUS       (0x09)
+#define QMC5883L_AUX_VAL_I2C_ADDR (0x0D)
+#define QMC5883L_REG_X_LSB        (0x00)
+#define QMC5883L_REG_X_MSB        (0x01)
+#define QMC5883L_REG_Y_LS         (0x02)
+#define QMC5883L_REG_Y_MSB        (0x03)
+#define QMC5883L_REG_Z_LSB        (0x04)
+#define QMC5883L_REG_Z_MSB        (0x05)
+#define QMC5883L_REG_STATUS       (0x06)
+#define QMC5883L_REG_TEMP_LSB     (0x07)
+#define QMC5883L_REG_TEMP_MSB     (0x08)
+#define QMC5883L_REG_CONFIG1      (0x09)
+#define QMC5883L_REG_CONFIG2      (0x0A)
+#define QMC5883L_REG_RESET        (0x0B)
+#define QMC5883L_REG_RESERVED     (0x0C)
+#define QMC5883L_REG_CHIP_ID      (0x0D)
+#define QMC5883L_BIT_CHIP_ID      (0xFF)
 
-#define HMC5883L_REG_ID_A         (0x0A)
-#define HMC5883L_BIT_ID_A         (0X48)
-#define HMC5883L_REG_ID_B         (0x0B)
-#define HMC5883L_BIT_ID_B         (0X34)
-#define HMC5883L_REG_ID_C         (0x0C)
-#define HMC5883L_BIT_ID_C         (0X33)
-
-#endif /* INC_HMC5883L_DRIVER_REGISTER_MAP_H */
+#endif /* INC_QMC5883L_DRIVER_REGISTER_MAP_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

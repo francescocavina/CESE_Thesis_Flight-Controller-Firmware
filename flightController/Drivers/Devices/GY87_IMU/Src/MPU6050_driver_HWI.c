@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_HWI.c
- * @date:    29/09/2023
+ * @date:    22/10/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.3.0
+ * @version: v1.4.0
  *
  * @brief:   TODO
  */
@@ -83,16 +83,7 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
     if (NULL == hi2c) {
         return false;
     }
-    if (0 == address) {
-        return false;
-    }
-    if (reg < MPU_6050_MIN_REG_ADDR || reg > MPU_6050_MAX_REG_ADDR) {
-        return false;
-    }
     if (NULL == data) {
-        return false;
-    }
-    if (dataSize < MPU_6050_MIN_DATA_SIZE || dataSize > MPU_6050_MAX_DATA_SIZE) {
         return false;
     }
 
@@ -112,12 +103,6 @@ bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t
 
     /* Check parameters */
     if (NULL == hi2c) {
-        return false;
-    }
-    if (0 == address) {
-        return false;
-    }
-    if (reg < MPU_6050_MIN_REG_ADDR || reg > MPU_6050_MAX_REG_ADDR) {
         return false;
     }
     if (NULL == data) {
