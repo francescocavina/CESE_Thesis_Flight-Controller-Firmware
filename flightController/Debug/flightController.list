@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_rnglists 00000def  00000000  00000000  0003b220  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_macro  0001a4cb  00000000  00000000  0003c00f  2**0
+ 17 .debug_macro  00019a37  00000000  00000000  0003c00f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_line   00019f62  00000000  00000000  000564da  2**0
+ 18 .debug_line   00019f91  00000000  00000000  00055a46  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    0008dc75  00000000  00000000  0007043c  2**0
+ 19 .debug_str    0008dc93  00000000  00000000  0006f9d7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00005290  00000000  00000000  000fe0b4  2**2
+ 20 .debug_frame  00005290  00000000  00000000  000fd66c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000008d  00000000  00000000  00103344  2**0
+ 21 .debug_line_str 0000008d  00000000  00000000  001028fc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -1242,10 +1242,10 @@ void flightController_App(void) {
         HAL_Delay(1000);
  8000ef0:	f44f 707a 	mov.w	r0, #1000	; 0x3e8
  8000ef4:	f000 fff6 	bl	8001ee4 <HAL_Delay>
-//        tempVal = MPU6050_ReadTemperatureSensor(hmpu6050);
-//        sprintf((char *)str3, (const char *)"Value Temperature: %d\r\n\n", tempVal);
-//        LOG(str3, LOG_DEBUGGING);
-//        HAL_Delay(10);
+        //        tempVal = MPU6050_ReadTemperatureSensor(hmpu6050);
+        //        sprintf((char *)str3, (const char *)"Value Temperature: %d\r\n\n", tempVal);
+        //        LOG(str3, LOG_DEBUGGING);
+        //        HAL_Delay(10);
 
         MPU6050_ReadMagnetometer(hmpu6050, magnetometerValues);
  8000ef8:	f8d7 10d0 	ldr.w	r1, [r7, #208]	; 0xd0
@@ -2757,8 +2757,8 @@ static void MPU6050_WakeUpDevice(MPU6050_HandleTypeDef_t * hmpu6050) {
  80016a0:	af02      	add	r7, sp, #8
  80016a2:	6078      	str	r0, [r7, #4]
 
-	/* Wake up device */
-	uint8_t regData;
+    /* Wake up device */
+    uint8_t regData;
 
     regData = MPU_6050_BIT_PWR_MGMT_1_SLEEP;
  80016a4:	2340      	movs	r3, #64	; 0x40
@@ -2788,7 +2788,7 @@ static void MPU6050_SetClockSource(MPU6050_HandleTypeDef_t * hmpu6050) {
  80016cc:	6078      	str	r0, [r7, #4]
 
     /* Set clock source */
-	uint8_t regData;
+    uint8_t regData;
 
     regData = MPU_6050_BIT_PWR_MGMT_1_CLKSEL_1;
  80016ce:	2301      	movs	r3, #1
@@ -2817,8 +2817,8 @@ static void MPU6050_SetSampleDivider(MPU6050_HandleTypeDef_t * hmpu6050) {
  80016f4:	af02      	add	r7, sp, #8
  80016f6:	6078      	str	r0, [r7, #4]
 
-	/* Set sample rate divider */
-	uint8_t regData;
+    /* Set sample rate divider */
+    uint8_t regData;
 
     regData = MPU_6050_BIT_SMPLRT_DIV;
  80016f8:	2318      	movs	r3, #24
@@ -2847,8 +2847,8 @@ static void MPU6050_SetGyroscopeRange(MPU6050_HandleTypeDef_t * hmpu6050) {
  800171e:	af02      	add	r7, sp, #8
  8001720:	6078      	str	r0, [r7, #4]
 
-	/* Set gyroscope range */
-	uint8_t regData;
+    /* Set gyroscope range */
+    uint8_t regData;
 
     regData = MPU_6050_BIT_GYRO_CONFIG_FS_SEL_3; // Full range
  8001722:	2318      	movs	r3, #24
@@ -2877,8 +2877,8 @@ static void MPU6050_SetAccelerometerRange(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001748:	af02      	add	r7, sp, #8
  800174a:	6078      	str	r0, [r7, #4]
 
-	/* Set accelerometer range */
-	uint8_t regData;
+    /* Set accelerometer range */
+    uint8_t regData;
 
     regData = MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_3; // Full range
  800174c:	2318      	movs	r3, #24
@@ -2907,8 +2907,8 @@ static void MPU6050_EnableI2CMasterMode(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001772:	af02      	add	r7, sp, #8
  8001774:	6078      	str	r0, [r7, #4]
 
-	/* Enable I2C Master mode */
-	uint8_t regData;
+    /* Enable I2C Master mode */
+    uint8_t regData;
 
     regData = 0b00100010; // TODO
  8001776:	2322      	movs	r3, #34	; 0x22
@@ -2937,8 +2937,8 @@ static void MPU6050_DisableI2CMasterMode(MPU6050_HandleTypeDef_t * hmpu6050) {
  800179c:	af02      	add	r7, sp, #8
  800179e:	6078      	str	r0, [r7, #4]
 
-	/* Disable I2C Master mode */
-	uint8_t regData;
+    /* Disable I2C Master mode */
+    uint8_t regData;
 
     regData = MPU_6050_BIT_USER_CTRL_MST_EN;
  80017a0:	2320      	movs	r3, #32
@@ -2967,8 +2967,8 @@ static void MPU6050_EnableBypassMode(MPU6050_HandleTypeDef_t * hmpu6050) {
  80017c6:	af02      	add	r7, sp, #8
  80017c8:	6078      	str	r0, [r7, #4]
 
-	/* Enable Bypass mode */
-	uint8_t regData;
+    /* Enable Bypass mode */
+    uint8_t regData;
 
     regData = MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN;
  80017ca:	2302      	movs	r3, #2
@@ -2997,8 +2997,8 @@ static void MPU6050_DisableBypassMode(MPU6050_HandleTypeDef_t * hmpu6050) {
  80017f0:	af02      	add	r7, sp, #8
  80017f2:	6078      	str	r0, [r7, #4]
 
-	/* Disable Bypass mode */
-	uint8_t regData;
+    /* Disable Bypass mode */
+    uint8_t regData;
 
     regData = MPU_6050_BIT_INT_PIN_CFG_I2C_BP_EN;
  80017f4:	2302      	movs	r3, #2
@@ -3028,7 +3028,7 @@ static void MPU6050_SetMasterClock(MPU6050_HandleTypeDef_t * hmpu6050) {
  800181c:	6078      	str	r0, [r7, #4]
 
     /* Set Master Clock */
-	uint8_t regData;
+    uint8_t regData;
 
     regData = 0b00001101; // 400 kHz TODO
  800181e:	230d      	movs	r3, #13
@@ -3057,10 +3057,10 @@ static bool_t MPU6050_TestConnection_QMC5883L(MPU6050_HandleTypeDef_t * hmpu6050
  8001844:	af02      	add	r7, sp, #8
  8001846:	6078      	str	r0, [r7, #4]
 
-	/* Test QMC5883L magnetometer connection */
-	uint8_t regData;
+    /* Test QMC5883L magnetometer connection */
+    uint8_t regData;
 
-	MPU6050_ReadRegister(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CHIP_ID, &regData, sizeof(regData));
+    MPU6050_ReadRegister(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CHIP_ID, &regData, sizeof(regData));
  8001848:	687b      	ldr	r3, [r7, #4]
  800184a:	6858      	ldr	r0, [r3, #4]
  800184c:	f107 030f 	add.w	r3, r7, #15
@@ -3070,17 +3070,17 @@ static bool_t MPU6050_TestConnection_QMC5883L(MPU6050_HandleTypeDef_t * hmpu6050
  8001856:	211a      	movs	r1, #26
  8001858:	f000 f8ee 	bl	8001a38 <MPU6050_ReadRegister>
 
-	if(QMC5883L_BIT_CHIP_ID != regData) {
+    if (QMC5883L_BIT_CHIP_ID != regData) {
  800185c:	7bfb      	ldrb	r3, [r7, #15]
  800185e:	2bff      	cmp	r3, #255	; 0xff
  8001860:	d001      	beq.n	8001866 <MPU6050_TestConnection_QMC5883L+0x26>
-		return false;
+        return false;
  8001862:	2300      	movs	r3, #0
  8001864:	e000      	b.n	8001868 <MPU6050_TestConnection_QMC5883L+0x28>
-	} else {
-		return true;
+    } else {
+        return true;
  8001866:	2301      	movs	r3, #1
-	}
+    }
 }
  8001868:	4618      	mov	r0, r3
  800186a:	3710      	adds	r7, #16
@@ -3095,8 +3095,8 @@ static bool_t MPU6050_TestConnection_BMP180(MPU6050_HandleTypeDef_t * hmpu6050) 
  8001874:	af02      	add	r7, sp, #8
  8001876:	6078      	str	r0, [r7, #4]
 
-	/* Test BMP180 barometer connection */
-	uint8_t regData;
+    /* Test BMP180 barometer connection */
+    uint8_t regData;
 
     MPU6050_ReadRegister(hmpu6050->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xD0, &regData, sizeof(regData));
  8001878:	687b      	ldr	r3, [r7, #4]
@@ -3108,17 +3108,17 @@ static bool_t MPU6050_TestConnection_BMP180(MPU6050_HandleTypeDef_t * hmpu6050) 
  8001886:	21ee      	movs	r1, #238	; 0xee
  8001888:	f000 f8d6 	bl	8001a38 <MPU6050_ReadRegister>
 
-	if(0x55 != regData) { // TODO
+    if (0x55 != regData) { // TODO
  800188c:	7bfb      	ldrb	r3, [r7, #15]
  800188e:	2b55      	cmp	r3, #85	; 0x55
  8001890:	d001      	beq.n	8001896 <MPU6050_TestConnection_BMP180+0x26>
-		return false;
+        return false;
  8001892:	2300      	movs	r3, #0
  8001894:	e000      	b.n	8001898 <MPU6050_TestConnection_BMP180+0x28>
-	} else {
-		return true;
+    } else {
+        return true;
  8001896:	2301      	movs	r3, #1
-	}
+    }
 }
  8001898:	4618      	mov	r0, r3
  800189a:	3710      	adds	r7, #16
@@ -3133,14 +3133,14 @@ static void QMC5883L_Configure(MPU6050_HandleTypeDef_t * hmpu6050) {
  80018a4:	af02      	add	r7, sp, #8
  80018a6:	6078      	str	r0, [r7, #4]
 
-	/* Configure QMC5883L magnetometer */
-	uint8_t regData;
+    /* Configure QMC5883L magnetometer */
+    uint8_t regData;
 
-	/* Reset QMC5883L magnetometer */
-	regData = 0b00000001;
+    /* Reset QMC5883L magnetometer */
+    regData = 0b00000001;
  80018a8:	2301      	movs	r3, #1
  80018aa:	73fb      	strb	r3, [r7, #15]
-	MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_RESET, &regData, QMC5883L_SET_BIT);
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_RESET, &regData, QMC5883L_SET_BIT);
  80018ac:	687b      	ldr	r3, [r7, #4]
  80018ae:	6858      	ldr	r0, [r3, #4]
  80018b0:	f107 030f 	add.w	r3, r7, #15
@@ -3150,11 +3150,11 @@ static void QMC5883L_Configure(MPU6050_HandleTypeDef_t * hmpu6050) {
  80018ba:	211a      	movs	r1, #26
  80018bc:	f000 f8e4 	bl	8001a88 <MPU6050_WriteRegisterBitmasked>
 
-	/* Configure QMC5883L magnetometer: Control Register 1 */
-	regData = 0b00011101;
+    /* Configure QMC5883L magnetometer: Control Register 1 */
+    regData = 0b00011101;
  80018c0:	231d      	movs	r3, #29
  80018c2:	73fb      	strb	r3, [r7, #15]
-	MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CONFIG1, &regData, QMC5883L_SET_BIT);
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CONFIG1, &regData, QMC5883L_SET_BIT);
  80018c4:	687b      	ldr	r3, [r7, #4]
  80018c6:	6858      	ldr	r0, [r3, #4]
  80018c8:	f107 030f 	add.w	r3, r7, #15
@@ -3164,11 +3164,11 @@ static void QMC5883L_Configure(MPU6050_HandleTypeDef_t * hmpu6050) {
  80018d2:	211a      	movs	r1, #26
  80018d4:	f000 f8d8 	bl	8001a88 <MPU6050_WriteRegisterBitmasked>
 
-	/* Configure QMC5883L magnetometer: Control Register 2 */
-	regData = 0b00000000;
+    /* Configure QMC5883L magnetometer: Control Register 2 */
+    regData = 0b00000000;
  80018d8:	2300      	movs	r3, #0
  80018da:	73fb      	strb	r3, [r7, #15]
-	MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CONFIG2, &regData, QMC5883L_SET_BIT);
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CONFIG2, &regData, QMC5883L_SET_BIT);
  80018dc:	687b      	ldr	r3, [r7, #4]
  80018de:	6858      	ldr	r0, [r3, #4]
  80018e0:	f107 030f 	add.w	r3, r7, #15
@@ -3191,13 +3191,13 @@ static void BMP180_Configure(MPU6050_HandleTypeDef_t * hmpu6050) {
  80018fc:	af02      	add	r7, sp, #8
  80018fe:	6078      	str	r0, [r7, #4]
 
-	/* Configure BMP180 barometer */
-	uint8_t regData;
+    /* Configure BMP180 barometer */
+    uint8_t regData;
 
-	regData = 0b01000000;
+    regData = 0b01000000;
  8001900:	2340      	movs	r3, #64	; 0x40
  8001902:	73fb      	strb	r3, [r7, #15]
-	MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF4, &regData, BMP180_SET_BIT);
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF4, &regData, BMP180_SET_BIT);
  8001904:	687b      	ldr	r3, [r7, #4]
  8001906:	6858      	ldr	r0, [r3, #4]
  8001908:	f107 030f 	add.w	r3, r7, #15
@@ -3220,14 +3220,14 @@ static void MPU6050_Configure_QMC5883l(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001924:	af02      	add	r7, sp, #8
  8001926:	6078      	str	r0, [r7, #4]
 
-	/* Configure slave QMC5883L magnetometer */
-	uint8_t regData;
+    /* Configure slave QMC5883L magnetometer */
+    uint8_t regData;
 
-	/* Set slave QMC5883L magnetometer device address */
-	regData = QMC5883L_AUX_VAL_I2C_ADDR | 0x80;
+    /* Set slave QMC5883L magnetometer device address */
+    regData = QMC5883L_AUX_VAL_I2C_ADDR | 0x80;
  8001928:	238d      	movs	r3, #141	; 0x8d
  800192a:	73fb      	strb	r3, [r7, #15]
-	MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_ADDR, &regData, MPU6050_SET_BIT);
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_ADDR, &regData, MPU6050_SET_BIT);
  800192c:	687b      	ldr	r3, [r7, #4]
  800192e:	6858      	ldr	r0, [r3, #4]
  8001930:	687b      	ldr	r3, [r7, #4]
@@ -3238,11 +3238,11 @@ static void MPU6050_Configure_QMC5883l(MPU6050_HandleTypeDef_t * hmpu6050) {
  800193c:	2225      	movs	r2, #37	; 0x25
  800193e:	f000 f8a3 	bl	8001a88 <MPU6050_WriteRegisterBitmasked>
 
-	/* Set slave QMC5883L magnetometer registers addresses to read */
-	regData = QMC5883L_REG_X_LSB;
+    /* Set slave QMC5883L magnetometer registers addresses to read */
+    regData = QMC5883L_REG_X_LSB;
  8001942:	2300      	movs	r3, #0
  8001944:	73fb      	strb	r3, [r7, #15]
-	MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_REG, &regData, MPU6050_SET_BIT);
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_REG, &regData, MPU6050_SET_BIT);
  8001946:	687b      	ldr	r3, [r7, #4]
  8001948:	6858      	ldr	r0, [r3, #4]
  800194a:	687b      	ldr	r3, [r7, #4]
@@ -3253,11 +3253,11 @@ static void MPU6050_Configure_QMC5883l(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001956:	2226      	movs	r2, #38	; 0x26
  8001958:	f000 f896 	bl	8001a88 <MPU6050_WriteRegisterBitmasked>
 
-	/* Set slave QMC5883L magnetometer number of registers to read*/
-	regData = 0x80 | 0x06;
+    /* Set slave QMC5883L magnetometer number of registers to read*/
+    regData = 0x80 | 0x06;
  800195c:	2386      	movs	r3, #134	; 0x86
  800195e:	73fb      	strb	r3, [r7, #15]
-	MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_CTRL, &regData, MPU6050_SET_BIT);
+    MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_CTRL, &regData, MPU6050_SET_BIT);
  8001960:	687b      	ldr	r3, [r7, #4]
  8001962:	6858      	ldr	r0, [r3, #4]
  8001964:	687b      	ldr	r3, [r7, #4]
@@ -3320,7 +3320,7 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
  80019ae:	f7ff ff08 	bl	80017c2 <MPU6050_EnableBypassMode>
 
     /* Test QMC5883L magnetometer connection */
-    if(!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
+    if (!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
  80019b2:	6878      	ldr	r0, [r7, #4]
  80019b4:	f7ff ff44 	bl	8001840 <MPU6050_TestConnection_QMC5883L>
  80019b8:	4603      	mov	r3, r0
@@ -3329,15 +3329,15 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
  80019c0:	2b00      	cmp	r3, #0
  80019c2:	d004      	beq.n	80019ce <MPU6050_Config+0x4e>
 
-    	LOG((uint8_t *) "QMC5883L Magnetometer not detected.\r\n\n", LOG_ERROR);
+        LOG((uint8_t *)"QMC5883L Magnetometer not detected.\r\n\n", LOG_ERROR);
  80019c4:	2103      	movs	r1, #3
  80019c6:	4818      	ldr	r0, [pc, #96]	; (8001a28 <MPU6050_Config+0xa8>)
  80019c8:	f000 f9b8 	bl	8001d3c <LOG>
  80019cc:	e003      	b.n	80019d6 <MPU6050_Config+0x56>
-    	// return -1; TODO
+        // return -1; TODO
     } else {
 
-    	LOG((uint8_t *) "QMC5883L Magnetometer detected.\r\n\n", LOG_INFORMATION);
+        LOG((uint8_t *)"QMC5883L Magnetometer detected.\r\n\n", LOG_INFORMATION);
  80019ce:	2100      	movs	r1, #0
  80019d0:	4816      	ldr	r0, [pc, #88]	; (8001a2c <MPU6050_Config+0xac>)
  80019d2:	f000 f9b3 	bl	8001d3c <LOG>
@@ -3348,8 +3348,8 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
  80019d6:	6878      	ldr	r0, [r7, #4]
  80019d8:	f7ff ff62 	bl	80018a0 <QMC5883L_Configure>
 
-	/* Test BMP180 barometer connection */
-    if(!MPU6050_TestConnection_BMP180(hmpu6050)) {
+    /* Test BMP180 barometer connection */
+    if (!MPU6050_TestConnection_BMP180(hmpu6050)) {
  80019dc:	6878      	ldr	r0, [r7, #4]
  80019de:	f7ff ff47 	bl	8001870 <MPU6050_TestConnection_BMP180>
  80019e2:	4603      	mov	r3, r0
@@ -3358,15 +3358,15 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
  80019ea:	2b00      	cmp	r3, #0
  80019ec:	d004      	beq.n	80019f8 <MPU6050_Config+0x78>
 
-    	LOG((uint8_t *) "BMP180 barometer not detected.\r\n\n", LOG_ERROR);
+        LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
  80019ee:	2103      	movs	r1, #3
  80019f0:	480f      	ldr	r0, [pc, #60]	; (8001a30 <MPU6050_Config+0xb0>)
  80019f2:	f000 f9a3 	bl	8001d3c <LOG>
  80019f6:	e003      	b.n	8001a00 <MPU6050_Config+0x80>
-    	// return -1; TODO
+        // return -1; TODO
     } else {
 
-    	LOG((uint8_t *) "BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
+        LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
  80019f8:	2100      	movs	r1, #0
  80019fa:	480e      	ldr	r0, [pc, #56]	; (8001a34 <MPU6050_Config+0xb4>)
  80019fc:	f000 f99e 	bl	8001d3c <LOG>
@@ -3378,7 +3378,7 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001a02:	f7ff ff79 	bl	80018f8 <BMP180_Configure>
 
     /* Disable Bypass */
-	MPU6050_DisableBypassMode(hmpu6050);
+    MPU6050_DisableBypassMode(hmpu6050);
  8001a06:	6878      	ldr	r0, [r7, #4]
  8001a08:	f7ff fef0 	bl	80017ec <MPU6050_DisableBypassMode>
 
@@ -3582,7 +3582,7 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
  8001b26:	d00e      	beq.n	8001b46 <MPU6050_Init+0x56>
 
             /* Initialization was successful */
-        	LOG((uint8_t *) "MPU6050 IMU detected.\r\n\n", LOG_INFORMATION);
+            LOG((uint8_t *)"MPU6050 IMU detected.\r\n\n", LOG_INFORMATION);
  8001b28:	2100      	movs	r1, #0
  8001b2a:	4813      	ldr	r0, [pc, #76]	; (8001b78 <MPU6050_Init+0x88>)
  8001b2c:	f000 f906 	bl	8001d3c <LOG>
@@ -3618,7 +3618,7 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
  8001b52:	f008 f865 	bl	8009c20 <free>
 #endif
 
-            LOG((uint8_t *) "MPU6050 IMU not detected.\r\n\n", LOG_ERROR);
+            LOG((uint8_t *)"MPU6050 IMU not detected.\r\n\n", LOG_ERROR);
  8001b56:	2103      	movs	r1, #3
  8001b58:	4808      	ldr	r0, [pc, #32]	; (8001b7c <MPU6050_Init+0x8c>)
  8001b5a:	f000 f8ef 	bl	8001d3c <LOG>
@@ -3629,7 +3629,7 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
     } else {
 
         /* Instance couldn't be created */
-    	LOG((uint8_t *) "MPU6050 IMU couldn't be initialized.\r\n\n", LOG_ERROR);
+        LOG((uint8_t *)"MPU6050 IMU couldn't be initialized.\r\n\n", LOG_ERROR);
  8001b62:	2103      	movs	r1, #3
  8001b64:	4806      	ldr	r0, [pc, #24]	; (8001b80 <MPU6050_Init+0x90>)
  8001b66:	f000 f8e9 	bl	8001d3c <LOG>
@@ -3676,8 +3676,8 @@ void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerVa
  8001b9a:	2b00      	cmp	r3, #0
  8001b9c:	d04e      	beq.n	8001c3c <MPU6050_ReadMagnetometer+0xb8>
 
-		/* Read magnetometer in axis X */
-		MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_00, magnetometerRawData, sizeof(uint16_t));
+        /* Read magnetometer in axis X */
+        MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_00, magnetometerRawData, sizeof(uint16_t));
  8001b9e:	687b      	ldr	r3, [r7, #4]
  8001ba0:	6858      	ldr	r0, [r3, #4]
  8001ba2:	687b      	ldr	r3, [r7, #4]
@@ -3687,7 +3687,7 @@ void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerVa
  8001bac:	9200      	str	r2, [sp, #0]
  8001bae:	2249      	movs	r2, #73	; 0x49
  8001bb0:	f7ff ff42 	bl	8001a38 <MPU6050_ReadRegister>
-		magnetometerValues->magnetometerX = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
+        magnetometerValues->magnetometerX = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
  8001bb4:	7b7b      	ldrb	r3, [r7, #13]
  8001bb6:	021b      	lsls	r3, r3, #8
  8001bb8:	b21a      	sxth	r2, r3
@@ -3702,8 +3702,8 @@ void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerVa
  8001bce:	683b      	ldr	r3, [r7, #0]
  8001bd0:	801a      	strh	r2, [r3, #0]
 
-		/* Read magnetometer in axis Y */
-		MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_02, magnetometerRawData, sizeof(uint16_t));
+        /* Read magnetometer in axis Y */
+        MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_02, magnetometerRawData, sizeof(uint16_t));
  8001bd2:	687b      	ldr	r3, [r7, #4]
  8001bd4:	6858      	ldr	r0, [r3, #4]
  8001bd6:	687b      	ldr	r3, [r7, #4]
@@ -3713,7 +3713,7 @@ void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerVa
  8001be0:	9200      	str	r2, [sp, #0]
  8001be2:	224b      	movs	r2, #75	; 0x4b
  8001be4:	f7ff ff28 	bl	8001a38 <MPU6050_ReadRegister>
-		magnetometerValues->magnetometerY = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
+        magnetometerValues->magnetometerY = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
  8001be8:	7b7b      	ldrb	r3, [r7, #13]
  8001bea:	021b      	lsls	r3, r3, #8
  8001bec:	b21a      	sxth	r2, r3
@@ -3728,8 +3728,8 @@ void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerVa
  8001c02:	683b      	ldr	r3, [r7, #0]
  8001c04:	805a      	strh	r2, [r3, #2]
 
-		/* Read magnetometer in axis Z */
-		MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_04, magnetometerRawData, sizeof(uint16_t));
+        /* Read magnetometer in axis Z */
+        MPU6050_ReadRegister(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_EXT_SENS_DATA_04, magnetometerRawData, sizeof(uint16_t));
  8001c06:	687b      	ldr	r3, [r7, #4]
  8001c08:	6858      	ldr	r0, [r3, #4]
  8001c0a:	687b      	ldr	r3, [r7, #4]
@@ -3739,7 +3739,7 @@ void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerVa
  8001c14:	9200      	str	r2, [sp, #0]
  8001c16:	224d      	movs	r2, #77	; 0x4d
  8001c18:	f7ff ff0e 	bl	8001a38 <MPU6050_ReadRegister>
-		magnetometerValues->magnetometerZ = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
+        magnetometerValues->magnetometerZ = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]) / scaleFactor;
  8001c1c:	7b7b      	ldrb	r3, [r7, #13]
  8001c1e:	021b      	lsls	r3, r3, #8
  8001c20:	b21a      	sxth	r2, r3
@@ -3755,21 +3755,21 @@ void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerVa
  8001c38:	809a      	strh	r2, [r3, #4]
  8001c3a:	e009      	b.n	8001c50 <MPU6050_ReadMagnetometer+0xcc>
 
-	} else {
-		/* Wrong parameters */
-		magnetometerValues->magnetometerX = 0;
+    } else {
+        /* Wrong parameters */
+        magnetometerValues->magnetometerX = 0;
  8001c3c:	683b      	ldr	r3, [r7, #0]
  8001c3e:	2200      	movs	r2, #0
  8001c40:	801a      	strh	r2, [r3, #0]
-		magnetometerValues->magnetometerY = 0;
+        magnetometerValues->magnetometerY = 0;
  8001c42:	683b      	ldr	r3, [r7, #0]
  8001c44:	2200      	movs	r2, #0
  8001c46:	805a      	strh	r2, [r3, #2]
-		magnetometerValues->magnetometerZ = 0;
+        magnetometerValues->magnetometerZ = 0;
  8001c48:	683b      	ldr	r3, [r7, #0]
  8001c4a:	2200      	movs	r2, #0
  8001c4c:	809a      	strh	r2, [r3, #4]
-	}
+    }
 }
  8001c4e:	bf00      	nop
  8001c50:	bf00      	nop
@@ -3785,7 +3785,7 @@ int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001c5c:	af00      	add	r7, sp, #0
  8001c5e:	6078      	str	r0, [r7, #4]
 
-	/* Allocate dynamic memory for the magnetometerValues_t structure */
+    /* Allocate dynamic memory for the magnetometerValues_t structure */
 #ifdef USE_FREERTOS
     magnetometerValues_t * magnetometerValues = pvPortmalloc(sizeof(magnetometerValues_t));
 #else
@@ -3796,7 +3796,7 @@ int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001c68:	60bb      	str	r3, [r7, #8]
 
     /* Declare variable for compass heading */
-	float heading;
+    float heading;
 
     /* Check parameters */
     if (NULL != hmpu6050) {
@@ -3804,13 +3804,13 @@ int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001c6c:	2b00      	cmp	r3, #0
  8001c6e:	d038      	beq.n	8001ce2 <MPU6050_ReadMagnetometerHeading+0x8a>
 
-    	MPU6050_ReadMagnetometer(hmpu6050, magnetometerValues);
+        MPU6050_ReadMagnetometer(hmpu6050, magnetometerValues);
  8001c70:	68b9      	ldr	r1, [r7, #8]
  8001c72:	6878      	ldr	r0, [r7, #4]
  8001c74:	f7ff ff86 	bl	8001b84 <MPU6050_ReadMagnetometer>
 
-    	/* Calculate heading */
-    	heading = atan2(magnetometerValues->magnetometerY, magnetometerValues->magnetometerX) * RADIANS_TO_DEGREES_CONST;
+        /* Calculate heading */
+        heading = atan2(magnetometerValues->magnetometerY, magnetometerValues->magnetometerX) * RADIANS_TO_DEGREES_CONST;
  8001c78:	68bb      	ldr	r3, [r7, #8]
  8001c7a:	f9b3 3002 	ldrsh.w	r3, [r3, #2]
  8001c7e:	4618      	mov	r0, r3
@@ -3838,27 +3838,27 @@ int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001cbe:	4603      	mov	r3, r0
  8001cc0:	60fb      	str	r3, [r7, #12]
 
-    	/* Check if heading is within 0 and 360 degrees */
-    	if(heading < 0) {
+        /* Check if heading is within 0 and 360 degrees */
+        if (heading < 0) {
  8001cc2:	edd7 7a03 	vldr	s15, [r7, #12]
  8001cc6:	eef5 7ac0 	vcmpe.f32	s15, #0.0
  8001cca:	eef1 fa10 	vmrs	APSR_nzcv, fpscr
  8001cce:	d50a      	bpl.n	8001ce6 <MPU6050_ReadMagnetometerHeading+0x8e>
-    		heading += 360;
+            heading += 360;
  8001cd0:	edd7 7a03 	vldr	s15, [r7, #12]
  8001cd4:	ed9f 7a0c 	vldr	s14, [pc, #48]	; 8001d08 <MPU6050_ReadMagnetometerHeading+0xb0>
  8001cd8:	ee77 7a87 	vadd.f32	s15, s15, s14
  8001cdc:	edc7 7a03 	vstr	s15, [r7, #12]
  8001ce0:	e001      	b.n	8001ce6 <MPU6050_ReadMagnetometerHeading+0x8e>
-    	}
+        }
 
     } else {
 
-    	heading = -1;
+        heading = -1;
  8001ce2:	4b0a      	ldr	r3, [pc, #40]	; (8001d0c <MPU6050_ReadMagnetometerHeading+0xb4>)
  8001ce4:	60fb      	str	r3, [r7, #12]
 
-	/* Free up dynamic allocated memory */
+    /* Free up dynamic allocated memory */
 #ifdef USE_FREERTOS
     vPortFree(magnetometerValues);
 #else
@@ -3867,7 +3867,7 @@ int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050) {
  8001ce8:	f007 ff9a 	bl	8009c20 <free>
 #endif
 
-	return heading;
+    return heading;
  8001cec:	edd7 7a03 	vldr	s15, [r7, #12]
  8001cf0:	eefd 7ae7 	vcvt.s32.f32	s15, s15
  8001cf4:	ee17 3a90 	vmov	r3, s15

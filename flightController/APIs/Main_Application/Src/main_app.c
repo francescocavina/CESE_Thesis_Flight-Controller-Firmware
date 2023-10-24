@@ -36,6 +36,7 @@
 #include "FSA8S_driver_UAI.h"
 #include "MPU6050_driver_UAI.h"
 #include "LoggingSystem_UAI.h"
+#include "ESC_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 
