@@ -27,7 +27,12 @@
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   TODO
+ * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
+ *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
+ *           and one low level abstraction layer (ESC_HWI.c and ESC_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver to another
+ *           platform, please only modify the low layer abstraction layer files where the labels
+ *           indicate it.
  */
 
 #ifndef INC_ESC_UAI_H
@@ -49,16 +54,20 @@ extern "C" {
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /**
- * @brief  TODO
- * @param  TODO
- * @retval TODO
+ * @brief  Initializes the ESC device.
+ * @param  htim:  Pointer to a TIM_HandleTypeDef structure that contains the configuration
+ * 				  information for the Timer as well as for the PWM Channels.
+ * @retval true:  If ESC device could be initialized.
+ *         false: If ESC device couldn't be initialized.
  */
 bool_t ESC_Init(TIM_HandleTypeDef * htim);
 
 /**
- * @brief  TODO
- * @param  TODO
- * @retval TODO
+ * @brief  Deinitializes the ESC device.
+ * @param  htim:  Pointer to a TIM_HandleTypeDef structure that contains the configuration
+ * 				  information for the Timer as well as for the PWM Channels.
+ * @retval true:  If ESC device could be deinitialized.
+ *         false: If ESC device couldn't be deinitialized.
  */
 bool_t ESC_Deinit(TIM_HandleTypeDef * htim);
 

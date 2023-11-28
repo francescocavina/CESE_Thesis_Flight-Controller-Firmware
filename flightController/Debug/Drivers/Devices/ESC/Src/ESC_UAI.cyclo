@@ -1,5 +1,5 @@
-../Drivers/Devices/ESC/Src/ESC_UAI.c:65:15:ESC_CalculateSpeed	3
-../Drivers/Devices/ESC/Src/ESC_UAI.c:77:15:ESC_Calibrate	9
-../Drivers/Devices/ESC/Src/ESC_UAI.c:107:8:ESC_Init	4
-../Drivers/Devices/ESC/Src/ESC_UAI.c:127:8:ESC_Deinit	3
-../Drivers/Devices/ESC/Src/ESC_UAI.c:142:8:ESC_SetSpeed	11
+../Drivers/Devices/ESC/Src/ESC_UAI.c:76:15:ESC_CalculatePWMValue	3
+../Drivers/Devices/ESC/Src/ESC_UAI.c:88:15:ESC_Calibrate	9
+../Drivers/Devices/ESC/Src/ESC_UAI.c:118:8:ESC_Init	4
+../Drivers/Devices/ESC/Src/ESC_UAI.c:138:8:ESC_Deinit	3
+../Drivers/Devices/ESC/Src/ESC_UAI.c:153:8:ESC_SetSpeed	11

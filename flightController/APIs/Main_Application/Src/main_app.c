@@ -140,19 +140,11 @@ void flightController_App(void) {
     //    	HAL_Delay(1000);
     //    }
 
-    PWM_SetDutyCycle(&htim3, TIM_CHANNEL_1, 500);
-    //	PWM_SetDutyCycle(&htim3, TIM_CHANNEL_2, 500);
-    //	PWM_SetDutyCycle(&htim3, TIM_CHANNEL_3, 500);
-    //	PWM_SetDutyCycle(&htim3, TIM_CHANNEL_4, 500);
-
-    HAL_Delay(3000);
+    ESC_Init(&htim3);
 
     while (1) {
 
-        PWM_SetDutyCycle(&htim3, TIM_CHANNEL_1, 600);
-        //		PWM_SetDutyCycle(&htim3, TIM_CHANNEL_2, 600);
-        //		PWM_SetDutyCycle(&htim3, TIM_CHANNEL_3, 600);
-        //		PWM_SetDutyCycle(&htim3, TIM_CHANNEL_4, 600);
+        PWM_SetDutyCycle(&htim3, TIM_CHANNEL_ALL, 600);
     }
 }
 

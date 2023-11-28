@@ -27,7 +27,12 @@
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   TODO
+ * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
+ *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
+ *           and one low level abstraction layer (ESC_HWI.c and ESC_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver to another
+ *           platform, please only modify the low layer abstraction layer files where the labels
+ *           indicate it.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
@@ -44,16 +49,22 @@
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /**
- * @brief  TODO
- * @param  TODO
- * @retval TODO
+ * @brief  Calculates PWM value.
+ * @param  speed:    Speed percentage (from 0.00 to 100.00).
+ * 		   pwmValue: Pointer to variable to store the result.
+ * @retval true:     If PWM value could be calculated.
+ *         false:    If PWM value couldn't be calculated.
  */
-static bool_t ESC_CalculateSpeed(float speed, uint16_t * pwmValue);
+static bool_t ESC_CalculatePWMValue(float speed, uint16_t * pwmValue);
 
 /**
- * @brief  TODO
- * @param  TODO
- * @retval TODO
+ * @brief  Calibrates ESC. This is necessary after powering on the ESC device.
+ * @param  htim:    Pointer to a TIM_HandleTypeDef structure that contains the configuration
+ * 				    information for the Timer as well as for the PWM Channels.
+ * 		   channel: Channel to initialize. Valid values are: TIM_CHANNEL_1, TIM_CHANNEL_2,
+ * 		            TIM_CHANNEL_3, TIM_CHANNEL_4 and TIM_CHANNEL_ALL.
+ * @retval true:    If ESC device could be calibrated.
+ *         false:   If ESC device couldn't be calibrated.
  */
 static bool_t ESC_Calibrate(TIM_HandleTypeDef * htim, uint32_t channel);
 
@@ -62,7 +73,7 @@ static bool_t ESC_Calibrate(TIM_HandleTypeDef * htim, uint32_t channel);
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t ESC_CalculateSpeed(float speed, uint16_t * pwmValue) {
+static bool_t ESC_CalculatePWMValue(float speed, uint16_t * pwmValue) {
 
     /* Check parameters */
     if (speed < 0 || speed > 100) {
@@ -90,7 +101,7 @@ static bool_t ESC_Calibrate(TIM_HandleTypeDef * htim, uint32_t channel) {
     }
 
     /* Wait 2 seconds */
-    HAL_Delay(3000); // TODO
+    HAL_Delay(3000); // TODO -> NO MAGIC NUMBERS AND NO HAL FUNCTION
 
     /* Set ESC to minimum throttle */
     if (false == PWM_SetDutyCycle(htim, TIM_CHANNEL_ALL, MIN_ESC_SPEED)) {
@@ -98,7 +109,7 @@ static bool_t ESC_Calibrate(TIM_HandleTypeDef * htim, uint32_t channel) {
     }
 
     /* Wait 1 second */
-    HAL_Delay(2000); // TODO
+    HAL_Delay(2000); // TODO -> NO MAGIC NUMBERS AND NO HAL FUNCTION
 
     return true;
 }
@@ -156,7 +167,7 @@ bool_t ESC_SetSpeed(TIM_HandleTypeDef * htim, uint32_t channel, float speed) {
     }
 
     /* Calculate PWM value */
-    if (false == ESC_CalculateSpeed(speed, pwmValuePtr)) {
+    if (false == ESC_CalculatePWMValue(speed, pwmValuePtr)) {
         return false;
     }
 
