@@ -16,7 +16,7 @@ S_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 Core/Startup/%.o: ../Core/Startup/%.s Core/Startup/subdir.mk
-	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -I../APIs/Main_Application/Inc -I"/mnt/CE0A6A9D0A6A8277/Francesco/Thesis/CESE_Thesis_Flight-Controller-Firmware/flightController/APIs/Main_Application" -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
 
 clean: clean-Core-2f-Startup
 

@@ -46,6 +46,83 @@
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
+bool_t PWM_Init(TIM_HandleTypeDef * htim, uint32_t channel) {
+
+    /* Check parameters */
+    if (NULL == htim) {
+        return false;
+    }
+    if (TIM_CHANNEL_1 != channel && TIM_CHANNEL_2 != channel && TIM_CHANNEL_3 != channel && TIM_CHANNEL_4 != channel && TIM_CHANNEL_ALL != channel) {
+        return false;
+    }
+
+    /* Initialize timer peripheral */
+    HAL_TIM_PWM_Init(htim);
+
+    /* Start PWM signal generation */
+    HAL_TIM_PWM_Start(htim, channel);
+
+    return true;
+}
+
+bool_t PWM_Deinit(TIM_HandleTypeDef * htim, uint32_t channel) {
+
+    /* Check parameters */
+    if (NULL == htim) {
+        return false;
+    }
+    if (TIM_CHANNEL_1 != channel && TIM_CHANNEL_2 != channel && TIM_CHANNEL_3 != channel && TIM_CHANNEL_4 != channel && TIM_CHANNEL_ALL != channel) {
+        return false;
+    }
+
+    /* Stop PWM signal generation */
+    HAL_TIM_PWM_Stop(htim, channel);
+
+    /* Deinitialize timer peripheral */
+    HAL_TIM_PWM_DeInit(htim);
+
+    return true;
+}
+
+bool_t PWM_SetDutyCycle(TIM_HandleTypeDef * htim, uint32_t channel, uint16_t dutyCycle) {
+
+    /* Check parameters */
+    if (NULL == htim) {
+        return false;
+    }
+    if (TIM_CHANNEL_1 != channel && TIM_CHANNEL_2 != channel && TIM_CHANNEL_3 != channel && TIM_CHANNEL_4 != channel && TIM_CHANNEL_ALL != channel) {
+        return false;
+    }
+    if (dutyCycle > 16383) {
+        return false;
+    }
+
+    /* Set duty cycle */
+    switch (channel) {
+
+    case TIM_CHANNEL_1:
+        TIM3->CCR1 = dutyCycle;
+        break;
+
+    case TIM_CHANNEL_2:
+        TIM3->CCR2 = dutyCycle;
+        break;
+
+    case TIM_CHANNEL_3:
+        TIM3->CCR3 = dutyCycle;
+        break;
+
+    case TIM_CHANNEL_4:
+        TIM3->CCR4 = dutyCycle;
+        break;
+
+    default:
+        return false;
+        break;
+    }
+
+    return true;
+}
 
 /* --- Public function implementation ---------------------------------------------------------- */
 

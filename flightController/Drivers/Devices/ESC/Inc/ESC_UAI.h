@@ -48,6 +48,19 @@ extern "C" {
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+/**
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+bool_t ESC_Init(TIM_HandleTypeDef * htim);
+
+/**
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+bool_t ESC_Deinit(TIM_HandleTypeDef * htim);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

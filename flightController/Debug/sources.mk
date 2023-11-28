@@ -22,7 +22,6 @@ C_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-.metadata/.plugins/org.eclipse.cdt.make.core \
 APIs/Main_Application/Src \
 Core/Src \
 Core/Startup \
@@ -33,6 +32,5 @@ Drivers/Devices/LoggingSystem/Src \
 Drivers/STM32F4xx_HAL_Driver/Src \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src \
-Templates \
 USB_DEVICE/App \
 USB_DEVICE/Target \

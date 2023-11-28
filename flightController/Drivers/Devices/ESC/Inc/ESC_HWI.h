@@ -49,10 +49,34 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
+/**
+ * @brief bool_t type declaration.
+ */
+typedef bool bool_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+/**
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+bool_t PWM_Init(TIM_HandleTypeDef * htim, uint32_t channel);
+
+/**
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+bool_t PWM_Deinit(TIM_HandleTypeDef * htim, uint32_t channel);
+
+/**
+ * @brief  TODO
+ * @param  TODO
+ * @retval TODO
+ */
+bool_t PWM_SetDutyCycle(TIM_HandleTypeDef * htim, uint32_t channel, uint16_t dutyCycle);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
