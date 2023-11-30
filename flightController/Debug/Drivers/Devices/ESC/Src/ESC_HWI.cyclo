@@ -1,3 +1,4 @@
-../Drivers/Devices/ESC/Src/ESC_HWI.c:54:8:PWM_Init	9
-../Drivers/Devices/ESC/Src/ESC_HWI.c:87:8:PWM_Deinit	9
-../Drivers/Devices/ESC/Src/ESC_HWI.c:120:8:PWM_SetDutyCycle	12
+../Drivers/Devices/ESC/Src/ESC_HWI.c:54:8:PWM_Init	8
+../Drivers/Devices/ESC/Src/ESC_HWI.c:93:8:PWM_Deinit	8
+../Drivers/Devices/ESC/Src/ESC_HWI.c:120:8:PWM_SetDutyCycle	11
+../Drivers/Devices/ESC/Src/ESC_HWI.c:154:6:ESC_SetTimeDelay	1

@@ -140,11 +140,26 @@ void flightController_App(void) {
     //    	HAL_Delay(1000);
     //    }
 
-    ESC_Init(&htim3);
+    ESC_HandleTypeDef_t * hesc;
+
+    // Delay before start
+    HAL_Delay(1000);
+
+    LOG((uint8_t *)"Initializing Flight Controller...\r\n\n", LOG_INFORMATION);
+    HAL_Delay(50);
+
+    hesc = ESC_Init(&htim3);
+
+    LOG((uint8_t *)"Flight Controller initialized.\r\n\n", LOG_INFORMATION);
+    HAL_Delay(50);
+
+    HAL_Delay(3000);
+    ESC_SetSpeed(hesc, hesc->channel1, 100);
+    ESC_SetSpeed(hesc, hesc->channel2, 100);
+    ESC_SetSpeed(hesc, hesc->channel3, 100);
+    ESC_SetSpeed(hesc, hesc->channel4, 100);
 
     while (1) {
-
-        PWM_SetDutyCycle(&htim3, TIM_CHANNEL_ALL, 600);
     }
 }
 

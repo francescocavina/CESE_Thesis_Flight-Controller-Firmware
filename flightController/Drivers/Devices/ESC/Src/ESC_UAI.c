@@ -23,9 +23,9 @@
 
 /*
  * @file:    ESC_UAI.c
- * @date:    24/10/2023
+ * @date:    29/11/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
  * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
  *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
@@ -39,9 +39,9 @@
 #include "ESC_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define MAX_PWM_VALUE (16384 - 1)            // 14 bits
-#define MIN_ESC_SPEED (MAX_PWM_VALUE * 0.05) // 1ms
-#define MAX_ESC_SPEED (MAX_PWM_VALUE * 0.10) // 2ms
+// #define USE_FREERTOS                   		// Remove comment when using FreeRTOS
+#define ESC_AUTOCALIBRATION_WAIT_TIME_1 (2000) // Time to wait after ESC was set to maximum throttle
+#define ESC_AUTOCALIBRATION_WAIT_TIME_2 (1000) // Time to wait after ESC was set to minimum throttle
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -49,130 +49,243 @@
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /**
- * @brief  Calculates PWM value.
+ * @brief  Calculates PWM duty cycle.
  * @param  speed:    Speed percentage (from 0.00 to 100.00).
  * 		   pwmValue: Pointer to variable to store the result.
  * @retval true:     If PWM value could be calculated.
  *         false:    If PWM value couldn't be calculated.
  */
-static bool_t ESC_CalculatePWMValue(float speed, uint16_t * pwmValue);
+static bool_t ESC_CalculatePWMDutyCycle(float speed, uint16_t * pwmValue);
 
 /**
- * @brief  Calibrates ESC. This is necessary after powering on the ESC device.
- * @param  htim:    Pointer to a TIM_HandleTypeDef structure that contains the configuration
- * 				    information for the Timer as well as for the PWM Channels.
- * 		   channel: Channel to initialize. Valid values are: TIM_CHANNEL_1, TIM_CHANNEL_2,
- * 		            TIM_CHANNEL_3, TIM_CHANNEL_4 and TIM_CHANNEL_ALL.
+ * @brief  Auto-calibrates ESC. This is necessary after powering on the ESC device.
+ * @param  hesc:    Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
+ * 			        information for the communication with the ESC device.
+ * 		   channel: Channel to auto-calibrate.
  * @retval true:    If ESC device could be calibrated.
  *         false:   If ESC device couldn't be calibrated.
  */
-static bool_t ESC_Calibrate(TIM_HandleTypeDef * htim, uint32_t channel);
+static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t ESC_CalculatePWMValue(float speed, uint16_t * pwmValue) {
+static bool_t ESC_CalculatePWMDutyCycle(float speed, uint16_t * pwmValue) {
 
     /* Check parameters */
-    if (speed < 0 || speed > 100) {
-        return false;
-    }
-
-    *pwmValue = (MAX_ESC_SPEED - MIN_ESC_SPEED) * (speed / 100) + MIN_ESC_SPEED;
-
-    return true;
-}
-
-static bool_t ESC_Calibrate(TIM_HandleTypeDef * htim, uint32_t channel) {
-
-    /* Check parameters */
-    if (NULL == htim) {
-        return false;
-    }
-    if (TIM_CHANNEL_1 != channel && TIM_CHANNEL_2 != channel && TIM_CHANNEL_3 != channel && TIM_CHANNEL_4 != channel && TIM_CHANNEL_ALL != channel) {
-        return false;
-    }
-
-    /* Set ESC to maximum throttle */
-    if (false == PWM_SetDutyCycle(htim, TIM_CHANNEL_ALL, MAX_ESC_SPEED)) {
-        return false;
-    }
-
-    /* Wait 2 seconds */
-    HAL_Delay(3000); // TODO -> NO MAGIC NUMBERS AND NO HAL FUNCTION
-
-    /* Set ESC to minimum throttle */
-    if (false == PWM_SetDutyCycle(htim, TIM_CHANNEL_ALL, MIN_ESC_SPEED)) {
-        return false;
-    }
-
-    /* Wait 1 second */
-    HAL_Delay(2000); // TODO -> NO MAGIC NUMBERS AND NO HAL FUNCTION
-
-    return true;
-}
-
-/* --- Public function implementation ---------------------------------------------------------- */
-bool_t ESC_Init(TIM_HandleTypeDef * htim) {
-
-    /* Check parameters */
-    if (NULL == htim) {
-        return false;
-    }
-
-    /* Start PWM signal generation */
-    if (false == PWM_Init(htim, TIM_CHANNEL_ALL)) {
-        return false;
-    }
-
-    /* Calibrate ESC */
-    if (false == ESC_Calibrate(htim, TIM_CHANNEL_ALL)) {
-        return false;
-    }
-
-    return true;
-}
-
-bool_t ESC_Deinit(TIM_HandleTypeDef * htim) {
-
-    /* Check parameters */
-    if (NULL == htim) {
-        return false;
-    }
-
-    /* Stop PWM signal generation */
-    if (false == PWM_Deinit(htim, TIM_CHANNEL_ALL)) {
-        return false;
-    }
-
-    return true;
-}
-
-bool_t ESC_SetSpeed(TIM_HandleTypeDef * htim, uint32_t channel, float speed) {
-
-    uint16_t pwmValue;
-    uint16_t * pwmValuePtr = &pwmValue;
-
-    /* Check parameters */
-    if (NULL == htim) {
-        return false;
-    }
-    if (TIM_CHANNEL_1 != channel && TIM_CHANNEL_2 != channel && TIM_CHANNEL_3 != channel && TIM_CHANNEL_4 != channel && TIM_CHANNEL_ALL != channel) {
-        return false;
-    }
     if (speed < 0 || speed > 100) {
         return false;
     }
 
     /* Calculate PWM value */
-    if (false == ESC_CalculatePWMValue(speed, pwmValuePtr)) {
+    *pwmValue = (MAX_ESC_SPEED - MIN_ESC_SPEED) * (speed / 100) + MIN_ESC_SPEED;
+
+    return true;
+}
+
+static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc) {
+
+    /* Check parameters */
+    if (NULL == hesc) {
+        return false;
+    }
+
+    LOG((uint8_t *)"Auto-calibrating ESCs...\r\n\n", LOG_INFORMATION);
+
+    /* Set ESC to maximum throttle */
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel1, MAX_ESC_SPEED)) {
+        return false;
+    }
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel2, MAX_ESC_SPEED)) {
+        return false;
+    }
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel3, MAX_ESC_SPEED)) {
+        return false;
+    }
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel4, MAX_ESC_SPEED)) {
+        return false;
+    }
+
+    /* Wait 2 seconds */
+    ESC_SetTimeDelay(ESC_AUTOCALIBRATION_WAIT_TIME_1);
+
+    /* Set ESC to minimum throttle */
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel1, MIN_ESC_SPEED)) {
+        return false;
+    }
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel2, MIN_ESC_SPEED)) {
+        return false;
+    }
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel3, MIN_ESC_SPEED)) {
+        return false;
+    }
+    if (false == PWM_SetDutyCycle(hesc, hesc->channel4, MIN_ESC_SPEED)) {
+        return false;
+    }
+
+    /* Wait 1 second */
+    ESC_SetTimeDelay(ESC_AUTOCALIBRATION_WAIT_TIME_2);
+
+    LOG((uint8_t *)"ESCs auto-calibrated.\r\n\n", LOG_INFORMATION);
+
+    return true;
+}
+
+/* --- Public function implementation ---------------------------------------------------------- */
+ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
+
+    /* Check parameters */
+    if (NULL == htim) {
+        return NULL;
+    }
+
+    LOG((uint8_t *)"Initializing ESCs...\r\n\n", LOG_INFORMATION);
+
+    /* Allocate dynamic memory for the ESC_HandleTypeDef_t structure */
+#ifdef USE_FREERTOS
+    ESC_HandleTypeDef_t * hesc = pvPortmalloc(sizeof(ESC_HandleTypeDef_t));
+#else
+    ESC_HandleTypeDef_t * hesc = malloc(sizeof(ESC_HandleTypeDef_t));
+#endif
+
+    /* Initialize ESC_HandleTypeDef structure */
+    if (hesc) {
+        hesc->htim = htim;
+    } else {
+        /* Dynamic memory allocation was not successful */
+        /* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+        vPortFree(hesc);
+#else
+        free(hesc);
+#endif
+    }
+
+    /* Start PWM signal generation */
+    if (false == PWM_Init(hesc, hesc->channel1)) {
+        LOG((uint8_t *)"ESC 1 couldn't be initialized.\r\n\n", LOG_ERROR);
+
+/* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+        vPortFree(hesc);
+#else
+        free(hesc);
+#endif
+
+        return NULL;
+    }
+    if (false == PWM_Init(hesc, hesc->channel2)) {
+        LOG((uint8_t *)"ESC 2 couldn't be initialized.\r\n\n", LOG_ERROR);
+
+/* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+        vPortFree(hesc);
+#else
+        free(hesc);
+#endif
+
+        return NULL;
+    }
+    if (false == PWM_Init(hesc, hesc->channel3)) {
+        LOG((uint8_t *)"ESC 3 couldn't be initialized.\r\n\n", LOG_ERROR);
+
+/* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+        vPortFree(hesc);
+#else
+        free(hesc);
+#endif
+
+        return NULL;
+    }
+    if (false == PWM_Init(hesc, hesc->channel4)) {
+        LOG((uint8_t *)"ESC 4 couldn't be initialized.\r\n\n", LOG_ERROR);
+
+/* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+        vPortFree(hesc);
+#else
+        free(hesc);
+#endif
+
+        return NULL;
+    }
+
+    /* Calibrate ESC */
+    if (false == ESC_AutoCalibrate(hesc)) {
+        LOG((uint8_t *)"ESCs couldn't be auto-calibrated.\r\n\n", LOG_ERROR);
+
+/* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+        vPortFree(hesc);
+#else
+        free(hesc);
+#endif
+
+        return NULL;
+    }
+
+    LOG((uint8_t *)"ESCs initialized.\r\n\n", LOG_INFORMATION);
+
+    return hesc;
+}
+
+bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc) {
+
+    /* Check parameters */
+    if (NULL == hesc->htim) {
+        return false;
+    }
+
+    /* Stop PWM signal generation */
+    if (false == PWM_Deinit(hesc, hesc->channel1)) {
+        return false;
+    }
+    if (false == PWM_Deinit(hesc, hesc->channel2)) {
+        return false;
+    }
+    if (false == PWM_Deinit(hesc, hesc->channel3)) {
+        return false;
+    }
+    if (false == PWM_Deinit(hesc, hesc->channel4)) {
+        return false;
+    }
+
+    /* Free up dynamic allocated memory */
+#ifdef USE_FREERTOS
+    vPortFree(hesc);
+#else
+    free(hesc);
+#endif
+
+    return true;
+}
+
+bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint32_t channel, float speed) {
+
+    uint16_t pwmValue;
+    uint16_t * pwmValuePtr = &pwmValue;
+
+    /* Check parameters */
+    if (NULL == hesc->htim) {
+        return false;
+    }
+    if (channel != hesc->channel1 && channel != hesc->channel2 && channel != hesc->channel3 && channel != hesc->channel4) {
+        return false;
+    }
+    if (speed < 0 || speed > 100) {
+        return false;
+    }
+
+    /* Calculate PWM duty cycle */
+    if (false == ESC_CalculatePWMDutyCycle(speed, pwmValuePtr)) {
         return false;
     }
 
     /* Set PWM duty cycle */
-    if (false == PWM_SetDutyCycle(htim, channel, *pwmValuePtr)) {
+    if (false == PWM_SetDutyCycle(hesc, channel, *pwmValuePtr)) {
         return false;
     };
 

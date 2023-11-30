@@ -23,9 +23,9 @@
 
 /*
  * @file:    ESC_UAI.h
- * @date:    24/10/2023
+ * @date:    29/11/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
  * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
  *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
@@ -57,19 +57,30 @@ extern "C" {
  * @brief  Initializes the ESC device.
  * @param  htim:  Pointer to a TIM_HandleTypeDef structure that contains the configuration
  * 				  information for the Timer as well as for the PWM Channels.
- * @retval true:  If ESC device could be initialized.
- *         false: If ESC device couldn't be initialized.
+ * @retval hesc:  Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
+ * 			      information for the communication with the ESC device.
  */
-bool_t ESC_Init(TIM_HandleTypeDef * htim);
+ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim);
 
 /**
  * @brief  Deinitializes the ESC device.
- * @param  htim:  Pointer to a TIM_HandleTypeDef structure that contains the configuration
- * 				  information for the Timer as well as for the PWM Channels.
- * @retval true:  If ESC device could be deinitialized.
+ * @param  hesc:  Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
+ * 			      information for the communication with the ESC device.
+ * @retval true:  If ESC device could be deihesc:  TODOnitialized.
  *         false: If ESC device couldn't be deinitialized.
  */
-bool_t ESC_Deinit(TIM_HandleTypeDef * htim);
+bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc);
+
+/**
+ * @brief  Sets the speed to a certain ESC device.
+ * @param  hesc:    Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
+ * 			        information for the communication with the ESC device.
+ * 		   channel: Channel to set the speed to.
+ * 		   speed:   Speed to set (from 0 to 100).
+ * @retval true:    Speed could be set.
+ *         false:   Speed couldn't be set.
+ */
+bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint32_t channel, float speed);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

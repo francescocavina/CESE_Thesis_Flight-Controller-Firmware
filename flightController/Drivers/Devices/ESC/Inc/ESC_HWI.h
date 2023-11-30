@@ -23,9 +23,9 @@
 
 /*
  * @file:    ESC_HWI.h
- * @date:    24/10/2023
+ * @date:    29/11/2023
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v1.1.0
  *
  * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
  *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
@@ -54,6 +54,9 @@ extern "C" {
 #endif
 
 /* --- Public macros definitions --------------------------------------------------------------- */
+#define MAX_PWM_VALUE (16384 - 1)            // 14 bits
+#define MIN_ESC_SPEED (MAX_PWM_VALUE * 0.05) // 1ms
+#define MAX_ESC_SPEED (MAX_PWM_VALUE * 0.10) // 2ms
 
 /* --- Public data type declarations ----------------------------------------------------------- */
 /**
@@ -61,56 +64,65 @@ extern "C" {
  */
 typedef bool bool_t;
 
+/**
+ * @brief ESC handle structure declaration.
+ */
+typedef struct {
+    /* BEGIN MODIFY 2 */
+    TIM_HandleTypeDef * htim; /* Pointer to TIM_HandleTypeDef structure */
+    /* END MODIFY 2 */
+    uint32_t channel1; // Value of channel 1 identifier
+    uint32_t channel2; // Value of channel 2 identifier
+    uint32_t channel3; // Value of channel 3 identifier
+    uint32_t channel4; // Value of channel 4 identifier
+    uint32_t * CCR1;   // Capture/Compare register for channel 1
+    uint32_t * CCR2;   // Capture/Compare register for channel 2
+    uint32_t * CCR3;   // Capture/Compare register for channel 3
+    uint32_t * CCR4;   // Capture/Compare register for channel 4
+} ESC_HandleTypeDef_t;
+
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /**
  * @brief  Initializes the PWM Timer peripheral.
- * @param  htim:    Pointer to a TIM_HandleTypeDef structure that contains the configuration
- * 				    information for the Timer as well as for the PWM Channels.
- * 		   channel: Channel to initialize. Valid values are: TIM_CHANNEL_1, TIM_CHANNEL_2,
- * 		            TIM_CHANNEL_3, TIM_CHANNEL_4 and TIM_CHANNEL_ALL.
+ * @param  hesc:    Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
+ * 					information for the communication with the ESC device.
+ * 		   channel: Channel to initialize.
  * @retval true:    If PWM could be initialized.
  *         false:   If PWM couldn't be initialized.
  */
-bool_t PWM_Init(
-    /* BEGIN MODIFY 2 */
-    TIM_HandleTypeDef * htim,
-    /* END MODIFY 2 */
-    uint32_t channel);
+bool_t PWM_Init(ESC_HandleTypeDef_t * hesc, uint32_t channel);
 
 /**
- * @brief  Deinitializes the PWM Timer peripheral.
- * @param  htim:    Pointer to a TIM_HandleTypeDef structure that contains the configuration
- * 				    information for the Timer as well as for the PWM Channels.
- * 		   channel: Channel to initialize. Valid values are: TIM_CHANNEL_1, TIM_CHANNEL_2,
- * 		            TIM_CHANNEL_3, TIM_CHANNEL_4 and TIM_CHANNEL_ALL.
- * @retval true:    If PWM could be deinitialized.
- *         false:   If PWM couldn't be deinitialized.
+ * @brief  De-initializes the PWM Timer peripheral.
+ * @param  hesc:    Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
+ * 					information for the communication with the ESC device.
+ * 		   channel: Channel to initialize.
+ * @retval true:    If PWM could be de-initialized.
+ *         false:   If PWM couldn't be de-initialized.
  */
-bool_t PWM_Deinit(
-    /* BEGIN MODIFY 3 */
-    TIM_HandleTypeDef * htim,
-    /* END MODIFY 3 */
-    uint32_t channel);
+bool_t PWM_Deinit(ESC_HandleTypeDef_t * hesc, uint32_t channel);
 
 /**
  * @brief  Sets PWM duty cycle.
- * @param  htim:     Pointer to a TIM_HandleTypeDef structure that contains the configuration
- * 				     information for the Timer as well as for the PWM Channels.
- * 		   channel:  Channel to initialize. Valid values are: TIM_CHANNEL_1, TIM_CHANNEL_2,
- * 		             TIM_CHANNEL_3, TIM_CHANNEL_4 and TIM_CHANNEL_ALL.
+ * @param  hesc:     Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
+ * 					 information for the communication with the ESC device.
+ * 		   channel:  Channel to initialize.
  * 		   dutyCyle: Percentage of the total PWM period where the signal is on an ON state.
  * 		             The duty cycle can be calculated as Ton / (Ton + Toff). In this driver,
- * 		             duty cycle goes from 0 to 16.384 (14 bit PWM).
+ * 		             duty cycle goes from 0 to 16.383 (14 bit PWM).
  * @retval true:     If duty cycle could be set.
  *         false:    If duty cycle couldn't be set.
  */
-bool_t PWM_SetDutyCycle(
-    /* BEGIN MODIFY 4 */
-    TIM_HandleTypeDef * htim,
-    /* END MODIFY 4 */
-    uint32_t channel, uint16_t dutyCycle);
+bool_t PWM_SetDutyCycle(ESC_HandleTypeDef_t * hesc, uint32_t channel, uint16_t dutyCycle);
+
+/**
+ * @brief  Provides a time delay.
+ * @param  Time in mili-seconds.
+ * @retval None
+ */
+void ESC_SetTimeDelay(uint32_t delay);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
