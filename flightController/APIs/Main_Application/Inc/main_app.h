@@ -34,6 +34,8 @@
 #define INC_MAIN_APP_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+#include "FreeRTOS.h"
+#include "cmsis_os.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -47,6 +49,13 @@ extern "C" {
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+/*
+ * @brief  TODO
+ * @param  None
+ * @retval None
+ */
+void FreeRTOS_CreateTasks();
+
 /*
  * @brief  This is the main application.
  * @param  None

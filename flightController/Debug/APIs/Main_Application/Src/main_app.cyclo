@@ -1,1 +1,4 @@
-../APIs/Main_Application/Src/main_app.c:60:6:flightController_App	1
+../APIs/Main_Application/Src/main_app.c:67:6:FlightController_HeartbeatLight	2
+../APIs/Main_Application/Src/main_app.c:88:6:FlightController_Init	1
+../APIs/Main_Application/Src/main_app.c:114:6:FreeRTOS_CreateTasks	4
+../APIs/Main_Application/Src/main_app.c:146:6:flightController_App	1

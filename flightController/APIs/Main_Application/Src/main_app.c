@@ -34,11 +34,16 @@
 #include "main_app.h"
 
 #include "FSA8S_driver_UAI.h"
-#include "MPU6050_driver_UAI.h"
+// #include "MPU6050_driver_UAI.h"
 #include "LoggingSystem_UAI.h"
-#include "ESC_UAI.h"
+// #include "ESC_UAI.h"
+// #include "PowerOnOff_UAI.h"
+
+#include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
+#define HEARTBEAT_DELAY    (200)
+#define DEFAULT_TASK_DELAY (50)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -49,28 +54,101 @@
 /* --- Public variable definitions ------------------------------------------------------------- */
 
 /* --- Private variable definitions ------------------------------------------------------------ */
-extern I2C_HandleTypeDef hi2c1;
+// extern I2C_HandleTypeDef hi2c1;
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart2_rx;
-extern TIM_HandleTypeDef htim3;
+// extern TIM_HandleTypeDef htim3;
+
+/* Tasks Handle */
+static TaskHandle_t FlightController_Init_Handle = NULL;
+static TaskHandle_t FlightController_HeartbeatLight_Handle = NULL;
 
 /* --- Private function implementation --------------------------------------------------------- */
+void FlightController_HeartbeatLight() {
 
-/* --- Public function implementation ---------------------------------------------------------- */
-void flightController_App(void) {
+    uint8_t ledState = GPIO_PIN_RESET;
+    const TickType_t xDelay = pdMS_TO_TICKS(HEARTBEAT_DELAY);
+
+    while (1) {
+
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
+
+        if (ledState == GPIO_PIN_RESET) {
+
+            ledState = GPIO_PIN_SET;
+        } else {
+
+            ledState = GPIO_PIN_RESET;
+        }
+
+        vTaskDelay(xDelay);
+    }
+}
+
+void FlightController_Init() {
 
     /* Radio Control Demo */
-    //    IBUS_HandleTypeDef_t * rc_controller;
-    //    rc_controller = FSA8S_Init(&huart2);
-    //    uint16_t channelValue;
+    static IBUS_HandleTypeDef_t * rc_controller;
+    uint8_t channel = CHANNEL_1;
+    static uint16_t channelValue;
+    uint8_t str[20];
+
+    rc_controller = FSA8S_Init(&huart2);
+
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+
+    while (1) {
+
+        // LOG((uint8_t *)"Initializing Flight Controller...\r\n\n", LOG_INFORMATION);
+
+        channelValue = FSA8S_ReadChannel(rc_controller, channel);
+        sprintf((char *)str, (const char *)"Channel %d: %d\r\n", channel, channelValue);
+        CDC_Transmit_FS(str, strlen((const char *)str));
+
+        vTaskDelay(xDelay);
+    }
+}
+
+/* --- Public function implementation ---------------------------------------------------------- */
+void FreeRTOS_CreateTasks() {
+
+    BaseType_t ret;
+
+    /* Task 1: FlightController_HeartbeatLight */
+    ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_HeartbeatLight_Handle);
+
+    /* Check the task was created successfully. */
+    configASSERT(ret == pdPASS);
+
+    /* Task 2: FlightController_Init */
+    ret = xTaskCreate(FlightController_Init, "FlightController_Init", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_Init_Handle);
+
+    /* Check the task was created successfully. */
+    configASSERT(ret == pdPASS);
+
+    if (FlightController_Init_Handle == NULL) {
+        vTaskDelete(FlightController_Init_Handle);
+    }
+}
+
+void flightController_App(void) {
+
+    //    /* Radio Control Demo */
+    //    static IBUS_HandleTypeDef_t * rc_controller;
     //    uint8_t channel = CHANNEL_1;
-    //    uint8_t str0[40];
+    //    static uint16_t channelValue;
+    //    uint8_t str[20];
+    //
+    //    rc_controller = FSA8S_Init(&huart2);
     //
     //    while (1) {
     //        channelValue = FSA8S_ReadChannel(rc_controller, channel);
-    //        sprintf((char *)str0, (const char *)"Channel %d: %d\r\n", channel, channelValue);
-    //        CDC_Transmit_FS(str0, strlen((const char *)str0));
+    //        sprintf((char *)str, (const char *)"Channel %d: %d\r\n", channel, channelValue);
+    //        CDC_Transmit_FS(str, strlen((const char *)str));
     //    }
+
+    while (1)
+        ;
 
     //    /* IMU Demo */
     //    MPU6050_HandleTypeDef_t * hmpu6050;
@@ -140,27 +218,27 @@ void flightController_App(void) {
     //    	HAL_Delay(1000);
     //    }
 
-    ESC_HandleTypeDef_t * hesc;
+    //    ESC_HandleTypeDef_t * hesc;
+    //
+    //    // Delay before start
+    //    HAL_Delay(1000);
+    //
+    //    LOG((uint8_t *)"Initializing Flight Controller...\r\n\n", LOG_INFORMATION);
+    //    HAL_Delay(50);
+    //
+    //    hesc = ESC_Init(&htim3);
+    //
+    //    LOG((uint8_t *)"Flight Controller initialized.\r\n\n", LOG_INFORMATION);
+    //    HAL_Delay(50);
+    //
+    //    HAL_Delay(3000);
+    //    ESC_SetSpeed(hesc, hesc->channel1, 100);
+    //    ESC_SetSpeed(hesc, hesc->channel2, 100);
+    //    ESC_SetSpeed(hesc, hesc->channel3, 100);
+    //    ESC_SetSpeed(hesc, hesc->channel4, 100);
 
-    // Delay before start
-    HAL_Delay(1000);
-
-    LOG((uint8_t *)"Initializing Flight Controller...\r\n\n", LOG_INFORMATION);
-    HAL_Delay(50);
-
-    hesc = ESC_Init(&htim3);
-
-    LOG((uint8_t *)"Flight Controller initialized.\r\n\n", LOG_INFORMATION);
-    HAL_Delay(50);
-
-    HAL_Delay(3000);
-    ESC_SetSpeed(hesc, hesc->channel1, 100);
-    ESC_SetSpeed(hesc, hesc->channel2, 100);
-    ESC_SetSpeed(hesc, hesc->channel3, 100);
-    ESC_SetSpeed(hesc, hesc->channel4, 100);
-
-    while (1) {
-    }
+    //    while (1) {
+    //    }
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */
