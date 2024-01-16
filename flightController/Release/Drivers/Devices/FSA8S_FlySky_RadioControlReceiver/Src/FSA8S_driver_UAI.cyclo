@@ -1,0 +1,2 @@
+../Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Src/FSA8S_driver_UAI.c:186:24:FSA8S_Init	4
+../Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Src/FSA8S_driver_UAI.c:255:10:FSA8S_ReadChannel	8

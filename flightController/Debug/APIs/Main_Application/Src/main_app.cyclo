@@ -1,4 +1,7 @@
-../APIs/Main_Application/Src/main_app.c:67:6:FlightController_HeartbeatLight	2
-../APIs/Main_Application/Src/main_app.c:88:6:FlightController_Init	1
-../APIs/Main_Application/Src/main_app.c:114:6:FreeRTOS_CreateTasks	4
-../APIs/Main_Application/Src/main_app.c:146:6:flightController_App	1
+../APIs/Main_Application/Src/main_app.c:110:6:FlightController_HeartbeatLight	2
+../APIs/Main_Application/Src/main_app.c:135:6:FlightController_FlightLights	1
+../APIs/Main_Application/Src/main_app.c:142:6:FlightController_Read_FSA8S	1
+../APIs/Main_Application/Src/main_app.c:160:6:FlightController_Read_GY87	1
+../APIs/Main_Application/Src/main_app.c:218:6:FlightController_Write_ESCs	1
+../APIs/Main_Application/Src/main_app.c:229:6:FlightController_Init	1
+../APIs/Main_Application/Src/main_app.c:244:6:FreeRTOS_CreateTasks	11

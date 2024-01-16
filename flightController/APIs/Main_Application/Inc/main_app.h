@@ -54,14 +54,14 @@ extern "C" {
  * @param  None
  * @retval None
  */
-void FreeRTOS_CreateTasks();
+void FlightController_Init(void);
 
 /*
- * @brief  This is the main application.
+ * @brief  TODO
  * @param  None
  * @retval None
  */
-void flightController_App(void);
+void FreeRTOS_CreateTasks(void);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
