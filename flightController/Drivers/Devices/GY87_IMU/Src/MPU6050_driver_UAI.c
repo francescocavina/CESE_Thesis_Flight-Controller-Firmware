@@ -37,6 +37,9 @@
 #include "BMP180_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
+#define USE_FREERTOS // Remove comment when using FreeRTOS
+// #define MPU6050_USE_LOGGING					// Remove comment to allow driver info logging
+
 #define MPU6050_MAX_NUMBER_INSTANCES (2) // Maximum number of possible IMUs connected to the i2c bus
 #define MPU6050_SET_BIT              (1)
 #define MPU6050_CLEAR_BIT            (0)
@@ -199,10 +202,10 @@ static MPU6050_HandleTypeDef_t * MPU6050_InstanceInit(I2C_HandleTypeDef * hi2c) 
 
 #ifdef USE_FREERTOS
     /* Allocate dynamic memory for the MPU6050_HandleTypeDef_t structure */
-    MPU6050_HandleTypeDef_t * hmpu6050 = pvPortmalloc(sizeof(MPU6050_HandleTypeDef_t));
+    MPU6050_HandleTypeDef_t * hmpu6050 = pvPortMalloc(sizeof(MPU6050_HandleTypeDef_t));
 
     /* Allocate dynamic memory for data buffer */
-    uint8_t * buffer = pvortMalloc(sizeof(1));
+    uint8_t * buffer = pvPortMalloc(sizeof(1));
 #else
     /* Allocate dynamic memory for the MPU6050_HandleTypeDef_t structure */
     MPU6050_HandleTypeDef_t * hmpu6050 = malloc(sizeof(MPU6050_HandleTypeDef_t));
@@ -434,12 +437,14 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
 
     /* Test QMC5883L magnetometer connection */
     if (!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
-
-        LOG((uint8_t *)"QMC5883L Magnetometer not detected.\r\n\n", LOG_ERROR);
+#ifdef MPU6050_USE_LOGGING
+        LOG((uint8_t *)"QMC5883L magnetometer not detected.\r\n\n", LOG_ERROR);
+#endif
         // return -1; TODO
     } else {
-
-        LOG((uint8_t *)"QMC5883L Magnetometer detected.\r\n\n", LOG_INFORMATION);
+#ifdef MPU6050_USE_LOGGING
+        LOG((uint8_t *)"QMC5883L magnetometer detected.\r\n\n", LOG_INFORMATION);
+#endif
     }
 
     /* Configure QMC5883L magnetometer */
@@ -447,12 +452,14 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
 
     /* Test BMP180 barometer connection */
     if (!MPU6050_TestConnection_BMP180(hmpu6050)) {
-
+#ifdef MPU6050_USE_LOGGING
         LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
+#endif
         // return -1; TODO
     } else {
-
+#ifdef MPU6050_USE_LOGGING
         LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
+#endif
     }
 
     /* Configure BMP180 barometer */
@@ -529,7 +536,9 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
         if (I2C_Init(hmpu6050)) {
 
             /* Initialization was successful */
+#ifdef MPU6050_USE_LOGGING
             LOG((uint8_t *)"MPU6050 IMU detected.\r\n\n", LOG_INFORMATION);
+#endif
 
             /* Configure device */
             MPU6050_Config(hmpu6050);
@@ -550,13 +559,17 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
             free(hmpu6050);
 #endif
 
+#ifdef MPU6050_USE_LOGGING
             LOG((uint8_t *)"MPU6050 IMU not detected.\r\n\n", LOG_ERROR);
+#endif
             return NULL;
         }
     } else {
 
         /* Instance couldn't be created */
+#ifdef MPU6050_USE_LOGGING
         LOG((uint8_t *)"MPU6050 IMU couldn't be initialized.\r\n\n", LOG_ERROR);
+#endif
         return NULL;
     }
 }
@@ -696,7 +709,7 @@ int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050) {
 
     /* Allocate dynamic memory for the magnetometerValues_t structure */
 #ifdef USE_FREERTOS
-    magnetometerValues_t * magnetometerValues = pvPortmalloc(sizeof(magnetometerValues_t));
+    magnetometerValues_t * magnetometerValues = pvPortMalloc(sizeof(magnetometerValues_t));
 #else
     magnetometerValues_t * magnetometerValues = malloc(sizeof(magnetometerValues_t));
 #endif

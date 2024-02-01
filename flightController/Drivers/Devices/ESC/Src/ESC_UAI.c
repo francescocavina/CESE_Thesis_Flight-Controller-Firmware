@@ -39,7 +39,9 @@
 #include "ESC_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-// #define USE_FREERTOS                   		// Remove comment when using FreeRTOS
+#define USE_FREERTOS // Remove comment when using FreeRTOS
+// #define ESC_USE_LOGGING							// Remove comment to allow driver info logging
+
 #define ESC_AUTOCALIBRATION_WAIT_TIME_1 (2000) // Time to wait after ESC was set to maximum throttle
 #define ESC_AUTOCALIBRATION_WAIT_TIME_2 (1000) // Time to wait after ESC was set to minimum throttle
 
@@ -92,7 +94,9 @@ static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc) {
         return false;
     }
 
+#ifdef ESC_USE_LOGGING
     LOG((uint8_t *)"Auto-calibrating ESCs...\r\n\n", LOG_INFORMATION);
+#endif
 
     /* Set ESC to maximum throttle */
     if (false == PWM_SetDutyCycle(hesc, hesc->channel1, MAX_ESC_SPEED)) {
@@ -128,7 +132,9 @@ static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc) {
     /* Wait 1 second */
     ESC_SetTimeDelay(ESC_AUTOCALIBRATION_WAIT_TIME_2);
 
+#ifdef ESC_USE_LOGGING
     LOG((uint8_t *)"ESCs auto-calibrated.\r\n\n", LOG_INFORMATION);
+#endif
 
     return true;
 }
@@ -141,11 +147,13 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
         return NULL;
     }
 
+#ifdef ESC_USE_LOGGING
     LOG((uint8_t *)"Initializing ESCs...\r\n\n", LOG_INFORMATION);
+#endif
 
     /* Allocate dynamic memory for the ESC_HandleTypeDef_t structure */
 #ifdef USE_FREERTOS
-    ESC_HandleTypeDef_t * hesc = pvPortmalloc(sizeof(ESC_HandleTypeDef_t));
+    ESC_HandleTypeDef_t * hesc = pvPortMalloc(sizeof(ESC_HandleTypeDef_t));
 #else
     ESC_HandleTypeDef_t * hesc = malloc(sizeof(ESC_HandleTypeDef_t));
 #endif
@@ -165,7 +173,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
 
     /* Start PWM signal generation */
     if (false == PWM_Init(hesc, hesc->channel1)) {
+#ifdef ESC_USE_LOGGING
         LOG((uint8_t *)"ESC 1 couldn't be initialized.\r\n\n", LOG_ERROR);
+#endif
 
 /* Free up dynamic allocated memory */
 #ifdef USE_FREERTOS
@@ -177,7 +187,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
         return NULL;
     }
     if (false == PWM_Init(hesc, hesc->channel2)) {
+#ifdef ESC_USE_LOGGING
         LOG((uint8_t *)"ESC 2 couldn't be initialized.\r\n\n", LOG_ERROR);
+#endif
 
 /* Free up dynamic allocated memory */
 #ifdef USE_FREERTOS
@@ -189,7 +201,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
         return NULL;
     }
     if (false == PWM_Init(hesc, hesc->channel3)) {
+#ifdef ESC_USE_LOGGING
         LOG((uint8_t *)"ESC 3 couldn't be initialized.\r\n\n", LOG_ERROR);
+#endif
 
 /* Free up dynamic allocated memory */
 #ifdef USE_FREERTOS
@@ -201,7 +215,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
         return NULL;
     }
     if (false == PWM_Init(hesc, hesc->channel4)) {
+#ifdef ESC_USE_LOGGING
         LOG((uint8_t *)"ESC 4 couldn't be initialized.\r\n\n", LOG_ERROR);
+#endif
 
 /* Free up dynamic allocated memory */
 #ifdef USE_FREERTOS
@@ -215,7 +231,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
 
     /* Calibrate ESC */
     if (false == ESC_AutoCalibrate(hesc)) {
+#ifdef ESC_USE_LOGGING
         LOG((uint8_t *)"ESCs couldn't be auto-calibrated.\r\n\n", LOG_ERROR);
+#endif
 
 /* Free up dynamic allocated memory */
 #ifdef USE_FREERTOS
@@ -227,7 +245,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
         return NULL;
     }
 
+#ifdef ESC_USE_LOGGING
     LOG((uint8_t *)"ESCs initialized.\r\n\n", LOG_INFORMATION);
+#endif
 
     return hesc;
 }

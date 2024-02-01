@@ -46,7 +46,8 @@
 #include "FSA8S_driver_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-// #define USE_FREERTOS                   // Remove comment when using FreeRTOS
+#define USE_FREERTOS // Remove comment when using FreeRTOS
+// #define FSA8S_USE_LOGGING					// Remove comment to allow driver info logging
 
 #define IBUS_BUFFER_LENGTH         (0X20) // 32 bytes of data for every transaction in iBus protocol
 #define IBUS_COMMAND               (0x40) // 40 is default value for second data byte
@@ -61,12 +62,9 @@
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Define array with channels calibration values */
-static uint8_t calibrationValues[IBUS_CHANNELS] = {
-    CHANNEL_01_CALIBRATION_VALUE, CHANNEL_02_CALIBRATION_VALUE, CHANNEL_03_CALIBRATION_VALUE,
-    CHANNEL_04_CALIBRATION_VALUE, CHANNEL_05_CALIBRATION_VALUE, CHANNEL_06_CALIBRATION_VALUE,
-    CHANNEL_07_CALIBRATION_VALUE, CHANNEL_08_CALIBRATION_VALUE, CHANNEL_09_CALIBRATION_VALUE,
-    CHANNEL_10_CALIBRATION_VALUE, CHANNEL_11_CALIBRATION_VALUE, CHANNEL_12_CALIBRATION_VALUE,
-    CHANNEL_13_CALIBRATION_VALUE, CHANNEL_14_CALIBRATION_VALUE};
+static uint8_t calibrationValues[IBUS_CHANNELS] = {CHANNEL_01_CALIBRATION_VALUE, CHANNEL_02_CALIBRATION_VALUE, CHANNEL_03_CALIBRATION_VALUE, CHANNEL_04_CALIBRATION_VALUE, CHANNEL_05_CALIBRATION_VALUE,
+                                                   CHANNEL_06_CALIBRATION_VALUE, CHANNEL_07_CALIBRATION_VALUE, CHANNEL_08_CALIBRATION_VALUE, CHANNEL_09_CALIBRATION_VALUE, CHANNEL_10_CALIBRATION_VALUE,
+                                                   CHANNEL_11_CALIBRATION_VALUE, CHANNEL_12_CALIBRATION_VALUE, CHANNEL_13_CALIBRATION_VALUE, CHANNEL_14_CALIBRATION_VALUE};
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /**
@@ -129,8 +127,7 @@ static bool_t FSA8S_Checksum(IBUS_HandleTypeDef_t * hibus) {
     }
 
     /* Get received checksum value */
-    sentChecksum =
-        (hibus->buffer[hibus->bufferSize - 1] << 8) | (hibus->buffer[hibus->bufferSize - 2]);
+    sentChecksum = (hibus->buffer[hibus->bufferSize - 1] << 8) | (hibus->buffer[hibus->bufferSize - 2]);
 
     /* Calculate checksum */
     for (uint8_t i = 0; i < 30; i++) {
@@ -156,28 +153,22 @@ static void FSA8S_AmendData(IBUS_HandleTypeDef_t * hibus) {
     if (NULL != hibus) {
 
         /* Amend data */
-        for (uint8_t i = 2; i <= (hibus->bufferSize - 2); i += 2) {
+        for (uint8_t i = 2; i < (hibus->bufferSize - 2); i += 2) {
 
             channelValue = IBUS_CHANNEL_VALUE_NULL;
 
             /* Swap channel bytes */
-            channelValue =
-                ((hibus->buffer[i + 1] << 8) | (hibus->buffer[i])) - calibrationValues[(i - 2) / 2];
+            channelValue = ((hibus->buffer[i + 1] << 8) | (hibus->buffer[i])) - calibrationValues[(i - 2) / 2];
 
             /* Map channel value from 0 to IBUS_CHANNEL_MAX_VALUE */
-            if ((IBUS_CHANNEL_MIN_RAW_VALUE <= channelValue) &&
-                (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
+            if ((IBUS_CHANNEL_MIN_RAW_VALUE <= channelValue) && (IBUS_CHANNEL_MAX_RAW_VALUE >= channelValue)) {
                 channelValue -= IBUS_CHANNEL_MIN_RAW_VALUE;
             } else {
                 channelValue = IBUS_CHANNEL_VALUE_NULL;
             }
 
             /* Map channel value between minimum and maximum values and store it */
-            hibus->data[(i - 2) / 2] =
-                channelValue * ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] *
-                                                                  ((float)IBUS_CHANNEL_MAX_VALUE /
-                                                                   IBUS_CHANNEL_MIN_RAW_VALUE))) /
-                                IBUS_CHANNEL_MIN_RAW_VALUE);
+            hibus->data[(i - 2) / 2] = channelValue * ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] * ((float)IBUS_CHANNEL_MAX_VALUE / IBUS_CHANNEL_MIN_RAW_VALUE))) / IBUS_CHANNEL_MIN_RAW_VALUE);
         }
     }
 }
@@ -201,13 +192,13 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
     /* Allocate dynamic memory for the IBUS_HandleTypeDef_t structure and for the buffer to receive
      * data */
 #ifdef USE_FREERTOS
-    IBUS_HandleTypeDef_t * hibus = pvPortmalloc(sizeof(IBUS_HandleTypeDef_t));
-    uint8_t * buffer = pvortMalloc(sizeof(IBUS_BUFFER_LENGTH));
-    uint16_t * data = pvortMalloc(sizeof(uint16_t) * IBUS_CHANNELS);
+    IBUS_HandleTypeDef_t * hibus = (IBUS_HandleTypeDef_t *)pvPortMalloc(sizeof(IBUS_HandleTypeDef_t));
+    uint8_t * buffer = (uint8_t *)pvPortMalloc(sizeof(uint8_t) * IBUS_BUFFER_LENGTH);
+    uint16_t * data = (uint16_t *)pvPortMalloc(sizeof(uint16_t) * IBUS_CHANNELS);
 #else
-    IBUS_HandleTypeDef_t * hibus = malloc(sizeof(IBUS_HandleTypeDef_t));
-    uint8_t * buffer = malloc(sizeof(IBUS_BUFFER_LENGTH));
-    uint16_t * data = malloc(sizeof(uint16_t));
+    IBUS_HandleTypeDef_t * hibus = (IBUS_HandleTypeDef_t *)malloc(sizeof(IBUS_HandleTypeDef_t));
+    uint8_t * buffer = (uint8_t *)malloc(sizeof(uint8_t) * IBUS_BUFFER_LENGTH);
+    uint16_t * data = (uint16_t *)malloc(sizeof(uint16_t) * IBUS_CHANNELS);
 #endif
 
     /* Initialize iBus_HandleTypeDef structure */
@@ -222,11 +213,12 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
 #ifdef USE_FREERTOS
         /* Free up dynamic allocated memory */
         vPortFree(hibus->buffer);
+        vPortFree(hibus->data);
         vPortFree(hibus);
 #else
         /* Free up dynamic allocated memory */
-        hibus->buffer = 0;
         free(hibus->buffer);
+        free(hibus->data);
         free(hibus);
 #endif
     }
@@ -241,10 +233,10 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
 #ifdef USE_FREERTOS
         /* Free up dynamic allocated memory */
         vPortFree(hibus->buffer);
+        vPortFree(hibus->data);
         vPortFree(hibus);
 #else
         /* Free up dynamic allocated memory */
-        hibus->buffer = 0;
         free(hibus->buffer);
         free(hibus);
 #endif
@@ -258,8 +250,14 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel
     if (NULL == hibus) {
         return IBUS_CHANNEL_VALUE_NULL;
     }
+
     /* Check parameter */
     if (!(channel > 0 && channel <= IBUS_CHANNELS)) {
+
+#ifdef FSA8S_USE_LOGGING
+        LOG((uint8_t *)"FSA8S invalid channel to read.\r\n\n", LOG_ERROR);
+#endif
+
         return IBUS_CHANNEL_VALUE_NULL;
     }
 

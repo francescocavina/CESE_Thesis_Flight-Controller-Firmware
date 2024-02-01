@@ -41,7 +41,8 @@ extern "C" {
 #endif
 
 /* --- Public macros definitions --------------------------------------------------------------- */
-
+#define HEARTBEAT_PERIOD      (500)  // Heartbeat Period [ms], Duty Cycle = 0.5
+#define PW_ON_OFF_DRIVER_TIME (3000) // Time in [ms] needed to keep pressed Power On/Off Button to turn on/off flight controller
 /* --- Public data type declarations ----------------------------------------------------------- */
 
 /* --- Public variable declarations ------------------------------------------------------------ */

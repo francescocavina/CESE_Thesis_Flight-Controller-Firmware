@@ -50,18 +50,12 @@ extern "C" {
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /*
- * @brief  TODO
+ * @brief  Initializes the flight controller. This is the main application function and must be
+ *         called in the "main.c" file at the main function, before starting the FreeRTOS kernel.
  * @param  None
  * @retval None
  */
 void FlightController_Init(void);
-
-/*
- * @brief  TODO
- * @param  None
- * @retval None
- */
-void FreeRTOS_CreateTasks(void);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

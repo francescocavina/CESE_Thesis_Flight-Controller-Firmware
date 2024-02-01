@@ -47,6 +47,7 @@
 #include "stm32f4xx_hal.h"
 /* END MODIFY 1 */
 #include "LoggingSystem_UAI.h"
+#include "cmsis_os.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
