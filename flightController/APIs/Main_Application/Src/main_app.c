@@ -43,8 +43,16 @@
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-// #define MAIN_APP_USE_LOGGING						// Remove comment to allow driver info logging
-#define DEFAULT_TASK_DELAY (50)
+#define LOGGING_TASK_DELAY_MULTIPLIER (20)
+// #define MAIN_APP_USE_LOGGING_FSA8S								// Remove comment to allow driver info logging
+#define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER				// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL	// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING									// Remove comment to allow driver info logging
+#define DEFAULT_TASK_DELAY (20)
+#define FSA8S_CHANNELS     (10) // Number of remote control channels to read
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -162,13 +170,25 @@ static TaskHandle_t FlightController_BatteryLevel_Handle = NULL;
 
 /* Timers Handles */
 static TimerHandle_t Timer1_Handle = NULL;
-bool_t Timer1_running = false;
-bool_t FlightController_running = false;
+static bool_t Timer1_running = false;
+static bool_t FlightController_running = false;
 
 /* Drivers Handle */
-static IBUS_HandleTypeDef_t * rc_controller;
-static MPU6050_HandleTypeDef_t * hmpu6050;
-static ESC_HandleTypeDef_t * hesc;
+static IBUS_HandleTypeDef_t * rc_controller = NULL;
+static MPU6050_HandleTypeDef_t * hmpu6050 = NULL;
+static ESC_HandleTypeDef_t * hesc = NULL;
+
+/* Remote Control Channel Values */
+static uint16_t FSA8S_channelValues[FSA8S_CHANNELS] = {0};
+
+/* IMU Sensors Values */
+static int16_t GY87_temperature = 0;
+static gyroscopeValues_t * GY87_gyroscopeValues;
+static accelerometerValues_t * GY87_accelerometerValues;
+static magnetometerValues_t * GY87_magnetometerValues;
+
+/* Flight Controller Battery Level */
+static float FlightController_batteryLevel;
 
 /* --- Private function implementation --------------------------------------------------------- */
 void FreeRTOS_CreateStartUpTasks(void) {
@@ -176,7 +196,7 @@ void FreeRTOS_CreateStartUpTasks(void) {
     BaseType_t ret;
 
     /* Task: FlightController_Startup */
-    ret = xTaskCreate(FlightController_StartUp, "FlightController_StartUp", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_StartUp_Handle);
+    ret = xTaskCreate(FlightController_StartUp, "FlightController_StartUp", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 2UL), &FlightController_StartUp_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -224,7 +244,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 3: FlightController_Read_FSA8S */
-    ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_Read_FSA8S_Handle);
+    ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_FSA8S_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -234,7 +254,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 4: FlightController_Read_GY87 */
-    ret = xTaskCreate(FlightController_Read_GY87, "FlightController_Read_GY87", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_Read_GY87_Handle);
+    ret = xTaskCreate(FlightController_Read_GY87, "FlightController_Read_GY87", (6 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_GY87_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -244,7 +264,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 5: FlightController_Write_ESCs */
-    ret = xTaskCreate(FlightController_Write_ESCs, "FlightController_Write_ESCs", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_Write_ESCs_Handle);
+    ret = xTaskCreate(FlightController_Write_ESCs, "FlightController_Write_ESCs", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Write_ESCs_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -269,8 +289,16 @@ void FreeRTOS_CreateTimers(void) {
 
 void FlightController_StartUp(void * ptr) {
 
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+
     while (1) {
+
+        /* Turn on-board LED on */
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+
         /* Check if flight controller is already running */
+        /* Create tasks and timers, and initialize drivers (only once) */
         if (FlightController_running) {
 
             /* Create system tasks */
@@ -287,6 +315,9 @@ void FlightController_StartUp(void * ptr) {
             /* Delete this task, as initialization must happen only once */
             vTaskDelete(FlightController_StartUp_Handle);
         }
+
+        /* Set task time delay */
+        vTaskDelay(xDelay);
     }
 }
 
@@ -310,7 +341,7 @@ void FlightController_HeartbeatLight(void * ptr) {
             ledState = GPIO_PIN_RESET;
         }
 
-        /* Set time delay */
+        /* Set task time delay */
         vTaskDelay(xDelay);
     }
 }
@@ -327,85 +358,112 @@ void FlightController_FlightLights(void * ptr) {
         //    	HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
         //    	HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
 
+        /* Set task time delay */
         vTaskDelay(xDelay);
     }
 }
 
 void FlightController_Read_FSA8S(void * ptr) {
 
-    uint8_t channel = CHANNEL_9;
-    uint16_t channelValue;
-    uint8_t str[20];
+    FSA8S_CHANNEL_t channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
 
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * 10);
+#ifdef MAIN_APP_USE_LOGGING_FSA8S
+    uint8_t loggingStr[30] = {0};
+#endif
+
+    /* Change delay from time in [ms] to ticks */
+#ifdef MAIN_APP_USE_LOGGING_FSA8S
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
+#else
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+#endif
 
     while (1) {
 
-        /* Demo */
-        //    	channelValue = FSA8S_ReadChannel(rc_controller, channel);
-        //    	sprintf((char *)str, (const char *)"Channel %d: %d\r\n", channel, channelValue);
-        //    	CDC_Transmit_FS(str, strlen((const char *)str));
+        for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
+            /* Read channels */
+            FSA8S_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
 
+            /* Log channel values */
+#ifdef MAIN_APP_USE_LOGGING_FSA8S
+            if (9 < (i + 1)) {
+                sprintf((char *)loggingStr, "FSA8S Channel %d: %04d\r\n\n", channels[i], FSA8S_channelValues[i]);
+            } else {
+                sprintf((char *)loggingStr, "FSA8S Channel %d:  %04d\r\n", channels[i], FSA8S_channelValues[i]);
+            }
+            LOG(loggingStr, LOG_INFORMATION);
+#endif
+        }
+
+        /* Set task time delay */
         vTaskDelay(xDelay);
     }
 }
 
 void FlightController_Read_GY87(void * ptr) {
 
-    uint8_t str1[50];
-    uint8_t str2[50];
-    uint8_t str3[50];
-    uint8_t str4[50];
-    gyroscopeValues_t * gyroscopeValues;
-    accelerometerValues_t * accelerometerValues;
-    uint16_t tempVal;
-    magnetometerValues_t * magnetometerValues;
+#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
+    uint8_t loggingStr[40];
+#endif
 
+    /* Change delay from time in [ms] to ticks */
+#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
+#else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+#endif
 
     while (1) {
 
-        //        MPU6050_ReadGyroscope(hmpu6050, gyroscopeValues);
-        //        sprintf((char *)str1, (const char *)"Value Gyro X: %d\r\n", gyroscopeValues->gyroscopeX);
-        //        LOG(str1, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //        sprintf((char *)str1, (const char *)"Value Gyro Y: %d\r\n", gyroscopeValues->gyroscopeY);
-        //        LOG(str1, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //        sprintf((char *)str1, (const char *)"Value Gyro Z: %d\r\n\n", gyroscopeValues->gyroscopeZ);
-        //        LOG(str1, LOG_DEBUGGING);
-        //        HAL_Delay(10);
+        /* Read GY87 gyroscope values */
+        MPU6050_ReadGyroscope(hmpu6050, GY87_gyroscopeValues);
 
-        //        MPU6050_ReadAccelerometer(hmpu6050, accelerometerValues);
-        //        sprintf((char *)str2, (const char *)"Value Accel X: %d\r\n", accelerometerValues->accelerometerX);
-        //        LOG(str2, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //        sprintf((char *)str2, (const char *)"Value Accel Y: %d\r\n", accelerometerValues->accelerometerY);
-        //        LOG(str2, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //        sprintf((char *)str2, (const char *)"Value Accel Z: %d\r\n\n", accelerometerValues->accelerometerZ);
-        //        LOG(str2, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //
-        tempVal = MPU6050_ReadTemperatureSensor(hmpu6050);
-        sprintf((char *)str3, (const char *)"Value Temperature: %d\r\n\n", tempVal);
-        LOG(str3, LOG_DEBUGGING);
-        //
-        //        MPU6050_ReadMagnetometer(hmpu6050, magnetometerValues);
-        //        sprintf((char *)str4, (const char *)"Value Mag X: %d\r\n", magnetometerValues->magnetometerX);
-        //        LOG(str4, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //        sprintf((char *)str4, (const char *)"Value Mag Y: %d\r\n", magnetometerValues->magnetometerY);
-        //        LOG(str4, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //        sprintf((char *)str4, (const char *)"Value Mag Z: %d\r\n\n", magnetometerValues->magnetometerZ);
-        //        LOG(str4, LOG_DEBUGGING);
-        //        HAL_Delay(10);
-        //
-        //        int16_t heading = MPU6050_ReadMagnetometerHeading(hmpu6050);
-        //        sprintf((char *)str4, (const char *)"Heading Value: %d\r\n\n", heading);
-        //        LOG(str4, LOG_DEBUGGING);
+        /* Log GY87 gyroscope values */
+#ifdef MAIN_APP_USE_LOGGING_GY87_GYROSCOPE
+        sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope X: %d\r\n", GY87_gyroscopeValues->gyroscopeX);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope Y: %d\r\n", GY87_gyroscopeValues->gyroscopeY);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope Z: %d\r\n\n", GY87_gyroscopeValues->gyroscopeZ);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
 
+        /* Read GY87 accelerometer values */
+        MPU6050_ReadAccelerometer(hmpu6050, GY87_accelerometerValues);
+
+        /* Log GY87 accelerometer values */
+#ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER
+        sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %d\r\n", GY87_accelerometerValues->accelerometerX);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer Y: %d\r\n", GY87_accelerometerValues->accelerometerY);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer Z: %d\r\n\n", GY87_accelerometerValues->accelerometerZ);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
+
+        /* Read GY87 temperature value */
+        GY87_temperature = MPU6050_ReadTemperatureSensor(hmpu6050);
+
+        /*  Log GY87 temperature value */
+#ifdef MAIN_APP_USE_LOGGING_GY87_TEMPERATURE
+        sprintf((char *)loggingStr, (const char *)"GY87 Temperature: %d°C\r\n\n", GY87_temperature);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
+
+        /* Read GY87 magnetometer values */
+        MPU6050_ReadMagnetometer(hmpu6050, GY87_magnetometerValues);
+
+        /* Log GY87 magnetometer values */
+#ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
+        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer X: %d\r\n", GY87_magnetometerValues->magnetometerX);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Y: %d\r\n", GY87_magnetometerValues->magnetometerY);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Z: %d\r\n\n", GY87_magnetometerValues->magnetometerZ);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
+
+        /* Set task time delay */
         vTaskDelay(xDelay);
     }
 }
@@ -417,8 +475,9 @@ void FlightController_Write_ESCs(void * ptr) {
 
     while (1) {
 
-        //        ESC_SetSpeed(hesc, hesc->channel3, channel_test/10);
+        //    	ESC_SetSpeed(hesc, hesc->channel3, channel_test/10);
 
+        /* Set task time delay */
         vTaskDelay(xDelay);
     }
 }
@@ -440,48 +499,53 @@ void FlightController_OnOffButton(void * ptr) {
             }
         }
 
-        /* Set time delay */
+        /* Set task time delay */
         vTaskDelay(xDelay);
     }
 }
 
 void FlightController_BatteryLevel(void * ptr) {
 
-#ifdef MAIN_APP_USE_LOGGING
-    uint8_t loggingStr[50];
+    uint16_t adcValue;
+
+#ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
+    uint8_t loggingStr[20];
 #endif
 
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * 10);
-    uint16_t adcValue;
-    double batteryLevel = 3.3;
+#ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
+#else
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+#endif
 
     while (1) {
 
-        // Start ADC Conversion
+        /* Start ADC Conversion */
         HAL_ADC_Start(&hadc1);
 
-        // Poll ADC peripheral
+        /* Poll ADC peripheral */
         HAL_ADC_PollForConversion(&hadc1, 1);
 
-        // Read ADC value
+        /* Read ADC value */
         adcValue = HAL_ADC_GetValue(&hadc1);
 
-        // Convert ADC value to real value
-        batteryLevel = (adcValue * 3.3) / 4096;
+        /* Convert ADC value to real value */
+        FlightController_batteryLevel = (adcValue * 3.3) / 4096;
 
-        // Correct real value, as when battery full, ADC input is not 3.3V
-        batteryLevel = batteryLevel * 1.046046;
+        /* Correct real value, as when battery full, ADC input is not 3.3V */
+        FlightController_batteryLevel = FlightController_batteryLevel * 1.046046;
 
-        // Map real value to battery levels
-        batteryLevel = batteryLevel * 3.363636;
+        /* Map real value to battery levels */
+        FlightController_batteryLevel = FlightController_batteryLevel * 3.363636;
 
-#ifdef MAIN_APP_USE_LOGGING
-        sprintf((char *)loggingStr, "Battery Level: %.2f[V]\r\n\n", batteryLevel);
+        /* Log battery level */
+#ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
+        sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f[V]\r\n\n", FlightController_batteryLevel);
         LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-        /* Set time delay */
+        /* Set task time delay */
         vTaskDelay(xDelay);
     }
 }
@@ -512,7 +576,7 @@ void Timer1_Callback(TimerHandle_t xTimer) {
             } else {
                 /* Flight controller was on */
                 /* User turned it off */
-                /* Suspend HeartbeatLight task and turn LED on */
+                /* Suspend HeartbeatLight task and turn on-board LED on */
                 vTaskSuspend(FlightController_HeartbeatLight_Handle);
                 HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 
@@ -520,6 +584,10 @@ void Timer1_Callback(TimerHandle_t xTimer) {
 
                 /* Turn off flight controller */
                 HAL_GPIO_WritePin(PW_ON_OFF_DRIVER_OUTPUT_GPIO_Port, PW_ON_OFF_DRIVER_OUTPUT_Pin, 0);
+
+                /* Next line will execute only if USB power is connected */
+                /* Reset micro-controller */
+                HAL_NVIC_SystemReset();
             }
         }
 

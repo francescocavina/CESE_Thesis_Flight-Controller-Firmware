@@ -37,8 +37,8 @@
 #include "BMP180_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define USE_FREERTOS // Remove comment when using FreeRTOS
-// #define MPU6050_USE_LOGGING					// Remove comment to allow driver info logging
+#define USE_FREERTOS                 // Remove comment when using FreeRTOS
+#define MPU6050_USE_LOGGING          // Remove comment to allow driver info logging
 
 #define MPU6050_MAX_NUMBER_INSTANCES (2) // Maximum number of possible IMUs connected to the i2c bus
 #define MPU6050_SET_BIT              (1)
@@ -429,53 +429,53 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
     /* Set accelerometer range */
     MPU6050_SetAccelerometerRange(hmpu6050);
 
-    /* Disable I2C Master mode */
-    MPU6050_DisableI2CMasterMode(hmpu6050);
-
-    /* Enable Bypass mode */
-    MPU6050_EnableBypassMode(hmpu6050);
-
-    /* Test QMC5883L magnetometer connection */
-    if (!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
-#ifdef MPU6050_USE_LOGGING
-        LOG((uint8_t *)"QMC5883L magnetometer not detected.\r\n\n", LOG_ERROR);
-#endif
-        // return -1; TODO
-    } else {
-#ifdef MPU6050_USE_LOGGING
-        LOG((uint8_t *)"QMC5883L magnetometer detected.\r\n\n", LOG_INFORMATION);
-#endif
-    }
-
-    /* Configure QMC5883L magnetometer */
-    QMC5883L_Configure(hmpu6050);
-
-    /* Test BMP180 barometer connection */
-    if (!MPU6050_TestConnection_BMP180(hmpu6050)) {
-#ifdef MPU6050_USE_LOGGING
-        LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
-#endif
-        // return -1; TODO
-    } else {
-#ifdef MPU6050_USE_LOGGING
-        LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
-#endif
-    }
-
-    /* Configure BMP180 barometer */
-    BMP180_Configure(hmpu6050);
-
-    /* Disable Bypass */
-    MPU6050_DisableBypassMode(hmpu6050);
-
-    /* Enable I2C Master mode */
-    MPU6050_EnableI2CMasterMode(hmpu6050);
-
-    /* Set Master clock */
-    MPU6050_SetMasterClock(hmpu6050);
-
-    /* Configure slave QMC5883L magnetometer */
-    MPU6050_Configure_QMC5883l(hmpu6050);
+    //    /* Disable I2C Master mode */
+    //    MPU6050_DisableI2CMasterMode(hmpu6050);
+    //
+    //    /* Enable Bypass mode */
+    //    MPU6050_EnableBypassMode(hmpu6050);
+    //
+    //    /* Test QMC5883L magnetometer connection */
+    //    if (!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
+    // #ifdef MPU6050_USE_LOGGING
+    //        LOG((uint8_t *)"QMC5883L magnetometer not detected.\r\n\n", LOG_ERROR);
+    // #endif
+    //        // return -1; TODO
+    //    } else {
+    // #ifdef MPU6050_USE_LOGGING
+    //        LOG((uint8_t *)"QMC5883L magnetometer detected.\r\n\n", LOG_INFORMATION);
+    // #endif
+    //    }
+    //
+    //    /* Configure QMC5883L magnetometer */
+    //    QMC5883L_Configure(hmpu6050);
+    //
+    //    /* Test BMP180 barometer connection */
+    //    if (!MPU6050_TestConnection_BMP180(hmpu6050)) {
+    // #ifdef MPU6050_USE_LOGGING
+    //        LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
+    // #endif
+    //        // return -1; TODO
+    //    } else {
+    // #ifdef MPU6050_USE_LOGGING
+    //        LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
+    // #endif
+    //    }
+    //
+    //    /* Configure BMP180 barometer */
+    //    BMP180_Configure(hmpu6050);
+    //
+    //    /* Disable Bypass */
+    //    MPU6050_DisableBypassMode(hmpu6050);
+    //
+    //    /* Enable I2C Master mode */
+    //    MPU6050_EnableI2CMasterMode(hmpu6050);
+    //
+    //    /* Set Master clock */
+    //    MPU6050_SetMasterClock(hmpu6050);
+    //
+    //    /* Configure slave QMC5883L magnetometer */
+    //    MPU6050_Configure_QMC5883l(hmpu6050);
 }
 
 static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
