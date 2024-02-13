@@ -170,7 +170,7 @@ static void BMP180_Configure(MPU6050_HandleTypeDef_t * hmpu6050);
  * @param  TODO
  * @retval None
  */
-static void MPU6050_Config();
+static void MPU6050_Configure(MPU6050_HandleTypeDef_t * hmpu6050);
 
 /*
  * @brief  Reads IMU register.
@@ -279,7 +279,7 @@ static void MPU6050_SetGyroscopeRange(MPU6050_HandleTypeDef_t * hmpu6050) {
     /* Set gyroscope range */
     uint8_t regData;
 
-    regData = MPU_6050_BIT_GYRO_CONFIG_FS_SEL_3; // Full range
+    regData = MPU_6050_BIT_GYRO_CONFIG_FS_SEL_0; // Full range
     MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_GYRO_CONFIG, &regData, MPU6050_SET_BIT);
 }
 
@@ -288,7 +288,7 @@ static void MPU6050_SetAccelerometerRange(MPU6050_HandleTypeDef_t * hmpu6050) {
     /* Set accelerometer range */
     uint8_t regData;
 
-    regData = MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_3; // Full range
+    regData = MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_0; // Full range
     MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_ACCEL_CONFIG, &regData, MPU6050_SET_BIT);
 }
 
@@ -410,7 +410,9 @@ static void MPU6050_Configure_QMC5883l(MPU6050_HandleTypeDef_t * hmpu6050) {
     MPU6050_WriteRegisterBitmasked(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_I2C_SLV0_CTRL, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
+static void MPU6050_Configure(MPU6050_HandleTypeDef_t * hmpu6050) {
+
+    uint8_t data;
 
     /* Configure MPU6050 device */
 
@@ -429,53 +431,53 @@ static void MPU6050_Config(MPU6050_HandleTypeDef_t * hmpu6050) {
     /* Set accelerometer range */
     MPU6050_SetAccelerometerRange(hmpu6050);
 
-    //    /* Disable I2C Master mode */
-    //    MPU6050_DisableI2CMasterMode(hmpu6050);
-    //
-    //    /* Enable Bypass mode */
-    //    MPU6050_EnableBypassMode(hmpu6050);
-    //
-    //    /* Test QMC5883L magnetometer connection */
-    //    if (!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
-    // #ifdef MPU6050_USE_LOGGING
-    //        LOG((uint8_t *)"QMC5883L magnetometer not detected.\r\n\n", LOG_ERROR);
-    // #endif
-    //        // return -1; TODO
-    //    } else {
-    // #ifdef MPU6050_USE_LOGGING
-    //        LOG((uint8_t *)"QMC5883L magnetometer detected.\r\n\n", LOG_INFORMATION);
-    // #endif
-    //    }
-    //
-    //    /* Configure QMC5883L magnetometer */
-    //    QMC5883L_Configure(hmpu6050);
-    //
-    //    /* Test BMP180 barometer connection */
-    //    if (!MPU6050_TestConnection_BMP180(hmpu6050)) {
-    // #ifdef MPU6050_USE_LOGGING
-    //        LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
-    // #endif
-    //        // return -1; TODO
-    //    } else {
-    // #ifdef MPU6050_USE_LOGGING
-    //        LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
-    // #endif
-    //    }
-    //
-    //    /* Configure BMP180 barometer */
-    //    BMP180_Configure(hmpu6050);
-    //
-    //    /* Disable Bypass */
-    //    MPU6050_DisableBypassMode(hmpu6050);
-    //
-    //    /* Enable I2C Master mode */
-    //    MPU6050_EnableI2CMasterMode(hmpu6050);
-    //
-    //    /* Set Master clock */
-    //    MPU6050_SetMasterClock(hmpu6050);
-    //
-    //    /* Configure slave QMC5883L magnetometer */
-    //    MPU6050_Configure_QMC5883l(hmpu6050);
+    /* Disable I2C Master mode */
+    MPU6050_DisableI2CMasterMode(hmpu6050);
+
+    /* Enable Bypass mode */
+    MPU6050_EnableBypassMode(hmpu6050);
+
+    /* Test QMC5883L magnetometer connection */
+    if (!MPU6050_TestConnection_QMC5883L(hmpu6050)) {
+#ifdef MPU6050_USE_LOGGING
+        LOG((uint8_t *)"QMC5883L magnetometer not detected.\r\n\n", LOG_ERROR);
+#endif
+        // return -1; TODO
+    } else {
+#ifdef MPU6050_USE_LOGGING
+        LOG((uint8_t *)"QMC5883L magnetometer detected.\r\n\n", LOG_INFORMATION);
+#endif
+    }
+
+    /* Configure QMC5883L magnetometer */
+    QMC5883L_Configure(hmpu6050);
+
+    /* Test BMP180 barometer connection */
+    if (!MPU6050_TestConnection_BMP180(hmpu6050)) {
+#ifdef MPU6050_USE_LOGGING
+        LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
+#endif
+        // return -1; TODO
+    } else {
+#ifdef MPU6050_USE_LOGGING
+        LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
+#endif
+    }
+
+    /* Configure BMP180 barometer */
+    BMP180_Configure(hmpu6050);
+
+    /* Disable Bypass */
+    MPU6050_DisableBypassMode(hmpu6050);
+
+    /* Enable I2C Master mode */
+    MPU6050_EnableI2CMasterMode(hmpu6050);
+
+    /* Set Master clock */
+    MPU6050_SetMasterClock(hmpu6050);
+
+    /* Configure slave QMC5883L magnetometer */
+    MPU6050_Configure_QMC5883l(hmpu6050);
 }
 
 static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
@@ -541,7 +543,7 @@ MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c) {
 #endif
 
             /* Configure device */
-            MPU6050_Config(hmpu6050);
+            MPU6050_Configure(hmpu6050);
 
             instancesNumber++;
 
@@ -596,7 +598,7 @@ void MPU6050_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050, gyroscopeValues_t
     uint8_t gyroscopeRawData[2];
 
     /* Define variable for scale factoring raw data */
-    int16_t scaleFactor = MPU_6050_AUX_VAL_GYRO_SF_2000;
+    int16_t scaleFactor = MPU_6050_AUX_VAL_GYRO_SF_0250;
 
     /* Check parameters */
     if (NULL != hmpu6050 && NULL != gyroscopeValues) {
@@ -614,6 +616,7 @@ void MPU6050_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050, gyroscopeValues_t
         gyroscopeValues->gyroscopeZ = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]) / scaleFactor;
 
     } else {
+
         /* Wrong parameters */
         gyroscopeValues->gyroscopeX = 0;
         gyroscopeValues->gyroscopeY = 0;
@@ -627,7 +630,7 @@ void MPU6050_ReadAccelerometer(MPU6050_HandleTypeDef_t * hmpu6050, accelerometer
     uint8_t accelerometerRawData[2];
 
     /* Define variable for scale factoring raw data */
-    int16_t scaleFactor = MPU_6050_AUX_VAL_ACCEL_SF_16;
+    int16_t scaleFactor = MPU_6050_AUX_VAL_ACCEL_SF_02;
 
     /* Check parameters */
     if (NULL != hmpu6050 && NULL != accelerometerValues) {

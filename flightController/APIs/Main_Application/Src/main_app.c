@@ -43,12 +43,13 @@
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
+#define USE_FREERTOS                  // Remove comment when using FreeRTOS
 #define LOGGING_TASK_DELAY_MULTIPLIER (20)
-// #define MAIN_APP_USE_LOGGING_FSA8S								// Remove comment to allow driver info logging
-#define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_FSA8S							// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER				// Remove comment to allow driver info logging
+#define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL	// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING									// Remove comment to allow driver info logging
 #define DEFAULT_TASK_DELAY (20)
@@ -412,6 +413,33 @@ void FlightController_Read_GY87(void * ptr) {
 #else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
 #endif
+
+    /* Allocate dynamic memory for the MPU6050 gyroscope values */
+    GY87_gyroscopeValues = pvPortMalloc(sizeof(GY87_gyroscopeValues));
+
+    if (NULL == GY87_gyroscopeValues) {
+
+        /* Free up dynamic allocated memory */
+        vPortFree(GY87_gyroscopeValues);
+    }
+
+    /* Allocate dynamic memory for the MPU6050 accelerometer values */
+    GY87_accelerometerValues = pvPortMalloc(sizeof(GY87_accelerometerValues));
+
+    if (NULL == GY87_accelerometerValues) {
+
+        /* Free up dynamic allocated memory */
+        vPortFree(GY87_accelerometerValues);
+    }
+
+    /* Allocate dynamic memory for the MPU6050 magnetometer values */
+    GY87_magnetometerValues = pvPortMalloc(sizeof(GY87_magnetometerValues));
+
+    if (NULL == GY87_magnetometerValues) {
+
+        /* Free up dynamic allocated memory */
+        vPortFree(GY87_magnetometerValues);
+    }
 
     while (1) {
 
