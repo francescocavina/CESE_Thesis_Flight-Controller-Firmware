@@ -56,17 +56,17 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t I2C_Init(MPU6050_HandleTypeDef_t * hmpu6050) {
+bool_t I2C_Init(GY87_HandleTypeDef_t * hgy87) {
 
     uint8_t who_am_I_value;
 
     /* Check parameter */
-    if (NULL == hmpu6050) {
+    if (NULL == hgy87) {
         return false;
     }
 
     /* Read IMU device ID */
-    I2C_Read(hmpu6050->hi2c, hmpu6050->address, MPU_6050_REG_WHO_AM_I, &who_am_I_value, 1);
+    I2C_Read(hgy87->hi2c, hgy87->address, MPU_6050_REG_WHO_AM_I, &who_am_I_value, 1);
     /* Check IMU device ID */
     if (who_am_I_value == MPU_6050_BIT_WHO_AM_I) {
         /* Right IMU device ID */

@@ -48,71 +48,112 @@ typedef struct gyroscopeValues {
     int16_t gyroscopeX;
     int16_t gyroscopeY;
     int16_t gyroscopeZ;
-} gyroscopeValues_t;
+} GY87_gyroscopeValues_t;
 
 typedef struct accelerometerValues {
     int16_t accelerometerX;
     int16_t accelerometerY;
     int16_t accelerometerZ;
-} accelerometerValues_t;
+} GY87_accelerometerValues_t;
 
 typedef struct magnetometerValues {
     int16_t magnetometerX;
     int16_t magnetometerY;
     int16_t magnetometerZ;
-} magnetometerValues_t;
+} GY87_magnetometerValues_t;
+
+typedef struct BMP180_CallibrationData {
+    int16_t AC1;
+    int16_t AC2;
+    int16_t AC3;
+    uint16_t AC4;
+    uint16_t AC5;
+    uint16_t AC6;
+    int16_t B1;
+    int16_t B2;
+    int16_t MB;
+    int16_t MC;
+    int16_t MD;
+} BMP180_CallibrationData_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /*
  * @brief  Initializes MPU6050 device.
- * @param  TODO
- * @retval TODO
+ * @param  hi2c: Pointer to a I2C_HandleTypeDef structure that contains
+ *         the configuration information for the I2C communication.
+ * @retval Pointer to a GY87_HandleTypeDef_t structure that contains
+ *         the configuration information for the GY87 device.
  */
-MPU6050_HandleTypeDef_t * MPU6050_Init(I2C_HandleTypeDef * hi2c);
+GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c);
 
 /*
  * @brief  Resets the device.
- * @param  TODO
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
  * @retval None
  */
-void MPU6050_Reset(MPU6050_HandleTypeDef_t * hmpu6050);
+void GY87_Reset(GY87_HandleTypeDef_t * hgy87);
 
 /*
- * @brief  Reads gyroscope data.
- * @param  TODO
+ * @brief  Reads gyroscope values.
+ * @param  hgy87:           Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                          the configuration information for the GY87 device.
+ *         gyroscopeValues: Pointer to a GY87_gyroscopeValues_t structure that stores the gyroscope values.
  * @retval None
  */
-void MPU6050_ReadGyroscope(MPU6050_HandleTypeDef_t * hmpu6050, gyroscopeValues_t * gyroscopeValues);
+void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues);
 
 /*
- * @brief  Reads accelerometer data.
- * @param  TODO
+ * @brief  Reads accelerometer values.
+ * @param  hgy87:               Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                              the configuration information for the GY87 device.
+ *         accelerometerValues: Pointer to a GY87_accelerometerValues_t structure that stores the accelerometer values.
  * @retval None
  */
-void MPU6050_ReadAccelerometer(MPU6050_HandleTypeDef_t * hmpu6050, accelerometerValues_t * accelerometerValues);
+void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues);
 
 /*
- * @brief  Reads temperature sensor data.
- * @param  TODO
+ * @brief  Reads temperature sensor value.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
+ * @retval Temperature in degrees Celsius [°C].
+ */
+int16_t GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87);
+
+/*
+ * @brief  Reads magnetometer values.
+ * @param  hgy87:              Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                             the configuration information for the GY87 device.
+ *         magnetometerValues: Pointer to a GY87_magnetometerValues_t structure that stores the magnetometer values.
  * @retval None
  */
-int16_t MPU6050_ReadTemperatureSensor(MPU6050_HandleTypeDef_t * hmpu6050);
+void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues_t * magnetometerValues);
 
 /*
- * @brief  TODO
- * @param  TODO
+ * @brief  Reads magnetometer heading.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
+ * @retval Magnetometer heading in degrees [°].
+ */
+float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t * hgy87);
+
+/*
+ * @brief  Reads barometer pressure value.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
  * @retval TODO
  */
-void MPU6050_ReadMagnetometer(MPU6050_HandleTypeDef_t * hmpu6050, magnetometerValues_t * magnetometerValues);
+float GY87_ReadBarometerPressure(GY87_HandleTypeDef_t * hgy87);
 
 /*
- * @brief  TODO
- * @param  TODO
+ * @brief  Reads barometer altitude value.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
  * @retval TODO
  */
-int16_t MPU6050_ReadMagnetometerHeading(MPU6050_HandleTypeDef_t * hmpu6050);
+float GY87_ReadBarometerAltitude(GY87_HandleTypeDef_t * hgy87);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

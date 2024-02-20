@@ -64,7 +64,7 @@ typedef struct {
     uint8_t address;
     uint8_t * buffer;
     uint8_t bufferSize;
-} MPU6050_HandleTypeDef_t;
+} GY87_HandleTypeDef_t;
 
 /**
  * @brief bool_t type definition
@@ -79,7 +79,7 @@ typedef bool bool_t;
  * @param  TODO
  * @retval TODO
  */
-bool_t I2C_Init(MPU6050_HandleTypeDef_t * hmpu6050);
+bool_t I2C_Init(GY87_HandleTypeDef_t * hmpu6050);
 
 /*
  * @brief  TODO

@@ -39,8 +39,8 @@
 #include "ESC_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define USE_FREERTOS // Remove comment when using FreeRTOS
-// #define ESC_USE_LOGGING							// Remove comment to allow driver info logging
+#define USE_FREERTOS                    // Remove comment when using FreeRTOS
+#define ESC_USE_LOGGING                 // Remove comment to allow driver info logging
 
 #define ESC_AUTOCALIBRATION_WAIT_TIME_1 (2000) // Time to wait after ESC was set to maximum throttle
 #define ESC_AUTOCALIBRATION_WAIT_TIME_2 (1000) // Time to wait after ESC was set to minimum throttle

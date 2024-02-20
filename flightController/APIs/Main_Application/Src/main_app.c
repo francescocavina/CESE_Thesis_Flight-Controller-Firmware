@@ -46,10 +46,13 @@
 #define USE_FREERTOS                  // Remove comment when using FreeRTOS
 #define LOGGING_TASK_DELAY_MULTIPLIER (20)
 // #define MAIN_APP_USE_LOGGING_FSA8S							// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE 					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
-#define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER 				// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING 		// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 		// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE 		// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL	// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING									// Remove comment to allow driver info logging
 #define DEFAULT_TASK_DELAY (20)
@@ -58,6 +61,40 @@
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
+/* Tasks Handles */
+static TaskHandle_t FlightController_StartUp_Handle = NULL;
+static TaskHandle_t FlightController_HeartbeatLight_Handle = NULL;
+static TaskHandle_t FlightController_Read_FSA8S_Handle = NULL;
+static TaskHandle_t FlightController_Read_GY87_Handle = NULL;
+static TaskHandle_t FlightController_FlightLights_Handle = NULL;
+static TaskHandle_t FlightController_Write_ESCs_Handle = NULL;
+static TaskHandle_t FlightController_OnOffButton_Handle = NULL;
+static TaskHandle_t FlightController_BatteryLevel_Handle = NULL;
+
+/* Timers Handles */
+static TimerHandle_t Timer1_Handle = NULL;
+static bool_t Timer1_running = false;
+static bool_t FlightController_running = false;
+
+/* Drivers Handle */
+static IBUS_HandleTypeDef_t * rc_controller = NULL;
+static GY87_HandleTypeDef_t * hgy87 = NULL;
+static ESC_HandleTypeDef_t * hesc = NULL;
+
+/* Remote Control Channel Values */
+static uint16_t FSA8S_channelValues[FSA8S_CHANNELS] = {0};
+
+/* IMU Sensors Values */
+static int16_t GY87_temperature = 0;
+static GY87_gyroscopeValues_t * GY87_gyroscopeValues = NULL;
+static GY87_accelerometerValues_t * GY87_accelerometerValues = NULL;
+static GY87_magnetometerValues_t * GY87_magnetometerValues = NULL;
+static float GY87_magnetometerHeadingValue = 0;
+static float GY87_barometerPressureValue = 0;
+static float GY87_barometerAltitudeValue = 0;
+
+/* Flight Controller Battery Level */
+static float FlightController_batteryLevel;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -151,45 +188,13 @@ void FlightController_BatteryLevel(void * ptr);
 void Timer1_Callback(TimerHandle_t xTimer);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
-
-/* --- Private variable definitions ------------------------------------------------------------ */
 extern I2C_HandleTypeDef hi2c1;
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 extern TIM_HandleTypeDef htim3;
 extern ADC_HandleTypeDef hadc1;
 
-/* Tasks Handles */
-static TaskHandle_t FlightController_StartUp_Handle = NULL;
-static TaskHandle_t FlightController_HeartbeatLight_Handle = NULL;
-static TaskHandle_t FlightController_Read_FSA8S_Handle = NULL;
-static TaskHandle_t FlightController_Read_GY87_Handle = NULL;
-static TaskHandle_t FlightController_FlightLights_Handle = NULL;
-static TaskHandle_t FlightController_Write_ESCs_Handle = NULL;
-static TaskHandle_t FlightController_OnOffButton_Handle = NULL;
-static TaskHandle_t FlightController_BatteryLevel_Handle = NULL;
-
-/* Timers Handles */
-static TimerHandle_t Timer1_Handle = NULL;
-static bool_t Timer1_running = false;
-static bool_t FlightController_running = false;
-
-/* Drivers Handle */
-static IBUS_HandleTypeDef_t * rc_controller = NULL;
-static MPU6050_HandleTypeDef_t * hmpu6050 = NULL;
-static ESC_HandleTypeDef_t * hesc = NULL;
-
-/* Remote Control Channel Values */
-static uint16_t FSA8S_channelValues[FSA8S_CHANNELS] = {0};
-
-/* IMU Sensors Values */
-static int16_t GY87_temperature = 0;
-static gyroscopeValues_t * GY87_gyroscopeValues;
-static accelerometerValues_t * GY87_accelerometerValues;
-static magnetometerValues_t * GY87_magnetometerValues;
-
-/* Flight Controller Battery Level */
-static float FlightController_batteryLevel;
+/* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
 void FreeRTOS_CreateStartUpTasks(void) {
@@ -225,7 +230,7 @@ void FreeRTOS_CreateTasks(void) {
     BaseType_t ret;
 
     /* Task 1: FlightController_HeartbeatLight */
-    ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_HeartbeatLight_Handle);
+    ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_HeartbeatLight_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -245,7 +250,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 3: FlightController_Read_FSA8S */
-    ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_FSA8S_Handle);
+    ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_FSA8S_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -310,8 +315,9 @@ void FlightController_StartUp(void * ptr) {
 
             /* Initialize drivers */
             rc_controller = FSA8S_Init(&huart2);
-            hmpu6050 = MPU6050_Init(&hi2c1);
-            hesc = ESC_Init(&htim3);
+            hgy87 = GY87_Init(&hi2c1);
+            // hesc = ESC_Init(&htim3);
+            PWM_Init(hesc, hesc->channel4);
 
             /* Delete this task, as initialization must happen only once */
             vTaskDelete(FlightController_StartUp_Handle);
@@ -403,12 +409,14 @@ void FlightController_Read_FSA8S(void * ptr) {
 
 void FlightController_Read_GY87(void * ptr) {
 
-#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
+#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER ||                                                 \
+    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
     uint8_t loggingStr[40];
 #endif
 
     /* Change delay from time in [ms] to ticks */
-#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
+#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER ||                                                 \
+    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
 #else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
@@ -444,7 +452,7 @@ void FlightController_Read_GY87(void * ptr) {
     while (1) {
 
         /* Read GY87 gyroscope values */
-        MPU6050_ReadGyroscope(hmpu6050, GY87_gyroscopeValues);
+        GY87_ReadGyroscope(hgy87, GY87_gyroscopeValues);
 
         /* Log GY87 gyroscope values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_GYROSCOPE
@@ -457,7 +465,7 @@ void FlightController_Read_GY87(void * ptr) {
 #endif
 
         /* Read GY87 accelerometer values */
-        MPU6050_ReadAccelerometer(hmpu6050, GY87_accelerometerValues);
+        GY87_ReadAccelerometer(hgy87, GY87_accelerometerValues);
 
         /* Log GY87 accelerometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER
@@ -470,7 +478,7 @@ void FlightController_Read_GY87(void * ptr) {
 #endif
 
         /* Read GY87 temperature value */
-        GY87_temperature = MPU6050_ReadTemperatureSensor(hmpu6050);
+        GY87_temperature = GY87_ReadTemperatureSensor(hgy87);
 
         /*  Log GY87 temperature value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_TEMPERATURE
@@ -479,7 +487,7 @@ void FlightController_Read_GY87(void * ptr) {
 #endif
 
         /* Read GY87 magnetometer values */
-        MPU6050_ReadMagnetometer(hmpu6050, GY87_magnetometerValues);
+        GY87_ReadMagnetometer(hgy87, GY87_magnetometerValues);
 
         /* Log GY87 magnetometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
@@ -488,6 +496,33 @@ void FlightController_Read_GY87(void * ptr) {
         sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Y: %d\r\n", GY87_magnetometerValues->magnetometerY);
         LOG(loggingStr, LOG_INFORMATION);
         sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Z: %d\r\n\n", GY87_magnetometerValues->magnetometerZ);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
+
+        /* Read GY87 magnetometer heading */
+        GY87_magnetometerHeadingValue = GY87_ReadMagnetometerHeading(hgy87);
+
+        /* Log GY87 magnetometer heading value */
+#ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING
+        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Heading: %.2f°\r\n", GY87_magnetometerHeadingValue);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
+
+        /* Read GY87 barometer pressure value */
+        //        GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
+
+        /* Log GY87 barometer pressure value */
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE
+        sprintf((char *)loggingStr, (const char *)"GY87 Barometer Pressure: %.2fDEFINE\r\n", GY87_barometerPressureValue);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
+
+        /* Read GY87 barometer altitude value */
+        //        GY87_barometerAltitudeValue = GY87_ReadBarometerAltitude(hgy87);
+
+        /* Log GY87 barometer altitude value */
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
+        sprintf((char *)loggingStr, (const char *)"GY87 Barometer Altitude: %.2fDEFINE\r\n", GY87_barometerAltitudeValue);
         LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -503,7 +538,8 @@ void FlightController_Write_ESCs(void * ptr) {
 
     while (1) {
 
-        //    	ESC_SetSpeed(hesc, hesc->channel3, channel_test/10);
+        ESC_SetSpeed(hesc, hesc->channel4, FSA8S_channelValues[3] / 10);
+        //    	*(hesc->CCR4) = FSA8S_channelValues[4] * 16;
 
         /* Set task time delay */
         vTaskDelay(xDelay);
