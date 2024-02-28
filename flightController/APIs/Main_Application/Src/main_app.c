@@ -23,11 +23,11 @@
 
 /*
  * @file:    main_app.c
- * @date:    23/09/2023
+ * @date:    27/02/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
- * @brief:   This is the main application.
+ * @brief:   This is the main application that uses FreeRTOS.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
@@ -38,7 +38,6 @@
 #include "FSA8S_driver_UAI.h"
 #include "MPU6050_driver_UAI.h"
 #include "ESC_UAI.h"
-// #include "PowerOnOff_UAI.h"
 
 #include <string.h>
 
@@ -64,14 +63,15 @@
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Tasks Handles */
 static TaskHandle_t FlightController_StartUp_Handle = NULL;
-static TaskHandle_t FlightController_HeartbeatLight_Handle = NULL;
+static TaskHandle_t FlightController_ControlSystem_Handle = NULL;
 static TaskHandle_t FlightController_Read_FSA8S_Handle = NULL;
 static TaskHandle_t FlightController_Read_GY87_Handle = NULL;
-static TaskHandle_t FlightController_FlightLights_Handle = NULL;
 static TaskHandle_t FlightController_Write_ESCs_Handle = NULL;
 static TaskHandle_t FlightController_OnOffButton_Handle = NULL;
 static TaskHandle_t FlightController_BatteryLevel_Handle = NULL;
-static TaskHandle_t FlightController_ControlSystem_Handle = NULL;
+static TaskHandle_t FlightController_BatteryAlarm_Handle = NULL;
+static TaskHandle_t FlightController_HeartbeatLight_Handle = NULL;
+static TaskHandle_t FlightController_FlightLights_Handle = NULL;
 
 /* Timers Handles */
 static TimerHandle_t Timer1_Handle = NULL;
@@ -133,18 +133,13 @@ void FreeRTOS_CreateTimers(void);
 void FlightController_StartUp(void * ptr);
 
 /*
- * @brief  Task: Blinks an on-board-LED.
+ * @brief  Task: Controls the whole system as a closed-loop system, taking as inputs the data
+ *               received by the radio controller receiver and the IMU module, and controlling
+ *               accordingly the electronic speed controllers.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_HeartbeatLight(void * ptr);
-
-/*
- * @brief  Task: Produces blinking sequences with the 4 flight lights.
- * @param  Task pointer: not used.
- * @retval None
- */
-void FlightController_FlightLights(void * ptr);
+void FlightController_ControlSystem(void * ptr);
 
 /*
  * @brief  Task: Reads incoming data from the radio control receiver.
@@ -183,13 +178,25 @@ void FlightController_OnOffButton(void * ptr);
 void FlightController_BatteryLevel(void * ptr);
 
 /*
- * @brief  Task: Controls the whole system as a closed-loop system, taking as inputs the data
- *               received by the radio controller receiver and the IMU module, and controlling
- *               accordingly the electronic speed controllers.
+ * @brief  Task: Activates an alarm whenever the battery level is below an user-defined threshold.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_ControlSystem(void * ptr);
+void FlightController_BatteryAlarm(void * ptr);
+
+/*
+ * @brief  Task: Blinks an on-board-LED.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void FlightController_HeartbeatLight(void * ptr);
+
+/*
+ * @brief  Task: Produces blinking sequences with the 4 flight lights.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void FlightController_FlightLights(void * ptr);
 
 /* --- Private function callback declarations ---------------------------------------------------*/
 /*
@@ -243,27 +250,17 @@ void FreeRTOS_CreateTasks(void) {
 
     BaseType_t ret;
 
-    /* Task 1: FlightController_HeartbeatLight */
-    ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_HeartbeatLight_Handle);
+    /* Task 1: FlightController_ControlSystem */
+    ret = xTaskCreate(FlightController_ControlSystem, "FlightController_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_ControlSystem_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
 
-    if (FlightController_HeartbeatLight_Handle == NULL) {
-        vTaskDelete(FlightController_HeartbeatLight_Handle);
+    if (FlightController_ControlSystem_Handle == NULL) {
+        vTaskDelete(FlightController_ControlSystem_Handle);
     }
 
-    /* Task 2: FlightController_FlightLights */
-    ret = xTaskCreate(FlightController_FlightLights, "FlightController_FlightLights", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_FlightLights_Handle);
-
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
-
-    if (FlightController_FlightLights_Handle == NULL) {
-        vTaskDelete(FlightController_FlightLights_Handle);
-    }
-
-    /* Task 3: FlightController_Read_FSA8S */
+    /* Task 2: FlightController_Read_FSA8S */
     ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_FSA8S_Handle);
 
     /* Check the task was created successfully. */
@@ -273,7 +270,7 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_Read_FSA8S_Handle);
     }
 
-    /* Task 4: FlightController_Read_GY87 */
+    /* Task 3: FlightController_Read_GY87 */
     ret = xTaskCreate(FlightController_Read_GY87, "FlightController_Read_GY87", (6 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_GY87_Handle);
 
     /* Check the task was created successfully. */
@@ -283,7 +280,7 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_Read_GY87_Handle);
     }
 
-    /* Task 5: FlightController_Write_ESCs */
+    /* Task 4: FlightController_Write_ESCs */
     ret = xTaskCreate(FlightController_Write_ESCs, "FlightController_Write_ESCs", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Write_ESCs_Handle);
 
     /* Check the task was created successfully. */
@@ -293,7 +290,7 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_Write_ESCs_Handle);
     }
 
-    /* Task 6: FlightController_BatteryLevel */
+    /* Task 5: FlightController_BatteryLevel */
     ret = xTaskCreate(FlightController_BatteryLevel, "FlightController_BatteryLevel", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_BatteryLevel_Handle);
 
     /* Check the task was created successfully. */
@@ -303,14 +300,34 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_BatteryLevel_Handle);
     }
 
-    /* Task 7: FlightController_ControlSystem */
-    ret = xTaskCreate(FlightController_ControlSystem, "FlightController_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_ControlSystem_Handle);
+    /* Task 6: FlightController_BatteryAlarm */
+    ret = xTaskCreate(FlightController_BatteryAlarm, "FlightController_BatteryAlarm", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_BatteryAlarm_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
 
-    if (FlightController_ControlSystem_Handle == NULL) {
-        vTaskDelete(FlightController_ControlSystem_Handle);
+    if (FlightController_BatteryAlarm_Handle == NULL) {
+        vTaskDelete(FlightController_BatteryAlarm_Handle);
+    }
+
+    /* Task 7: FlightController_HeartbeatLight */
+    ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_HeartbeatLight_Handle);
+
+    /* Check the task was created successfully. */
+    configASSERT(ret == pdPASS);
+
+    if (FlightController_HeartbeatLight_Handle == NULL) {
+        vTaskDelete(FlightController_HeartbeatLight_Handle);
+    }
+
+    /* Task 8: FlightController_FlightLights */
+    ret = xTaskCreate(FlightController_FlightLights, "FlightController_FlightLights", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_FlightLights_Handle);
+
+    /* Check the task was created successfully. */
+    configASSERT(ret == pdPASS);
+
+    if (FlightController_FlightLights_Handle == NULL) {
+        vTaskDelete(FlightController_FlightLights_Handle);
     }
 }
 
@@ -351,42 +368,26 @@ void FlightController_StartUp(void * ptr) {
     }
 }
 
-void FlightController_HeartbeatLight(void * ptr) {
+void FlightController_ControlSystem(void * ptr) {
 
-    uint8_t ledState = GPIO_PIN_RESET;
+#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
+    uint8_t loggingStr[40];
+#endif
 
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xDelay = pdMS_TO_TICKS(HEARTBEAT_PERIOD / 2);
-
-    while (1) {
-
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
-
-        /* Change pin state */
-        if (ledState == GPIO_PIN_RESET) {
-
-            ledState = GPIO_PIN_SET;
-        } else {
-
-            ledState = GPIO_PIN_RESET;
-        }
-
-        /* Set task time delay */
-        vTaskDelay(xDelay);
-    }
-}
-
-void FlightController_FlightLights(void * ptr) {
-
+#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
+#else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+#endif
 
     while (1) {
 
-        /* Demo */
-        //    	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-        //    	HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-        //    	HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-        //    	HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
+        /* Set ESCs speeds */
+        ESC_speeds[0] = FSA8S_channelValues[2] / 10;
+        ESC_speeds[1] = FSA8S_channelValues[2] / 10;
+        ESC_speeds[2] = FSA8S_channelValues[2] / 10;
+        ESC_speeds[3] = FSA8S_channelValues[2] / 10;
 
         /* Set task time delay */
         vTaskDelay(xDelay);
@@ -658,26 +659,53 @@ void FlightController_BatteryLevel(void * ptr) {
     }
 }
 
-void FlightController_ControlSystem(void * ptr) {
-
-#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
-    uint8_t loggingStr[40];
-#endif
+void FlightController_BatteryAlarm(void * ptr) {
 
     /* Change delay from time in [ms] to ticks */
-#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
-#else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-#endif
 
     while (1) {
 
-        /* Set ESCs speeds */
-        ESC_speeds[0] = FSA8S_channelValues[2] / 10;
-        ESC_speeds[1] = FSA8S_channelValues[2] / 10;
-        ESC_speeds[2] = FSA8S_channelValues[2] / 10;
-        ESC_speeds[3] = FSA8S_channelValues[2] / 10;
+        /* Set task time delay */
+        vTaskDelay(xDelay);
+    }
+}
+
+void FlightController_HeartbeatLight(void * ptr) {
+
+    uint8_t ledState = GPIO_PIN_RESET;
+
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xDelay = pdMS_TO_TICKS(HEARTBEAT_PERIOD / 2);
+
+    while (1) {
+
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
+
+        /* Change pin state */
+        if (ledState == GPIO_PIN_RESET) {
+
+            ledState = GPIO_PIN_SET;
+        } else {
+
+            ledState = GPIO_PIN_RESET;
+        }
+
+        /* Set task time delay */
+        vTaskDelay(xDelay);
+    }
+}
+
+void FlightController_FlightLights(void * ptr) {
+
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+
+    while (1) {
+
+        //    	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+        //    	HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+        //    	HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
+        //    	HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
 
         /* Set task time delay */
         vTaskDelay(xDelay);

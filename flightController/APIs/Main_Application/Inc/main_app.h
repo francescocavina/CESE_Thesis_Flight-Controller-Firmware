@@ -23,11 +23,11 @@
 
 /*
  * @file:    main_app.h
- * @date:    23/09/2023
+ * @date:    27/02/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
- * @brief:   This is a the main application.
+ * @brief:   This is the main application that uses FreeRTOS.
  */
 
 #ifndef INC_MAIN_APP_H
