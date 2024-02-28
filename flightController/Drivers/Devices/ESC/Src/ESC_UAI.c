@@ -23,9 +23,9 @@
 
 /*
  * @file:    ESC_UAI.c
- * @date:    29/11/2023
+ * @date:    27/02/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.1.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
  *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
@@ -39,8 +39,11 @@
 #include "ESC_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define USE_FREERTOS                    // Remove comment when using FreeRTOS
-#define ESC_USE_LOGGING                 // Remove comment to allow driver info logging
+#define USE_FREERTOS // Remove comment when using FreeRTOS
+// #define ESC_USE_LOGGING                 // Remove comment to allow driver info logging
+
+#define MIN_ESC_SPEED                   (MAX_PWM_VALUE * 0.05) // 1ms
+#define MAX_ESC_SPEED                   (MAX_PWM_VALUE * 0.10) // 2ms
 
 #define ESC_AUTOCALIBRATION_WAIT_TIME_1 (2000) // Time to wait after ESC was set to maximum throttle
 #define ESC_AUTOCALIBRATION_WAIT_TIME_2 (1000) // Time to wait after ESC was set to minimum throttle
@@ -57,7 +60,7 @@
  * @retval true:     If PWM value could be calculated.
  *         false:    If PWM value couldn't be calculated.
  */
-static bool_t ESC_CalculatePWMDutyCycle(float speed, uint16_t * pwmValue);
+static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t * pwmValue);
 
 /**
  * @brief  Auto-calibrates ESC. This is necessary after powering on the ESC device.
@@ -74,15 +77,15 @@ static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc);
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t ESC_CalculatePWMDutyCycle(float speed, uint16_t * pwmValue) {
+static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t * pwmValue) {
 
     /* Check parameters */
-    if (speed < 0 || speed > 100) {
+    if (0 > speed || 100 < speed) {
         return false;
     }
 
     /* Calculate PWM value */
-    *pwmValue = (MAX_ESC_SPEED - MIN_ESC_SPEED) * (speed / 100) + MIN_ESC_SPEED;
+    *pwmValue = (uint32_t)((MAX_ESC_SPEED - MIN_ESC_SPEED) * (float)(speed / 100) + MIN_ESC_SPEED);
 
     return true;
 }
@@ -99,38 +102,32 @@ static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc) {
 #endif
 
     /* Set ESC to maximum throttle */
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel1, MAX_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc1, MAX_ESC_SPEED)) {
         return false;
     }
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel2, MAX_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc2, MAX_ESC_SPEED)) {
         return false;
     }
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel3, MAX_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc3, MAX_ESC_SPEED)) {
         return false;
     }
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel4, MAX_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc4, MAX_ESC_SPEED)) {
         return false;
     }
-
-    /* Wait 2 seconds */
-    ESC_SetTimeDelay(ESC_AUTOCALIBRATION_WAIT_TIME_1);
 
     /* Set ESC to minimum throttle */
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel1, MIN_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc1, MIN_ESC_SPEED)) {
         return false;
     }
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel2, MIN_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc2, MIN_ESC_SPEED)) {
         return false;
     }
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel3, MIN_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc3, MIN_ESC_SPEED)) {
         return false;
     }
-    if (false == PWM_SetDutyCycle(hesc, hesc->channel4, MIN_ESC_SPEED)) {
+    if (false == PWM_SetDutyCycle(hesc, hesc->esc4, MIN_ESC_SPEED)) {
         return false;
     }
-
-    /* Wait 1 second */
-    ESC_SetTimeDelay(ESC_AUTOCALIBRATION_WAIT_TIME_2);
 
 #ifdef ESC_USE_LOGGING
     LOG((uint8_t *)"ESCs auto-calibrated.\r\n\n", LOG_INFORMATION);
@@ -161,6 +158,10 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
     /* Initialize ESC_HandleTypeDef structure */
     if (hesc) {
         hesc->htim = htim;
+        hesc->esc1 = PWM_CHANNEL_4;
+        hesc->esc2 = PWM_CHANNEL_2;
+        hesc->esc3 = PWM_CHANNEL_3;
+        hesc->esc4 = PWM_CHANNEL_1;
     } else {
         /* Dynamic memory allocation was not successful */
         /* Free up dynamic allocated memory */
@@ -172,51 +173,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
     }
 
     /* Start PWM signal generation */
-    if (false == PWM_Init(hesc, hesc->channel1)) {
+    if (false == PWM_Init(hesc)) {
 #ifdef ESC_USE_LOGGING
-        LOG((uint8_t *)"ESC 1 couldn't be initialized.\r\n\n", LOG_ERROR);
-#endif
-
-/* Free up dynamic allocated memory */
-#ifdef USE_FREERTOS
-        vPortFree(hesc);
-#else
-        free(hesc);
-#endif
-
-        return NULL;
-    }
-    if (false == PWM_Init(hesc, hesc->channel2)) {
-#ifdef ESC_USE_LOGGING
-        LOG((uint8_t *)"ESC 2 couldn't be initialized.\r\n\n", LOG_ERROR);
-#endif
-
-/* Free up dynamic allocated memory */
-#ifdef USE_FREERTOS
-        vPortFree(hesc);
-#else
-        free(hesc);
-#endif
-
-        return NULL;
-    }
-    if (false == PWM_Init(hesc, hesc->channel3)) {
-#ifdef ESC_USE_LOGGING
-        LOG((uint8_t *)"ESC 3 couldn't be initialized.\r\n\n", LOG_ERROR);
-#endif
-
-/* Free up dynamic allocated memory */
-#ifdef USE_FREERTOS
-        vPortFree(hesc);
-#else
-        free(hesc);
-#endif
-
-        return NULL;
-    }
-    if (false == PWM_Init(hesc, hesc->channel4)) {
-#ifdef ESC_USE_LOGGING
-        LOG((uint8_t *)"ESC 4 couldn't be initialized.\r\n\n", LOG_ERROR);
+        LOG((uint8_t *)"ESCs  couldn't be initialized.\r\n\n", LOG_ERROR);
 #endif
 
 /* Free up dynamic allocated memory */
@@ -232,7 +191,7 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
     /* Calibrate ESC */
     if (false == ESC_AutoCalibrate(hesc)) {
 #ifdef ESC_USE_LOGGING
-        LOG((uint8_t *)"ESCs couldn't be auto-calibrated.\r\n\n", LOG_ERROR);
+        LOG((uint8_t *)"ESCs couldn't be calibrated.\r\n\n", LOG_ERROR);
 #endif
 
 /* Free up dynamic allocated memory */
@@ -260,16 +219,7 @@ bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc) {
     }
 
     /* Stop PWM signal generation */
-    if (false == PWM_Deinit(hesc, hesc->channel1)) {
-        return false;
-    }
-    if (false == PWM_Deinit(hesc, hesc->channel2)) {
-        return false;
-    }
-    if (false == PWM_Deinit(hesc, hesc->channel3)) {
-        return false;
-    }
-    if (false == PWM_Deinit(hesc, hesc->channel4)) {
+    if (false == PWM_Deinit(hesc)) {
         return false;
     }
 
@@ -283,16 +233,15 @@ bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc) {
     return true;
 }
 
-bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint32_t channel, float speed) {
+bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint8_t channel, float speed) {
 
-    uint16_t pwmValue;
-    uint16_t * pwmValuePtr = &pwmValue;
+    uint32_t pwmValue;
 
     /* Check parameters */
     if (NULL == hesc->htim) {
         return false;
     }
-    if (channel != hesc->channel1 && channel != hesc->channel2 && channel != hesc->channel3 && channel != hesc->channel4) {
+    if (PWM_CHANNEL_1 != channel && PWM_CHANNEL_2 != channel && PWM_CHANNEL_3 != channel && PWM_CHANNEL_4 != channel) {
         return false;
     }
     if (speed < 0 || speed > 100) {
@@ -300,12 +249,12 @@ bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint32_t channel, float speed) {
     }
 
     /* Calculate PWM duty cycle */
-    if (false == ESC_CalculatePWMDutyCycle(speed, pwmValuePtr)) {
+    if (false == ESC_CalculatePWMDutyCycle(speed, &pwmValue)) {
         return false;
     }
 
     /* Set PWM duty cycle */
-    if (false == PWM_SetDutyCycle(hesc, channel, *pwmValuePtr)) {
+    if (false == PWM_SetDutyCycle(hesc, channel, pwmValue)) {
         return false;
     };
 

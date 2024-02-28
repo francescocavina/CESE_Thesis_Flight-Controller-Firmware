@@ -45,16 +45,17 @@
 /* --- Macros definitions ---------------------------------------------------------------------- */
 #define USE_FREERTOS                  // Remove comment when using FreeRTOS
 #define LOGGING_TASK_DELAY_MULTIPLIER (20)
+// #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM					 	// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_FSA8S							// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE 					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER 				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING 		// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 		// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE 		// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 			// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE 			// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL	// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING									// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_ESC								// Remove comment to allow driver info logging
 #define DEFAULT_TASK_DELAY (20)
 #define FSA8S_CHANNELS     (10) // Number of remote control channels to read
 
@@ -70,6 +71,7 @@ static TaskHandle_t FlightController_FlightLights_Handle = NULL;
 static TaskHandle_t FlightController_Write_ESCs_Handle = NULL;
 static TaskHandle_t FlightController_OnOffButton_Handle = NULL;
 static TaskHandle_t FlightController_BatteryLevel_Handle = NULL;
+static TaskHandle_t FlightController_ControlSystem_Handle = NULL;
 
 /* Timers Handles */
 static TimerHandle_t Timer1_Handle = NULL;
@@ -92,6 +94,9 @@ static GY87_magnetometerValues_t * GY87_magnetometerValues = NULL;
 static float GY87_magnetometerHeadingValue = 0;
 static float GY87_barometerPressureValue = 0;
 static float GY87_barometerAltitudeValue = 0;
+
+/* ESCs Speed */
+static uint16_t ESC_speeds[4] = {0};
 
 /* Flight Controller Battery Level */
 static float FlightController_batteryLevel;
@@ -176,6 +181,15 @@ void FlightController_OnOffButton(void * ptr);
  * @retval None
  */
 void FlightController_BatteryLevel(void * ptr);
+
+/*
+ * @brief  Task: Controls the whole system as a closed-loop system, taking as inputs the data
+ *               received by the radio controller receiver and the IMU module, and controlling
+ *               accordingly the electronic speed controllers.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void FlightController_ControlSystem(void * ptr);
 
 /* --- Private function callback declarations ---------------------------------------------------*/
 /*
@@ -288,6 +302,16 @@ void FreeRTOS_CreateTasks(void) {
     if (FlightController_BatteryLevel_Handle == NULL) {
         vTaskDelete(FlightController_BatteryLevel_Handle);
     }
+
+    /* Task 7: FlightController_ControlSystem */
+    ret = xTaskCreate(FlightController_ControlSystem, "FlightController_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_ControlSystem_Handle);
+
+    /* Check the task was created successfully. */
+    configASSERT(ret == pdPASS);
+
+    if (FlightController_ControlSystem_Handle == NULL) {
+        vTaskDelete(FlightController_ControlSystem_Handle);
+    }
 }
 
 void FreeRTOS_CreateTimers(void) {
@@ -316,8 +340,7 @@ void FlightController_StartUp(void * ptr) {
             /* Initialize drivers */
             rc_controller = FSA8S_Init(&huart2);
             hgy87 = GY87_Init(&hi2c1);
-            // hesc = ESC_Init(&htim3);
-            PWM_Init(hesc, hesc->channel4);
+            hesc = ESC_Init(&htim3);
 
             /* Delete this task, as initialization must happen only once */
             vTaskDelete(FlightController_StartUp_Handle);
@@ -533,13 +556,34 @@ void FlightController_Read_GY87(void * ptr) {
 
 void FlightController_Write_ESCs(void * ptr) {
 
+#ifdef MAIN_APP_USE_LOGGING_ESC
+    uint8_t loggingStr[40];
+#endif
+
     /* Change delay from time in [ms] to ticks */
+#ifdef MAIN_APP_USE_LOGGING_ESC
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
+#else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+#endif
 
     while (1) {
 
-        ESC_SetSpeed(hesc, hesc->channel4, FSA8S_channelValues[3] / 10);
-        //    	*(hesc->CCR4) = FSA8S_channelValues[4] * 16;
+        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[0]);
+        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[1]);
+        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[2]);
+        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[3]);
+
+#ifdef MAIN_APP_USE_LOGGING_ESC
+        sprintf((char *)loggingStr, (const char *)"PWM Channel 1 Speed: %d\r\n", ESC_speeds[0]);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"PWM Channel 2 Speed: %d\r\n", ESC_speeds[1]);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"PWM Channel 3 Speed: %d\r\n", ESC_speeds[2]);
+        LOG(loggingStr, LOG_INFORMATION);
+        sprintf((char *)loggingStr, (const char *)"PWM Channel 4 Speed: %d\r\n\n", ESC_speeds[3]);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
 
         /* Set task time delay */
         vTaskDelay(xDelay);
@@ -608,6 +652,32 @@ void FlightController_BatteryLevel(void * ptr) {
         sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f[V]\r\n\n", FlightController_batteryLevel);
         LOG(loggingStr, LOG_INFORMATION);
 #endif
+
+        /* Set task time delay */
+        vTaskDelay(xDelay);
+    }
+}
+
+void FlightController_ControlSystem(void * ptr) {
+
+#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
+    uint8_t loggingStr[40];
+#endif
+
+    /* Change delay from time in [ms] to ticks */
+#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
+#else
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+#endif
+
+    while (1) {
+
+        /* Set ESCs speeds */
+        ESC_speeds[0] = FSA8S_channelValues[2] / 10;
+        ESC_speeds[1] = FSA8S_channelValues[2] / 10;
+        ESC_speeds[2] = FSA8S_channelValues[2] / 10;
+        ESC_speeds[3] = FSA8S_channelValues[2] / 10;
 
         /* Set task time delay */
         vTaskDelay(xDelay);

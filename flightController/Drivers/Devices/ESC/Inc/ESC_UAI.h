@@ -23,9 +23,9 @@
 
 /*
  * @file:    ESC_UAI.h
- * @date:    29/11/2023
+ * @date:    27/02/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.1.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
  *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
@@ -66,7 +66,7 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim);
  * @brief  Deinitializes the ESC device.
  * @param  hesc:  Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
  * 			      information for the communication with the ESC device.
- * @retval true:  If ESC device could be deihesc:  TODOnitialized.
+ * @retval true:  If ESC device could be deinitialized.
  *         false: If ESC device couldn't be deinitialized.
  */
 bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc);
@@ -80,7 +80,7 @@ bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc);
  * @retval true:    Speed could be set.
  *         false:   Speed couldn't be set.
  */
-bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint32_t channel, float speed);
+bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint8_t channel, float speed);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

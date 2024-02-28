@@ -23,9 +23,9 @@
 
 /*
  * @file:    ESC_HWI.c
- * @date:    29/11/2023
+ * @date:    27/02/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.1.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for a generic ESC device. It is divided in two parts: One high level
  *           abstraction layer (ESC_UAI.c and ESC_UAI.h) for interface with the user application
@@ -51,117 +51,107 @@
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-bool_t PWM_Init(ESC_HandleTypeDef_t * hesc, uint32_t channel) {
+bool_t PWM_Init(ESC_HandleTypeDef_t * hesc) {
 
-    /* Check parameters */
+    /* Check first parameter */
     if (NULL == hesc) {
-        return false;
-    }
-    if (channel != hesc->channel1 && channel != hesc->channel2 && channel != hesc->channel3 && channel != hesc->channel4) {
-        return false;
-    }
-
-    /* Initialize ESC_HandleTypeDef structure */
-    /* BEGIN MODIFY 1 */
-    hesc->channel1 = TIM_CHANNEL_1;
-    hesc->channel2 = TIM_CHANNEL_2;
-    hesc->channel3 = TIM_CHANNEL_3;
-    hesc->channel4 = TIM_CHANNEL_4;
-    hesc->CCR1 = (uint32_t *)&(TIM3->CCR1);
-    hesc->CCR2 = (uint32_t *)&(TIM3->CCR2);
-    hesc->CCR3 = (uint32_t *)&(TIM3->CCR3);
-    hesc->CCR4 = (uint32_t *)&(TIM3->CCR4);
-    /* END MODIFY 1 */
-
-    /* Initialize timer peripheral */
-    /* BEGIN MODIFY 2 */
-    if (HAL_OK != HAL_TIM_PWM_Init(hesc->htim)) {
-        /* END MODIFY 2 */
         return false;
     }
 
     /* Start PWM signal generation */
+    /* BEGIN MODIFY 1 */
+    if (HAL_OK != HAL_TIM_PWM_Start(hesc->htim, TIM_CHANNEL_1)) {
+        /* END MODIFY 1 */
+        return false;
+    }
+    /* BEGIN MODIFY 2 */
+    if (HAL_OK != HAL_TIM_PWM_Start(hesc->htim, TIM_CHANNEL_2)) {
+        /* END MODIFY 2 */
+        return false;
+    }
     /* BEGIN MODIFY 3 */
-    if (HAL_OK != HAL_TIM_PWM_Start(hesc->htim, channel)) {
+    if (HAL_OK != HAL_TIM_PWM_Start(hesc->htim, TIM_CHANNEL_3)) {
         /* END MODIFY 3 */
         return false;
     }
-
-    return true;
-}
-
-bool_t PWM_Deinit(ESC_HandleTypeDef_t * hesc, uint32_t channel) {
-
-    /* Check parameters */
-    if (NULL == hesc) {
-        return false;
-    }
-    if (channel != hesc->channel1 && channel != hesc->channel2 && channel != hesc->channel3 && channel != hesc->channel4) {
-        return false;
-    }
-
-    /* Stop PWM signal generation */
     /* BEGIN MODIFY 4 */
-    if (HAL_OK != HAL_TIM_PWM_Stop(hesc->htim, channel)) {
+    if (HAL_OK != HAL_TIM_PWM_Start(hesc->htim, TIM_CHANNEL_4)) {
         /* END MODIFY 4 */
         return false;
     }
 
-    /* De-initialize timer peripheral */
-    /* BEGIN MODIFY 5 */
-    if (HAL_OK != HAL_TIM_PWM_DeInit(hesc->htim)) {
-        /* END MODIFY 5 */
-        return false;
-    }
-
     return true;
 }
 
-bool_t PWM_SetDutyCycle(ESC_HandleTypeDef_t * hesc, uint32_t channel, uint16_t dutyCycle) {
+bool_t PWM_Deinit(ESC_HandleTypeDef_t * hesc) {
 
     /* Check parameters */
     if (NULL == hesc) {
         return false;
     }
-    if (channel != hesc->channel1 && channel != hesc->channel2 && channel != hesc->channel3 && channel != hesc->channel4) {
+
+    /* Stop PWM signal generation */
+    /* BEGIN MODIFY 5 */
+    if (HAL_OK != HAL_TIM_PWM_Stop(hesc->htim, TIM_CHANNEL_1)) {
+        /* END MODIFY 5 */
         return false;
     }
-    if (dutyCycle > MAX_PWM_VALUE) {
+    /* BEGIN MODIFY 6 */
+    if (HAL_OK != HAL_TIM_PWM_Stop(hesc->htim, TIM_CHANNEL_2)) {
+        /* END MODIFY 6 */
+        return false;
+    }
+    /* BEGIN MODIFY 7 */
+    if (HAL_OK != HAL_TIM_PWM_Stop(hesc->htim, TIM_CHANNEL_3)) {
+        /* END MODIFY 7 */
+        return false;
+    }
+    /* BEGIN MODIFY 8 */
+    if (HAL_OK != HAL_TIM_PWM_Stop(hesc->htim, TIM_CHANNEL_4)) {
+        /* END MODIFY 8 */
         return false;
     }
 
-    /* Set duty cycle */
-    if (hesc->channel1 == channel) {
-
-        *(hesc->CCR1) = dutyCycle;
-    } else if (hesc->channel2 == channel) {
-
-        *(hesc->CCR2) = dutyCycle;
-    } else if (hesc->channel3 == channel) {
-
-        *(hesc->CCR3) = dutyCycle;
-    } else if (hesc->channel4 == channel) {
-
-        *(hesc->CCR4) = dutyCycle;
-    } else {
-
+    /* De-initialize timer peripheral */
+    /* BEGIN MODIFY 9 */
+    if (HAL_OK != HAL_TIM_PWM_DeInit(hesc->htim)) {
+        /* END MODIFY 9 */
         return false;
     }
 
     return true;
 }
 
-void ESC_SetTimeDelay(uint32_t delay) {
+bool_t PWM_SetDutyCycle(ESC_HandleTypeDef_t * hesc, uint8_t channel, uint32_t dutyCycle) {
 
-/* No need to check parameters */
+    /* Check parameters */
+    if (NULL == hesc) {
+        return false;
+    }
+    if (PWM_CHANNEL_1 != channel && PWM_CHANNEL_2 != channel && PWM_CHANNEL_3 != channel && PWM_CHANNEL_4 != channel) {
+        return false;
+    }
 
-/* Set delay */
-#ifdef USE_FREERTOS
-    const TickType_t xDelay = pdMS_TO_TICKS(delay);
-    vTaskDelay(xDelay);
-#else
-    HAL_Delay(delay);
-#endif
+    /* Set duty cycle */
+    if (PWM_CHANNEL_1 == channel) {
+        /* BEGIN MODIFY 10 */
+        TIM3->CCR1 = (uint16_t)dutyCycle;
+        /* END MODIFY 10 */
+    } else if (PWM_CHANNEL_2 == channel) {
+        /* BEGIN MODIFY 11 */
+        TIM3->CCR2 = (uint16_t)dutyCycle;
+        /* END MODIFY 11 */
+    } else if (PWM_CHANNEL_3 == channel) {
+        /* BEGIN MODIFY 12 */
+        TIM3->CCR3 = (uint16_t)dutyCycle;
+        /* END MODIFY 12 */
+    } else if (PWM_CHANNEL_4 == channel) {
+        /* BEGIN MODIFY 13 */
+        TIM3->CCR4 = (uint16_t)dutyCycle;
+        /* END MODIFY 13 */
+    }
+
+    return true;
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
