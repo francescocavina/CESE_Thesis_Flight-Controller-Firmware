@@ -23,11 +23,22 @@
 
 /*
  * @file:    MPU6050_driver_UAI.h
- * @date:    22/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.4.0
  *
- * @brief:   TODO
+ * @brief:   This is a driver for the GY87 IMU module.
+ *           It is divided in three parts: One high level abstraction layer
+ *           (MPU6050_driver_UAI.c and MPU6050_driver_UAI.h) for interface with the user
+ *           application, one low level abstraction layer (MPU6050_driver_HWI.c and
+ *           MPU6050_driver_HWI.h) for interface with the hardware (also known as port)
+ *           and register maps (MPU6050_driver_register_map.h, QMC5883L_driver_register_map.h
+ *           and BMP180_driver_register_map.h). In case of need to port this driver to another
+ *           platform, please only modify the low layer abstraction layer files where the
+ *           labels indicate it.
+ *
+ * @details: In order to be able to use the IMU module, it must be initialized first.
+ * 			 Only two devices can be initialized and therefore used.
  */
 
 #ifndef INC_MPU6050_DRIVER_UAI_H
@@ -82,7 +93,7 @@ typedef struct BMP180_CallibrationData {
 /*
  * @brief  Initializes MPU6050 device.
  * @param  hi2c: Pointer to a I2C_HandleTypeDef structure that contains
- *         the configuration information for the I2C communication.
+ *               the configuration information for the I2C communication.
  * @retval Pointer to a GY87_HandleTypeDef_t structure that contains
  *         the configuration information for the GY87 device.
  */
@@ -143,7 +154,7 @@ float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t * hgy87);
  * @brief  Reads barometer pressure value.
  * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
  *                the configuration information for the GY87 device.
- * @retval TODO
+ * @retval Barometer pressure in Pascals [Pa].
  */
 float GY87_ReadBarometerPressure(GY87_HandleTypeDef_t * hgy87);
 
@@ -151,7 +162,7 @@ float GY87_ReadBarometerPressure(GY87_HandleTypeDef_t * hgy87);
  * @brief  Reads barometer altitude value.
  * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
  *                the configuration information for the GY87 device.
- * @retval TODO
+ * @retval Altitude in meters [m].
  */
 float GY87_ReadBarometerAltitude(GY87_HandleTypeDef_t * hgy87);
 

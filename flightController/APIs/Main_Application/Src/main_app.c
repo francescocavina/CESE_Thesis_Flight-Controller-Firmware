@@ -50,7 +50,7 @@
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER 				// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING 		// Remove comment to allow driver info logging
+#define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 			// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE 			// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL	// Remove comment to allow driver info logging
@@ -702,10 +702,7 @@ void FlightController_FlightLights(void * ptr) {
 
     while (1) {
 
-        //    	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-        //    	HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-        //    	HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-        //    	HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
+        // TODO
 
         /* Set task time delay */
         vTaskDelay(xDelay);

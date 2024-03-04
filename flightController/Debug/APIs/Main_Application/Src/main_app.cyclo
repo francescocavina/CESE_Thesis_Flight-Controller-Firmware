@@ -11,5 +11,5 @@
 ../APIs/Main_Application/Src/main_app.c:662:6:FlightController_BatteryAlarm	1
 ../APIs/Main_Application/Src/main_app.c:674:6:FlightController_HeartbeatLight	2
 ../APIs/Main_Application/Src/main_app.c:699:6:FlightController_FlightLights	1
-../APIs/Main_Application/Src/main_app.c:716:6:Timer1_Callback	4
-../APIs/Main_Application/Src/main_app.c:769:6:FlightController_Init	1
+../APIs/Main_Application/Src/main_app.c:713:6:Timer1_Callback	4
+../APIs/Main_Application/Src/main_app.c:766:6:FlightController_Init	1

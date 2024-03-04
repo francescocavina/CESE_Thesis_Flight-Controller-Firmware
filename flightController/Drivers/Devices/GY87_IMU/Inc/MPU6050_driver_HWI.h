@@ -23,11 +23,22 @@
 
 /*
  * @file:    MPU6050_driver_HWI.h
- * @date:    22/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.4.0
  *
- * @brief:   TODO
+ * @brief:   This is a driver for the GY87 IMU module.
+ *           It is divided in three parts: One high level abstraction layer
+ *           (MPU6050_driver_UAI.c and MPU6050_driver_UAI.h) for interface with the user
+ *           application, one low level abstraction layer (MPU6050_driver_HWI.c and
+ *           MPU6050_driver_HWI.h) for interface with the hardware (also known as port)
+ *           and register maps (MPU6050_driver_register_map.h, QMC5883L_driver_register_map.h
+ *           and BMP180_driver_register_map.h). In case of need to port this driver to another
+ *           platform, please only modify the low layer abstraction layer files where the
+ *           labels indicate it.
+ *
+ * @details: This driver uses I2C for the communication with the GY87 module, in standard
+ *           mode with no interrupts or DMA.
  */
 
 #ifndef INC_MPU6050_DRIVER_HWI_H
@@ -38,13 +49,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
-
 /* BEGIN MODIFY 1 */
 #include "stm32f4xx_hal.h"
-/* END MODIFY 1 */
-// TODO
-#include "LoggingSystem_UAI.h"
 #include "cmsis_os.h"
+/* END MODIFY 1 */
+#include "LoggingSystem_UAI.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -75,23 +84,36 @@ typedef bool bool_t;
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
+ * @brief  Initializes the I2C peripheral.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
+ * @retval true:  If communication could be initialized.
+ *         false: If communication couldn't be initialized.
  */
-bool_t I2C_Init(GY87_HandleTypeDef_t * hmpu6050);
+bool_t I2C_Init(GY87_HandleTypeDef_t * hgy87);
 
 /*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
+ * @brief  Reads I2C device registers.
+ * @param  hi2c:     Pointer to a I2C_HandleTypeDef structure that contains
+ *                   the configuration information for the I2C communication.
+ *         address:  I2C device address to read.
+ *         reg:		 I2C device register to read.
+ *         data:     Pointer to variable that holds the data to be read.
+ *         dataSize: Size of the data to be read.
+ * @retval true:     I2C device register could be read.
+ *         false:    I2C device register couldn't be read.
  */
 bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize);
 
 /*
- * @brief  TODO
- * @param  TODO
- * @retval TODO
+ * @brief  Writes to I2C device register.
+ * @param  hi2c:    Pointer to a I2C_HandleTypeDef structure that contains
+ *                  the configuration information for the I2C communication.
+ *         address: I2C device address to write.
+ *         reg:		I2C device register to write.
+ *         data:    Pointer to variable that holds the data to be written.
+ * @retval true:    I2C device register could be written.
+ *         false:   I2C device register couldn't be written.
  */
 bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data);
 

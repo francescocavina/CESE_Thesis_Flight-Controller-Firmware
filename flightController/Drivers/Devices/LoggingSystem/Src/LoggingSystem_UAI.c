@@ -23,11 +23,18 @@
 
 /*
  * @file:    LoggingSystem_UAI.c
- * @date:    21/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   TODO
+ * @brief:   This is a driver for logging messages for the user via USB.
+ *           It is divided in two parts: One high level abstraction layer
+ *           (LoggingSystem_UAI.c and LoggingSystem_UAI.h) for interface with the
+ *           user application and one low level abstraction layer
+ *           (LoggingSystem_HWI.c and LoggingSystem_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver
+ *           to another platform, please only modify the low layer abstraction
+ *           layer files where the labels indicate it.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
@@ -55,15 +62,15 @@ static uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-int8_t LOG(uint8_t * message, LOGGING_TYPE_t logType) {
+bool_t LOG(uint8_t * message, LOGGING_TYPE_t logType) {
 
     /* Check parameters */
     if (NULL == message) {
-        return -1;
+        return false;
     }
 
     if (LOG_INFORMATION < 0 || logType > LOG_ERROR) {
-        return -1;
+        return false;
     }
 
     /* Build log message */
@@ -88,7 +95,7 @@ int8_t LOG(uint8_t * message, LOGGING_TYPE_t logType) {
     /* Send message through USB port */
     USB_Write(logMessage);
 
-    return 0;
+    return true;
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

@@ -23,7 +23,7 @@
 
 /*
  * @file:    MPU6050_driver_register_map.h
- * @date:    22/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.4.0
  *

@@ -23,11 +23,22 @@
 
 /*
  * @file:    MPU6050_driver_HWI.c
- * @date:    22/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.4.0
  *
- * @brief:   TODO
+ * @brief:  This is a driver for the GY87 IMU module.
+ *           It is divided in three parts: One high level abstraction layer
+ *           (MPU6050_driver_UAI.c and MPU6050_driver_UAI.h) for interface with the user
+ *           application, one low level abstraction layer (MPU6050_driver_HWI.c and
+ *           MPU6050_driver_HWI.h) for interface with the hardware (also known as port)
+ *           and register maps (MPU6050_driver_register_map.h, QMC5883L_driver_register_map.h
+ *           and BMP180_driver_register_map.h). In case of need to port this driver to another
+ *           platform, please only modify the low layer abstraction layer files where the
+ *           labels indicate it.
+ *
+ * @details: This driver uses I2C for the communication with the GY87 module, in standard
+ *           mode with no interrupts or DMA.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
@@ -67,6 +78,7 @@ bool_t I2C_Init(GY87_HandleTypeDef_t * hgy87) {
 
     /* Read IMU device ID */
     I2C_Read(hgy87->hi2c, hgy87->address, MPU_6050_REG_WHO_AM_I, &who_am_I_value, 1);
+
     /* Check IMU device ID */
     if (who_am_I_value == MPU_6050_BIT_WHO_AM_I) {
         /* Right IMU device ID */
@@ -87,9 +99,10 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
         return false;
     }
 
-    /* Read IMU data by passing a data register */
+    /* Read I2C device data by passing a data register */
+    /* BEGIN MODIFY 1 */
     if (HAL_OK != HAL_I2C_Mem_Read(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize, MPU_6050_I2C_READ_TIMEOUT)) {
-
+        /* END MODIFY 1 */
         /* Data couldn't be read */
         return false;
     } else {
@@ -109,9 +122,10 @@ bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t
         return false;
     }
 
-    /* Write to IMU */
+    /* Write to I2C device register */
+    /* BEGIN MODIFY 2 */
     if (HAL_OK != HAL_I2C_Mem_Write(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, sizeof(*data), MPU_6050_I2C_WRITE_TIMEOUT)) {
-
+        /* END MODIFY 2 */
         /* Data couldn't be written */
         return false;
     } else {

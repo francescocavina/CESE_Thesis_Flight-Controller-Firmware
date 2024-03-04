@@ -29,7 +29,6 @@ Drivers/Devices/ESC/Src \
 Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Src \
 Drivers/Devices/GY87_IMU/Src \
 Drivers/Devices/LoggingSystem/Src \
-Drivers/Devices/PowerOnOff/Src \
 Drivers/STM32F4xx_HAL_Driver/Src \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src \

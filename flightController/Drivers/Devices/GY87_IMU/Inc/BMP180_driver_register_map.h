@@ -23,11 +23,11 @@
 
 /*
  * @file:    BMP180_driver_register_map.h
- * @date:    22/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.4.0
  *
- * @brief:   TODO
+ * @brief:   This file contains the register map for the BMP180 barometer.
  */
 
 #ifndef INC_BMP180_DRIVER_REGISTER_MAP_H

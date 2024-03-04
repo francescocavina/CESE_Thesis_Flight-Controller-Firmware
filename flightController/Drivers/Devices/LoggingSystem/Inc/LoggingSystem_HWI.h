@@ -23,11 +23,18 @@
 
 /*
  * @file:    LoggingSystem_HWI.h
- * @date:    21/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   TODO
+ * @brief:   This is a driver for logging messages for the user via USB.
+ *           It is divided in two parts: One high level abstraction layer
+ *           (LoggingSystem_UAI.c and LoggingSystem_UAI.h) for interface with the
+ *           user application and one low level abstraction layer
+ *           (LoggingSystem_HWI.c and LoggingSystem_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver
+ *           to another platform, please only modify the low layer abstraction
+ *           layer files where the labels indicate it.
  */
 
 #ifndef INC_LOGGING_SYSTEM_HWI_H
@@ -37,10 +44,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-
+/* BEGIN MODIFY 1 */
 #include "stm32f4xx_hal.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
+/* END MODIFY 1 */
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -50,6 +58,10 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
+/**
+ * @brief bool_t type definition
+ */
+typedef bool bool_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 

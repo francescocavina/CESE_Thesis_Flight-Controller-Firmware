@@ -23,11 +23,23 @@
 
 /*
  * @file:    MPU6050_driver_UAI.c
- * @date:    22/10/2023
+ * @date:    03/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.4.0
  *
- * @brief:   TODO
+ * @brief:   This is a driver for the GY87 IMU module.
+ *           It is divided in three parts: One high level abstraction layer
+ *           (MPU6050_driver_UAI.c and MPU6050_driver_UAI.h) for interface with the user
+ *           application, one low level abstraction layer (MPU6050_driver_HWI.c and
+ *           MPU6050_driver_HWI.h) for interface with the hardware (also known as port)
+ *           and register maps (MPU6050_driver_register_map.h, QMC5883L_driver_register_map.h
+ *           and BMP180_driver_register_map.h). In case of need to port this driver to another
+ *           platform, please only modify the low layer abstraction layer files where the
+ *           labels indicate it.
+ *
+ * @details: In order to be able to use the IMU module, it must be
+ *           initialized first. Only two devices can be initialized and therefore
+ *           used.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
@@ -210,9 +222,10 @@ static void MPU6050_WriteRegisterBitmasked(I2C_HandleTypeDef * hi2c, uint8_t add
  * @brief  Configures GY87 device at initialization.
  * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
  *                the configuration information for the GY87 device.
- * @retval None
+ * @retval true:  GY87 could be configured.
+ *         false: GY87 couldn't be configured.
  */
-static void GY87_Configure(GY87_HandleTypeDef_t * hgy87);
+static bool_t GY87_Configure(GY87_HandleTypeDef_t * hgy87);
 
 /*
  * @brief  Tests if QMC5883L magnetometer was detected.
@@ -454,7 +467,7 @@ static void MPU6050_Configure_BMP180(GY87_HandleTypeDef_t * hgy87) {
     //    MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_CTRL, &regData, MPU6050_SET_BIT);
 }
 
-static void GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
+static bool_t GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
 
     /* Configure MPU6050 device */
 
@@ -484,7 +497,7 @@ static void GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
 #ifdef GY87_USE_LOGGING
         LOG((uint8_t *)"QMC5883L magnetometer not detected.\r\n\n", LOG_ERROR);
 #endif
-        // return -1; TODO
+        return false;
     } else {
 #ifdef GY87_USE_LOGGING
         LOG((uint8_t *)"QMC5883L magnetometer detected.\r\n\n", LOG_INFORMATION);
@@ -499,7 +512,7 @@ static void GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
 #ifdef GY87_USE_LOGGING
         LOG((uint8_t *)"BMP180 barometer not detected.\r\n\n", LOG_ERROR);
 #endif
-        // return -1; TODO
+        return false;
     } else {
 #ifdef GY87_USE_LOGGING
         LOG((uint8_t *)"BMP180 barometer detected.\r\n\n", LOG_INFORMATION);
@@ -523,6 +536,8 @@ static void GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
 
     //    /* Configure slave BMP180 barometer in MPU6050 */
     //    MPU6050_Configure_BMP180(hgy87);
+
+    return true;
 }
 
 static bool_t QMC5883L_TestConnection(GY87_HandleTypeDef_t * hgy87) {
