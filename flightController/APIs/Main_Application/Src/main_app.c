@@ -48,11 +48,12 @@
 // #define MAIN_APP_USE_LOGGING_FSA8S							// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE 					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES		// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER 				// Remove comment to allow driver info logging
-#define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 			// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE 			// Remove comment to allow driver info logging
+#define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL	// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_ESC								// Remove comment to allow driver info logging
 #define DEFAULT_TASK_DELAY (20)
@@ -321,7 +322,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 8: FlightController_FlightLights */
-    ret = xTaskCreate(FlightController_FlightLights, "FlightController_FlightLights", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_FlightLights_Handle);
+    ret = xTaskCreate(FlightController_FlightLights, "FlightController_FlightLights", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_FlightLights_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -369,6 +370,27 @@ void FlightController_StartUp(void * ptr) {
 }
 
 void FlightController_ControlSystem(void * ptr) {
+
+    //	float rateRoll, ratePitch, rateYaw;
+    //	float angleRoll, anglePitch;
+    //	float gyroscopeCalibrationRoll, gyroscopeCalibrationPitch, gyroscopeCalibrationYaw;
+    //	float linearAccelerationX, linearAcceleretionY, linearAccelerationZ;
+    //
+    //	float kalmanAngleRoll = 0;
+    //	float kalmanUncertaintyAngleRoll = 2 * 2;
+    //	float kalmanAnglePitch = 0;
+    //	float kalmanUncertaintyAnglePitch = 2 * 2;
+    //
+    //	float kalman1DOutput[] = {0, 0};
+    //
+    //	/* 1D Kalman Filter */
+    //	  kalmanState = kalmanState + 0.004 * kalmanInput;
+    //	  kalmanUncertainty = kalmanUncertainty + 0.004 * 0.004 * 4 * 4;
+    //	  float KalmanGain = kalmanUncertainty * 1 / (1 * kalmanUncertainty + 3 * 3);
+    //	  kalmanState = KalmanState + KalmanGain * (kalmanMeasurement - kalmanState);
+    //	  kalmanUncertainty = (1 - kalmanGain) * kalmanUncertainty;
+    //	  kalman1DOutput[0] = kalmanState;
+    //	  kalman1DOutput[1] = kalmanUncertainty;
 
 #ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
     uint8_t loggingStr[40];
@@ -433,18 +455,21 @@ void FlightController_Read_FSA8S(void * ptr) {
 
 void FlightController_Read_GY87(void * ptr) {
 
-#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER ||                                                 \
-    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
-    uint8_t loggingStr[40];
+#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE ||                                         \
+    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
+    uint8_t loggingStr[120];
 #endif
 
     /* Change delay from time in [ms] to ticks */
-#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER ||                                                 \
-    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
+#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE ||                                         \
+    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
 #else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
 #endif
+
+    bool_t gyroscopeCalibrationIsDone = false;
+    bool_t accelerometerCalibrationIsDone = false;
 
     /* Allocate dynamic memory for the MPU6050 gyroscope values */
     GY87_gyroscopeValues = pvPortMalloc(sizeof(GY87_gyroscopeValues));
@@ -475,80 +500,90 @@ void FlightController_Read_GY87(void * ptr) {
 
     while (1) {
 
-        /* Read GY87 gyroscope values */
-        GY87_ReadGyroscope(hgy87, GY87_gyroscopeValues);
+        if (gyroscopeCalibrationIsDone && accelerometerCalibrationIsDone) {
 
-        /* Log GY87 gyroscope values */
+            /* Read GY87 gyroscope values */
+            GY87_ReadGyroscope(hgy87, GY87_gyroscopeValues);
+
+            /* Log GY87 gyroscope values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_GYROSCOPE
-        sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope X: %d\r\n", GY87_gyroscopeValues->gyroscopeX);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope Y: %d\r\n", GY87_gyroscopeValues->gyroscopeY);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope Z: %d\r\n\n", GY87_gyroscopeValues->gyroscopeZ);
-        LOG(loggingStr, LOG_INFORMATION);
+            sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope ROLL: %.2f[°/s] PITCH: %.2f[°/s] YAW: %.2f[°/s]\r\n", GY87_gyroscopeValues->rotationRateRoll, GY87_gyroscopeValues->rotationRatePitch, GY87_gyroscopeValues->rotationRateYaw);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-        /* Read GY87 accelerometer values */
-        GY87_ReadAccelerometer(hgy87, GY87_accelerometerValues);
+            /* Read GY87 accelerometer values */
+            GY87_ReadAccelerometer(hgy87, GY87_accelerometerValues);
 
-        /* Log GY87 accelerometer values */
+            /* Log GY87 accelerometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER
-        sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %d\r\n", GY87_accelerometerValues->accelerometerX);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer Y: %d\r\n", GY87_accelerometerValues->accelerometerY);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer Z: %d\r\n\n", GY87_accelerometerValues->accelerometerZ);
-        LOG(loggingStr, LOG_INFORMATION);
+            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %.2f[g] Y: %.2f[g] Z: %.2f[g]\r\n", GY87_accelerometerValues->linearAccelerationX, GY87_accelerometerValues->linearAccelerationY,
+                    GY87_accelerometerValues->linearAccelerationZ);
+            LOG(loggingStr, LOG_INFORMATION);
+#endif
+#ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES
+            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer ROLL: %.2f[°] PITCH: %.2f[°]\r\n", GY87_accelerometerValues->angleRoll, GY87_accelerometerValues->anglePitch);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-        /* Read GY87 temperature value */
-        GY87_temperature = GY87_ReadTemperatureSensor(hgy87);
+            /* Read GY87 temperature value */
+            GY87_temperature = GY87_ReadTemperatureSensor(hgy87);
 
-        /*  Log GY87 temperature value */
+            /*  Log GY87 temperature value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_TEMPERATURE
-        sprintf((char *)loggingStr, (const char *)"GY87 Temperature: %d°C\r\n\n", GY87_temperature);
-        LOG(loggingStr, LOG_INFORMATION);
+            sprintf((char *)loggingStr, (const char *)"GY87 Temperature: %d[°C]\r\n", GY87_temperature);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-        /* Read GY87 magnetometer values */
-        GY87_ReadMagnetometer(hgy87, GY87_magnetometerValues);
+            /* Read GY87 magnetometer values */
+            GY87_ReadMagnetometer(hgy87, GY87_magnetometerValues);
 
-        /* Log GY87 magnetometer values */
+            /* Log GY87 magnetometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
-        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer X: %d\r\n", GY87_magnetometerValues->magnetometerX);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Y: %d\r\n", GY87_magnetometerValues->magnetometerY);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Z: %d\r\n\n", GY87_magnetometerValues->magnetometerZ);
-        LOG(loggingStr, LOG_INFORMATION);
+            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer X: %.3f[G] Y: %.3f[G] Z: %.3f[G]\r\n", GY87_magnetometerValues->magneticFieldX, GY87_magnetometerValues->magneticFieldY, GY87_magnetometerValues->magneticFieldZ);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-        /* Read GY87 magnetometer heading */
-        GY87_magnetometerHeadingValue = GY87_ReadMagnetometerHeading(hgy87);
+            /* Read GY87 magnetometer heading */
+            GY87_magnetometerHeadingValue = GY87_ReadMagnetometerHeading(hgy87);
 
-        /* Log GY87 magnetometer heading value */
+            /* Log GY87 magnetometer heading value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING
-        sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Heading: %.2f°\r\n", GY87_magnetometerHeadingValue);
-        LOG(loggingStr, LOG_INFORMATION);
+            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Heading: %.2f[°]\r\n", GY87_magnetometerHeadingValue);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-        /* Read GY87 barometer pressure value */
-        //        GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
+            /* Read GY87 barometer pressure value */
+            //    		GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
 
-        /* Log GY87 barometer pressure value */
+            /* Log GY87 barometer pressure value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE
-        sprintf((char *)loggingStr, (const char *)"GY87 Barometer Pressure: %.2fDEFINE\r\n", GY87_barometerPressureValue);
-        LOG(loggingStr, LOG_INFORMATION);
+            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Pressure: %.2fDEFINE\r\n", GY87_barometerPressureValue);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-        /* Read GY87 barometer altitude value */
-        //        GY87_barometerAltitudeValue = GY87_ReadBarometerAltitude(hgy87);
+            /* Read GY87 barometer altitude value */
+            GY87_barometerAltitudeValue = GY87_ReadBarometerAltitude(hgy87);
 
-        /* Log GY87 barometer altitude value */
+            /* Log GY87 barometer altitude value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
-        sprintf((char *)loggingStr, (const char *)"GY87 Barometer Altitude: %.2fDEFINE\r\n", GY87_barometerAltitudeValue);
-        LOG(loggingStr, LOG_INFORMATION);
+            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Altitude: %.2f[m]\r\n", GY87_barometerAltitudeValue);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
+
+        } else {
+
+            /* Calibrate gyroscope measurements */
+            if (false == gyroscopeCalibrationIsDone) {
+
+                gyroscopeCalibrationIsDone = GY87_CalibrateGyroscope(hgy87);
+            }
+
+            /* Calibrate accelerometer measurements */
+            if (false == accelerometerCalibrationIsDone) {
+
+                accelerometerCalibrationIsDone = GY87_CalibrateAccelerometer(hgy87);
+            }
+        }
 
         /* Set task time delay */
         vTaskDelay(xDelay);
@@ -700,12 +735,14 @@ void FlightController_FlightLights(void * ptr) {
 
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
 
+    uint8_t sequence[] = {1, 0, 1, 0, 1, 0};
+
     while (1) {
 
-        // TODO
+        HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
 
         /* Set task time delay */
-        vTaskDelay(xDelay);
+        vTaskDelay(xDelay * 250);
     }
 }
 

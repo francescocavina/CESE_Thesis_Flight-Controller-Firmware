@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_HWI.c
- * @date:    03/03/2024
+ * @date:    10/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.4.0
+ * @version: v1.5.0
  *
  * @brief:  This is a driver for the GY87 IMU module.
  *           It is divided in three parts: One high level abstraction layer
@@ -106,7 +106,6 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
         /* Data couldn't be read */
         return false;
     } else {
-
         /* Data read successfully */
         return true;
     }

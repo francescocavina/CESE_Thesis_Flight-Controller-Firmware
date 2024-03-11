@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_UAI.h
- * @date:    03/03/2024
+ * @date:    10/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.4.0
+ * @version: v1.5.0
  *
  * @brief:   This is a driver for the GY87 IMU module.
  *           It is divided in three parts: One high level abstraction layer
@@ -56,36 +56,50 @@ extern "C" {
 
 /* --- Public data type declarations ----------------------------------------------------------- */
 typedef struct gyroscopeValues {
-    int16_t gyroscopeX;
-    int16_t gyroscopeY;
-    int16_t gyroscopeZ;
+    int16_t rawValueX;
+    int16_t rawValueY;
+    int16_t rawValueZ;
+    float rotationRateRoll;
+    float rotationRatePitch;
+    float rotationRateYaw;
 } GY87_gyroscopeValues_t;
 
 typedef struct accelerometerValues {
-    int16_t accelerometerX;
-    int16_t accelerometerY;
-    int16_t accelerometerZ;
+    int16_t rawValueX;
+    int16_t rawValueY;
+    int16_t rawValueZ;
+    float linearAccelerationX;
+    float linearAccelerationY;
+    float linearAccelerationZ;
+    float angleRoll;
+    float anglePitch;
 } GY87_accelerometerValues_t;
 
 typedef struct magnetometerValues {
-    int16_t magnetometerX;
-    int16_t magnetometerY;
-    int16_t magnetometerZ;
+    int16_t rawValueX;
+    int16_t rawValueY;
+    int16_t rawValueZ;
+    float magneticFieldX;
+    float magneticFieldY;
+    float magneticFieldZ;
 } GY87_magnetometerValues_t;
 
-typedef struct BMP180_CallibrationData {
-    int16_t AC1;
-    int16_t AC2;
-    int16_t AC3;
-    uint16_t AC4;
-    uint16_t AC5;
-    uint16_t AC6;
-    int16_t B1;
-    int16_t B2;
-    int16_t MB;
-    int16_t MC;
-    int16_t MD;
-} BMP180_CallibrationData_t;
+typedef struct BMP180_CalibrationData {
+    int16_t AC1;  // Read
+    int16_t AC2;  // Read
+    int16_t AC3;  // Read
+    uint16_t AC4; // Read
+    uint16_t AC5; // Read
+    uint16_t AC6; // Read
+    int16_t B1;   // Read
+    int16_t B2;   // Read
+    int32_t B5;   // Calculated
+    int16_t MB;   // Read
+    int16_t MC;   // Read
+    int16_t MD;   // Read
+    int32_t UT;   // Calculated
+    int32_t CT;   // Calculated
+} BMP180_CalibrationData_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
@@ -108,6 +122,15 @@ GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c);
 void GY87_Reset(GY87_HandleTypeDef_t * hgy87);
 
 /*
+ * @brief  Calibrates gyroscope measurement.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
+ * @retval true:  Calibration was successful.
+ *         false: Calibrations was not successful.
+ */
+bool_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87);
+
+/*
  * @brief  Reads gyroscope values.
  * @param  hgy87:           Pointer to a GY87_HandleTypeDef_t structure that contains
  *                          the configuration information for the GY87 device.
@@ -115,6 +138,15 @@ void GY87_Reset(GY87_HandleTypeDef_t * hgy87);
  * @retval None
  */
 void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues);
+
+/*
+ * @brief  Calibrates accelerometer measurement.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
+ * @retval true:  Calibration was successful.
+ *         false: Calibrations was not successful.
+ */
+bool_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87);
 
 /*
  * @brief  Reads accelerometer values.

@@ -43,7 +43,7 @@
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define LOG_MESSAGE_MAX_LENGTH 50
+#define LOG_MESSAGE_MAX_LENGTH 256
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 

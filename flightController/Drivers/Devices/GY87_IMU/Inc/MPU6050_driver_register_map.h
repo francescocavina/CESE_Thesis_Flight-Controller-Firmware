@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_register_map.h
- * @date:    03/03/2024
+ * @date:    10/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.4.0
+ * @version: v1.5.0
  *
  * @brief:   This file contains the register map for the MPU-6050 IMU module.
  */
@@ -77,6 +77,13 @@
 #define MPU_6050_REG_ACCEL_CONFIG (0x1C) // REG ADDR: Accelerometer Configuration
 /* --- CONFIGURATION - REGISTERS BITS ---------------------------------------------------------- */
 #define MPU_6050_BIT_SMPLRT_DIV            ((MPU_6050_AUX_VAL_GYRO_SMPLRT - MPU_6050_AUX_VAL_SMPLRT) / MPU_6050_AUX_VAL_SMPLRT)
+#define MPU_6050_BIT_CONFIG_DLPF_CFG_0     (0X00) // REG BIT: Set Digital Low Pass Filter: Accelerometer BW = 260 Hz, delay = 00.0 ms; Gyroscope BW = 256 Hz, fs = 8 kHZ
+#define MPU_6050_BIT_CONFIG_DLPF_CFG_1     (0X01) // REG BIT: Set Digital Low Pass Filter: Accelerometer BW = 184 Hz, delay = 02.0 ms; Gyroscope BW = 188 Hz, fs = 1 kHZ
+#define MPU_6050_BIT_CONFIG_DLPF_CFG_2     (0X02) // REG BIT: Set Digital Low Pass Filter: Accelerometer BW = 094 Hz, delay = 03.0 ms; Gyroscope BW = 098 Hz, fs = 1 kHZ
+#define MPU_6050_BIT_CONFIG_DLPF_CFG_3     (0X03) // REG BIT: Set Digital Low Pass Filter: Accelerometer BW = 044 Hz, delay = 04.9 ms; Gyroscope BW = 042 Hz, fs = 1 kHZ
+#define MPU_6050_BIT_CONFIG_DLPF_CFG_4     (0X04) // REG BIT: Set Digital Low Pass Filter: Accelerometer BW = 021 Hz, delay = 08.5 ms; Gyroscope BW = 020 Hz, fs = 1 kHZ
+#define MPU_6050_BIT_CONFIG_DLPF_CFG_5     (0X05) // REG BIT: Set Digital Low Pass Filter: Accelerometer BW = 010 Hz, delay = 13.8 ms; Gyroscope BW = 010 Hz, fs = 1 kHZ
+#define MPU_6050_BIT_CONFIG_DLPF_CFG_6     (0X06) // REG BIT: Set Digital Low Pass Filter: Accelerometer BW = 005 Hz, delay = 19.0 ms; Gyroscope BW = 005 Hz, fs = 1 kHZ
 #define MPU_6050_BIT_GYRO_CONFIG_FS_SEL_0  (0X00) // REG BIT: Set Full Range Scale = ± 0250 °/s
 #define MPU_6050_BIT_GYRO_CONFIG_FS_SEL_1  (0X08) // REG BIT: Set Full Range Scale = ± 0500 °/s
 #define MPU_6050_BIT_GYRO_CONFIG_FS_SEL_2  (0X10) // REG BIT: Set Full Range Scale = ± 1000 °/s
@@ -86,20 +93,20 @@
 #define MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_2 (0X10) // REG BIT: Set Full Range Scale = ± 08 g
 #define MPU_6050_BIT_ACCEL_CONFIG_FS_SEL_3 (0X18) // REG BIT: Set Full Range Scale = ± 16 g
 /* --- CONFIGURATION - AUXILIARY VALUES -------------------------------------------------------- */
-#define MPU_6050_AUX_VAL_GYRO_SMPLRT  (8000)                                  // AUX VAL: Gyroscope Sample Rate = 8 kHz
-#define MPU_6050_AUX_VAL_SMPLRT       (0500)                                  // AUX VAL: Desired Sample Rate = 5OO Hz
-#define MPU_6050_AUX_VAL_GYRO_FS_0250 (0250)                                  // AUX VAL: Full Range Scale = ± 0250 °/s
-#define MPU_6050_AUX_VAL_GYRO_FS_0500 (0500)                                  // AUX VAL: Full Range Scale = ± 0500 °/s
+#define MPU_6050_AUX_VAL_GYRO_SMPLRT  (1000)                                  // AUX VAL: Gyroscope Sample Rate = 8 kHz (with DLPF disabled) or 1 kHz (with DLPF enabled)
+#define MPU_6050_AUX_VAL_SMPLRT       (500)                                   // AUX VAL: Desired Sample Rate = 5OO Hz
+#define MPU_6050_AUX_VAL_GYRO_FS_0250 (250)                                   // AUX VAL: Full Range Scale = ± 0250 °/s
+#define MPU_6050_AUX_VAL_GYRO_FS_0500 (500)                                   // AUX VAL: Full Range Scale = ± 0500 °/s
 #define MPU_6050_AUX_VAL_GYRO_FS_1000 (1000)                                  // AUX VAL: Full Range Scale = ± 1000 °/s
 #define MPU_6050_AUX_VAL_GYRO_FS_2000 (2000)                                  // AUX VAL: Full Range Scale = ± 2000 °/s
 #define MPU_6050_AUX_VAL_GYRO_SF_0250 (32768 / MPU_6050_AUX_VAL_GYRO_FS_0250) // AUX VAL: Scale Factor for Full Range Scale = ± 0250 °/s
 #define MPU_6050_AUX_VAL_GYRO_SF_0500 (32768 / MPU_6050_AUX_VAL_GYRO_FS_0500) // AUX VAL: Scale Factor for Full Range Scale = ± 0500 °/s
 #define MPU_6050_AUX_VAL_GYRO_SF_1000 (32768 / MPU_6050_AUX_VAL_GYRO_FS_1000) // AUX VAL: Scale Factor for Full Range Scale = ± 1000 °/s
 #define MPU_6050_AUX_VAL_GYRO_SF_2000 (32768 / MPU_6050_AUX_VAL_GYRO_FS_2000) // AUX VAL: Scale Factor for Full Range Scale = ± 2000 °/s
-#define MPU_6050_AUX_VAL_ACCEL_FS_02  (02)                                    // AUX VAL: Full Range Scale = ± 02 g
-#define MPU_6050_AUX_VAL_ACCEL_FS_04  (04)                                    // AUX VAL: Full Range Scale = ± 04 g
-#define MPU_6050_AUX_VAL_ACCEL_FS_08  (08)                                    // AUX VAL: Full Range Scale = ± 08 g
-#define MPU_6050_AUX_VAL_ACCEL_FS_16  (16)                                    // AUX VAL: Full Range Scale = ± 16 g
+#define MPU_6050_AUX_VAL_ACCEL_FS_02  (16384)                                 // AUX VAL: Full Range Scale = ± 02 g
+#define MPU_6050_AUX_VAL_ACCEL_FS_04  (8192)                                  // AUX VAL: Full Range Scale = ± 04 g
+#define MPU_6050_AUX_VAL_ACCEL_FS_08  (4096)                                  // AUX VAL: Full Range Scale = ± 08 g
+#define MPU_6050_AUX_VAL_ACCEL_FS_16  (2048)                                  // AUX VAL: Full Range Scale = ± 16 g
 #define MPU_6050_AUX_VAL_ACCEL_SF_02  (32768 / MPU_6050_AUX_VAL_ACCEL_FS_02)  // AUX VAL: Scale Factor for Full Range Scale = ± 02 g
 #define MPU_6050_AUX_VAL_ACCEL_SF_04  (32768 / MPU_6050_AUX_VAL_ACCEL_FS_04)  // AUX VAL: Scale Factor for Full Range Scale = ± 04 g
 #define MPU_6050_AUX_VAL_ACCEL_SF_08  (32768 / MPU_6050_AUX_VAL_ACCEL_FS_08)  // AUX VAL: Scale Factor for Full Range Scale = ± 08 g
@@ -138,7 +145,22 @@
 #define MPU_6050_REG_I2C_SLV4_CTRL (0x34) // I2C Slave 4 Control
 #define MPU_6050_REG_I2C_SLV4_DI   (0x35) // I2C Slave 4 Control
 /* --- AUXILIARY I2C BUS - REGISTERS BITS ------------------------------------------------------ */
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_00 (0x00) // REG BIT: Set I2C Master Clock to 348 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_01 (0x01) // REG BIT: Set I2C Master Clock to 333 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_02 (0x02) // REG BIT: Set I2C Master Clock to 320 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_03 (0x03) // REG BIT: Set I2C Master Clock to 308 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_04 (0x04) // REG BIT: Set I2C Master Clock to 296 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_05 (0x05) // REG BIT: Set I2C Master Clock to 286 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_06 (0x06) // REG BIT: Set I2C Master Clock to 276 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_07 (0x07) // REG BIT: Set I2C Master Clock to 267 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_08 (0x08) // REG BIT: Set I2C Master Clock to 258 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_09 (0x09) // REG BIT: Set I2C Master Clock to 500 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_10 (0x0A) // REG BIT: Set I2C Master Clock to 471 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_11 (0x0B) // REG BIT: Set I2C Master Clock to 444 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_12 (0x0C) // REG BIT: Set I2C Master Clock to 421 kHz
 #define MPU_6050_BIT_I2C_MST_CTRL_CLK_13 (0x0D) // REG BIT: Set I2C Master Clock to 400 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_14 (0x0E) // REG BIT: Set I2C Master Clock to 381 kHz
+#define MPU_6050_BIT_I2C_MST_CTRL_CLK_15 (0x0F) // REG BIT: Set I2C Master Clock to 364 kHz
 
 /* --- AUXILIARY I2C BUS - REGISTERS ADDRESSES - READ ONLY ------------------------------------- */
 #define MPU_6050_REG_I2C_MST_STATUS (0x36) // I2C Master Status

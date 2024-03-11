@@ -23,9 +23,9 @@
 
 /*
  * @file:    QMC5883L_driver_register_map.h
- * @date:    03/03/2024
+ * @date:    10/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.4.0
+ * @version: v1.5.0
  *
  * @brief:   This file contains the register map for the QMC5883L magnetometer.
  */
