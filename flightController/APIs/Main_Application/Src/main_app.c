@@ -53,8 +53,8 @@
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER 				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 			// Remove comment to allow driver info logging
-#define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE // Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL	// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE // Remove comment to allow driver info logging
+#define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_ESC								// Remove comment to allow driver info logging
 #define DEFAULT_TASK_DELAY (20)
 #define FSA8S_CHANNELS     (10) // Number of remote control channels to read
@@ -76,7 +76,9 @@ static TaskHandle_t FlightController_FlightLights_Handle = NULL;
 
 /* Timers Handles */
 static TimerHandle_t Timer1_Handle = NULL;
+static TimerHandle_t Timer2_Handle = NULL;
 static bool_t Timer1_running = false;
+static bool_t Timer2_flag = false;
 static bool_t FlightController_running = false;
 
 /* Drivers Handle */
@@ -100,7 +102,7 @@ static float GY87_barometerAltitudeValue = 0;
 static uint16_t ESC_speeds[4] = {0};
 
 /* Flight Controller Battery Level */
-static float FlightController_batteryLevel;
+static float FlightController_batteryLevel = 11.1;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -209,6 +211,13 @@ void FlightController_FlightLights(void * ptr);
  */
 void Timer1_Callback(TimerHandle_t xTimer);
 
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void Timer2_Callback(TimerHandle_t xTimer);
+
 /* --- Public variable definitions ------------------------------------------------------------- */
 extern I2C_HandleTypeDef hi2c1;
 extern UART_HandleTypeDef huart2;
@@ -243,7 +252,7 @@ void FreeRTOS_CreateStartUpTasks(void) {
         vTaskDelete(FlightController_OnOffButton_Handle);
     }
 
-    /* Timer: OnOff_Button */
+    /* Timer1: OnOff_Button */
     Timer1_Handle = xTimerCreate("OnOff_Button", 100, pdTRUE, (void *)0, Timer1_Callback);
 }
 
@@ -292,7 +301,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 5: FlightController_BatteryLevel */
-    ret = xTaskCreate(FlightController_BatteryLevel, "FlightController_BatteryLevel", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_BatteryLevel_Handle);
+    ret = xTaskCreate(FlightController_BatteryLevel, "FlightController_BatteryLevel", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_BatteryLevel_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -302,7 +311,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 6: FlightController_BatteryAlarm */
-    ret = xTaskCreate(FlightController_BatteryAlarm, "FlightController_BatteryAlarm", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_BatteryAlarm_Handle);
+    ret = xTaskCreate(FlightController_BatteryAlarm, "FlightController_BatteryAlarm", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_BatteryAlarm_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -333,6 +342,13 @@ void FreeRTOS_CreateTasks(void) {
 }
 
 void FreeRTOS_CreateTimers(void) {
+
+    /* Timer2: BatteryLevelAlarm */
+    Timer2_Handle = xTimerCreate("BatteryLevelAlarm", 200, pdTRUE, (void *)0, Timer2_Callback);
+    if (NULL != Timer2_Handle) {
+        /* Start timer */
+        xTimerStart(Timer2_Handle, 0);
+    }
 }
 
 void FlightController_StartUp(void * ptr) {
@@ -507,7 +523,7 @@ void FlightController_Read_GY87(void * ptr) {
 
             /* Log GY87 gyroscope values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_GYROSCOPE
-            sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope ROLL: %.2f[°/s] PITCH: %.2f[°/s] YAW: %.2f[°/s]\r\n", GY87_gyroscopeValues->rotationRateRoll, GY87_gyroscopeValues->rotationRatePitch, GY87_gyroscopeValues->rotationRateYaw);
+            sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope ROLL: %.2f [°/s] PITCH: %.2f [°/s] YAW: %.2f [°/s]\r\n", GY87_gyroscopeValues->rotationRateRoll, GY87_gyroscopeValues->rotationRatePitch, GY87_gyroscopeValues->rotationRateYaw);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -516,12 +532,12 @@ void FlightController_Read_GY87(void * ptr) {
 
             /* Log GY87 accelerometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER
-            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %.2f[g] Y: %.2f[g] Z: %.2f[g]\r\n", GY87_accelerometerValues->linearAccelerationX, GY87_accelerometerValues->linearAccelerationY,
+            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %.2f [g] Y: %.2f[g] Z: %.2f [g]\r\n", GY87_accelerometerValues->linearAccelerationX, GY87_accelerometerValues->linearAccelerationY,
                     GY87_accelerometerValues->linearAccelerationZ);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 #ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES
-            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer ROLL: %.2f[°] PITCH: %.2f[°]\r\n", GY87_accelerometerValues->angleRoll, GY87_accelerometerValues->anglePitch);
+            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer ROLL: %.2f [°] PITCH: %.2f [°]\r\n", GY87_accelerometerValues->angleRoll, GY87_accelerometerValues->anglePitch);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -530,7 +546,7 @@ void FlightController_Read_GY87(void * ptr) {
 
             /*  Log GY87 temperature value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_TEMPERATURE
-            sprintf((char *)loggingStr, (const char *)"GY87 Temperature: %d[°C]\r\n", GY87_temperature);
+            sprintf((char *)loggingStr, (const char *)"GY87 Temperature: %d [°C]\r\n", GY87_temperature);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -539,7 +555,7 @@ void FlightController_Read_GY87(void * ptr) {
 
             /* Log GY87 magnetometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
-            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer X: %.3f[G] Y: %.3f[G] Z: %.3f[G]\r\n", GY87_magnetometerValues->magneticFieldX, GY87_magnetometerValues->magneticFieldY, GY87_magnetometerValues->magneticFieldZ);
+            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer X: %.3f [G] Y: %.3f [G] Z: %.3f [G]\r\n", GY87_magnetometerValues->magneticFieldX, GY87_magnetometerValues->magneticFieldY, GY87_magnetometerValues->magneticFieldZ);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -548,7 +564,7 @@ void FlightController_Read_GY87(void * ptr) {
 
             /* Log GY87 magnetometer heading value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING
-            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Heading: %.2f[°]\r\n", GY87_magnetometerHeadingValue);
+            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Heading: %.2f [°]\r\n", GY87_magnetometerHeadingValue);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -566,7 +582,7 @@ void FlightController_Read_GY87(void * ptr) {
 
             /* Log GY87 barometer altitude value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
-            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Altitude: %.2f[m]\r\n", GY87_barometerAltitudeValue);
+            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Altitude: %.2f [m]\r\n", GY87_barometerAltitudeValue);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -685,7 +701,7 @@ void FlightController_BatteryLevel(void * ptr) {
 
         /* Log battery level */
 #ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
-        sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f[V]\r\n\n", FlightController_batteryLevel);
+        sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f [V]\r\n\n", FlightController_batteryLevel);
         LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -696,10 +712,36 @@ void FlightController_BatteryLevel(void * ptr) {
 
 void FlightController_BatteryAlarm(void * ptr) {
 
+    uint8_t alarmSequence[] = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t alarmSequenceSize = 40;
+    uint8_t alarmSequenceCursor = 0;
+
     /* Change delay from time in [ms] to ticks */
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
 
     while (1) {
+
+        if (FlightController_batteryLevel < BATTERY_ALARM_THRESHOLD) {
+
+            if (Timer2_flag) {
+                /* If timer expired */
+
+                /* Parse alarm sequence */
+                alarmSequenceCursor++;
+                if (alarmSequenceSize <= alarmSequenceCursor) {
+                    alarmSequenceCursor = 0;
+                }
+
+                HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, alarmSequence[alarmSequenceCursor]);
+
+                /* Reset Timer2 flag */
+                Timer2_flag = false;
+            }
+
+        } else {
+
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
+        }
 
         /* Set task time delay */
         vTaskDelay(xDelay);
@@ -787,12 +829,36 @@ void Timer1_Callback(TimerHandle_t xTimer) {
             }
         }
 
-        /* Stop Timer1 */
-        xTimerStop(xTimer, 0);
+        /* Reset timer count */
         vTimerSetTimerID(xTimer, (void *)0);
 
         /* Reset running flag */
         Timer1_running = false;
+    } else {
+        /* Store the incremented count back into the timer's ID */
+        vTimerSetTimerID(xTimer, (void *)ulCount);
+    }
+}
+
+void Timer2_Callback(TimerHandle_t xTimer) {
+
+    /* Get no. of times this timer has expired */
+    uint32_t ulCount = (uint32_t)pvTimerGetTimerID(xTimer);
+
+    /* Get timer period */
+    uint32_t xTimerPeriod = xTimerGetPeriod(xTimer);
+
+    /* Increment the count */
+    ulCount++;
+
+    if (ulCount >= (200 / xTimerPeriod)) {
+
+        /* Set Timer2 flag to true */
+        Timer2_flag = true;
+
+        /* Reset timer count */
+        vTimerSetTimerID(xTimer, (void *)0);
+
     } else {
         /* Store the incremented count back into the timer's ID */
         vTimerSetTimerID(xTimer, (void *)ulCount);

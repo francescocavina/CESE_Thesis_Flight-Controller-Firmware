@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_UAI.c
- * @date:    03/03/2024
+ * @date:    10/03/2024
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.4.0
+ * @version: v1.5.0
  *
  * @brief:   This is a driver for the GY87 IMU module.
  *           It is divided in three parts: One high level abstraction layer
@@ -49,8 +49,8 @@
 #include "BMP180_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define USE_FREERTOS                // Remove comment when using FreeRTOS
-#define GY87_USE_LOGGING            // Remove comment to allow driver info logging
+#define USE_FREERTOS // Remove comment when using FreeRTOS
+// #define GY87_USE_LOGGING          // Remove comment to allow driver info logging
 
 #define GY87_MAX_NUMBER_INSTANCES   (2)    // Maximum number of possible IMUs connected to the i2c bus
 #define GY87_CALIBRATION_ITERATIONS (2000) // No. of readings to get a calibration value

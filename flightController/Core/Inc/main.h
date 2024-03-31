@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define LED1_GPIO_Port                    GPIOB
 #define LED3_Pin                          GPIO_PIN_12
 #define LED3_GPIO_Port                    GPIOB
+#define BUZZER_Pin                        GPIO_PIN_15
+#define BUZZER_GPIO_Port                  GPIOA
 #define PW_ON_OFF_DRIVER_OUTPUT_Pin       GPIO_PIN_4
 #define PW_ON_OFF_DRIVER_OUTPUT_GPIO_Port GPIOB
 #define PW_ON_OFF_DRIVER_INPUT_Pin        GPIO_PIN_5

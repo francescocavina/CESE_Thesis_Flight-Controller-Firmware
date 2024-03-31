@@ -41,8 +41,10 @@ extern "C" {
 #endif
 
 /* --- Public macros definitions --------------------------------------------------------------- */
-#define HEARTBEAT_PERIOD      (500)  // Heartbeat Period [ms], Duty Cycle = 0.5
-#define PW_ON_OFF_DRIVER_TIME (3000) // Time in [ms] needed to keep pressed Power On/Off Button to turn on/off flight controller
+#define HEARTBEAT_PERIOD        (500)  // Heartbeat Period [ms], Duty Cycle = 0.5
+#define PW_ON_OFF_DRIVER_TIME   (3000) // Time in [ms] needed to keep pressed Power On/Off Button to turn on/off flight controller
+#define BATTERY_ALARM_THRESHOLD (9.6)  // Voltage level at which battery alarm starts beeping
+
 /* --- Public data type declarations ----------------------------------------------------------- */
 
 /* --- Public variable declarations ------------------------------------------------------------ */
