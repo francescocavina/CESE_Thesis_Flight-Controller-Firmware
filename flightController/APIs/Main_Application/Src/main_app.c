@@ -45,16 +45,17 @@
 #define USE_FREERTOS                  // Remove comment when using FreeRTOS
 #define LOGGING_TASK_DELAY_MULTIPLIER (20)
 // #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM					 	// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_FSA8S							// Remove comment to allow driver info logging
+#define MAIN_APP_USE_LOGGING_FSA8S // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE 					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES		// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER 				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 			// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE // Remove comment to allow driver info logging
-#define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_ESC								// Remove comment to allow driver info logging
 #define DEFAULT_TASK_DELAY (20)
 #define FSA8S_CHANNELS     (10) // Number of remote control channels to read
@@ -62,6 +63,9 @@
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
+/* Flight Controller State */
+static bool_t FlightController_running = false;
+
 /* Tasks Handles */
 static TaskHandle_t FlightController_StartUp_Handle = NULL;
 static TaskHandle_t FlightController_ControlSystem_Handle = NULL;
@@ -77,9 +81,14 @@ static TaskHandle_t FlightController_FlightLights_Handle = NULL;
 /* Timers Handles */
 static TimerHandle_t Timer1_Handle = NULL;
 static TimerHandle_t Timer2_Handle = NULL;
+static TimerHandle_t Timer3_Handle = NULL;
+
+/* Timers Variables */
 static bool_t Timer1_running = false;
 static bool_t Timer2_flag = false;
-static bool_t FlightController_running = false;
+static bool_t Timer3_flag = false;
+static uint16_t Timer2_AutoReloadTime = 200;
+static uint16_t Timer3_AutoReloadTime = 200;
 
 /* Drivers Handle */
 static IBUS_HandleTypeDef_t * rc_controller = NULL;
@@ -95,6 +104,7 @@ static GY87_gyroscopeValues_t * GY87_gyroscopeValues = NULL;
 static GY87_accelerometerValues_t * GY87_accelerometerValues = NULL;
 static GY87_magnetometerValues_t * GY87_magnetometerValues = NULL;
 static float GY87_magnetometerHeadingValue = 0;
+static float GY87_barometerTemperatureValue = 0;
 static float GY87_barometerPressureValue = 0;
 static float GY87_barometerAltitudeValue = 0;
 
@@ -102,7 +112,7 @@ static float GY87_barometerAltitudeValue = 0;
 static uint16_t ESC_speeds[4] = {0};
 
 /* Flight Controller Battery Level */
-static float FlightController_batteryLevel = 11.1;
+static float FlightController_batteryLevelValue = 11.1;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -212,11 +222,20 @@ void FlightController_FlightLights(void * ptr);
 void Timer1_Callback(TimerHandle_t xTimer);
 
 /*
- * @brief  TODO
- * @param  TODO
+ * @brief  Sets a flag whenever the timer has expired. It is used for the Battery Level Alarm.
+ * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
+ *         timer.
  * @retval None
  */
 void Timer2_Callback(TimerHandle_t xTimer);
+
+/*
+ * @brief  Sets a flag whenever the timer has expired. It is used for the Flight Lights.
+ * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
+ *         timer.
+ * @retval None
+ */
+void Timer3_Callback(TimerHandle_t xTimer);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 extern I2C_HandleTypeDef hi2c1;
@@ -349,6 +368,13 @@ void FreeRTOS_CreateTimers(void) {
         /* Start timer */
         xTimerStart(Timer2_Handle, 0);
     }
+
+    /* Timer3: FlightLights */
+    Timer3_Handle = xTimerCreate("FlightLights", 100, pdTRUE, (void *)0, Timer3_Callback);
+    if (NULL != Timer3_Handle) {
+        /* Start timer */
+        xTimerStart(Timer3_Handle, 0);
+    }
 }
 
 void FlightController_StartUp(void * ptr) {
@@ -472,13 +498,15 @@ void FlightController_Read_FSA8S(void * ptr) {
 void FlightController_Read_GY87(void * ptr) {
 
 #if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE ||                                         \
-    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
+    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE ||                       \
+    defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
     uint8_t loggingStr[120];
 #endif
 
     /* Change delay from time in [ms] to ticks */
 #if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE ||                                         \
-    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
+    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE ||                       \
+    defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
 #else
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
@@ -516,6 +544,7 @@ void FlightController_Read_GY87(void * ptr) {
 
     while (1) {
 
+        /* Check if gyroscope and accelerometer calibrations were done */
         if (gyroscopeCalibrationIsDone && accelerometerCalibrationIsDone) {
 
             /* Read GY87 gyroscope values */
@@ -568,12 +597,21 @@ void FlightController_Read_GY87(void * ptr) {
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
+            /* Read GY87 barometer temperature value */
+            GY87_barometerTemperatureValue = GY87_ReadBarometerTemperature(hgy87);
+
+            /* Log GY87 barometer pressure value */
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE
+            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Temperature: %.2f [°C]\r\n", GY87_barometerTemperatureValue);
+            LOG(loggingStr, LOG_INFORMATION);
+#endif
+
             /* Read GY87 barometer pressure value */
-            //    		GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
+            GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
 
             /* Log GY87 barometer pressure value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE
-            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Pressure: %.2fDEFINE\r\n", GY87_barometerPressureValue);
+            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Pressure: %.2f [Pa]\r\n", GY87_barometerPressureValue);
             LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -691,13 +729,13 @@ void FlightController_BatteryLevel(void * ptr) {
         adcValue = HAL_ADC_GetValue(&hadc1);
 
         /* Convert ADC value to real value */
-        FlightController_batteryLevel = (adcValue * 3.3) / 4096;
+        FlightController_batteryLevelValue = (adcValue * 3.3) / 4096;
 
         /* Correct real value, as when battery full, ADC input is not 3.3V */
-        FlightController_batteryLevel = FlightController_batteryLevel * 1.046046;
+        FlightController_batteryLevelValue = FlightController_batteryLevelValue * 1.046046;
 
         /* Map real value to battery levels */
-        FlightController_batteryLevel = FlightController_batteryLevel * 3.363636;
+        FlightController_batteryLevelValue = FlightController_batteryLevelValue * 3.363636;
 
         /* Log battery level */
 #ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
@@ -713,7 +751,7 @@ void FlightController_BatteryLevel(void * ptr) {
 void FlightController_BatteryAlarm(void * ptr) {
 
     uint8_t alarmSequence[] = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    uint8_t alarmSequenceSize = 40;
+    uint8_t alarmSequenceSize = sizeof(alarmSequence);
     uint8_t alarmSequenceCursor = 0;
 
     /* Change delay from time in [ms] to ticks */
@@ -721,7 +759,7 @@ void FlightController_BatteryAlarm(void * ptr) {
 
     while (1) {
 
-        if (FlightController_batteryLevel < BATTERY_ALARM_THRESHOLD) {
+        if (FlightController_batteryLevelValue < BATTERY_ALARM_THRESHOLD) {
 
             if (Timer2_flag) {
                 /* If timer expired */
@@ -732,6 +770,7 @@ void FlightController_BatteryAlarm(void * ptr) {
                     alarmSequenceCursor = 0;
                 }
 
+                /* Write to buzzer */
                 HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, alarmSequence[alarmSequenceCursor]);
 
                 /* Reset Timer2 flag */
@@ -775,16 +814,104 @@ void FlightController_HeartbeatLight(void * ptr) {
 
 void FlightController_FlightLights(void * ptr) {
 
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    /* Define flight lights sequences */
+    uint8_t flightLightsSequenceA1[] = {1, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t flightLightsSequenceA3[] = {1, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t flightLightsSequenceA2[] = {0, 0, 1, 0, 0, 0, 0, 0};
+    uint8_t flightLightsSequenceA4[] = {0, 0, 1, 0, 0, 0, 0, 0};
 
-    uint8_t sequence[] = {1, 0, 1, 0, 1, 0};
+    uint8_t flightLightsSequenceB1[] = {1, 0, 1, 0, 0, 0, 0, 0};
+    uint8_t flightLightsSequenceB3[] = {1, 0, 1, 0, 0, 0, 0, 0};
+    uint8_t flightLightsSequenceB2[] = {0, 0, 0, 0, 1, 0, 1, 0};
+    uint8_t flightLightsSequenceB4[] = {0, 0, 0, 0, 1, 0, 1, 0};
+
+    uint8_t flightLightsSequenceC1[] = {1, 0, 1, 0, 0, 0, 0, 0};
+    uint8_t flightLightsSequenceC3[] = {1, 0, 1, 0, 0, 0, 0, 0};
+    uint8_t flightLightsSequenceC2[] = {0, 0, 0, 0, 1, 0, 0, 0};
+    uint8_t flightLightsSequenceC4[] = {0, 0, 0, 0, 1, 0, 0, 0};
+
+    uint8_t flightLightsSequence = 0;
+    uint8_t flightLightsSequenceSize = 0;
+    uint8_t flightLightsSequenceCursor = 0;
+
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
 
     while (1) {
 
-        HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+        /* Turn on/off flight lights (Switch D on radio controller) */
+        if (500 <= FSA8S_channelValues[9]) {
+
+            /* Set flight light sequence (Switch C on radio controller) */
+            if (250 >= FSA8S_channelValues[8]) {
+
+                flightLightsSequence = 0;
+
+            } else if (250 < FSA8S_channelValues[8] && 750 >= FSA8S_channelValues[8]) {
+
+                flightLightsSequence = 1;
+
+            } else if (750 < FSA8S_channelValues[8]) {
+
+                flightLightsSequence = 2;
+            }
+
+            /* Set flight light sequence speed (Potentiometer B on radio controller) */
+            Timer3_AutoReloadTime = 200 + FSA8S_channelValues[7] / 5;
+
+            /* Check if timer has expired */
+            if (Timer3_flag) {
+
+                /* Parse flight lights sequences */
+                flightLightsSequenceCursor++;
+                if (flightLightsSequenceSize <= flightLightsSequenceCursor) {
+                    flightLightsSequenceCursor = 0;
+                }
+
+                /* Write to flight lights */
+                if (flightLightsSequence == 0) {
+
+                    flightLightsSequenceSize = sizeof(flightLightsSequenceA1);
+
+                    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, flightLightsSequenceA1[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, flightLightsSequenceA2[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, flightLightsSequenceA3[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, flightLightsSequenceA4[flightLightsSequenceCursor]);
+
+                } else if (flightLightsSequence == 1) {
+
+                    flightLightsSequenceSize = sizeof(flightLightsSequenceB1);
+
+                    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, flightLightsSequenceB1[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, flightLightsSequenceB2[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, flightLightsSequenceB3[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, flightLightsSequenceB4[flightLightsSequenceCursor]);
+
+                } else if (flightLightsSequence == 2) {
+
+                    flightLightsSequenceSize = sizeof(flightLightsSequenceC1);
+
+                    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, flightLightsSequenceC1[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, flightLightsSequenceC2[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, flightLightsSequenceC3[flightLightsSequenceCursor]);
+                    HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, flightLightsSequenceC4[flightLightsSequenceCursor]);
+                }
+
+                /* Reset Timer3 flag */
+                Timer3_flag = false;
+            }
+
+        } else {
+
+            /* Turn off flight lights */
+            HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, 0);
+            HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, 0);
+            HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, 0);
+            HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, 0);
+        }
 
         /* Set task time delay */
-        vTaskDelay(xDelay * 250);
+        vTaskDelay(xDelay);
     }
 }
 
@@ -851,10 +978,35 @@ void Timer2_Callback(TimerHandle_t xTimer) {
     /* Increment the count */
     ulCount++;
 
-    if (ulCount >= (200 / xTimerPeriod)) {
+    if (ulCount >= (Timer2_AutoReloadTime / xTimerPeriod)) {
 
         /* Set Timer2 flag to true */
         Timer2_flag = true;
+
+        /* Reset timer count */
+        vTimerSetTimerID(xTimer, (void *)0);
+
+    } else {
+        /* Store the incremented count back into the timer's ID */
+        vTimerSetTimerID(xTimer, (void *)ulCount);
+    }
+}
+
+void Timer3_Callback(TimerHandle_t xTimer) {
+
+    /* Get no. of times this timer has expired */
+    uint32_t ulCount = (uint32_t)pvTimerGetTimerID(xTimer);
+
+    /* Get timer period */
+    uint32_t xTimerPeriod = xTimerGetPeriod(xTimer);
+
+    /* Increment the count */
+    ulCount++;
+
+    if (ulCount >= (Timer3_AutoReloadTime / xTimerPeriod)) {
+
+        /* Set Timer3 flag to true */
+        Timer3_flag = true;
 
         /* Reset timer count */
         vTimerSetTimerID(xTimer, (void *)0);
@@ -869,7 +1021,7 @@ void Timer2_Callback(TimerHandle_t xTimer) {
 void FlightController_Init(void) {
 
     /* Welcome message */
-    LOG((uint8_t *)"Initializing Flight Controller...\r\n\n", LOG_INFORMATION);
+    // LOG((uint8_t *)"Initializing Flight Controller...\r\n\n", LOG_INFORMATION);
 
     /* Create start-up tasks and timers */
     FreeRTOS_CreateStartUpTasks();

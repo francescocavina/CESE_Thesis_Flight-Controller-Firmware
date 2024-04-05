@@ -455,7 +455,7 @@ static void MPU6050_Configure_QMC5883l(GY87_HandleTypeDef_t * hgy87) {
     uint8_t regData;
 
     /* Set slave QMC5883L magnetometer device address */
-    regData = QMC5883L_AUX_VAL_I2C_ADDR | 0x80;
+    regData = 0x80 | QMC5883L_AUX_VAL_I2C_ADDR;
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV0_ADDR, &regData, MPU6050_SET_BIT);
 
     /* Set slave QMC5883L magnetometer registers addresses to read */
@@ -473,16 +473,19 @@ static void MPU6050_Configure_BMP180(GY87_HandleTypeDef_t * hgy87) {
     uint8_t regData;
 
     /* Set slave BMP180 barometer device address (SLAVE 1: Registers 0xF6 to 0xF8) */
-    regData = BMP180_AUX_VAL_I2C_ADDR | 0x80;
-    MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_ADDR, &regData, MPU6050_SET_BIT);
+    regData = 0x80 | BMP180_AUX_VAL_I2C_ADDR;
+    // MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_ADDR, &regData, MPU6050_SET_BIT);
+    MPU6050_WriteRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_ADDR, &regData);
 
     /* Set slave BMP180 barometer registers addresses to read (SLAVE 1: Registers 0xF6 to 0xF8) */
     regData = 0xF6;
-    MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_REG, &regData, MPU6050_SET_BIT);
+    // MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_REG, &regData, MPU6050_SET_BIT);
+    MPU6050_WriteRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_REG, &regData);
 
     /* Set slave BMP180 barometer number of registers to read (SLAVE 1: Registers 0xF6 to 0xF8) */
     regData = 0x80 | 0x03;
-    MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_CTRL, &regData, MPU6050_SET_BIT);
+    // MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_CTRL, &regData, MPU6050_SET_BIT);
+    MPU6050_WriteRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV1_CTRL, &regData);
 }
 
 static bool_t GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
@@ -609,15 +612,9 @@ static void QMC5883L_Configure(GY87_HandleTypeDef_t * hgy87) {
 
 static void BMP180_Configure(GY87_HandleTypeDef_t * hgy87) {
 
-    /* delete, debugging */
-    uint8_t loggingStr[64];
-
     /* Configure BMP180 barometer */
     uint8_t regData;
     uint8_t temperatureRawData[2] = {0};
-
-    int32_t X1;
-    int32_t X2;
 
     /* Read calibration data */
     BMP180_ReadCalibrationData(hgy87);
@@ -628,21 +625,29 @@ static void BMP180_Configure(GY87_HandleTypeDef_t * hgy87) {
     // DELAY NEEDED IN ORDER TO READ THE TEMPERATURE VALUE PORPERLY
 #ifdef USE_FREERTOS
     // vTaskDelay(pdMS_TO_TICKS(5));
+    // HAL_Delay(5);
 #else
     // HAL_Delay(5);
 #endif
     MPU6050_ReadRegister(hgy87->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF6, temperatureRawData, 2 * sizeof(uint8_t));
     BMP180_CalibrationData.UT = (temperatureRawData[0] << 8) | temperatureRawData[1];
 
-    /* Calculate compensated temperature */
-    X1 = (BMP180_CalibrationData.UT - BMP180_CalibrationData.AC6) * (BMP180_CalibrationData.AC5 / (1 << 15));
-    X2 = (BMP180_CalibrationData.MC * (1 << 11)) / (X1 + BMP180_CalibrationData.MD);
-    BMP180_CalibrationData.B5 = X1 + X2;
-    BMP180_CalibrationData.CT = ((BMP180_CalibrationData.B5 + 8) / (1 << 4)) / 10;
-
     /* Write register to read uncompensated pressure in the future */
-    regData = 0x34 + (BMP180_OVERSAMPLING << 6);
+    regData = 0x34 | (BMP180_OVERSAMPLING << 6);
     MPU6050_WriteRegister(hgy87->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF4, &regData);
+
+    /* DEBUGGING DELETE */
+    uint8_t loggingStr[64];
+    uint8_t pressureRawData[3] = {0};
+    MPU6050_ReadRegister(hgy87->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF6, pressureRawData, 3 * sizeof(uint8_t));
+    int32_t uncompensatedPressure = ((pressureRawData[0] << 16) | (pressureRawData[1] << 8) | pressureRawData[2]) >> (8 - BMP180_OVERSAMPLING);
+
+    sprintf((char *)loggingStr, (const char *)"BMP180_Configure(): UT = %d °C\r\n", BMP180_CalibrationData.UT);
+    LOG(loggingStr, LOG_DEBUGGING);
+
+    sprintf((char *)loggingStr, (const char *)"BMP180_Configure(): UP = %d P\r\n", uncompensatedPressure);
+    LOG(loggingStr, LOG_DEBUGGING);
+    /* DEBUGGING DELETE */
 }
 
 static void BMP180_ReadCalibrationData(GY87_HandleTypeDef_t * hgy87) {
@@ -668,15 +673,26 @@ static void BMP180_ReadCalibrationData(GY87_HandleTypeDef_t * hgy87) {
 
 static uint32_t GY87_BMP180_ReadUncompensatedPressure(GY87_HandleTypeDef_t * hgy87) {
 
+    // TODO: CHEQUEAR PARÁMETROS EN FUNCIONES DEL BARÓMETRO
+
+    uint8_t regData;
+
     /* Declare variable for raw data */
-    uint8_t pressureRawData[3];
+    uint8_t pressureRawData[3] = {0};
     int32_t uncompensatedPressure;
 
     /* Read uncompensated pressure data */
-    MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_EXT_SENS_DATA_06, pressureRawData, 3 * sizeof(uint8_t));
+    // MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_EXT_SENS_DATA_06, pressureRawData, 3 * sizeof(uint8_t));
+    MPU6050_ReadRegister(hgy87->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF6, pressureRawData, 3 * sizeof(uint8_t));
 
     /* Calculate uncompensated pressure */
-    uncompensatedPressure = ((pressureRawData[0] << 16) + (pressureRawData[1] << 8) + pressureRawData[2]) >> (8 - BMP180_OVERSAMPLING);
+    uncompensatedPressure = ((pressureRawData[0] << 16) | (pressureRawData[1] << 8) | pressureRawData[2]) >> (8 - BMP180_OVERSAMPLING);
+
+    /* DEBUGGING DELETE */
+    //    uint8_t loggingStr[64];
+    //    sprintf((char *)loggingStr, (const char *)"GY87_BMP180_ReadUncompensatedPressure(): UP = %d°C\r\n\n", uncompensatedPressure);
+    //    LOG(loggingStr, LOG_DEBUGGING);
+    /* DEBUGGING DELETE */
 
     return uncompensatedPressure;
 }
@@ -1050,9 +1066,30 @@ float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t * hgy87) {
     return heading;
 }
 
+float GY87_ReadBarometerTemperature(GY87_HandleTypeDef_t * hgy87) {
+
+    /* Calculate compensated/true temperature */
+    int32_t X1 = ((BMP180_CalibrationData.UT - BMP180_CalibrationData.AC6) * BMP180_CalibrationData.AC5) / (1 << 15);
+    int32_t X2 = (BMP180_CalibrationData.MC * (1 << 11)) / (X1 + BMP180_CalibrationData.MD);
+    BMP180_CalibrationData.B5 = X1 + X2;
+    BMP180_CalibrationData.CT = ((BMP180_CalibrationData.B5 + 8) / (1 << 4)) / 10;
+
+    /* DEBUGGING DELETE */
+    //    uint8_t loggingStr[64];
+    //
+    //    sprintf((char *)loggingStr, (const char *)"GY87_ReadBarometerTemperature(): UT = %d°C\r\n", BMP180_CalibrationData.UT);
+    //    LOG(loggingStr, LOG_DEBUGGING);
+    //
+    //    sprintf((char *)loggingStr, (const char *)"GY87_ReadBarometerTemperature(): CT = %d°C\r\n\n", BMP180_CalibrationData.CT);
+    //    LOG(loggingStr, LOG_DEBUGGING);
+    /* DEBUGGING DELETE */
+
+    return (float)BMP180_CalibrationData.CT;
+}
+
 float GY87_ReadBarometerPressure(GY87_HandleTypeDef_t * hgy87) {
 
-    int32_t pressure;
+    float pressure;
 
     int32_t X1;
     int32_t X2;
@@ -1100,7 +1137,7 @@ float GY87_ReadBarometerAltitude(GY87_HandleTypeDef_t * hgy87) {
 
     pressure = GY87_ReadBarometerPressure(hgy87);
 
-    altitude = 44330 * (1 - (pow(((float)pressure / (float)BMP180_ATMOSFERIC_PRESSURE), 0.19029495718)));
+    altitude = 44330 * (1 - (pow((pressure / BMP180_ATMOSFERIC_PRESSURE), 0.19029495718)));
 
     return altitude;
 }

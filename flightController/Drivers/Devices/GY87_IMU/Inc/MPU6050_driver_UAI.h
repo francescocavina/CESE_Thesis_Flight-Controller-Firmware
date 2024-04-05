@@ -183,10 +183,19 @@ void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues
 float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t * hgy87);
 
 /*
+ * @brief  Reads barometer temperature value. Temperature value is set at
+ *         initialization, therefore it won't change.
+ * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
+ *                the configuration information for the GY87 device.
+ * @retval Temperature in [°C].
+ */
+float GY87_ReadBarometerTemperature(GY87_HandleTypeDef_t * hgy87);
+
+/*
  * @brief  Reads barometer pressure value.
  * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
  *                the configuration information for the GY87 device.
- * @retval Barometer pressure in Pascals [Pa].
+ * @retval Pressure in Pascals [Pa].
  */
 float GY87_ReadBarometerPressure(GY87_HandleTypeDef_t * hgy87);
 

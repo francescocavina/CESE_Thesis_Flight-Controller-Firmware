@@ -40,16 +40,27 @@
 extern "C" {
 #endif
 
-/* --- Public macros definitions --------------------------------------------------------------- */
-#define HEARTBEAT_PERIOD        (500)  // Heartbeat Period [ms], Duty Cycle = 0.5
-#define PW_ON_OFF_DRIVER_TIME   (3000) // Time in [ms] needed to keep pressed Power On/Off Button to turn on/off flight controller
-#define BATTERY_ALARM_THRESHOLD (9.6)  // Voltage level at which battery alarm starts beeping
+/* ############################################################################################# */
+/* ####################################### USER SETTINGS ####################################### */
+/* ############################################################################################# */
 
-/* --- Public data type declarations ----------------------------------------------------------- */
+/* --- POWER ON/OFF DRIVER --------------------------------------------------------------------- */
+#define PW_ON_OFF_DRIVER_TIME                                                                                                                                                                                                                            \
+    (3000) // Time in [ms] that the on-board power on/off button needs
+           // to be pressed in order to turn on/off the flight
+           // controller.
 
-/* --- Public variable declarations ------------------------------------------------------------ */
+/* --- BATTERY ALARM --------------------------------------------------------------------------- */
+#define BATTERY_ALARM_THRESHOLD                                                                                                                                                                                                                          \
+    (6.5) // Voltage level in [V] at which the battery alarm starts
+          // beeping, indicating that the flight controller has low
+          // battery.
 
-/* --- Public function declarations ------------------------------------------------------------ */
+/* --- ON-BOARD HEARTEAT LIGHT ----------------------------------------------------------------- */
+#define HEARTBEAT_PERIOD (500) // Heartbeat period in [ms] (duty cycle is 50%)
+
+/* --- FLIGHT LIGHTS  -------------------------------------------------------------------------- */
+#define FLIGHT_LIGHTS_SEQUENCE (3) // Flight lights	sequence (1, 2 or 3)
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
