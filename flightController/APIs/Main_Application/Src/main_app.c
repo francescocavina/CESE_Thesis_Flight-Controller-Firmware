@@ -42,10 +42,23 @@
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define USE_FREERTOS                  // Remove comment when using FreeRTOS
-#define LOGGING_TASK_DELAY_MULTIPLIER (20)
-// #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM					 	// Remove comment to allow driver info logging
-#define MAIN_APP_USE_LOGGING_FSA8S // Remove comment to allow driver info logging
+/* FreeRTOS */
+#define USE_FREERTOS                                  // Remove comment when using FreeRTOS
+#define DEFAULT_TASK_DELAY                            (20)
+#define TASK_FLIGHTCONTROLLER_STARTUP_PRIORITY        (2)
+#define TASK_FLIGHTCONTROLLER_ONOFFBUTTON_PRIORITY    (3)
+#define TASK_FLIGHTCONTROLLER_CONTROLSYSTEM_PRIORITY  (4)
+#define TASK_FLIGHTCONTROLLER_READ_FSA8S_PRIORITY     (4)
+#define TASK_FLIGHTCONTROLLER_READ_GY87_PRIORITY      (4)
+#define TASK_FLIGHTCONTROLLER_WRITE_ESCS_PRIORITY     (4)
+#define TASK_FLIGHTCONTROLLER_BATTERYLEVEL_PRIORITY   (3)
+#define TASK_FLIGHTCONTROLLER_BATTERYALARM_PRIORITY   (3)
+#define TASK_FLIGHTCONTROLLER_HEARTBEATLIGHT_PRIORITY (3)
+#define TASK_FLIGHTCONTROLLER_FLIGHTLIGHTS_PRIORITY   (3)
+/* Logging */
+#define LOGGING_TASK_DELAY_MULTIPLIER       (20)
+#define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_FSA8S // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE 					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES		// Remove comment to allow driver info logging
@@ -57,8 +70,12 @@
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_ESC								// Remove comment to allow driver info logging
-#define DEFAULT_TASK_DELAY (20)
-#define FSA8S_CHANNELS     (10) // Number of remote control channels to read
+/* Drivers */
+#define FSA8S_CHANNELS    (10) // Number of remote control channels to read
+#define ESC_MAXIMUM_SPEED (80)
+/* Control System */
+#define CONTROL_SYSTEM_MODE        (1)
+#define CONTROL_SYSTEM_LOOP_PERIOD (4) // Loop period in [ms]
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -82,15 +99,18 @@ static TaskHandle_t FlightController_FlightLights_Handle = NULL;
 static TimerHandle_t Timer1_Handle = NULL;
 static TimerHandle_t Timer2_Handle = NULL;
 static TimerHandle_t Timer3_Handle = NULL;
+static TimerHandle_t Timer4_Handle = NULL;
 
 /* Timers Variables */
 static bool_t Timer1_running = false;
 static bool_t Timer2_flag = false;
 static bool_t Timer3_flag = false;
-static uint16_t Timer2_AutoReloadTime = 200;
-static uint16_t Timer3_AutoReloadTime = 200;
+static bool_t Timer4_flag = false;
+static uint16_t Timer2_AutoReloadTime = pdMS_TO_TICKS(200);
+static uint16_t Timer3_AutoReloadTime = pdMS_TO_TICKS(200);
+static uint16_t Timer4_AutoReloadTime = pdMS_TO_TICKS(CONTROL_SYSTEM_LOOP_PERIOD);
 
-/* Drivers Handle */
+/* Drivers Handles */
 static IBUS_HandleTypeDef_t * rc_controller = NULL;
 static GY87_HandleTypeDef_t * hgy87 = NULL;
 static ESC_HandleTypeDef_t * hesc = NULL;
@@ -109,6 +129,7 @@ static float GY87_barometerPressureValue = 0;
 static float GY87_barometerAltitudeValue = 0;
 
 /* ESCs Speed */
+static bool_t ESC_isEnabled = false;
 static uint16_t ESC_speeds[4] = {0};
 
 /* Flight Controller Battery Level */
@@ -213,8 +234,8 @@ void FlightController_FlightLights(void * ptr);
 
 /* --- Private function callback declarations ---------------------------------------------------*/
 /*
- * @brief  Reads the on-board on/off button and turns on/off the flight controller depending on
- *         the time expiration of the system timer.
+ * @brief  Timer Callback: Reads the on-board on/off button and turns on/off the flight controller
+ * 		                   depending on the time expiration of the system timer.
  * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
  *         timer.
  * @retval None
@@ -222,7 +243,8 @@ void FlightController_FlightLights(void * ptr);
 void Timer1_Callback(TimerHandle_t xTimer);
 
 /*
- * @brief  Sets a flag whenever the timer has expired. It is used for the Battery Level Alarm.
+ * @brief  Timer Callback: Sets a flag whenever the timer has expired. It is used for the Battery
+ *                         Level Alarm.
  * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
  *         timer.
  * @retval None
@@ -230,12 +252,35 @@ void Timer1_Callback(TimerHandle_t xTimer);
 void Timer2_Callback(TimerHandle_t xTimer);
 
 /*
- * @brief  Sets a flag whenever the timer has expired. It is used for the Flight Lights.
+ * @brief  Timer Callback: Sets a flag whenever the timer has expired. It is used for the
+ *                         Flight Lights.
  * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
  *         timer.
  * @retval None
  */
 void Timer3_Callback(TimerHandle_t xTimer);
+
+/*
+ * @brief  Timer Callback: TODO
+ * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
+ *         timer.
+ * @retval None
+ */
+void Timer4_Callback(TimerHandle_t xTimer);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void PID_Equation_Mode1(float * PID_Output, float * newPreviousErrorValue, float * Iterm, float errorValue, float kP, float kI, float kD, float lastPreviousErrorValue, float previousIterm);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void PID_Reset_Mode1(float * previousErrorValue_rollRate, float * previousErrorValue_pitchRate, float * previousErrorValue_yawRate, float * previousIterm_rollRate, float * previousIterm_pitchRate, float * previousIterm_yawRate);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 extern I2C_HandleTypeDef hi2c1;
@@ -252,7 +297,7 @@ void FreeRTOS_CreateStartUpTasks(void) {
     BaseType_t ret;
 
     /* Task: FlightController_Startup */
-    ret = xTaskCreate(FlightController_StartUp, "FlightController_StartUp", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 2UL), &FlightController_StartUp_Handle);
+    ret = xTaskCreate(FlightController_StartUp, "FlightController_StartUp", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_STARTUP_PRIORITY), &FlightController_StartUp_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -262,7 +307,7 @@ void FreeRTOS_CreateStartUpTasks(void) {
     }
 
     /* Task: FlightController_OnOffButton */
-    ret = xTaskCreate(FlightController_OnOffButton, "FlightController_OnOffButton", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 1UL), &FlightController_OnOffButton_Handle);
+    ret = xTaskCreate(FlightController_OnOffButton, "FlightController_OnOffButton", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_ONOFFBUTTON_PRIORITY), &FlightController_OnOffButton_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -280,7 +325,7 @@ void FreeRTOS_CreateTasks(void) {
     BaseType_t ret;
 
     /* Task 1: FlightController_ControlSystem */
-    ret = xTaskCreate(FlightController_ControlSystem, "FlightController_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_ControlSystem_Handle);
+    ret = xTaskCreate(FlightController_ControlSystem, "FlightController_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_CONTROLSYSTEM_PRIORITY), &FlightController_ControlSystem_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -290,7 +335,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 2: FlightController_Read_FSA8S */
-    ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_FSA8S_Handle);
+    ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_READ_FSA8S_PRIORITY), &FlightController_Read_FSA8S_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -300,7 +345,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 3: FlightController_Read_GY87 */
-    ret = xTaskCreate(FlightController_Read_GY87, "FlightController_Read_GY87", (6 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Read_GY87_Handle);
+    ret = xTaskCreate(FlightController_Read_GY87, "FlightController_Read_GY87", (6 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_READ_GY87_PRIORITY), &FlightController_Read_GY87_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -310,7 +355,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 4: FlightController_Write_ESCs */
-    ret = xTaskCreate(FlightController_Write_ESCs, "FlightController_Write_ESCs", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_Write_ESCs_Handle);
+    ret = xTaskCreate(FlightController_Write_ESCs, "FlightController_Write_ESCs", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_WRITE_ESCS_PRIORITY), &FlightController_Write_ESCs_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -320,7 +365,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 5: FlightController_BatteryLevel */
-    ret = xTaskCreate(FlightController_BatteryLevel, "FlightController_BatteryLevel", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_BatteryLevel_Handle);
+    ret = xTaskCreate(FlightController_BatteryLevel, "FlightController_BatteryLevel", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_BATTERYLEVEL_PRIORITY), &FlightController_BatteryLevel_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -330,7 +375,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 6: FlightController_BatteryAlarm */
-    ret = xTaskCreate(FlightController_BatteryAlarm, "FlightController_BatteryAlarm", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_BatteryAlarm_Handle);
+    ret = xTaskCreate(FlightController_BatteryAlarm, "FlightController_BatteryAlarm", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_BATTERYALARM_PRIORITY), &FlightController_BatteryAlarm_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -340,7 +385,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 7: FlightController_HeartbeatLight */
-    ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_HeartbeatLight_Handle);
+    ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_HEARTBEATLIGHT_PRIORITY), &FlightController_HeartbeatLight_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -350,7 +395,7 @@ void FreeRTOS_CreateTasks(void) {
     }
 
     /* Task 8: FlightController_FlightLights */
-    ret = xTaskCreate(FlightController_FlightLights, "FlightController_FlightLights", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + 3UL), &FlightController_FlightLights_Handle);
+    ret = xTaskCreate(FlightController_FlightLights, "FlightController_FlightLights", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_FLIGHTLIGHTS_PRIORITY), &FlightController_FlightLights_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
@@ -363,17 +408,24 @@ void FreeRTOS_CreateTasks(void) {
 void FreeRTOS_CreateTimers(void) {
 
     /* Timer2: BatteryLevelAlarm */
-    Timer2_Handle = xTimerCreate("BatteryLevelAlarm", 200, pdTRUE, (void *)0, Timer2_Callback);
+    Timer2_Handle = xTimerCreate("BatteryLevelAlarm", pdMS_TO_TICKS(200), pdTRUE, (void *)0, Timer2_Callback);
     if (NULL != Timer2_Handle) {
         /* Start timer */
         xTimerStart(Timer2_Handle, 0);
     }
 
     /* Timer3: FlightLights */
-    Timer3_Handle = xTimerCreate("FlightLights", 100, pdTRUE, (void *)0, Timer3_Callback);
+    Timer3_Handle = xTimerCreate("FlightLights", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer3_Callback);
     if (NULL != Timer3_Handle) {
         /* Start timer */
         xTimerStart(Timer3_Handle, 0);
+    }
+
+    /* Timer4: ControlSystem */
+    Timer4_Handle = xTimerCreate("ControlSystem", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer4_Callback);
+    if (NULL != Timer4_Handle) {
+        /* Start timer */
+        xTimerStart(Timer4_Handle, 0);
     }
 }
 
@@ -413,29 +465,8 @@ void FlightController_StartUp(void * ptr) {
 
 void FlightController_ControlSystem(void * ptr) {
 
-    //	float rateRoll, ratePitch, rateYaw;
-    //	float angleRoll, anglePitch;
-    //	float gyroscopeCalibrationRoll, gyroscopeCalibrationPitch, gyroscopeCalibrationYaw;
-    //	float linearAccelerationX, linearAcceleretionY, linearAccelerationZ;
-    //
-    //	float kalmanAngleRoll = 0;
-    //	float kalmanUncertaintyAngleRoll = 2 * 2;
-    //	float kalmanAnglePitch = 0;
-    //	float kalmanUncertaintyAnglePitch = 2 * 2;
-    //
-    //	float kalman1DOutput[] = {0, 0};
-    //
-    //	/* 1D Kalman Filter */
-    //	  kalmanState = kalmanState + 0.004 * kalmanInput;
-    //	  kalmanUncertainty = kalmanUncertainty + 0.004 * 0.004 * 4 * 4;
-    //	  float KalmanGain = kalmanUncertainty * 1 / (1 * kalmanUncertainty + 3 * 3);
-    //	  kalmanState = KalmanState + KalmanGain * (kalmanMeasurement - kalmanState);
-    //	  kalmanUncertainty = (1 - kalmanGain) * kalmanUncertainty;
-    //	  kalman1DOutput[0] = kalmanState;
-    //	  kalman1DOutput[1] = kalmanUncertainty;
-
 #ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
-    uint8_t loggingStr[40];
+    uint8_t loggingStr[200];
 #endif
 
     /* Change delay from time in [ms] to ticks */
@@ -445,13 +476,193 @@ void FlightController_ControlSystem(void * ptr) {
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
 #endif
 
+    /* Define variables */
+#if 1 == CONTROL_SYSTEM_MODE
+    /* References */
+    float inputValue_throttle = 0;
+    /* Desired references */
+    float desiredValue_rollRate = 0;
+    float desiredValue_pitchRate = 0;
+    float desiredValue_yawRate = 0;
+    /* Errors */
+    float errorValue_rollRate = 0;
+    float errorValue_pitchRate = 0;
+    float errorValue_yawRate = 0;
+    /* Previously stored errors */
+    float previousErrorValue_rollRate = 0;
+    float previousErrorValue_pitchRate = 0;
+    float previousErrorValue_yawRate = 0;
+    /* Previously stored terms */
+    float previousIterm_rollRate = 0;
+    float previousIterm_pitchRate = 0;
+    float previousIterm_yawRate = 0;
+    /* PID gains */
+    float kP_rollRate = 0.60;
+    float kP_pitchRate = 0.60;
+    float kP_yawRate = 2.00;
+    float kI_rollRate = 3.50;
+    float kI_pitchRate = 3.50;
+    float kI_yawRate = 12.00;
+    float kD_rollRate = 0.03;
+    float kD_pitchRate = 0.03;
+    float kD_yawRate = 0.00;
+    /* PID outputs */
+    float pidOutputValue_rollRate = 0;
+    float pidOutputValue_pitchRate = 0;
+    float pidOutputValue_yawRate = 0;
+    /* Motors inputs */
+    float motorSpeed1 = 0;
+    float motorSpeed2 = 0;
+    float motorSpeed3 = 0;
+    float motorSpeed4 = 0;
+#endif
+
     while (1) {
 
-        /* Set ESCs speeds */
-        ESC_speeds[0] = FSA8S_channelValues[2] / 10;
-        ESC_speeds[1] = FSA8S_channelValues[2] / 10;
-        ESC_speeds[2] = FSA8S_channelValues[2] / 10;
-        ESC_speeds[3] = FSA8S_channelValues[2] / 10;
+        /* Control system processing */
+        if (0 == CONTROL_SYSTEM_MODE) {
+
+#if 0 == CONTROL_SYSTEM_MODE
+
+        	/* Check if ESCs are enabled (Switch B on radio controller) */
+        	if (500 <= FSA8S_channelValues[5]) {
+        		ESC_isEnabled = true;
+        	} else {
+        		ESC_isEnabled = false;
+        	}
+
+    		/* Turn off motors in case ESCs are disabled */
+    		if(false == ESC_isEnabled &&  10 > (ESC_speeds[0] + ESC_speeds[1] + ESC_speeds[2] + ESC_speeds[3])) {
+
+    			/* Turn off motors */
+    			ESC_speeds[0] = 0;
+    			ESC_speeds[1] = 0;
+    			ESC_speeds[2] = 0;
+    			ESC_speeds[3] = 0;
+
+    		} else {
+
+    			/* Set motors speed */
+    			ESC_speeds[0] = FSA8S_channelValues[2] / 10;
+    			ESC_speeds[1] = FSA8S_channelValues[2] / 10;
+    			ESC_speeds[2] = FSA8S_channelValues[2] / 10;
+    			ESC_speeds[3] = FSA8S_channelValues[2] / 10;
+
+    		}
+
+#endif
+
+        } else if (1 == CONTROL_SYSTEM_MODE) {
+
+#if 1 == CONTROL_SYSTEM_MODE
+
+            /* Check if ESCs are enabled (Switch B on radio controller) */
+            if (500 <= FSA8S_channelValues[5]) {
+                ESC_isEnabled = true;
+            } else {
+                ESC_isEnabled = false;
+            }
+
+            /* Read inputs from radio controller */
+            inputValue_throttle = FSA8S_channelValues[2];
+            /* Adjust and limit throttle input */
+            if (800 < inputValue_throttle) {
+                inputValue_throttle = 800;
+            }
+            /* Calculate desired rates by mapping radio controller values to rates */
+            desiredValue_rollRate = 0.15 * (FSA8S_channelValues[0] - 500);
+            desiredValue_pitchRate = 0.15 * (FSA8S_channelValues[1] - 500);
+            desiredValue_yawRate = 0.15 * (FSA8S_channelValues[3] - 500);
+
+            /* Turn off motors in case ESCs are disabled */
+            if (false == ESC_isEnabled) {
+
+                /* Turn off motors */
+                ESC_speeds[0] = 0;
+                ESC_speeds[1] = 0;
+                ESC_speeds[2] = 0;
+                ESC_speeds[3] = 0;
+
+                /* Reset previously stored PID errors and terms values */
+                PID_Reset_Mode1(&previousErrorValue_rollRate, &previousErrorValue_pitchRate, &previousErrorValue_yawRate, &previousIterm_rollRate, &previousIterm_pitchRate, &previousIterm_yawRate);
+
+            } else {
+
+                /* Check if timer has expired */
+                if (1) {
+
+                    if (inputValue_throttle < 50) {
+
+                        /* Turn off motors */
+                        ESC_speeds[0] = 0;
+                        ESC_speeds[1] = 0;
+                        ESC_speeds[2] = 0;
+                        ESC_speeds[3] = 0;
+
+                        /* Reset previously stored PID errors and terms values */
+                        PID_Reset_Mode1(&previousErrorValue_rollRate, &previousErrorValue_pitchRate, &previousErrorValue_yawRate, &previousIterm_rollRate, &previousIterm_pitchRate, &previousIterm_yawRate);
+
+                    } else {
+
+                        /* Calculate rates errors */
+                        errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues->rotationRateRoll;
+                        errorValue_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues->rotationRatePitch;
+                        errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues->rotationRateYaw;
+
+                        /* Calculate PID output for roll */
+                        PID_Equation_Mode1(&pidOutputValue_rollRate, &previousErrorValue_rollRate, &previousIterm_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate, previousErrorValue_rollRate, previousIterm_rollRate);
+
+                        /* Calculate PID output for pitch */
+                        PID_Equation_Mode1(&pidOutputValue_pitchRate, &previousErrorValue_pitchRate, &previousIterm_pitchRate, errorValue_pitchRate, kP_pitchRate, kI_pitchRate, kD_pitchRate, previousErrorValue_pitchRate, previousIterm_pitchRate);
+
+                        /* Calculate PID output for yaw */
+                        PID_Equation_Mode1(&pidOutputValue_yawRate, &previousErrorValue_yawRate, &previousIterm_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate, previousErrorValue_yawRate, previousIterm_yawRate);
+
+                        /* Calculate motors speed */
+                        motorSpeed1 = 0.1 * (inputValue_throttle - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate);
+                        motorSpeed2 = 0.1 * (inputValue_throttle - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate);
+                        motorSpeed3 = 0.1 * (inputValue_throttle + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate);
+                        motorSpeed4 = 0.1 * (inputValue_throttle + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate);
+
+                        /* Adjust and limit motors speed */
+                        if (ESC_MAXIMUM_SPEED < motorSpeed1)
+                            motorSpeed1 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed2)
+                            motorSpeed2 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed3)
+                            motorSpeed3 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed4)
+                            motorSpeed4 = ESC_MAXIMUM_SPEED;
+
+                        /* Set motors speed */
+                        ESC_speeds[0] = (uint16_t)motorSpeed1;
+                        ESC_speeds[1] = (uint16_t)motorSpeed2;
+                        ESC_speeds[2] = (uint16_t)motorSpeed3;
+                        ESC_speeds[3] = (uint16_t)motorSpeed4;
+                    }
+
+                    /* Reset Timer4 flag */
+                    Timer4_flag = false;
+                }
+
+                /* Log control system values */
+#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
+                sprintf((char *)loggingStr, (const char *)"CS Mode1 | Motors are enabled? %d\r\n", ESC_isEnabled);
+                LOG(loggingStr, LOG_INFORMATION);
+                sprintf((char *)loggingStr, (const char *)"CS Mode1 | desVal_rollRate: %.2f [°/s], desVal_pitchRate: %.2f [°/s], desVal_yawRate: %.2f [°/s], desVal_throttle: %.2f\r\n", desiredValue_rollRate, desiredValue_pitchRate,
+                        desiredValue_yawRate, inputValue_throttle);
+                LOG(loggingStr, LOG_INFORMATION);
+                sprintf((char *)loggingStr, (const char *)"CS Mode1 | errorVal_rollRate: %.2f [°/s], errorVal_pitchRate: %.2f [°/s], errorVal_yawRate: %.2f [°/s]\r\n\n", errorValue_rollRate, errorValue_pitchRate, errorValue_yawRate);
+                LOG(loggingStr, LOG_INFORMATION);
+#endif
+            }
+
+#endif
+
+        } else if (2 == CONTROL_SYSTEM_MODE) {
+
+        } else if (3 == CONTROL_SYSTEM_MODE) {
+        }
 
         /* Set task time delay */
         vTaskDelay(xDelay);
@@ -607,7 +818,7 @@ void FlightController_Read_GY87(void * ptr) {
 #endif
 
             /* Read GY87 barometer pressure value */
-            GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
+            //            GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
 
             /* Log GY87 barometer pressure value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE
@@ -616,7 +827,7 @@ void FlightController_Read_GY87(void * ptr) {
 #endif
 
             /* Read GY87 barometer altitude value */
-            GY87_barometerAltitudeValue = GY87_ReadBarometerAltitude(hgy87);
+            //            GY87_barometerAltitudeValue = GY87_ReadBarometerAltitude(hgy87);
 
             /* Log GY87 barometer altitude value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
@@ -707,15 +918,11 @@ void FlightController_BatteryLevel(void * ptr) {
     uint16_t adcValue;
 
 #ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
-    uint8_t loggingStr[20];
+    uint8_t loggingStr[30];
 #endif
 
     /* Change delay from time in [ms] to ticks */
-#ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
-#else
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-#endif
+    const TickType_t xDelay = pdMS_TO_TICKS(1000);
 
     while (1) {
 
@@ -739,7 +946,7 @@ void FlightController_BatteryLevel(void * ptr) {
 
         /* Log battery level */
 #ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
-        sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f [V]\r\n\n", FlightController_batteryLevel);
+        sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f [V]\r\n\n", FlightController_batteryLevelValue);
         LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -915,6 +1122,50 @@ void FlightController_FlightLights(void * ptr) {
     }
 }
 
+void PID_Equation_Mode1(float * PID_Output, float * newPreviousErrorValue, float * Iterm, float errorValue, float kP, float kI, float kD, float lastPreviousErrorValue, float previousIterm) {
+
+    float Pterm;
+    float Dterm;
+
+    /* Calculate proportional term */
+    Pterm = kP * errorValue;
+
+    /* Calculate integral term */
+    *Iterm = previousIterm + kI * (errorValue + lastPreviousErrorValue) * 0.004 / 2;
+    /* Limit integral term to avoid integral wind-up */
+    if (*Iterm > 400) {
+        *Iterm = 400;
+    } else if (*Iterm < -400) {
+        *Iterm = -400;
+    }
+
+    /* Calculate derivative term */
+    Dterm = kD * (errorValue - lastPreviousErrorValue) / 0.004;
+
+    /* Calculate PID output */
+    *PID_Output = Pterm + *Iterm + Dterm;
+    /* Limit PID output to avoid integral wind-up */
+    if (*PID_Output > 400) {
+        *PID_Output = 400;
+    } else if (*PID_Output < -400) {
+        *PID_Output = -400;
+    }
+
+    /* Update previous error value */
+    *newPreviousErrorValue = errorValue;
+}
+
+void PID_Reset_Mode1(float * previousErrorValue_rollRate, float * previousErrorValue_pitchRate, float * previousErrorValue_yawRate, float * previousIterm_rollRate, float * previousIterm_pitchRate, float * previousIterm_yawRate) {
+
+    /* Reset previously stored PID errors and terms values */
+    *previousErrorValue_rollRate = 0;
+    *previousErrorValue_pitchRate = 0;
+    *previousErrorValue_yawRate = 0;
+    *previousIterm_rollRate = 0;
+    *previousIterm_pitchRate = 0;
+    *previousIterm_yawRate = 0;
+}
+
 /* --- Private callback function implementation ------------------------------------------------ */
 void Timer1_Callback(TimerHandle_t xTimer) {
 
@@ -1007,6 +1258,31 @@ void Timer3_Callback(TimerHandle_t xTimer) {
 
         /* Set Timer3 flag to true */
         Timer3_flag = true;
+
+        /* Reset timer count */
+        vTimerSetTimerID(xTimer, (void *)0);
+
+    } else {
+        /* Store the incremented count back into the timer's ID */
+        vTimerSetTimerID(xTimer, (void *)ulCount);
+    }
+}
+
+void Timer4_Callback(TimerHandle_t xTimer) {
+
+    /* Get no. of times this timer has expired */
+    uint32_t ulCount = (uint32_t)pvTimerGetTimerID(xTimer);
+
+    /* Get timer period */
+    uint32_t xTimerPeriod = xTimerGetPeriod(xTimer);
+
+    /* Increment the count */
+    ulCount++;
+
+    if (ulCount >= (Timer4_AutoReloadTime / xTimerPeriod)) {
+
+        /* Set Timer3 flag to true */
+        Timer4_flag = true;
 
         /* Reset timer count */
         vTimerSetTimerID(xTimer, (void *)0);

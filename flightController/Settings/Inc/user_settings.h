@@ -59,9 +59,6 @@ extern "C" {
 /* --- ON-BOARD HEARTEAT LIGHT ----------------------------------------------------------------- */
 #define HEARTBEAT_PERIOD (500) // Heartbeat period in [ms] (duty cycle is 50%)
 
-/* --- FLIGHT LIGHTS  -------------------------------------------------------------------------- */
-#define FLIGHT_LIGHTS_SEQUENCE (3) // Flight lights	sequence (1, 2 or 3)
-
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }

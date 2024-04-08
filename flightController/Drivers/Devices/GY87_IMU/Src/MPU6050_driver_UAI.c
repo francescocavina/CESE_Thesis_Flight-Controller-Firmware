@@ -637,16 +637,16 @@ static void BMP180_Configure(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegister(hgy87->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF4, &regData);
 
     /* DEBUGGING DELETE */
-    uint8_t loggingStr[64];
-    uint8_t pressureRawData[3] = {0};
-    MPU6050_ReadRegister(hgy87->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF6, pressureRawData, 3 * sizeof(uint8_t));
-    int32_t uncompensatedPressure = ((pressureRawData[0] << 16) | (pressureRawData[1] << 8) | pressureRawData[2]) >> (8 - BMP180_OVERSAMPLING);
-
-    sprintf((char *)loggingStr, (const char *)"BMP180_Configure(): UT = %d °C\r\n", BMP180_CalibrationData.UT);
-    LOG(loggingStr, LOG_DEBUGGING);
-
-    sprintf((char *)loggingStr, (const char *)"BMP180_Configure(): UP = %d P\r\n", uncompensatedPressure);
-    LOG(loggingStr, LOG_DEBUGGING);
+    //    uint8_t loggingStr[64];
+    //    uint8_t pressureRawData[3] = {0};
+    //    MPU6050_ReadRegister(hgy87->hi2c, BMP180_AUX_VAL_I2C_ADDR << 1, 0xF6, pressureRawData, 3 * sizeof(uint8_t));
+    //    int32_t uncompensatedPressure = ((pressureRawData[0] << 16) | (pressureRawData[1] << 8) | pressureRawData[2]) >> (8 - BMP180_OVERSAMPLING);
+    //
+    //    sprintf((char *)loggingStr, (const char *)"BMP180_Configure(): UT = %d °C\r\n", BMP180_CalibrationData.UT);
+    //    LOG(loggingStr, LOG_DEBUGGING);
+    //
+    //    sprintf((char *)loggingStr, (const char *)"BMP180_Configure(): UP = %d P\r\n", uncompensatedPressure);
+    //    LOG(loggingStr, LOG_DEBUGGING);
     /* DEBUGGING DELETE */
 }
 
@@ -674,8 +674,6 @@ static void BMP180_ReadCalibrationData(GY87_HandleTypeDef_t * hgy87) {
 static uint32_t GY87_BMP180_ReadUncompensatedPressure(GY87_HandleTypeDef_t * hgy87) {
 
     // TODO: CHEQUEAR PARÁMETROS EN FUNCIONES DEL BARÓMETRO
-
-    uint8_t regData;
 
     /* Declare variable for raw data */
     uint8_t pressureRawData[3] = {0};
