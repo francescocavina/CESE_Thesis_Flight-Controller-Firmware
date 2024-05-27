@@ -46,50 +46,54 @@
 #define USE_FREERTOS                                  // Remove comment when using FreeRTOS
 #define DEFAULT_TASK_DELAY                            (20)
 #define TASK_FLIGHTCONTROLLER_STARTUP_PRIORITY        (2)
-#define TASK_FLIGHTCONTROLLER_ONOFFBUTTON_PRIORITY    (2)
 #define TASK_FLIGHTCONTROLLER_CONTROLSYSTEM_PRIORITY  (2)
-#define TASK_FLIGHTCONTROLLER_READ_FSA8S_PRIORITY     (2)
-#define TASK_FLIGHTCONTROLLER_READ_GY87_PRIORITY      (2)
-#define TASK_FLIGHTCONTROLLER_WRITE_ESCS_PRIORITY     (2)
+#define TASK_FLIGHTCONTROLLER_DATA_LOGGING_PRIORITY   (2)
+#define TASK_FLIGHTCONTROLLER_ONOFFBUTTON_PRIORITY    (2)
 #define TASK_FLIGHTCONTROLLER_BATTERYLEVEL_PRIORITY   (2)
 #define TASK_FLIGHTCONTROLLER_BATTERYALARM_PRIORITY   (2)
 #define TASK_FLIGHTCONTROLLER_HEARTBEATLIGHT_PRIORITY (2)
 #define TASK_FLIGHTCONTROLLER_FLIGHTLIGHTS_PRIORITY   (2)
 /* Logging */
 #define LOGGING_TASK_DELAY_MULTIPLIER (20)
-// #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM // Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_FSA8S // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_STARTUP 							// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE0 			// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE1 			// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_FSA8S 							// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE 					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES		// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_KALMAN_ANGLES				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_TEMPERATURE					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER 				// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING // Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE // Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING 		// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE 		// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE 			// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE // Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL // Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_ESC								// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE 			// Remove comment to allow driver info logging
+// #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL 	// Remove comment to allow driver info logging
 /* Drivers */
 #define FSA8S_CHANNELS    (10) // Number of remote control channels to read
-#define ESC_MAXIMUM_SPEED (80)
+#define ESC_MAXIMUM_SPEED (100)
 #define ESC_MINIMUM_SPEED (10)
 /* Control System */
-#define CONTROL_SYSTEM_MODE        (1)
-#define CONTROL_SYSTEM_LOOP_PERIOD (4) // Loop period in [ms]
+#define CONTROL_SYSTEM_MODE                   (2)
+#define CONTROL_SYSTEM_LOOP_PERIOD_MS         (4) // Loop period in [ms]
+#define CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE (25)
+#define CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE (800)
+#define CONTROL_SYSTEM_PID_OUTPUT_LIMIT       (20)
+/* Battery Level */
+#define BATTERY_LEVEL_CALIBRATION_OFFSET (0.76)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Flight Controller State */
-static bool_t FlightController_running = false;
+static bool_t FlightController_isRunning = false;
+static bool_t FlightController_isInitialized = false;
 
 /* Tasks Handles */
 static TaskHandle_t FlightController_StartUp_Handle = NULL;
 static TaskHandle_t FlightController_ControlSystem_Handle = NULL;
-static TaskHandle_t FlightController_Read_FSA8S_Handle = NULL;
-static TaskHandle_t FlightController_Read_GY87_Handle = NULL;
-static TaskHandle_t FlightController_Write_ESCs_Handle = NULL;
+static TaskHandle_t FlightController_Data_Logging_Handle = NULL;
 static TaskHandle_t FlightController_OnOffButton_Handle = NULL;
 static TaskHandle_t FlightController_BatteryLevel_Handle = NULL;
 static TaskHandle_t FlightController_BatteryAlarm_Handle = NULL;
@@ -110,29 +114,197 @@ static bool_t Timer4_flag = false;
 static uint16_t Timer1_AutoReloadTime = PW_ON_OFF_DRIVER_TIME;
 static uint16_t Timer2_AutoReloadTime = 200;
 static uint16_t Timer3_AutoReloadTime = 200;
-static uint16_t Timer4_AutoReloadTime = CONTROL_SYSTEM_LOOP_PERIOD;
+static uint16_t Timer4_AutoReloadTime = CONTROL_SYSTEM_LOOP_PERIOD_MS;
 
 /* Drivers Handles */
 static IBUS_HandleTypeDef_t * rc_controller = NULL;
 static GY87_HandleTypeDef_t * hgy87 = NULL;
 static ESC_HandleTypeDef_t * hesc = NULL;
 
-/* Remote Control Channel Values */
+/* FS-A8S Radio Controller Variables */
+static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
 static uint16_t FSA8S_channelValues[FSA8S_CHANNELS] = {0};
 
-/* IMU Sensors Values */
-static int16_t GY87_temperature = 0;
-static GY87_gyroscopeValues_t * GY87_gyroscopeValues = NULL;
-static GY87_accelerometerValues_t * GY87_accelerometerValues = NULL;
-static GY87_magnetometerValues_t * GY87_magnetometerValues = NULL;
+/* GY-87 IMU Variables */
+static GY87_gyroscopeValues_t GY87_gyroscopeValues;
+static GY87_accelerometerValues_t GY87_accelerometerValues;
+static GY87_magnetometerValues_t GY87_magnetometerValues;
 static float GY87_magnetometerHeadingValue = 0;
-static float GY87_barometerTemperatureValue = 0;
-static float GY87_barometerPressureValue = 0;
-static float GY87_barometerAltitudeValue = 0;
+static bool_t gyroscopeCalibrationIsDone = false;
+static bool_t accelerometerCalibrationIsDone = false;
 
-/* ESCs Speed */
+/* Control System Mode 0 */
+#if 0 == CONTROL_SYSTEM_MODE
+/* Throttle stick check */
+static bool_t throttleStick_startedDown = false;
+/* References */
+static float inputValue_throttle = 0;
+/* Motors inputs */
+static float motorSpeed1 = 0;
+static float motorSpeed2 = 0;
+static float motorSpeed3 = 0;
+static float motorSpeed4 = 0;
+/* ESCs */
 static bool_t ESC_isEnabled = false;
-static uint16_t ESC_speeds[5] = {0};
+static float ESC_speeds[5] = {0};
+#endif
+/* Control System Mode 1 */
+#if 1 == CONTROL_SYSTEM_MODE
+/* Throttle stick check */
+static bool_t throttleStick_startedDown = false;
+/* References */
+static float inputValue_throttle = 0;
+static float inputValue_rollRate = 0;
+static float inputValue_pitchRate = 0;
+static float inputValue_yawRate = 0;
+/* Desired references */
+static float desiredValue_rollRate = 0;
+static float desiredValue_pitchRate = 0;
+static float desiredValue_yawRate = 0;
+/* Errors */
+static float errorValue_rollRate = 0;
+static float errorValue_pitchRate = 0;
+static float errorValue_yawRate = 0;
+/* Previously stored errors */
+static float previousErrorValue_rollRate = 0;
+static float previousErrorValue_pitchRate = 0;
+static float previousErrorValue_yawRate = 0;
+/* Previously stored terms */
+static float previousIterm_rollRate = 0;
+static float previousIterm_pitchRate = 0;
+static float previousIterm_yawRate = 0;
+/* PID gains */
+static float kP_rollRate = 0.3;
+static float kP_pitchRate = 0.3;
+static float kP_yawRate = 0.3;
+static float kI_rollRate = 0.1;
+static float kI_pitchRate = 0.1;
+static float kI_yawRate = 0.1;
+static float kD_rollRate = 0.0;
+static float kD_pitchRate = 0.0;
+static float kD_yawRate = 0.0;
+/* PID terms */
+// static float Pterm_rollRate  = 0;
+// static float Pterm_pitchRate = 0;
+// static float Pterm_yawRate   = 0;
+// static float Iterm_rollRate  = 0;
+// static float Iterm_pitchRate = 0;
+// static float Iterm_yawRate   = 0;
+// static float Dterm_rollRate  = 0;
+// static float Dterm_pitchRate = 0;
+// static float Dterm_yawRate   = 0;
+/* PID outputs */
+static float pidOutputValue_rollRate = 0;
+static float pidOutputValue_pitchRate = 0;
+static float pidOutputValue_yawRate = 0;
+/* Motors inputs */
+static float motorSpeed1 = 0;
+static float motorSpeed2 = 0;
+static float motorSpeed3 = 0;
+static float motorSpeed4 = 0;
+/* ESCs */
+static bool_t ESC_isEnabled = false;
+static float ESC_speeds[5] = {0};
+#endif
+/* Control System Mode 2 */
+#if 2 == CONTROL_SYSTEM_MODE
+/* Throttle stick check */
+static bool_t throttleStick_startedDown = false;
+/* References: General */
+static float inputValue_throttle = 0;
+/* References: Angles */
+static float inputValue_rollAngle = 0;
+static float inputValue_pitchAngle = 0;
+/* Kalman prediction measurements */
+static float kalmanPredictionValue_rollAngle = 0;
+static float kalmanPredictionValue_pitchAngle = 0;
+/* Kalman measurements uncertainties */
+static float kalmanUncertaintyValue_rollAngle = 2 * 2;
+static float kalmanUncertaintyValue_pitchAngle = 2 * 2;
+/* Kalman calculatio output */
+static float kalmanOutput[2] = {0};
+/* Desired references: Angles */
+static float desiredValue_rollAngle = 0;
+static float desiredValue_pitchAngle = 0;
+/* Errors: Angles */
+static float errorValue_rollAngle = 0;
+static float errorValue_pitchAngle = 0;
+/* Previously stored errors: Angles */
+static float previousErrorValue_rollAngle = 0;
+static float previousErrorValue_pitchAngle = 0;
+/* Previously stored terms: Angles */
+static float previousIterm_rollAngle = 0;
+static float previousIterm_pitchAngle = 0;
+/* PID gains: Angles */
+static float kP_rollAngle = 0.3;
+static float kP_pitchAngle = 0.3;
+static float kI_rollAngle = 0;
+static float kI_pitchAngle = 0;
+static float kD_rollAngle = 0;
+static float kD_pitchAngle = 0;
+/* PID terms */
+// static float Pterm_rollAngle  = 0;
+// static float Pterm_pitchAngle = 0;
+// static float Iterm_rollAngle  = 0;
+// static float Iterm_pitchAngle = 0;
+// static float Dterm_rollAngle  = 0;
+// static float Dterm_pitchAngle = 0;
+/* PID outputs */
+static float pidOutputValue_rollAngle = 0;
+static float pidOutputValue_pitchAngle = 0;
+/* References: Rates */
+static float inputValue_rollRate = 0;
+static float inputValue_pitchRate = 0;
+static float inputValue_yawRate = 0;
+/* Desired references: Rates */
+static float desiredValue_rollRate = 0;
+static float desiredValue_pitchRate = 0;
+static float desiredValue_yawRate = 0;
+/* Errors: Rates */
+static float errorValue_rollRate = 0;
+static float errorValue_pitchRate = 0;
+static float errorValue_yawRate = 0;
+/* Previously stored errors: Rates */
+static float previousErrorValue_rollRate = 0;
+static float previousErrorValue_pitchRate = 0;
+static float previousErrorValue_yawRate = 0;
+/* Previously stored terms: Rates  */
+static float previousIterm_rollRate = 0;
+static float previousIterm_pitchRate = 0;
+static float previousIterm_yawRate = 0;
+/* PID gains: Rates */
+static float kP_rollRate = 0.1;
+static float kP_pitchRate = 0.1;
+static float kP_yawRate = 0.1;
+static float kI_rollRate = 0.0;
+static float kI_pitchRate = 0.0;
+static float kI_yawRate = 0.0;
+static float kD_rollRate = 0.0;
+static float kD_pitchRate = 0.0;
+static float kD_yawRate = 0.0;
+/* PID terms */
+// static float Pterm_rollRate  = 0;
+// static float Pterm_pitchRate = 0;
+// static float Pterm_yawRate   = 0;
+// static float Iterm_rollRate  = 0;
+// static float Iterm_pitchRate = 0;
+// static float Iterm_yawRate   = 0;
+// static float Dterm_rollRate  = 0;
+// static float Dterm_pitchRate = 0;
+// static float Dterm_yawRate   = 0;
+/* PID outputs */
+static float pidOutputValue_rollRate = 0;
+static float pidOutputValue_pitchRate = 0;
+static float pidOutputValue_yawRate = 0;
+/* Motors inputs */
+static float motorSpeed1 = 0;
+static float motorSpeed2 = 0;
+static float motorSpeed3 = 0;
+static float motorSpeed4 = 0;
+/* ESCs */
+static bool_t ESC_isEnabled = false;
+static float ESC_speeds[5] = {0};
+#endif
 
 /* Flight Controller Battery Level */
 static float FlightController_batteryLevelValue = 11.1;
@@ -178,25 +350,11 @@ void FlightController_StartUp(void * ptr);
 void FlightController_ControlSystem(void * ptr);
 
 /*
- * @brief  Task: Reads incoming data from the radio control receiver.
+ * @brief  Task: Logs flight controller data.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_Read_FSA8S(void * ptr);
-
-/*
- * @brief  Task: Reads incoming data from the IMU.
- * @param  Task pointer: not used.
- * @retval None
- */
-void FlightController_Read_GY87(void * ptr);
-
-/*
- * @brief  Task: Set the different motors speeds in the ESCs.
- * @param  Task pointer: not used.
- * @retval None
- */
-void FlightController_Write_ESCs(void * ptr);
+void FlightController_Data_Logging(void * ptr);
 
 /*
  * @brief  Task: Reads the on-board on/off button and turns on/off the flight controller.
@@ -275,14 +433,35 @@ void Timer4_Callback(TimerHandle_t xTimer);
  * @param  TODO
  * @retval None
  */
-void PID_Equation_Mode1(float * PID_Output, float * newPreviousErrorValue, float * Iterm, float errorValue, float kP, float kI, float kD, float lastPreviousErrorValue, float previousIterm);
+void CSM1_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD);
 
 /*
  * @brief  TODO
  * @param  TODO
  * @retval None
  */
-void PID_Reset_Mode1(float * previousErrorValue_rollRate, float * previousErrorValue_pitchRate, float * previousErrorValue_yawRate, float * previousIterm_rollRate, float * previousIterm_pitchRate, float * previousIterm_yawRate);
+void CSM1_ResetPID(void);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void CSM2_CalculateKalman(float kalmanState, float kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void CSM2_CalculatePID();
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void CSM2_ResetPID(void);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 extern I2C_HandleTypeDef hi2c1;
@@ -336,37 +515,17 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_ControlSystem_Handle);
     }
 
-    /* Task 2: FlightController_Read_FSA8S */
-    ret = xTaskCreate(FlightController_Read_FSA8S, "FlightController_Read_FSA8S", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_READ_FSA8S_PRIORITY), &FlightController_Read_FSA8S_Handle);
+    /* Task 2: FlightController_Data_Logging */
+    ret = xTaskCreate(FlightController_Data_Logging, "FlightController_Data_Logging", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_DATA_LOGGING_PRIORITY), &FlightController_Data_Logging_Handle);
 
     /* Check the task was created successfully. */
     configASSERT(ret == pdPASS);
 
-    if (FlightController_Read_FSA8S_Handle == NULL) {
-        vTaskDelete(FlightController_Read_FSA8S_Handle);
+    if (FlightController_Data_Logging_Handle == NULL) {
+        vTaskDelete(FlightController_Data_Logging_Handle);
     }
 
-    /* Task 3: FlightController_Read_GY87 */
-    ret = xTaskCreate(FlightController_Read_GY87, "FlightController_Read_GY87", (6 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_READ_GY87_PRIORITY), &FlightController_Read_GY87_Handle);
-
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
-
-    if (FlightController_Read_GY87_Handle == NULL) {
-        vTaskDelete(FlightController_Read_GY87_Handle);
-    }
-
-    /* Task 4: FlightController_Write_ESCs */
-    ret = xTaskCreate(FlightController_Write_ESCs, "FlightController_Write_ESCs", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_WRITE_ESCS_PRIORITY), &FlightController_Write_ESCs_Handle);
-
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
-
-    if (FlightController_Write_ESCs_Handle == NULL) {
-        vTaskDelete(FlightController_Write_ESCs_Handle);
-    }
-
-    /* Task 5: FlightController_BatteryLevel */
+    /* Task 3: FlightController_BatteryLevel */
     ret = xTaskCreate(FlightController_BatteryLevel, "FlightController_BatteryLevel", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_BATTERYLEVEL_PRIORITY), &FlightController_BatteryLevel_Handle);
 
     /* Check the task was created successfully. */
@@ -376,7 +535,7 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_BatteryLevel_Handle);
     }
 
-    /* Task 6: FlightController_BatteryAlarm */
+    /* Task 4: FlightController_BatteryAlarm */
     ret = xTaskCreate(FlightController_BatteryAlarm, "FlightController_BatteryAlarm", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_BATTERYALARM_PRIORITY), &FlightController_BatteryAlarm_Handle);
 
     /* Check the task was created successfully. */
@@ -386,7 +545,7 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_BatteryAlarm_Handle);
     }
 
-    /* Task 7: FlightController_HeartbeatLight */
+    /* Task 5: FlightController_HeartbeatLight */
     ret = xTaskCreate(FlightController_HeartbeatLight, "FlightController_HeartbeatLight", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_HEARTBEATLIGHT_PRIORITY), &FlightController_HeartbeatLight_Handle);
 
     /* Check the task was created successfully. */
@@ -396,7 +555,7 @@ void FreeRTOS_CreateTasks(void) {
         vTaskDelete(FlightController_HeartbeatLight_Handle);
     }
 
-    /* Task 8: FlightController_FlightLights */
+    /* Task 6: FlightController_FlightLights */
     ret = xTaskCreate(FlightController_FlightLights, "FlightController_FlightLights", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_FLIGHTLIGHTS_PRIORITY), &FlightController_FlightLights_Handle);
 
     /* Check the task was created successfully. */
@@ -438,15 +597,17 @@ void FlightController_StartUp(void * ptr) {
 
     while (1) {
 
-        /* Turn on-board LED on */
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+        /* Turn on-board LED off */
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
 
         /* Check if flight controller is already running */
         /* Create tasks and timers, and initialize drivers (only once) */
-        if (FlightController_running) {
+        if (FlightController_isRunning) {
 
             /* Startup message */
+#ifdef MAIN_APP_USE_LOGGING_STARTUP
             LOG((uint8_t *)"Initializing Flight Controller...\r\n\n", LOG_INFORMATION);
+#endif
 
             /* Create system tasks */
             FreeRTOS_CreateTasks();
@@ -456,13 +617,19 @@ void FlightController_StartUp(void * ptr) {
 
             /* Initialize drivers */
             rc_controller = FSA8S_Init(&huart2);
+#ifdef MAIN_APP_USE_LOGGING_STARTUP
             LOG((uint8_t *)"FSA8S Radio Controller Initialized.\r\n\n", LOG_INFORMATION);
+#endif
 
             hgy87 = GY87_Init(&hi2c1);
+#ifdef MAIN_APP_USE_LOGGING_STARTUP
             LOG((uint8_t *)"GY-87 IMU Initialized.\r\n\n", LOG_INFORMATION);
+#endif
 
             hesc = ESC_Init(&htim3);
+#ifdef MAIN_APP_USE_LOGGING_STARTUP
             LOG((uint8_t *)"ESCs Initialized.\r\n\n", LOG_INFORMATION);
+#endif
 
             /* Delete this task, as initialization must happen only once */
             vTaskDelete(FlightController_StartUp_Handle);
@@ -475,121 +642,105 @@ void FlightController_StartUp(void * ptr) {
 
 void FlightController_ControlSystem(void * ptr) {
 
-#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
-    uint8_t loggingStr[200];
-#endif
-
     /* Change delay from time in [ms] to ticks */
-#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
-#else
-    const TickType_t xDelay = pdMS_TO_TICKS(2);
-#endif
-
-    /* Define variables */
-#if 0 == CONTROL_SYSTEM_MODE
-    /* References */
-    float inputValue_throttle = 0;
-    /* Motors inputs */
-    float motorSpeed1 = 0;
-    float motorSpeed2 = 0;
-    float motorSpeed3 = 0;
-    float motorSpeed4 = 0;
-#endif
-
-#if 1 == CONTROL_SYSTEM_MODE
-    /* References */
-    float inputValue_throttle = 0;
-    float inputValue_rollRate = 0;
-    float inputValue_pitchRate = 0;
-    float inputValue_yawRate = 0;
-    /* Desired references */
-    float desiredValue_rollRate = 0;
-    float desiredValue_pitchRate = 0;
-    float desiredValue_yawRate = 0;
-    /* Errors */
-    float errorValue_rollRate = 0;
-    float errorValue_pitchRate = 0;
-    float errorValue_yawRate = 0;
-    /* Previously stored errors */
-    float previousErrorValue_rollRate = 0;
-    float previousErrorValue_pitchRate = 0;
-    float previousErrorValue_yawRate = 0;
-    /* Previously stored terms */
-    float previousIterm_rollRate = 0;
-    float previousIterm_pitchRate = 0;
-    float previousIterm_yawRate = 0;
-    /* PID gains */
-    float kP_rollRate = 0.0;
-    float kP_pitchRate = 0.0;
-    float kP_yawRate = 0.0;
-    float kI_rollRate = 3.50;
-    float kI_pitchRate = 3.50;
-    float kI_yawRate = 12.00;
-    float kD_rollRate = 0.03;
-    float kD_pitchRate = 0.03;
-    float kD_yawRate = 0.00;
-    /* PID terms */
-    float Pterm_rollRate = 0;
-    float Pterm_pitchRate = 0;
-    float Pterm_yawRate = 0;
-    /* PID outputs */
-    float pidOutputValue_rollRate = 0;
-    float pidOutputValue_pitchRate = 0;
-    float pidOutputValue_yawRate = 0;
-    /* Motors inputs */
-    float motorSpeed1 = 0;
-    float motorSpeed2 = 0;
-    float motorSpeed3 = 0;
-    float motorSpeed4 = 0;
-    /* Throttle stick check */
-    bool_t throttleStick_startedDown = false;
-#endif
+    const TickType_t xDelay = pdMS_TO_TICKS(1);
 
     while (1) {
 
+        /* Calibrate GY-87 gyroscope sensor */
+        if (false == gyroscopeCalibrationIsDone) {
+            gyroscopeCalibrationIsDone = GY87_CalibrateGyroscope(hgy87);
+        }
+
+        /* Calibrate GY-87 accelerometer sensor */
+        if (false == accelerometerCalibrationIsDone) {
+            accelerometerCalibrationIsDone = GY87_CalibrateAccelerometer(hgy87);
+
+            if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+#ifdef MAIN_APP_USE_LOGGING_STARTUP
+                vTaskDelay(pdMS_TO_TICKS(5));
+                LOG((uint8_t *)"Flight Controller Initialized.\r\n\n", LOG_INFORMATION);
+#endif
+                FlightController_isInitialized = true;
+            }
+        }
+
+        /* Read flight lights control */
+        FSA8S_channelValues[7] = FSA8S_ReadChannel(rc_controller, CHANNEL_8);
+        FSA8S_channelValues[8] = FSA8S_ReadChannel(rc_controller, CHANNEL_9);
+        FSA8S_channelValues[9] = FSA8S_ReadChannel(rc_controller, CHANNEL_10);
+
         /* Control system processing */
-        if (0 == CONTROL_SYSTEM_MODE) {
+        if (FlightController_isInitialized && 0 == CONTROL_SYSTEM_MODE) {
 
 #if 0 == CONTROL_SYSTEM_MODE
 
-    		/* Check if ESCs are enabled (Switch B on radio controller) */
-    		if (500 <= FSA8S_channelValues[5]) {
-    			ESC_isEnabled = true;
-    		} else {
-    			ESC_isEnabled = false;
-    		}
+        	/* Avoid uncontrolled motor start */
+        	while (false == throttleStick_startedDown) {
 
-    		/* Read inputs from radio controller */
-    		inputValue_throttle = FSA8S_channelValues[2];
-    		/* Adjust and limit throttle input */
-    		if (700 < inputValue_throttle) {
-    			inputValue_throttle = 700;
-    		}
+        		/* Read throttle input from radio controller */
+        		inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+
+        		if (15 > inputValue_throttle) {
+
+        			throttleStick_startedDown = true;
+
+        		} else {
+
+        			throttleStick_startedDown = false;
+        		}
+        	}
+
+        	/* Check if ESCs are enabled (Switch B on radio controller) */
+        	if (500 <= FSA8S_ReadChannel(rc_controller, CHANNEL_6)) {
+        		ESC_isEnabled = true;
+        	} else {
+        		ESC_isEnabled = false;
+        	}
 
     		/* Turn off motors in case ESCs are disabled */
     		if(false == ESC_isEnabled) {
 
-    			/* Turn off motors */
+    			/* Save motors speed */
     			ESC_speeds[1] = 0;
     			ESC_speeds[2] = 0;
     			ESC_speeds[3] = 0;
     			ESC_speeds[4] = 0;
+
+                /* Turn off motors */
+                ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
 
     		} else {
 
                 /* Check if timer has expired */
                 if (Timer4_flag) {
 
-					if (inputValue_throttle < 50) {
+            		/* Read input throttle from radio controller */
+                	inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
 
-						/* Turn off motors */
-						ESC_speeds[1] = 0;
-						ESC_speeds[2] = 0;
-						ESC_speeds[3] = 0;
-						ESC_speeds[4] = 0;
+                    if (CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE > inputValue_throttle) {
 
-					} else {
+                        /* Save motors speed */
+                        ESC_speeds[1] = 0;
+                        ESC_speeds[2] = 0;
+                        ESC_speeds[3] = 0;
+                        ESC_speeds[4] = 0;
+
+                        /* Turn off motors */
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+
+                    } else {
+
+                		/* Adjust and limit throttle input */
+                		if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < inputValue_throttle) {
+                			inputValue_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
+                		}
 
                         /* Calculate motors speed */
                         motorSpeed1 = inputValue_throttle / 10;
@@ -597,12 +748,37 @@ void FlightController_ControlSystem(void * ptr) {
                         motorSpeed3 = inputValue_throttle / 10;
                         motorSpeed4 = inputValue_throttle / 10;
 
-						/* Set motors speed */
-                        ESC_speeds[1] = (uint16_t) motorSpeed1;
-                        ESC_speeds[2] = (uint16_t) motorSpeed2;
-                        ESC_speeds[3] = (uint16_t) motorSpeed3;
-                        ESC_speeds[4] = (uint16_t) motorSpeed4;
+                        /* Adjust and limit motors maximum speed */
+                        if (ESC_MAXIMUM_SPEED < motorSpeed1)
+                            motorSpeed1 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed2)
+                            motorSpeed2 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed3)
+                            motorSpeed3 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed4)
+                            motorSpeed4 = ESC_MAXIMUM_SPEED;
 
+                        /* Adjust and limit motors minimum speed */
+                        if (0 > motorSpeed1)
+                            motorSpeed1 = 0;
+                        if (0 > motorSpeed2)
+                            motorSpeed2 = 0;
+                        if (0 > motorSpeed3)
+                            motorSpeed3 = 0;
+                        if (0 > motorSpeed4)
+                            motorSpeed4 = 0;
+
+						/* Save motors speed */
+                        ESC_speeds[1] = motorSpeed1;
+                        ESC_speeds[2] = motorSpeed2;
+                        ESC_speeds[3] = motorSpeed3;
+                        ESC_speeds[4] = motorSpeed4;
+
+                        /* Set motors speed */
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
 					}
 
 					/* Reset Timer4 flag */
@@ -614,24 +790,17 @@ void FlightController_ControlSystem(void * ptr) {
 
 #endif
 
-        } else if (1 == CONTROL_SYSTEM_MODE) {
+        } else if (FlightController_isInitialized && 1 == CONTROL_SYSTEM_MODE) {
 
 #if 1 == CONTROL_SYSTEM_MODE
-
-            /* Check if ESCs are enabled (Switch B on radio controller) */
-            if (500 <= FSA8S_channelValues[5]) {
-                ESC_isEnabled = true;
-            } else {
-                ESC_isEnabled = false;
-            }
 
             /* Avoid uncontrolled motor start */
             while (false == throttleStick_startedDown) {
 
                 /* Read throttle input from radio controller */
-                inputValue_throttle = FSA8S_channelValues[2];
+                inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
 
-                if (50 > inputValue_throttle) {
+                if (15 > inputValue_throttle) {
 
                     throttleStick_startedDown = true;
 
@@ -641,61 +810,97 @@ void FlightController_ControlSystem(void * ptr) {
                 }
             }
 
+            /* Check if ESCs are enabled (Switch B on radio controller) */
+            if (500 <= FSA8S_ReadChannel(rc_controller, CHANNEL_6)) {
+                ESC_isEnabled = true;
+            } else {
+                ESC_isEnabled = false;
+            }
+
             /* Turn off motors in case ESCs are disabled */
             if (false == ESC_isEnabled) {
 
-                /* Turn off motors */
+                /* Save motors speed */
                 ESC_speeds[1] = 0;
                 ESC_speeds[2] = 0;
                 ESC_speeds[3] = 0;
                 ESC_speeds[4] = 0;
 
+                /* Turn off motors */
+                ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+
+                /* Reset PID variables */
+                CSM1_ResetPID();
+
             } else {
 
                 /* Check if timer has expired */
-                //                if (Timer4_flag) {
-                if (1) {
+                if (Timer4_flag) {
 
-                    /* Read inputs from radio controller */
-                    inputValue_throttle = FSA8S_channelValues[2];  // Channel 3
-                    inputValue_rollRate = FSA8S_channelValues[0];  // Channel 1
-                    inputValue_pitchRate = FSA8S_channelValues[1]; // Channel 2
-                    inputValue_yawRate = FSA8S_channelValues[3];   // Channel 4
+                    /* Read input throttle from radio controller */
+                    inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
 
-                    /* Calculate desired rates by mapping radio controller values to rates */
-                    desiredValue_rollRate = 0.15 * (inputValue_rollRate - 500);
-                    desiredValue_pitchRate = 0.15 * (inputValue_pitchRate - 500);
-                    desiredValue_yawRate = 0.15 * (inputValue_yawRate - 500);
+                    if (CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE > inputValue_throttle) {
 
-                    if (50 > inputValue_throttle) {
-
-                        /* Turn off motors */
+                        /* Save motors speed */
                         ESC_speeds[1] = 0;
                         ESC_speeds[2] = 0;
                         ESC_speeds[3] = 0;
                         ESC_speeds[4] = 0;
 
+                        /* Turn off motors */
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+
+                        /* Reset PID variables */
+                        CSM1_ResetPID();
+
                     } else {
 
-                        /* Adjust and limit throttle input */
-                        if (800 < inputValue_throttle) {
-                            inputValue_throttle = 800;
+                        /* Read GY-87 gyroscope sensor */
+                        if (true == gyroscopeCalibrationIsDone) {
+                            GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
                         }
 
+                        /* Read GY-87 accelerometer sensor */
+                        if (true == accelerometerCalibrationIsDone) {
+                            GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
+                        }
+
+                        /* Read inputs from radio controller */
+                        inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                        inputValue_rollRate = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
+                        inputValue_pitchRate = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
+                        inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
+
+                        /* Adjust and limit throttle input */
+                        if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < inputValue_throttle) {
+                            inputValue_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
+                        }
+
+                        /* Calculate desired rates by mapping radio controller values to rates */
+                        desiredValue_rollRate = 0.15 * (inputValue_rollRate - 500);
+                        desiredValue_pitchRate = 0.15 * (inputValue_pitchRate - 500);
+                        desiredValue_yawRate = 0.15 * (inputValue_yawRate - 500);
+
                         /* Calculate rates errors */
-                        errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues->rotationRateRoll;
-                        errorValue_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues->rotationRatePitch;
-                        errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues->rotationRateYaw;
+                        errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
+                        errorValue_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues.rotationRatePitch;
+                        errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
 
-                        /* Calculate P terms */
-                        Pterm_rollRate = kP_rollRate * errorValue_rollRate;
-                        Pterm_pitchRate = kP_pitchRate * errorValue_pitchRate;
-                        Pterm_yawRate = kP_yawRate * errorValue_yawRate;
+                        /* Calculate PID for roll rate */
+                        CSM1_CalculatePID(&pidOutputValue_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate);
 
-                        /* Calculate PID outputs */
-                        //                        pidOutputValue_rollRate = Pterm_rollRate;
-                        //                        pidOutputValue_pitchRate = Pterm_pitchRate;
-                        //                        pidOutputValue_yawRate = Pterm_yawRate;
+                        /* Calculate PID for pitch rate */
+                        CSM1_CalculatePID(&pidOutputValue_pitchRate, &previousIterm_pitchRate, &previousErrorValue_pitchRate, errorValue_pitchRate, kP_pitchRate, kI_pitchRate, kD_pitchRate);
+
+                        /* Calculate PID for yaw rate */
+                        CSM1_CalculatePID(&pidOutputValue_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate);
 
                         /* Calculate motors speed */
                         motorSpeed1 = ((inputValue_throttle / 10) - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate);
@@ -713,11 +918,27 @@ void FlightController_ControlSystem(void * ptr) {
                         if (ESC_MAXIMUM_SPEED < motorSpeed4)
                             motorSpeed4 = ESC_MAXIMUM_SPEED;
 
+                        /* Adjust and limit motors minimum speed */
+                        if (0 > motorSpeed1)
+                            motorSpeed1 = 0;
+                        if (0 > motorSpeed2)
+                            motorSpeed2 = 0;
+                        if (0 > motorSpeed3)
+                            motorSpeed3 = 0;
+                        if (0 > motorSpeed4)
+                            motorSpeed4 = 0;
+
+                        /* Save motors speed */
+                        ESC_speeds[1] = motorSpeed1;
+                        ESC_speeds[2] = motorSpeed2;
+                        ESC_speeds[3] = motorSpeed3;
+                        ESC_speeds[4] = motorSpeed4;
+
                         /* Set motors speed */
-                        ESC_speeds[1] = (uint16_t)motorSpeed1;
-                        ESC_speeds[2] = (uint16_t)motorSpeed2;
-                        ESC_speeds[3] = (uint16_t)motorSpeed3;
-                        ESC_speeds[4] = (uint16_t)motorSpeed4;
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
                     }
 
                     /* Reset Timer4 flag */
@@ -727,9 +948,190 @@ void FlightController_ControlSystem(void * ptr) {
 
 #endif
 
-        } else if (2 == CONTROL_SYSTEM_MODE) {
+        } else if (FlightController_isInitialized && 2 == CONTROL_SYSTEM_MODE) {
 
-        } else if (3 == CONTROL_SYSTEM_MODE) {
+#if 2 == CONTROL_SYSTEM_MODE
+
+            /* Avoid uncontrolled motor start */
+            while (false == throttleStick_startedDown) {
+
+                /* Read throttle input from radio controller */
+                inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+
+                if (15 > inputValue_throttle) {
+
+                    throttleStick_startedDown = true;
+
+                } else {
+
+                    throttleStick_startedDown = false;
+                }
+            }
+
+            /* Check if ESCs are enabled (Switch B on radio controller) */
+            if (500 <= FSA8S_ReadChannel(rc_controller, CHANNEL_6)) {
+                ESC_isEnabled = true;
+            } else {
+                ESC_isEnabled = false;
+            }
+
+            /* Turn off motors in case ESCs are disabled */
+            if (false == ESC_isEnabled) {
+
+                /* Save motors speed */
+                ESC_speeds[1] = 0;
+                ESC_speeds[2] = 0;
+                ESC_speeds[3] = 0;
+                ESC_speeds[4] = 0;
+
+                /* Turn off motors */
+                ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+
+                /* Reset PID variables */
+                CSM2_ResetPID();
+
+            } else {
+
+                /* Check if timer has expired */
+                if (Timer4_flag) {
+
+                    /* Read input throttle from radio controller */
+                    inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+
+                    /* Check if throttle stick is low */
+                    if (CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE > inputValue_throttle) {
+
+                        /* Save motors speed */
+                        ESC_speeds[1] = 0;
+                        ESC_speeds[2] = 0;
+                        ESC_speeds[3] = 0;
+                        ESC_speeds[4] = 0;
+
+                        /* Turn off motors */
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+
+                        /* Reset PID variables */
+                        CSM2_ResetPID();
+
+                    } else {
+
+                        /* Read GY-87 gyroscope sensor */
+                        if (true == gyroscopeCalibrationIsDone) {
+                            GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
+                        }
+
+                        /* Read GY-87 accelerometer sensor */
+                        if (true == accelerometerCalibrationIsDone) {
+                            GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
+                        }
+
+                        /* Calculate Kalman roll angle */
+                        CSM2_CalculateKalman(kalmanPredictionValue_rollAngle, kalmanUncertaintyValue_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
+                        kalmanPredictionValue_rollAngle = kalmanOutput[0];
+                        kalmanUncertaintyValue_rollAngle = kalmanOutput[1];
+
+                        /* Calculate Kalman pitch angle */
+                        CSM2_CalculateKalman(kalmanPredictionValue_pitchAngle, kalmanUncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
+                        kalmanPredictionValue_pitchAngle = kalmanOutput[0];
+                        kalmanUncertaintyValue_pitchAngle = kalmanOutput[1];
+
+                        /* Read inputs from radio controller */
+                        inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                        inputValue_rollAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
+                        inputValue_pitchAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
+                        inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
+
+                        /* Adjust and limit throttle input */
+                        if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < inputValue_throttle) {
+                            inputValue_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
+                        }
+
+                        /* Calculate desired angles by mapping radio controller values to angles */
+                        desiredValue_rollAngle = 0.10 * (inputValue_rollRate - 500);
+                        desiredValue_pitchAngle = 0.10 * (inputValue_pitchRate - 500);
+
+                        /* Calculate angles errors */
+                        errorValue_rollAngle = desiredValue_rollAngle - kalmanPredictionValue_rollAngle;
+                        errorValue_pitchAngle = desiredValue_pitchAngle - kalmanPredictionValue_pitchAngle;
+
+                        /* Calculate PID for roll angle */
+                        CSM1_CalculatePID(&pidOutputValue_rollAngle, &previousIterm_rollAngle, &previousErrorValue_rollAngle, errorValue_rollAngle, kP_rollAngle, kI_rollAngle, kD_rollAngle);
+
+                        /* Calculate PID for pitch angle */
+                        CSM1_CalculatePID(&pidOutputValue_pitchAngle, &previousIterm_pitchAngle, &previousErrorValue_pitchAngle, errorValue_pitchAngle, kP_pitchAngle, kI_pitchAngle, kD_pitchAngle);
+
+                        /* Calculate desired rates */
+                        desiredValue_rollRate = pidOutputValue_rollAngle;
+                        desiredValue_pitchRate = pidOutputValue_pitchAngle;
+                        desiredValue_yawRate = 0.15 * (FSA8S_channelValues[3] - 500);
+
+                        /* Calculate rates errors */
+                        errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
+                        errorValue_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues.rotationRatePitch;
+                        errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
+
+                        /* Calculate PID for roll rate */
+                        CSM1_CalculatePID(&pidOutputValue_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate);
+
+                        /* Calculate PID for pitch rate */
+                        CSM1_CalculatePID(&pidOutputValue_pitchRate, &previousIterm_pitchRate, &previousErrorValue_pitchRate, errorValue_pitchRate, kP_pitchRate, kI_pitchRate, kD_pitchRate);
+
+                        /* Calculate PID for yaw rate */
+                        CSM1_CalculatePID(&pidOutputValue_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate);
+
+                        /* Calculate motors speed */
+                        motorSpeed1 = ((inputValue_throttle / 10) - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate);
+                        motorSpeed2 = ((inputValue_throttle / 10) + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate);
+                        motorSpeed3 = ((inputValue_throttle / 10) + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate);
+                        motorSpeed4 = ((inputValue_throttle / 10) - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate);
+
+                        /* Adjust and limit motors maximum speed */
+                        if (ESC_MAXIMUM_SPEED < motorSpeed1)
+                            motorSpeed1 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed2)
+                            motorSpeed2 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed3)
+                            motorSpeed3 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed4)
+                            motorSpeed4 = ESC_MAXIMUM_SPEED;
+
+                        /* Adjust and limit motors minimum speed */
+                        if (0 > motorSpeed1)
+                            motorSpeed1 = 0;
+                        if (0 > motorSpeed2)
+                            motorSpeed2 = 0;
+                        if (0 > motorSpeed3)
+                            motorSpeed3 = 0;
+                        if (0 > motorSpeed4)
+                            motorSpeed4 = 0;
+
+                        /* Save motors speed */
+                        ESC_speeds[1] = motorSpeed1;
+                        ESC_speeds[2] = motorSpeed2;
+                        ESC_speeds[3] = motorSpeed3;
+                        ESC_speeds[4] = motorSpeed4;
+
+                        /* Set motors speed */
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+                    }
+
+                    /* Reset Timer4 flag */
+                    Timer4_flag = false;
+                }
+            }
+
+#endif
+
+        } else if (FlightController_isInitialized && 3 == CONTROL_SYSTEM_MODE) {
         }
 
         /* Set task time delay */
@@ -737,220 +1139,163 @@ void FlightController_ControlSystem(void * ptr) {
     }
 }
 
-void FlightController_Read_FSA8S(void * ptr) {
-
-    FSA8S_CHANNEL_t channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
-
-#ifdef MAIN_APP_USE_LOGGING_FSA8S
-    uint8_t loggingStr[30] = {0};
-#endif
+void FlightController_Data_Logging(void * ptr) {
 
     /* Change delay from time in [ms] to ticks */
-#ifdef MAIN_APP_USE_LOGGING_FSA8S
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
-#else
-    const TickType_t xDelay = pdMS_TO_TICKS(1);
+
+    uint8_t loggingStr[150] = {0};
+
+#ifdef MAIN_APP_USE_LOGGING_GY87_TEMPERATURE
+    int16_t GY87_temperature_log = 0;
+#endif
+
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE
+    float GY87_barometerPressureValue_log = 0;
+#endif
+
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
+    float GY87_barometerAltitudeValue_log = 0;
+#endif
+
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE
+    float GY87_barometerTemperatureValue_log = 0;
 #endif
 
     while (1) {
 
-        for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
-            /* Read channels */
-            FSA8S_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
-
-            /* Log channel values */
-#ifdef MAIN_APP_USE_LOGGING_FSA8S
-            if (9 < (i + 1)) {
-                sprintf((char *)loggingStr, "FSA8S Channel %d: %04d\r\n\n", channels[i], FSA8S_channelValues[i]);
+#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE0
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            if (ESC_isEnabled) {
+                sprintf((char *)loggingStr, "Input Throttle: %04d | ESCs Enabled  | ESC1: %03d%%, ESC2: %03d%%, ESC3: %03d%%, ESC4: %03d%%\r\n", (uint16_t)inputValue_throttle, (uint16_t)ESC_speeds[1], (uint16_t)ESC_speeds[2], (uint16_t)ESC_speeds[3],
+                        (uint16_t)ESC_speeds[4]);
             } else {
-                sprintf((char *)loggingStr, "FSA8S Channel %d:  %04d\r\n", channels[i], FSA8S_channelValues[i]);
+                sprintf((char *)loggingStr, "Input Throttle: %04d | ESCs Disabled | ESC1: %03d%%, ESC2: %03d%%, ESC3: %03d%%, ESC4: %03d%%\r\n", (uint16_t)inputValue_throttle, (uint16_t)ESC_speeds[1], (uint16_t)ESC_speeds[2], (uint16_t)ESC_speeds[3],
+                        (uint16_t)ESC_speeds[4]);
             }
             LOG(loggingStr, LOG_INFORMATION);
-#endif
         }
-
-        /* Set task time delay */
-        vTaskDelay(xDelay);
-    }
-}
-
-void FlightController_Read_GY87(void * ptr) {
-
-#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE ||                                         \
-    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE ||                       \
-    defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
-    uint8_t loggingStr[120];
 #endif
 
-    /* Change delay from time in [ms] to ticks */
-#if defined MAIN_APP_USE_LOGGING_GY87_GYROSCOPE || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER || defined MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES || defined MAIN_APP_USE_LOGGING_GY87_TEMPERATURE ||                                         \
-    defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER || defined MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE || defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE ||                       \
-    defined MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
-#else
-    const TickType_t xDelay = pdMS_TO_TICKS(1);
+#ifdef MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE1
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            if (ESC_isEnabled) {
+                sprintf((char *)loggingStr, "Input Throttle: %04d | ESCs Enabled  | ESC1: %03d%%, ESC2: %03d%%, ESC3: %03d%%, ESC4: %03d%%\r\n", (uint16_t)inputValue_throttle, (uint16_t)ESC_speeds[1], (uint16_t)ESC_speeds[2], (uint16_t)ESC_speeds[3],
+                        (uint16_t)ESC_speeds[4]);
+            } else {
+                sprintf((char *)loggingStr, "Input Throttle: %04d | ESCs Disabled | ESC1: %03d%%, ESC2: %03d%%, ESC3: %03d%%, ESC4: %03d%%\r\n", (uint16_t)inputValue_throttle, (uint16_t)ESC_speeds[1], (uint16_t)ESC_speeds[2], (uint16_t)ESC_speeds[3],
+                        (uint16_t)ESC_speeds[4]);
+            }
+            LOG(loggingStr, LOG_INFORMATION);
+        }
 #endif
 
-    bool_t gyroscopeCalibrationIsDone = false;
-    bool_t accelerometerCalibrationIsDone = false;
+#ifdef MAIN_APP_USE_LOGGING_FSA8S
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            /* Log channel values */
+            sprintf((char *)loggingStr, "FSA8S Ch1: %04d, Ch2: %04d, Ch3: %04d, Ch4: %04d, Ch5: %04d, Ch6: %04d, Ch7: %04d, Ch8: %04d, Ch9: %04d, Ch10: %04d\r\n", FSA8S_channelValues[0], FSA8S_channelValues[1], FSA8S_channelValues[2],
+                    FSA8S_channelValues[3], FSA8S_channelValues[4], FSA8S_channelValues[5], FSA8S_channelValues[6], FSA8S_channelValues[7], FSA8S_channelValues[8], FSA8S_channelValues[9]);
+            LOG(loggingStr, LOG_INFORMATION);
+        }
+#endif
 
-    /* Allocate dynamic memory for the MPU6050 gyroscope values */
-    GY87_gyroscopeValues = pvPortMalloc(sizeof(GY87_gyroscopeValues));
-
-    if (NULL == GY87_gyroscopeValues) {
-
-        /* Free up dynamic allocated memory */
-        vPortFree(GY87_gyroscopeValues);
-    }
-
-    /* Allocate dynamic memory for the MPU6050 accelerometer values */
-    GY87_accelerometerValues = pvPortMalloc(sizeof(GY87_accelerometerValues));
-
-    if (NULL == GY87_accelerometerValues) {
-
-        /* Free up dynamic allocated memory */
-        vPortFree(GY87_accelerometerValues);
-    }
-
-    /* Allocate dynamic memory for the MPU6050 magnetometer values */
-    GY87_magnetometerValues = pvPortMalloc(sizeof(GY87_magnetometerValues));
-
-    if (NULL == GY87_magnetometerValues) {
-
-        /* Free up dynamic allocated memory */
-        vPortFree(GY87_magnetometerValues);
-    }
-
-    while (1) {
-
-        /* Check if gyroscope and accelerometer calibrations were done */
-        if (gyroscopeCalibrationIsDone && accelerometerCalibrationIsDone) {
-
-            /* Read GY87 gyroscope values */
-            GY87_ReadGyroscope(hgy87, GY87_gyroscopeValues);
-
-            /* Log GY87 gyroscope values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_GYROSCOPE
-            sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope ROLL: %.2f [°/s] PITCH: %.2f [°/s] YAW: %.2f [°/s]\r\n", GY87_gyroscopeValues->rotationRateRoll, GY87_gyroscopeValues->rotationRatePitch, GY87_gyroscopeValues->rotationRateYaw);
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            /* Log GY87 gyroscope values */
+            sprintf((char *)loggingStr, (const char *)"GY87 Gyroscope ROLL: %.2f [°/s], PITCH: %.2f [°/s], YAW: %.2f [°/s]\r\n", GY87_gyroscopeValues.rotationRateRoll, GY87_gyroscopeValues.rotationRatePitch, GY87_gyroscopeValues.rotationRateYaw);
             LOG(loggingStr, LOG_INFORMATION);
+        }
 #endif
 
-            /* Read GY87 accelerometer values */
-            GY87_ReadAccelerometer(hgy87, GY87_accelerometerValues);
-
-            /* Log GY87 accelerometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER
-            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %.2f [g] Y: %.2f[g] Z: %.2f [g]\r\n", GY87_accelerometerValues->linearAccelerationX, GY87_accelerometerValues->linearAccelerationY,
-                    GY87_accelerometerValues->linearAccelerationZ);
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            /* Log GY87 accelerometer values */
+            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %.2f [g], Y: %.2f[g], Z: %.2f [g]\r\n", GY87_accelerometerValues.linearAccelerationX, GY87_accelerometerValues.linearAccelerationY,
+                    GY87_accelerometerValues.linearAccelerationZ);
             LOG(loggingStr, LOG_INFORMATION);
+        }
 #endif
+
 #ifdef MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES
-            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer ROLL: %.2f [°] PITCH: %.2f [°]\r\n", GY87_accelerometerValues->angleRoll, GY87_accelerometerValues->anglePitch);
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            /* Log GY87 accelerometer angles */
+            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer ROLL: %.2f [°], PITCH: %.2f [°]\r\n", GY87_accelerometerValues.angleRoll, GY87_accelerometerValues.anglePitch);
             LOG(loggingStr, LOG_INFORMATION);
+        }
 #endif
 
-            /* Read GY87 temperature value */
-            GY87_temperature = GY87_ReadTemperatureSensor(hgy87);
+#ifdef MAIN_APP_USE_LOGGING_GY87_KALMAN_ANGLES
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            /* Log GY87 accelerometer angles */
+            sprintf((char *)loggingStr, (const char *)"GY87 Kalman ROLL: %.2f [°], Kalman PITCH: %.2f [°]\r\n", kalmanPredictionValue_rollAngle, kalmanPredictionValue_pitchAngle);
+            LOG(loggingStr, LOG_INFORMATION);
+        }
+#endif
 
-            /*  Log GY87 temperature value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_TEMPERATURE
-            sprintf((char *)loggingStr, (const char *)"GY87 Temperature: %d [°C]\r\n", GY87_temperature);
-            LOG(loggingStr, LOG_INFORMATION);
+        /* Read GY87 temperature value */
+        GY87_temperature_log = GY87_ReadTemperatureSensor(hgy87);
+
+        /*  Log GY87 temperature value */
+        sprintf((char *)loggingStr, (const char *)"GY87 Temperature: %d [°C]\r\n", GY87_temperature_log);
+        LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-            /* Read GY87 magnetometer values */
-            GY87_ReadMagnetometer(hgy87, GY87_magnetometerValues);
-
-            /* Log GY87 magnetometer values */
 #ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER
-            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer X: %.3f [G] Y: %.3f [G] Z: %.3f [G]\r\n", GY87_magnetometerValues->magneticFieldX, GY87_magnetometerValues->magneticFieldY, GY87_magnetometerValues->magneticFieldZ);
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            /* Log GY87 magnetometer values */
+            sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer X: %.3f [G], Y: %.3f [G], Z: %.3f [G]\r\n", GY87_magnetometerValues.magneticFieldX, GY87_magnetometerValues.magneticFieldY, GY87_magnetometerValues.magneticFieldZ);
             LOG(loggingStr, LOG_INFORMATION);
+        }
 #endif
 
-            /* Read GY87 magnetometer heading */
-            GY87_magnetometerHeadingValue = GY87_ReadMagnetometerHeading(hgy87);
-
-            /* Log GY87 magnetometer heading value */
 #ifdef MAIN_APP_USE_LOGGING_GY87_MAGNETOMETER_HEADING
+        /* Check if GY-87 calibrations are done */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+            /* Log GY87 magnetometer heading value */
             sprintf((char *)loggingStr, (const char *)"GY87 Magnetometer Heading: %.2f [°]\r\n", GY87_magnetometerHeadingValue);
             LOG(loggingStr, LOG_INFORMATION);
-#endif
-
-            /* Read GY87 barometer temperature value */
-            GY87_barometerTemperatureValue = GY87_ReadBarometerTemperature(hgy87);
-
-            /* Log GY87 barometer pressure value */
-#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE
-            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Temperature: %.2f [°C]\r\n", GY87_barometerTemperatureValue);
-            LOG(loggingStr, LOG_INFORMATION);
-#endif
-
-            /* Read GY87 barometer pressure value */
-            //            GY87_barometerPressureValue = GY87_ReadBarometerPressure(hgy87);
-
-            /* Log GY87 barometer pressure value */
-#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE
-            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Pressure: %.2f [Pa]\r\n", GY87_barometerPressureValue);
-            LOG(loggingStr, LOG_INFORMATION);
-#endif
-
-            /* Read GY87 barometer altitude value */
-            //            GY87_barometerAltitudeValue = GY87_ReadBarometerAltitude(hgy87);
-
-            /* Log GY87 barometer altitude value */
-#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
-            sprintf((char *)loggingStr, (const char *)"GY87 Barometer Altitude: %.2f [m]\r\n", GY87_barometerAltitudeValue);
-            LOG(loggingStr, LOG_INFORMATION);
-#endif
-
-        } else {
-
-            /* Calibrate gyroscope measurements */
-            if (false == gyroscopeCalibrationIsDone) {
-
-                gyroscopeCalibrationIsDone = GY87_CalibrateGyroscope(hgy87);
-            }
-
-            /* Calibrate accelerometer measurements */
-            if (false == accelerometerCalibrationIsDone) {
-
-                accelerometerCalibrationIsDone = GY87_CalibrateAccelerometer(hgy87);
-            }
         }
-
-        /* Set task time delay */
-        vTaskDelay(xDelay);
-    }
-}
-
-void FlightController_Write_ESCs(void * ptr) {
-
-#ifdef MAIN_APP_USE_LOGGING_ESC
-    uint8_t loggingStr[40];
 #endif
 
-    /* Change delay from time in [ms] to ticks */
-#ifdef MAIN_APP_USE_LOGGING_ESC
-    const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
-#else
-    const TickType_t xDelay = pdMS_TO_TICKS(2);
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_TEMPERATURE
+
+        /* Read GY87 barometer temperature value */
+        GY87_barometerTemperatureValue_log = GY87_ReadBarometerTemperature(hgy87);
+
+        /* Log GY87 barometer pressure value */
+        sprintf((char *)loggingStr, (const char *)"GY87 Barometer Temperature: %.2f [°C]\r\n", GY87_barometerTemperatureValue_log);
+        LOG(loggingStr, LOG_INFORMATION);
 #endif
 
-    while (1) {
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_PRESSURE
+        /* Read GY87 barometer pressure value */
+        GY87_barometerPressureValue_log = GY87_ReadBarometerPressure(hgy87);
 
-        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
-        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
-        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
-        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+        /* Log GY87 barometer pressure value */
+        sprintf((char *)loggingStr, (const char *)"GY87 Barometer Pressure: %.2f [Pa]\r\n", GY87_barometerPressureValue_log);
+        LOG(loggingStr, LOG_INFORMATION);
+#endif
 
-#ifdef MAIN_APP_USE_LOGGING_ESC
-        sprintf((char *)loggingStr, (const char *)"PWM Channel 1 Speed: %d\r\n", ESC_speeds[0]);
+#ifdef MAIN_APP_USE_LOGGING_GY87_BAROMETER_ALTITUDE
+        /* Read GY87 barometer altitude value */
+        GY87_barometerAltitudeValue_log = GY87_ReadBarometerAltitude(hgy87);
+
+        /* Log GY87 barometer altitude value */
+        sprintf((char *)loggingStr, (const char *)"GY87 Barometer Altitude: %.2f [m]\r\n", GY87_barometerAltitudeValue_log);
         LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"PWM Channel 2 Speed: %d\r\n", ESC_speeds[1]);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"PWM Channel 3 Speed: %d\r\n", ESC_speeds[2]);
-        LOG(loggingStr, LOG_INFORMATION);
-        sprintf((char *)loggingStr, (const char *)"PWM Channel 4 Speed: %d\r\n\n", ESC_speeds[3]);
+#endif
+
+#ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
+        sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f [V]\r\n\n", FlightController_batteryLevelValue);
         LOG(loggingStr, LOG_INFORMATION);
 #endif
 
@@ -985,10 +1330,6 @@ void FlightController_BatteryLevel(void * ptr) {
 
     uint16_t adcValue;
 
-#ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
-    uint8_t loggingStr[30];
-#endif
-
     /* Change delay from time in [ms] to ticks */
     const TickType_t xDelay = pdMS_TO_TICKS(1000);
 
@@ -1010,13 +1351,7 @@ void FlightController_BatteryLevel(void * ptr) {
         FlightController_batteryLevelValue = FlightController_batteryLevelValue * 1.046046;
 
         /* Map real value to battery levels */
-        FlightController_batteryLevelValue = FlightController_batteryLevelValue * 3.363636;
-
-        /* Log battery level */
-#ifdef MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL
-        sprintf((char *)loggingStr, (const char *)"Battery Level: %.2f [V]\r\n\n", FlightController_batteryLevelValue);
-        LOG(loggingStr, LOG_INFORMATION);
-#endif
+        FlightController_batteryLevelValue = FlightController_batteryLevelValue * 3.363636 + BATTERY_LEVEL_CALIBRATION_OFFSET;
 
         /* Set task time delay */
         vTaskDelay(xDelay);
@@ -1071,15 +1406,19 @@ void FlightController_HeartbeatLight(void * ptr) {
 
     while (1) {
 
-        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
+        if (FlightController_isInitialized) {
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
 
-        /* Change pin state */
-        if (ledState == GPIO_PIN_RESET) {
+            /* Change pin state */
+            if (ledState == GPIO_PIN_RESET) {
 
-            ledState = GPIO_PIN_SET;
+                ledState = GPIO_PIN_SET;
+            } else {
+
+                ledState = GPIO_PIN_RESET;
+            }
         } else {
-
-            ledState = GPIO_PIN_RESET;
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
         }
 
         /* Set task time delay */
@@ -1190,48 +1529,91 @@ void FlightController_FlightLights(void * ptr) {
     }
 }
 
-void PID_Equation_Mode1(float * PID_Output, float * newPreviousErrorValue, float * Iterm, float errorValue, float kP, float kI, float kD, float lastPreviousErrorValue, float previousIterm) {
+void CSM1_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD) {
 
     float Pterm;
+    float Iterm;
     float Dterm;
+    float pidOutputValue;
 
-    /* Calculate proportional term */
     Pterm = kP * errorValue;
 
-    /* Calculate integral term */
-    *Iterm = previousIterm + kI * (errorValue + lastPreviousErrorValue) * 0.004 / 2;
-    /* Limit integral term to avoid integral wind-up */
-    if (*Iterm > 400) {
-        *Iterm = 400;
-    } else if (*Iterm < -400) {
-        *Iterm = -400;
+    Iterm = *previousIterm + kI * (errorValue + *previousErrorValue) * 0.004 / 2;
+    if (-CONTROL_SYSTEM_PID_OUTPUT_LIMIT > Iterm) {
+        Iterm = -CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
+    } else if (CONTROL_SYSTEM_PID_OUTPUT_LIMIT < Iterm) {
+        Iterm = CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
     }
 
-    /* Calculate derivative term */
-    Dterm = kD * (errorValue - lastPreviousErrorValue) / 0.004;
+    Dterm = kD * (errorValue - *previousErrorValue) / 0.004;
 
-    /* Calculate PID output */
-    *PID_Output = Pterm + *Iterm + Dterm;
-    /* Limit PID output to avoid integral wind-up */
-    if (*PID_Output > 400) {
-        *PID_Output = 400;
-    } else if (*PID_Output < -400) {
-        *PID_Output = -400;
+    pidOutputValue = Pterm + Iterm + Dterm;
+    if (-CONTROL_SYSTEM_PID_OUTPUT_LIMIT > pidOutputValue) {
+        pidOutputValue = -CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
+    } else if (CONTROL_SYSTEM_PID_OUTPUT_LIMIT < pidOutputValue) {
+        pidOutputValue = CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
     }
 
-    /* Update previous error value */
-    *newPreviousErrorValue = errorValue;
+    *PID_Output = pidOutputValue;
+    *previousErrorValue = errorValue;
+    *previousIterm = Iterm;
 }
 
-void PID_Reset_Mode1(float * previousErrorValue_rollRate, float * previousErrorValue_pitchRate, float * previousErrorValue_yawRate, float * previousIterm_rollRate, float * previousIterm_pitchRate, float * previousIterm_yawRate) {
+void CSM1_ResetPID(void) {
+
+#if 1 == CONTROL_SYSTEM_MODE
 
     /* Reset previously stored PID errors and terms values */
-    *previousErrorValue_rollRate = 0;
-    *previousErrorValue_pitchRate = 0;
-    *previousErrorValue_yawRate = 0;
-    *previousIterm_rollRate = 0;
-    *previousIterm_pitchRate = 0;
-    *previousIterm_yawRate = 0;
+    previousErrorValue_rollRate = 0;
+    previousErrorValue_pitchRate = 0;
+    previousErrorValue_yawRate = 0;
+    previousIterm_rollRate = 0;
+    previousIterm_pitchRate = 0;
+    previousIterm_yawRate = 0;
+
+#endif
+}
+
+void CSM2_CalculateKalman(float kalmanState, float kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
+
+#if 2 == CONTROL_SYSTEM_MODE
+
+    float kalmanGain;
+
+    kalmanState = kalmanState + 0.004 * kalmanInput;
+    kalmanUncertainty = kalmanUncertainty + 0.004 * 0.004 * 4 * 4;
+    kalmanGain = kalmanUncertainty * 1 / (1 * kalmanUncertainty + 3 * 3);
+    kalmanState = kalmanState + kalmanGain * (kalmanMeasurement - kalmanState);
+    kalmanUncertainty = (1 - kalmanGain) * kalmanUncertainty;
+
+    kalmanOutput[0] = kalmanState;
+    kalmanOutput[1] = kalmanUncertainty;
+
+#endif
+}
+
+void CSM2_CalculatePID(void) {
+}
+
+void CSM2_ResetPID(void) {
+
+#if 2 == CONTROL_SYSTEM_MODE
+
+    /* Reset previously stored PID errors and terms values: Angles */
+    previousErrorValue_rollAngle = 0;
+    previousErrorValue_pitchAngle = 0;
+    previousIterm_rollAngle = 0;
+    previousIterm_pitchAngle = 0;
+
+    /* Reset previously stored PID errors and terms values: Rates */
+    previousErrorValue_rollRate = 0;
+    previousErrorValue_pitchRate = 0;
+    previousErrorValue_yawRate = 0;
+    previousIterm_rollRate = 0;
+    previousIterm_pitchRate = 0;
+    previousIterm_yawRate = 0;
+
+#endif
 }
 
 /* --- Private callback function implementation ------------------------------------------------ */
@@ -1250,13 +1632,13 @@ void Timer1_Callback(TimerHandle_t xTimer) {
         /* Check if On/Off Button is still pressed after 3 seconds */
         if (!HAL_GPIO_ReadPin(PW_ON_OFF_DRIVER_INPUT_GPIO_Port, PW_ON_OFF_DRIVER_INPUT_Pin)) {
 
-            if (!FlightController_running) {
+            if (!FlightController_isRunning) {
                 /* Flight controller was off */
                 /* User turned it on */
                 /* Turn on flight controller */
                 HAL_GPIO_WritePin(PW_ON_OFF_DRIVER_OUTPUT_GPIO_Port, PW_ON_OFF_DRIVER_OUTPUT_Pin, 1);
 
-                FlightController_running = true;
+                FlightController_isRunning = true;
             } else {
                 /* Flight controller was on */
                 /* User turned it off */
@@ -1264,7 +1646,7 @@ void Timer1_Callback(TimerHandle_t xTimer) {
                 vTaskSuspend(FlightController_HeartbeatLight_Handle);
                 HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 
-                FlightController_running = false;
+                FlightController_isRunning = false;
 
                 /* Turn off flight controller */
                 HAL_GPIO_WritePin(PW_ON_OFF_DRIVER_OUTPUT_GPIO_Port, PW_ON_OFF_DRIVER_OUTPUT_Pin, 0);

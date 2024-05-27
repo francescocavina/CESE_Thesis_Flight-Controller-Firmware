@@ -49,11 +49,11 @@
 #include "BMP180_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define USE_FREERTOS // Remove comment when using FreeRTOS
-// #define GY87_USE_LOGGING          // Remove comment to allow driver info logging
+#define USE_FREERTOS                // Remove comment when using FreeRTOS
+#define GY87_USE_LOGGING            // Remove comment to allow driver info logging
 
 #define GY87_MAX_NUMBER_INSTANCES   (2)    // Maximum number of possible IMUs connected to the i2c bus
-#define GY87_CALIBRATION_ITERATIONS (2000) // No. of readings to get a calibration value
+#define GY87_CALIBRATION_ITERATIONS (3000) // No. of readings to get a calibration value
 #define MPU6050_SET_BIT             (1)
 #define MPU6050_CLEAR_BIT           (0)
 #define QMC5883L_SET_BIT            (1)
@@ -80,10 +80,12 @@ static BMP180_CalibrationData_t BMP180_CalibrationData;
 static float gyroscopeCalibrationRoll = 0;
 static float gyroscopeCalibrationPitch = 0;
 static float gyroscopeCalibrationYaw = 0;
+static bool_t gyroscopeCalibrationIsDone = false;
 /* Accelerometer calibration values */
 static float accelerometerCalibrationX = 0;
 static float accelerometerCalibrationY = 0;
 static float accelerometerCalibrationZ = 0;
+static bool_t accelerometerCalibrationIsDone = false;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -837,8 +839,12 @@ bool_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87) {
         gyroscopeCalibrationYaw = ratesYaw / GY87_CALIBRATION_ITERATIONS;
 
 #ifdef GY87_USE_LOGGING
-        LOG((uint8_t *)"Gyroscope calibration done.\r\n\n", LOG_INFORMATION);
+        uint8_t loggingStr[120] = {0};
+        sprintf((char *)loggingStr, (const char *)"Gyroscope calibration done. CALVAL_ROLL = %.2f, CALVAL_PITCH = %.2f, CALVAL_YAW = %.2f\r\n\n", gyroscopeCalibrationRoll, gyroscopeCalibrationPitch, gyroscopeCalibrationYaw);
+        LOG(loggingStr, LOG_INFORMATION);
 #endif
+
+        gyroscopeCalibrationIsDone = true;
 
         return true;
 
@@ -863,13 +869,21 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_XOUT_H, gyroscopeRawData, sizeof(uint16_t));
         gyroscopeValues->rawValueX = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along X axis (roll) */
-        gyroscopeValues->rotationRateRoll = -(((float)gyroscopeValues->rawValueX / scaleFactor) - gyroscopeCalibrationRoll);
+        if (gyroscopeCalibrationIsDone) {
+            gyroscopeValues->rotationRateRoll = -(((float)gyroscopeValues->rawValueX / scaleFactor) - gyroscopeCalibrationRoll);
+        } else {
+            gyroscopeValues->rotationRateRoll = ((float)gyroscopeValues->rawValueX / scaleFactor) - gyroscopeCalibrationRoll;
+        }
 
         /* Read gyroscope raw value for Y axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_YOUT_H, gyroscopeRawData, sizeof(uint16_t));
         gyroscopeValues->rawValueY = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along Y axis (pitch) */
-        gyroscopeValues->rotationRatePitch = -(((float)gyroscopeValues->rawValueY / scaleFactor) - gyroscopeCalibrationPitch);
+        if (gyroscopeCalibrationIsDone) {
+            gyroscopeValues->rotationRatePitch = -(((float)gyroscopeValues->rawValueY / scaleFactor) - gyroscopeCalibrationPitch);
+        } else {
+            gyroscopeValues->rotationRatePitch = ((float)gyroscopeValues->rawValueY / scaleFactor) - gyroscopeCalibrationPitch;
+        }
 
         /* Read gyroscope raw value for Z axis  */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_ZOUT_H, gyroscopeRawData, sizeof(uint16_t));
@@ -919,8 +933,12 @@ bool_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87) {
         accelerometerCalibrationZ = linearAccelerationsZ / GY87_CALIBRATION_ITERATIONS;
 
 #ifdef GY87_USE_LOGGING
-        LOG((uint8_t *)"Accelerometer calibration done.\r\n\n", LOG_INFORMATION);
+        uint8_t loggingStr[120] = {0};
+        sprintf((char *)loggingStr, (const char *)"Accelerometer calibration done. CALVAL_X = %.2f, CALVAL_Y = %.2f, CALVAL_Z = %.2f\r\n\n", accelerometerCalibrationX, accelerometerCalibrationY, accelerometerCalibrationZ);
+        LOG((uint8_t *)loggingStr, LOG_INFORMATION);
 #endif
+
+        accelerometerCalibrationIsDone = true;
 
         return true;
 
@@ -947,13 +965,21 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_ACCEL_XOUT_H, accelerometerRawData, sizeof(uint16_t));
         accelerometerValues->rawValueX = (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
         /* Calculate accelerometer linear acceleration along X axis */
-        accX = accelerometerValues->linearAccelerationX = ((float)accelerometerValues->rawValueX / scaleFactor) - accelerometerCalibrationX;
+        if (accelerometerCalibrationIsDone) {
+            accX = accelerometerValues->linearAccelerationX = -(((float)accelerometerValues->rawValueX / scaleFactor) - accelerometerCalibrationX);
+        } else {
+            accX = accelerometerValues->linearAccelerationX = ((float)accelerometerValues->rawValueX / scaleFactor) - accelerometerCalibrationX;
+        }
 
         /* Read accelerometer raw value for Y axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_ACCEL_YOUT_H, accelerometerRawData, sizeof(uint16_t));
         accelerometerValues->rawValueY = (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
         /* Calculate accelerometer linear acceleration along Y axis */
-        accY = accelerometerValues->linearAccelerationY = ((float)accelerometerValues->rawValueY / scaleFactor) - accelerometerCalibrationY;
+        if (accelerometerCalibrationIsDone) {
+            accY = accelerometerValues->linearAccelerationY = -(((float)accelerometerValues->rawValueY / scaleFactor) - accelerometerCalibrationY);
+        } else {
+            accY = accelerometerValues->linearAccelerationY = ((float)accelerometerValues->rawValueY / scaleFactor) - accelerometerCalibrationY;
+        }
 
         /* Read accelerometer raw value for Z axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_ACCEL_ZOUT_H, accelerometerRawData, sizeof(uint16_t));

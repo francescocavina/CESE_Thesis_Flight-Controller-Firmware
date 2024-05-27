@@ -101,19 +101,19 @@ static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc) {
     LOG((uint8_t *)"Auto-calibrating ESCs...\r\n\n", LOG_INFORMATION);
 #endif
 
-    /* Set ESC to maximum throttle */
-    if (false == PWM_SetDutyCycle(hesc, hesc->esc1, MAX_ESC_SPEED)) {
-        return false;
-    }
-    if (false == PWM_SetDutyCycle(hesc, hesc->esc2, MAX_ESC_SPEED)) {
-        return false;
-    }
-    if (false == PWM_SetDutyCycle(hesc, hesc->esc3, MAX_ESC_SPEED)) {
-        return false;
-    }
-    if (false == PWM_SetDutyCycle(hesc, hesc->esc4, MAX_ESC_SPEED)) {
-        return false;
-    }
+    //    /* Set ESC to maximum throttle */
+    //    if (false == PWM_SetDutyCycle(hesc, hesc->esc1, MAX_ESC_SPEED)) {
+    //        return false;
+    //    }
+    //    if (false == PWM_SetDutyCycle(hesc, hesc->esc2, MAX_ESC_SPEED)) {
+    //        return false;
+    //    }
+    //    if (false == PWM_SetDutyCycle(hesc, hesc->esc3, MAX_ESC_SPEED)) {
+    //        return false;
+    //    }
+    //    if (false == PWM_SetDutyCycle(hesc, hesc->esc4, MAX_ESC_SPEED)) {
+    //        return false;
+    //    }
 
     /* Set ESC to minimum throttle */
     if (false == PWM_SetDutyCycle(hesc, hesc->esc1, MIN_ESC_SPEED)) {
