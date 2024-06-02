@@ -72,14 +72,16 @@
 // #define MAIN_APP_USE_LOGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL 	// Remove comment to allow driver info logging
 /* Drivers */
 #define FSA8S_CHANNELS    (10) // Number of remote control channels to read
-#define ESC_MAXIMUM_SPEED (100)
+#define ESC_MAXIMUM_SPEED (90)
 #define ESC_MINIMUM_SPEED (10)
 /* Control System */
-#define CONTROL_SYSTEM_MODE                   (2)
-#define CONTROL_SYSTEM_LOOP_PERIOD_MS         (4) // Loop period in [ms]
+#define CONTROL_SYSTEM_MODE                   (3)
+#define CONTROL_SYSTEM_LOOP_PERIOD_S          (0.004) // Loop period in [s]
+#define CONTROL_SYSTEM_LOOP_PERIOD_MS         (4)     // Loop period in [ms]
 #define CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE (25)
-#define CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE (800)
-#define CONTROL_SYSTEM_PID_OUTPUT_LIMIT       (20)
+#define CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE (1800)
+#define CONTROL_SYSTEM_PID_OUTPUT_LIMIT       (400)
+#define CONTROL_SYSTEM_PID_ITERM_LIMIT        (400)
 /* Battery Level */
 #define BATTERY_LEVEL_CALIBRATION_OFFSET (0.76)
 
@@ -132,9 +134,14 @@ static GY87_magnetometerValues_t GY87_magnetometerValues;
 static float GY87_magnetometerHeadingValue = 0;
 static bool_t gyroscopeCalibrationIsDone = false;
 static bool_t accelerometerCalibrationIsDone = false;
+/* Kalman Filter Variables */
+static float Kalman_predictionValue_rollAngle = 0;
+static float Kalman_predictionValue_pitchAngle = 0;
+static float Kalman_uncertaintyValue_rollAngle = 2 * 2;
+static float Kalman_uncertaintyValue_pitchAngle = 2 * 2;
 
-/* Control System Mode 0 */
-#if 0 == CONTROL_SYSTEM_MODE
+/* Control System Mode 1 */
+#if 1 == CONTROL_SYSTEM_MODE
 /* Throttle stick check */
 static bool_t throttleStick_startedDown = false;
 /* References */
@@ -148,8 +155,8 @@ static float motorSpeed4 = 0;
 static bool_t ESC_isEnabled = false;
 static float ESC_speeds[5] = {0};
 #endif
-/* Control System Mode 1 */
-#if 1 == CONTROL_SYSTEM_MODE
+/* Control System Mode 2 */
+#if 2 == CONTROL_SYSTEM_MODE
 /* Throttle stick check */
 static bool_t throttleStick_startedDown = false;
 /* References */
@@ -174,25 +181,15 @@ static float previousIterm_rollRate = 0;
 static float previousIterm_pitchRate = 0;
 static float previousIterm_yawRate = 0;
 /* PID gains */
-static float kP_rollRate = 0.3;
-static float kP_pitchRate = 0.3;
-static float kP_yawRate = 0.3;
-static float kI_rollRate = 0.1;
-static float kI_pitchRate = 0.1;
-static float kI_yawRate = 0.1;
-static float kD_rollRate = 0.0;
-static float kD_pitchRate = 0.0;
-static float kD_yawRate = 0.0;
-/* PID terms */
-// static float Pterm_rollRate  = 0;
-// static float Pterm_pitchRate = 0;
-// static float Pterm_yawRate   = 0;
-// static float Iterm_rollRate  = 0;
-// static float Iterm_pitchRate = 0;
-// static float Iterm_yawRate   = 0;
-// static float Dterm_rollRate  = 0;
-// static float Dterm_pitchRate = 0;
-// static float Dterm_yawRate   = 0;
+static float kP_rollRate = 0.6;
+static float kP_pitchRate = 0.6;
+static float kP_yawRate = 2;
+static float kI_rollRate = 3.5;
+static float kI_pitchRate = 3.5;
+static float kI_yawRate = 12;
+static float kD_rollRate = 0.03;
+static float kD_pitchRate = 0.03;
+static float kD_yawRate = 0.03;
 /* PID outputs */
 static float pidOutputValue_rollRate = 0;
 static float pidOutputValue_pitchRate = 0;
@@ -206,8 +203,8 @@ static float motorSpeed4 = 0;
 static bool_t ESC_isEnabled = false;
 static float ESC_speeds[5] = {0};
 #endif
-/* Control System Mode 2 */
-#if 2 == CONTROL_SYSTEM_MODE
+/* Control System Mode 3 */
+#if 3 == CONTROL_SYSTEM_MODE
 /* Throttle stick check */
 static bool_t throttleStick_startedDown = false;
 /* References: General */
@@ -215,14 +212,6 @@ static float inputValue_throttle = 0;
 /* References: Angles */
 static float inputValue_rollAngle = 0;
 static float inputValue_pitchAngle = 0;
-/* Kalman prediction measurements */
-static float kalmanPredictionValue_rollAngle = 0;
-static float kalmanPredictionValue_pitchAngle = 0;
-/* Kalman measurements uncertainties */
-static float kalmanUncertaintyValue_rollAngle = 2 * 2;
-static float kalmanUncertaintyValue_pitchAngle = 2 * 2;
-/* Kalman calculatio output */
-static float kalmanOutput[2] = {0};
 /* Desired references: Angles */
 static float desiredValue_rollAngle = 0;
 static float desiredValue_pitchAngle = 0;
@@ -236,25 +225,16 @@ static float previousErrorValue_pitchAngle = 0;
 static float previousIterm_rollAngle = 0;
 static float previousIterm_pitchAngle = 0;
 /* PID gains: Angles */
-static float kP_rollAngle = 0.3;
-static float kP_pitchAngle = 0.3;
+static float kP_rollAngle = 2;
+static float kP_pitchAngle = 2;
 static float kI_rollAngle = 0;
 static float kI_pitchAngle = 0;
 static float kD_rollAngle = 0;
 static float kD_pitchAngle = 0;
-/* PID terms */
-// static float Pterm_rollAngle  = 0;
-// static float Pterm_pitchAngle = 0;
-// static float Iterm_rollAngle  = 0;
-// static float Iterm_pitchAngle = 0;
-// static float Dterm_rollAngle  = 0;
-// static float Dterm_pitchAngle = 0;
-/* PID outputs */
+/* PID outputs: Angles */
 static float pidOutputValue_rollAngle = 0;
 static float pidOutputValue_pitchAngle = 0;
 /* References: Rates */
-static float inputValue_rollRate = 0;
-static float inputValue_pitchRate = 0;
 static float inputValue_yawRate = 0;
 /* Desired references: Rates */
 static float desiredValue_rollRate = 0;
@@ -273,26 +253,16 @@ static float previousIterm_rollRate = 0;
 static float previousIterm_pitchRate = 0;
 static float previousIterm_yawRate = 0;
 /* PID gains: Rates */
-static float kP_rollRate = 0.1;
-static float kP_pitchRate = 0.1;
-static float kP_yawRate = 0.1;
-static float kI_rollRate = 0.0;
-static float kI_pitchRate = 0.0;
-static float kI_yawRate = 0.0;
-static float kD_rollRate = 0.0;
-static float kD_pitchRate = 0.0;
+static float kP_rollRate = 0.6;
+static float kP_pitchRate = 0.6;
+static float kP_yawRate = 2;
+static float kI_rollRate = 3.5;
+static float kI_pitchRate = 3.5;
+static float kI_yawRate = 12;
+static float kD_rollRate = 0.03;
+static float kD_pitchRate = 0.03;
 static float kD_yawRate = 0.0;
-/* PID terms */
-// static float Pterm_rollRate  = 0;
-// static float Pterm_pitchRate = 0;
-// static float Pterm_yawRate   = 0;
-// static float Iterm_rollRate  = 0;
-// static float Iterm_pitchRate = 0;
-// static float Iterm_yawRate   = 0;
-// static float Dterm_rollRate  = 0;
-// static float Dterm_pitchRate = 0;
-// static float Dterm_yawRate   = 0;
-/* PID outputs */
+/* PID outputs: Rates */
 static float pidOutputValue_rollRate = 0;
 static float pidOutputValue_pitchRate = 0;
 static float pidOutputValue_yawRate = 0;
@@ -433,28 +403,14 @@ void Timer4_Callback(TimerHandle_t xTimer);
  * @param  TODO
  * @retval None
  */
-void CSM1_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD);
+void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
 
 /*
  * @brief  TODO
  * @param  TODO
  * @retval None
  */
-void CSM1_ResetPID(void);
-
-/*
- * @brief  TODO
- * @param  TODO
- * @retval None
- */
-void CSM2_CalculateKalman(float kalmanState, float kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
-
-/*
- * @brief  TODO
- * @param  TODO
- * @retval None
- */
-void CSM2_CalculatePID();
+void CSM2_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD);
 
 /*
  * @brief  TODO
@@ -462,6 +418,20 @@ void CSM2_CalculatePID();
  * @retval None
  */
 void CSM2_ResetPID(void);
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void CSM3_CalculatePID();
+
+/*
+ * @brief  TODO
+ * @param  TODO
+ * @retval None
+ */
+void CSM3_ResetPID(void);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 extern I2C_HandleTypeDef hi2c1;
@@ -647,25 +617,36 @@ void FlightController_ControlSystem(void * ptr) {
 
     while (1) {
 
-        /* Calibrate GY-87 gyroscope sensor */
-        if (false == gyroscopeCalibrationIsDone) {
-            gyroscopeCalibrationIsDone = GY87_CalibrateGyroscope(hgy87);
-        }
+        /* Calibrate GY-87 sensors */
+        if (1 == GY87_CALIBRATION_EN) {
 
-        /* Calibrate GY-87 accelerometer sensor */
-        if (false == accelerometerCalibrationIsDone) {
-            accelerometerCalibrationIsDone = GY87_CalibrateAccelerometer(hgy87);
-
-            if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
-#ifdef MAIN_APP_USE_LOGGING_STARTUP
-                vTaskDelay(pdMS_TO_TICKS(5));
-                LOG((uint8_t *)"Flight Controller Initialized.\r\n\n", LOG_INFORMATION);
-#endif
-                FlightController_isInitialized = true;
+            /* Calibrate GY-87 gyroscope sensor */
+            if (false == gyroscopeCalibrationIsDone) {
+                gyroscopeCalibrationIsDone = GY87_CalibrateGyroscope(hgy87);
             }
+
+            /* Calibrate GY-87 accelerometer sensor */
+            if (false == accelerometerCalibrationIsDone) {
+                accelerometerCalibrationIsDone = GY87_CalibrateAccelerometer(hgy87);
+            }
+        } else {
+
+            gyroscopeCalibrationIsDone = true;
+            accelerometerCalibrationIsDone = true;
         }
 
-        /* Read flight lights control */
+        if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
+#ifdef MAIN_APP_USE_LOGGING_STARTUP
+            vTaskDelay(pdMS_TO_TICKS(5));
+            LOG((uint8_t *)"Flight Controller Initialized.\r\n\n", LOG_INFORMATION);
+#endif
+            FlightController_isInitialized = true;
+        } else {
+
+            FlightController_isInitialized = false;
+        }
+
+        /* Read flight lights controls */
         FSA8S_channelValues[7] = FSA8S_ReadChannel(rc_controller, CHANNEL_8);
         FSA8S_channelValues[8] = FSA8S_ReadChannel(rc_controller, CHANNEL_9);
         FSA8S_channelValues[9] = FSA8S_ReadChannel(rc_controller, CHANNEL_10);
@@ -675,118 +656,34 @@ void FlightController_ControlSystem(void * ptr) {
 
 #if 0 == CONTROL_SYSTEM_MODE
 
-        	/* Avoid uncontrolled motor start */
-        	while (false == throttleStick_startedDown) {
+            /* Check if timer has expired */
+            if (Timer4_flag) {
 
-        		/* Read throttle input from radio controller */
-        		inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+				/* Read FS-A8S channels */
+            	for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
+            		FSA8S_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
+            	}
 
-        		if (15 > inputValue_throttle) {
+				/* Read GY-87 gyroscope sensor */
+				GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
 
-        			throttleStick_startedDown = true;
+				/* Read GY-87 accelerometer sensor */
+				GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
 
-        		} else {
+				/* Calculate Kalman angles */
+				Kalman_CalculateAngle(&Kalman_predictionValue_rollAngle, &Kalman_uncertaintyValue_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
+				Kalman_CalculateAngle(&Kalman_predictionValue_pitchAngle, &Kalman_uncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
 
-        			throttleStick_startedDown = false;
-        		}
-        	}
+				/* Read GY-87 magnetometer sensor */
+				GY87_ReadMagnetometer(hgy87, &GY87_magnetometerValues);
 
-        	/* Check if ESCs are enabled (Switch B on radio controller) */
-        	if (500 <= FSA8S_ReadChannel(rc_controller, CHANNEL_6)) {
-        		ESC_isEnabled = true;
-        	} else {
-        		ESC_isEnabled = false;
-        	}
+				/* Raead GY-87 magnetometer heading */
+				GY87_magnetometerHeadingValue = GY87_ReadMagnetometerHeading(hgy87);
 
-    		/* Turn off motors in case ESCs are disabled */
-    		if(false == ESC_isEnabled) {
+				/* Reset Timer4 flag */
+				Timer4_flag = false;
 
-    			/* Save motors speed */
-    			ESC_speeds[1] = 0;
-    			ESC_speeds[2] = 0;
-    			ESC_speeds[3] = 0;
-    			ESC_speeds[4] = 0;
-
-                /* Turn off motors */
-                ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
-                ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
-                ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
-                ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
-
-    		} else {
-
-                /* Check if timer has expired */
-                if (Timer4_flag) {
-
-            		/* Read input throttle from radio controller */
-                	inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-
-                    if (CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE > inputValue_throttle) {
-
-                        /* Save motors speed */
-                        ESC_speeds[1] = 0;
-                        ESC_speeds[2] = 0;
-                        ESC_speeds[3] = 0;
-                        ESC_speeds[4] = 0;
-
-                        /* Turn off motors */
-                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
-                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
-                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
-                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
-
-                    } else {
-
-                		/* Adjust and limit throttle input */
-                		if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < inputValue_throttle) {
-                			inputValue_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
-                		}
-
-                        /* Calculate motors speed */
-                        motorSpeed1 = inputValue_throttle / 10;
-                        motorSpeed2 = inputValue_throttle / 10;
-                        motorSpeed3 = inputValue_throttle / 10;
-                        motorSpeed4 = inputValue_throttle / 10;
-
-                        /* Adjust and limit motors maximum speed */
-                        if (ESC_MAXIMUM_SPEED < motorSpeed1)
-                            motorSpeed1 = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < motorSpeed2)
-                            motorSpeed2 = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < motorSpeed3)
-                            motorSpeed3 = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < motorSpeed4)
-                            motorSpeed4 = ESC_MAXIMUM_SPEED;
-
-                        /* Adjust and limit motors minimum speed */
-                        if (0 > motorSpeed1)
-                            motorSpeed1 = 0;
-                        if (0 > motorSpeed2)
-                            motorSpeed2 = 0;
-                        if (0 > motorSpeed3)
-                            motorSpeed3 = 0;
-                        if (0 > motorSpeed4)
-                            motorSpeed4 = 0;
-
-						/* Save motors speed */
-                        ESC_speeds[1] = motorSpeed1;
-                        ESC_speeds[2] = motorSpeed2;
-                        ESC_speeds[3] = motorSpeed3;
-                        ESC_speeds[4] = motorSpeed4;
-
-                        /* Set motors speed */
-                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
-                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
-                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
-                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
-					}
-
-					/* Reset Timer4 flag */
-					Timer4_flag = false;
-
-    			}
-
-    		}
+            }
 
 #endif
 
@@ -832,9 +729,6 @@ void FlightController_ControlSystem(void * ptr) {
                 ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
                 ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
 
-                /* Reset PID variables */
-                CSM1_ResetPID();
-
             } else {
 
                 /* Check if timer has expired */
@@ -857,56 +751,18 @@ void FlightController_ControlSystem(void * ptr) {
                         ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
                         ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
 
-                        /* Reset PID variables */
-                        CSM1_ResetPID();
-
                     } else {
-
-                        /* Read GY-87 gyroscope sensor */
-                        if (true == gyroscopeCalibrationIsDone) {
-                            GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
-                        }
-
-                        /* Read GY-87 accelerometer sensor */
-                        if (true == accelerometerCalibrationIsDone) {
-                            GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
-                        }
-
-                        /* Read inputs from radio controller */
-                        inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                        inputValue_rollRate = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
-                        inputValue_pitchRate = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
-                        inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
 
                         /* Adjust and limit throttle input */
                         if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < inputValue_throttle) {
                             inputValue_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
                         }
 
-                        /* Calculate desired rates by mapping radio controller values to rates */
-                        desiredValue_rollRate = 0.15 * (inputValue_rollRate - 500);
-                        desiredValue_pitchRate = 0.15 * (inputValue_pitchRate - 500);
-                        desiredValue_yawRate = 0.15 * (inputValue_yawRate - 500);
-
-                        /* Calculate rates errors */
-                        errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
-                        errorValue_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues.rotationRatePitch;
-                        errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
-
-                        /* Calculate PID for roll rate */
-                        CSM1_CalculatePID(&pidOutputValue_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate);
-
-                        /* Calculate PID for pitch rate */
-                        CSM1_CalculatePID(&pidOutputValue_pitchRate, &previousIterm_pitchRate, &previousErrorValue_pitchRate, errorValue_pitchRate, kP_pitchRate, kI_pitchRate, kD_pitchRate);
-
-                        /* Calculate PID for yaw rate */
-                        CSM1_CalculatePID(&pidOutputValue_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate);
-
                         /* Calculate motors speed */
-                        motorSpeed1 = ((inputValue_throttle / 10) - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate);
-                        motorSpeed2 = ((inputValue_throttle / 10) + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate);
-                        motorSpeed3 = ((inputValue_throttle / 10) + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate);
-                        motorSpeed4 = ((inputValue_throttle / 10) - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate);
+                        motorSpeed1 = inputValue_throttle / 10;
+                        motorSpeed2 = inputValue_throttle / 10;
+                        motorSpeed3 = inputValue_throttle / 10;
+                        motorSpeed4 = inputValue_throttle / 10;
 
                         /* Adjust and limit motors maximum speed */
                         if (ESC_MAXIMUM_SPEED < motorSpeed1)
@@ -919,14 +775,14 @@ void FlightController_ControlSystem(void * ptr) {
                             motorSpeed4 = ESC_MAXIMUM_SPEED;
 
                         /* Adjust and limit motors minimum speed */
-                        if (0 > motorSpeed1)
-                            motorSpeed1 = 0;
-                        if (0 > motorSpeed2)
-                            motorSpeed2 = 0;
-                        if (0 > motorSpeed3)
-                            motorSpeed3 = 0;
-                        if (0 > motorSpeed4)
-                            motorSpeed4 = 0;
+                        if (ESC_MINIMUM_SPEED > motorSpeed1)
+                            motorSpeed1 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed2)
+                            motorSpeed2 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed3)
+                            motorSpeed3 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed4)
+                            motorSpeed4 = ESC_MINIMUM_SPEED;
 
                         /* Save motors speed */
                         ESC_speeds[1] = motorSpeed1;
@@ -1001,7 +857,6 @@ void FlightController_ControlSystem(void * ptr) {
                     /* Read input throttle from radio controller */
                     inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
 
-                    /* Check if throttle stick is low */
                     if (CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE > inputValue_throttle) {
 
                         /* Save motors speed */
@@ -1022,29 +877,14 @@ void FlightController_ControlSystem(void * ptr) {
                     } else {
 
                         /* Read GY-87 gyroscope sensor */
-                        if (true == gyroscopeCalibrationIsDone) {
-                            GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
-                        }
-
+                        GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
                         /* Read GY-87 accelerometer sensor */
-                        if (true == accelerometerCalibrationIsDone) {
-                            GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
-                        }
-
-                        /* Calculate Kalman roll angle */
-                        CSM2_CalculateKalman(kalmanPredictionValue_rollAngle, kalmanUncertaintyValue_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
-                        kalmanPredictionValue_rollAngle = kalmanOutput[0];
-                        kalmanUncertaintyValue_rollAngle = kalmanOutput[1];
-
-                        /* Calculate Kalman pitch angle */
-                        CSM2_CalculateKalman(kalmanPredictionValue_pitchAngle, kalmanUncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
-                        kalmanPredictionValue_pitchAngle = kalmanOutput[0];
-                        kalmanUncertaintyValue_pitchAngle = kalmanOutput[1];
+                        GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
 
                         /* Read inputs from radio controller */
                         inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                        inputValue_rollAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
-                        inputValue_pitchAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
+                        inputValue_rollRate = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
+                        inputValue_pitchRate = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
                         inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
 
                         /* Adjust and limit throttle input */
@@ -1052,24 +892,10 @@ void FlightController_ControlSystem(void * ptr) {
                             inputValue_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
                         }
 
-                        /* Calculate desired angles by mapping radio controller values to angles */
-                        desiredValue_rollAngle = 0.10 * (inputValue_rollRate - 500);
-                        desiredValue_pitchAngle = 0.10 * (inputValue_pitchRate - 500);
-
-                        /* Calculate angles errors */
-                        errorValue_rollAngle = desiredValue_rollAngle - kalmanPredictionValue_rollAngle;
-                        errorValue_pitchAngle = desiredValue_pitchAngle - kalmanPredictionValue_pitchAngle;
-
-                        /* Calculate PID for roll angle */
-                        CSM1_CalculatePID(&pidOutputValue_rollAngle, &previousIterm_rollAngle, &previousErrorValue_rollAngle, errorValue_rollAngle, kP_rollAngle, kI_rollAngle, kD_rollAngle);
-
-                        /* Calculate PID for pitch angle */
-                        CSM1_CalculatePID(&pidOutputValue_pitchAngle, &previousIterm_pitchAngle, &previousErrorValue_pitchAngle, errorValue_pitchAngle, kP_pitchAngle, kI_pitchAngle, kD_pitchAngle);
-
-                        /* Calculate desired rates */
-                        desiredValue_rollRate = pidOutputValue_rollAngle;
-                        desiredValue_pitchRate = pidOutputValue_pitchAngle;
-                        desiredValue_yawRate = 0.15 * (FSA8S_channelValues[3] - 500);
+                        /* Calculate desired rates by mapping radio controller values to rates */
+                        desiredValue_rollRate = 0.15 * (inputValue_rollRate - 500);
+                        desiredValue_pitchRate = 0.15 * (inputValue_pitchRate - 500);
+                        desiredValue_yawRate = 0.15 * (inputValue_yawRate - 500);
 
                         /* Calculate rates errors */
                         errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
@@ -1077,19 +903,17 @@ void FlightController_ControlSystem(void * ptr) {
                         errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
 
                         /* Calculate PID for roll rate */
-                        CSM1_CalculatePID(&pidOutputValue_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate);
-
+                        CSM2_CalculatePID(&pidOutputValue_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate);
                         /* Calculate PID for pitch rate */
-                        CSM1_CalculatePID(&pidOutputValue_pitchRate, &previousIterm_pitchRate, &previousErrorValue_pitchRate, errorValue_pitchRate, kP_pitchRate, kI_pitchRate, kD_pitchRate);
-
+                        CSM2_CalculatePID(&pidOutputValue_pitchRate, &previousIterm_pitchRate, &previousErrorValue_pitchRate, errorValue_pitchRate, kP_pitchRate, kI_pitchRate, kD_pitchRate);
                         /* Calculate PID for yaw rate */
-                        CSM1_CalculatePID(&pidOutputValue_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate);
+                        CSM2_CalculatePID(&pidOutputValue_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate);
 
                         /* Calculate motors speed */
-                        motorSpeed1 = ((inputValue_throttle / 10) - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate);
-                        motorSpeed2 = ((inputValue_throttle / 10) + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate);
-                        motorSpeed3 = ((inputValue_throttle / 10) + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate);
-                        motorSpeed4 = ((inputValue_throttle / 10) - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate);
+                        motorSpeed1 = (inputValue_throttle - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate) / 10;
+                        motorSpeed2 = (inputValue_throttle + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate) / 10;
+                        motorSpeed3 = (inputValue_throttle + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate) / 10;
+                        motorSpeed4 = (inputValue_throttle - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate) / 10;
 
                         /* Adjust and limit motors maximum speed */
                         if (ESC_MAXIMUM_SPEED < motorSpeed1)
@@ -1102,14 +926,14 @@ void FlightController_ControlSystem(void * ptr) {
                             motorSpeed4 = ESC_MAXIMUM_SPEED;
 
                         /* Adjust and limit motors minimum speed */
-                        if (0 > motorSpeed1)
-                            motorSpeed1 = 0;
-                        if (0 > motorSpeed2)
-                            motorSpeed2 = 0;
-                        if (0 > motorSpeed3)
-                            motorSpeed3 = 0;
-                        if (0 > motorSpeed4)
-                            motorSpeed4 = 0;
+                        if (ESC_MINIMUM_SPEED > motorSpeed1)
+                            motorSpeed1 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed2)
+                            motorSpeed2 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed3)
+                            motorSpeed3 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed4)
+                            motorSpeed4 = ESC_MINIMUM_SPEED;
 
                         /* Save motors speed */
                         ESC_speeds[1] = motorSpeed1;
@@ -1132,6 +956,174 @@ void FlightController_ControlSystem(void * ptr) {
 #endif
 
         } else if (FlightController_isInitialized && 3 == CONTROL_SYSTEM_MODE) {
+
+#if 3 == CONTROL_SYSTEM_MODE
+
+            /* Avoid uncontrolled motor start */
+            while (false == throttleStick_startedDown) {
+
+                /* Read throttle input from radio controller */
+                inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+
+                if (15 > inputValue_throttle) {
+
+                    throttleStick_startedDown = true;
+
+                } else {
+
+                    throttleStick_startedDown = false;
+                }
+            }
+
+            /* Check if ESCs are enabled (Switch B on radio controller) */
+            if (500 <= FSA8S_ReadChannel(rc_controller, CHANNEL_6)) {
+                ESC_isEnabled = true;
+            } else {
+                ESC_isEnabled = false;
+            }
+
+            /* Turn off motors in case ESCs are disabled */
+            if (false == ESC_isEnabled) {
+
+                /* Save motors speed */
+                ESC_speeds[1] = 0;
+                ESC_speeds[2] = 0;
+                ESC_speeds[3] = 0;
+                ESC_speeds[4] = 0;
+
+                /* Turn off motors */
+                ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+
+                /* Reset PID variables */
+                CSM3_ResetPID();
+
+            } else {
+
+                /* Check if timer has expired */
+                if (Timer4_flag) {
+
+                    /* Read input throttle from radio controller */
+                    inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+
+                    /* Check if throttle stick is low */
+                    if (CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE > inputValue_throttle) {
+
+                        /* Save motors speed */
+                        ESC_speeds[1] = 0;
+                        ESC_speeds[2] = 0;
+                        ESC_speeds[3] = 0;
+                        ESC_speeds[4] = 0;
+
+                        /* Turn off motors */
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+
+                        /* Reset PID variables */
+                        CSM3_ResetPID();
+
+                    } else {
+
+                        /* Read GY-87 gyroscope sensor */
+                        GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
+                        /* Read GY-87 accelerometer sensor */
+                        GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
+
+                        /* Calculate Kalman roll angle */
+                        Kalman_CalculateAngle(&Kalman_predictionValue_rollAngle, &Kalman_uncertaintyValue_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
+                        /* Calculate Kalman pitch angle */
+                        Kalman_CalculateAngle(&Kalman_predictionValue_pitchAngle, &Kalman_uncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
+
+                        /* Read inputs from radio controller */
+                        inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3) + 1000;
+                        inputValue_rollAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_1) + 1000;
+                        inputValue_pitchAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_2) + 1000;
+                        inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4) + 1000;
+
+                        /* Adjust and limit throttle input */
+                        if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < inputValue_throttle) {
+                            inputValue_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
+                        }
+
+                        /* Calculate desired angles by mapping radio controller values to angles */
+                        desiredValue_rollAngle = 0.10 * (inputValue_rollAngle - 1500);
+                        desiredValue_pitchAngle = 0.10 * (inputValue_pitchAngle - 1500);
+
+                        /* Calculate angles errors */
+                        errorValue_rollAngle = desiredValue_rollAngle - Kalman_predictionValue_rollAngle;
+                        errorValue_pitchAngle = desiredValue_pitchAngle - Kalman_predictionValue_pitchAngle;
+
+                        /* Calculate PID for roll angle */
+                        CSM2_CalculatePID(&pidOutputValue_rollAngle, &previousIterm_rollAngle, &previousErrorValue_rollAngle, errorValue_rollAngle, kP_rollAngle, kI_rollAngle, kD_rollAngle);
+                        /* Calculate PID for pitch angle */
+                        CSM2_CalculatePID(&pidOutputValue_pitchAngle, &previousIterm_pitchAngle, &previousErrorValue_pitchAngle, errorValue_pitchAngle, kP_pitchAngle, kI_pitchAngle, kD_pitchAngle);
+
+                        /* Calculate desired rates */
+                        desiredValue_rollRate = pidOutputValue_rollAngle;
+                        desiredValue_pitchRate = pidOutputValue_pitchAngle;
+                        desiredValue_yawRate = 0.15 * (inputValue_yawRate - 1500);
+
+                        /* Calculate rates errors */
+                        errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
+                        errorValue_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues.rotationRatePitch;
+                        errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
+
+                        /* Calculate PID for roll rate */
+                        CSM2_CalculatePID(&pidOutputValue_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate);
+                        /* Calculate PID for pitch rate */
+                        CSM2_CalculatePID(&pidOutputValue_pitchRate, &previousIterm_pitchRate, &previousErrorValue_pitchRate, errorValue_pitchRate, kP_pitchRate, kI_pitchRate, kD_pitchRate);
+                        /* Calculate PID for yaw rate */
+                        CSM2_CalculatePID(&pidOutputValue_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate);
+
+                        /* Calculate motors speed */
+                        motorSpeed1 = ((inputValue_throttle - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate) - 1000) / 10;
+                        motorSpeed2 = ((inputValue_throttle + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate) - 1000) / 10;
+                        motorSpeed3 = ((inputValue_throttle + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate) - 1000) / 10;
+                        motorSpeed4 = ((inputValue_throttle - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate) - 1000) / 10;
+
+                        /* Adjust and limit motors maximum speed */
+                        if (ESC_MAXIMUM_SPEED < motorSpeed1)
+                            motorSpeed1 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed2)
+                            motorSpeed2 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed3)
+                            motorSpeed3 = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < motorSpeed4)
+                            motorSpeed4 = ESC_MAXIMUM_SPEED;
+
+                        /* Adjust and limit motors minimum speed */
+                        if (ESC_MINIMUM_SPEED > motorSpeed1)
+                            motorSpeed1 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed2)
+                            motorSpeed2 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed3)
+                            motorSpeed3 = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > motorSpeed4)
+                            motorSpeed4 = ESC_MINIMUM_SPEED;
+
+                        /* Save motors speed */
+                        ESC_speeds[1] = motorSpeed1;
+                        ESC_speeds[2] = motorSpeed2;
+                        ESC_speeds[3] = motorSpeed3;
+                        ESC_speeds[4] = motorSpeed4;
+
+                        /* Set motors speed */
+                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
+                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
+                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
+                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
+                    }
+
+                    /* Reset Timer4 flag */
+                    Timer4_flag = false;
+                }
+            }
+
+#endif
         }
 
         /* Set task time delay */
@@ -1215,7 +1207,7 @@ void FlightController_Data_Logging(void * ptr) {
         /* Check if GY-87 calibrations are done */
         if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
             /* Log GY87 accelerometer values */
-            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %.2f [g], Y: %.2f[g], Z: %.2f [g]\r\n", GY87_accelerometerValues.linearAccelerationX, GY87_accelerometerValues.linearAccelerationY,
+            sprintf((char *)loggingStr, (const char *)"GY87 Accelerometer X: %.3f [g], Y: %.3f[g], Z: %.3f [g]\r\n", GY87_accelerometerValues.linearAccelerationX, GY87_accelerometerValues.linearAccelerationY,
                     GY87_accelerometerValues.linearAccelerationZ);
             LOG(loggingStr, LOG_INFORMATION);
         }
@@ -1234,7 +1226,7 @@ void FlightController_Data_Logging(void * ptr) {
         /* Check if GY-87 calibrations are done */
         if (true == gyroscopeCalibrationIsDone && true == accelerometerCalibrationIsDone) {
             /* Log GY87 accelerometer angles */
-            sprintf((char *)loggingStr, (const char *)"GY87 Kalman ROLL: %.2f [°], Kalman PITCH: %.2f [°]\r\n", kalmanPredictionValue_rollAngle, kalmanPredictionValue_pitchAngle);
+            sprintf((char *)loggingStr, (const char *)"GY87 Kalman ROLL: %.2f [°], Kalman PITCH: %.2f [°]\r\n", Kalman_predictionValue_rollAngle, Kalman_predictionValue_pitchAngle);
             LOG(loggingStr, LOG_INFORMATION);
         }
 #endif
@@ -1529,39 +1521,57 @@ void FlightController_FlightLights(void * ptr) {
     }
 }
 
-void CSM1_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD) {
+void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
+
+    float kalmanGain;
+
+    *kalmanState = *kalmanState + CONTROL_SYSTEM_LOOP_PERIOD_S * kalmanInput;
+    *kalmanUncertainty = *kalmanUncertainty + CONTROL_SYSTEM_LOOP_PERIOD_S * CONTROL_SYSTEM_LOOP_PERIOD_S * 4 * 4;
+    kalmanGain = *kalmanUncertainty * 1 / (1 * *kalmanUncertainty + 3 * 3);
+    *kalmanState = *kalmanState + kalmanGain * (kalmanMeasurement - *kalmanState);
+    *kalmanUncertainty = (1 - kalmanGain) * *kalmanUncertainty;
+}
+
+void CSM2_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD) {
 
     float Pterm;
     float Iterm;
     float Dterm;
     float pidOutputValue;
 
+    /* Calculate proportional term */
     Pterm = kP * errorValue;
 
-    Iterm = *previousIterm + kI * (errorValue + *previousErrorValue) * 0.004 / 2;
-    if (-CONTROL_SYSTEM_PID_OUTPUT_LIMIT > Iterm) {
-        Iterm = -CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
-    } else if (CONTROL_SYSTEM_PID_OUTPUT_LIMIT < Iterm) {
-        Iterm = CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
+    /* Calculate integral term */
+    Iterm = *previousIterm + kI * ((*previousErrorValue + errorValue) / 2) * CONTROL_SYSTEM_LOOP_PERIOD_S;
+    /* Clamp integral term to avoid integral wind-up */
+    if (-CONTROL_SYSTEM_PID_ITERM_LIMIT > Iterm) {
+        Iterm = -CONTROL_SYSTEM_PID_ITERM_LIMIT;
+    } else if (CONTROL_SYSTEM_PID_ITERM_LIMIT < Iterm) {
+        Iterm = CONTROL_SYSTEM_PID_ITERM_LIMIT;
     }
 
-    Dterm = kD * (errorValue - *previousErrorValue) / 0.004;
+    /* Calculate derivative term */
+    Dterm = kD * (errorValue - *previousErrorValue) / CONTROL_SYSTEM_LOOP_PERIOD_S;
 
+    /* Calculate PID output */
     pidOutputValue = Pterm + Iterm + Dterm;
+    /* Limit the PID output */
     if (-CONTROL_SYSTEM_PID_OUTPUT_LIMIT > pidOutputValue) {
         pidOutputValue = -CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
     } else if (CONTROL_SYSTEM_PID_OUTPUT_LIMIT < pidOutputValue) {
         pidOutputValue = CONTROL_SYSTEM_PID_OUTPUT_LIMIT;
     }
 
+    /* Return values */
     *PID_Output = pidOutputValue;
     *previousErrorValue = errorValue;
     *previousIterm = Iterm;
 }
 
-void CSM1_ResetPID(void) {
+void CSM2_ResetPID(void) {
 
-#if 1 == CONTROL_SYSTEM_MODE
+#if 2 == CONTROL_SYSTEM_MODE
 
     /* Reset previously stored PID errors and terms values */
     previousErrorValue_rollRate = 0;
@@ -1574,30 +1584,12 @@ void CSM1_ResetPID(void) {
 #endif
 }
 
-void CSM2_CalculateKalman(float kalmanState, float kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
-
-#if 2 == CONTROL_SYSTEM_MODE
-
-    float kalmanGain;
-
-    kalmanState = kalmanState + 0.004 * kalmanInput;
-    kalmanUncertainty = kalmanUncertainty + 0.004 * 0.004 * 4 * 4;
-    kalmanGain = kalmanUncertainty * 1 / (1 * kalmanUncertainty + 3 * 3);
-    kalmanState = kalmanState + kalmanGain * (kalmanMeasurement - kalmanState);
-    kalmanUncertainty = (1 - kalmanGain) * kalmanUncertainty;
-
-    kalmanOutput[0] = kalmanState;
-    kalmanOutput[1] = kalmanUncertainty;
-
-#endif
+void CSM3_CalculatePID(void) {
 }
 
-void CSM2_CalculatePID(void) {
-}
+void CSM3_ResetPID(void) {
 
-void CSM2_ResetPID(void) {
-
-#if 2 == CONTROL_SYSTEM_MODE
+#if 3 == CONTROL_SYSTEM_MODE
 
     /* Reset previously stored PID errors and terms values: Angles */
     previousErrorValue_rollAngle = 0;
