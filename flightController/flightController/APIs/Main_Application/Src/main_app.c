@@ -56,9 +56,9 @@
 /* Logging */
 #define LOGGING_TASK_DELAY_MULTIPLIER (20)
 // #define MAIN_APP_USE_LOGGING_STARTUP 							// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE0 			// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE1 			// Remove comment to allow driver info logging
-// #define MAIN_APP_USE_LOGGING_FSA8S 							// Remove comment to allow driver info logging
+//  #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE0 			// Remove comment to allow driver info logging
+//  #define MAIN_APP_USE_LOGGING_CONTROL_SYSTEM_MODE1 			// Remove comment to allow driver info logging
+#define MAIN_APP_USE_LOGGING_FSA8S // Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_GYROSCOPE 					// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER				// Remove comment to allow driver info logging
 // #define MAIN_APP_USE_LOGGING_GY87_ACCELEROMETER_ANGLES		// Remove comment to allow driver info logging
@@ -80,8 +80,8 @@
 #define CONTROL_SYSTEM_LOOP_PERIOD_MS         (4)     // Loop period in [ms]
 #define CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE (25)
 #define CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE (1800)
-#define CONTROL_SYSTEM_PID_OUTPUT_LIMIT       (400)
-#define CONTROL_SYSTEM_PID_ITERM_LIMIT        (400)
+#define CONTROL_SYSTEM_PID_OUTPUT_LIMIT       (200)
+#define CONTROL_SYSTEM_PID_ITERM_LIMIT        (200)
 /* Battery Level */
 #define BATTERY_LEVEL_CALIBRATION_OFFSET (0.76)
 
@@ -253,15 +253,15 @@ static float previousIterm_rollRate = 0;
 static float previousIterm_pitchRate = 0;
 static float previousIterm_yawRate = 0;
 /* PID gains: Rates */
-static float kP_rollRate = 0.6;
-static float kP_pitchRate = 0.6;
-static float kP_yawRate = 2;
-static float kI_rollRate = 3.5;
-static float kI_pitchRate = 3.5;
-static float kI_yawRate = 12;
-static float kD_rollRate = 0.03;
-static float kD_pitchRate = 0.03;
-static float kD_yawRate = 0.0;
+static float kP_rollRate = 1.404;
+static float kP_pitchRate = 0;
+static float kP_yawRate = 0;
+static float kI_rollRate = 0.596;
+static float kI_pitchRate = 0;
+static float kI_yawRate = 0;
+static float kD_rollRate = 0;
+static float kD_pitchRate = 0.0;
+static float kD_yawRate = 0;
 /* PID outputs: Rates */
 static float pidOutputValue_rollRate = 0;
 static float pidOutputValue_pitchRate = 0;
@@ -1039,10 +1039,20 @@ void FlightController_ControlSystem(void * ptr) {
                         Kalman_CalculateAngle(&Kalman_predictionValue_pitchAngle, &Kalman_uncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
 
                         /* Read inputs from radio controller */
-                        inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3) + 1000;
-                        inputValue_rollAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_1) + 1000;
-                        inputValue_pitchAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_2) + 1000;
-                        inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4) + 1000;
+                        inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                        inputValue_rollAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
+                        inputValue_pitchAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
+                        inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
+
+                        /*  Manual Calibration */
+                        //                        kP_pitchRate = 1.413 + (FSA8S_ReadChannel(rc_controller, CHANNEL_7) - 500) / 300;
+                        //                        kI_pitchRate = 3.463 + (FSA8S_ReadChannel(rc_controller, CHANNEL_8) - 500) / 100;
+                        //                        if(kP_pitchRate < 0)
+                        //                        	kP_pitchRate = 0;
+                        //                        if(kI_pitchRate < 0)
+                        //                        	kI_pitchRate = 0;
+                        kP_rollRate = FSA8S_ReadChannel(rc_controller, CHANNEL_7) / 250;
+                        kI_rollRate = FSA8S_ReadChannel(rc_controller, CHANNEL_8) / 250;
 
                         /* Adjust and limit throttle input */
                         if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < inputValue_throttle) {
@@ -1050,8 +1060,8 @@ void FlightController_ControlSystem(void * ptr) {
                         }
 
                         /* Calculate desired angles by mapping radio controller values to angles */
-                        desiredValue_rollAngle = 0.10 * (inputValue_rollAngle - 1500);
-                        desiredValue_pitchAngle = 0.10 * (inputValue_pitchAngle - 1500);
+                        desiredValue_rollAngle = 0.03 * (inputValue_rollAngle - 500);
+                        desiredValue_pitchAngle = 0.03 * (inputValue_pitchAngle - 500);
 
                         /* Calculate angles errors */
                         errorValue_rollAngle = desiredValue_rollAngle - Kalman_predictionValue_rollAngle;
@@ -1065,7 +1075,7 @@ void FlightController_ControlSystem(void * ptr) {
                         /* Calculate desired rates */
                         desiredValue_rollRate = pidOutputValue_rollAngle;
                         desiredValue_pitchRate = pidOutputValue_pitchAngle;
-                        desiredValue_yawRate = 0.15 * (inputValue_yawRate - 1500);
+                        desiredValue_yawRate = 0.03 * (inputValue_yawRate - 500);
 
                         /* Calculate rates errors */
                         errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
@@ -1080,10 +1090,10 @@ void FlightController_ControlSystem(void * ptr) {
                         CSM2_CalculatePID(&pidOutputValue_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, errorValue_yawRate, kP_yawRate, kI_yawRate, kD_yawRate);
 
                         /* Calculate motors speed */
-                        motorSpeed1 = ((inputValue_throttle - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate) - 1000) / 10;
-                        motorSpeed2 = ((inputValue_throttle + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate) - 1000) / 10;
-                        motorSpeed3 = ((inputValue_throttle + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate) - 1000) / 10;
-                        motorSpeed4 = ((inputValue_throttle - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate) - 1000) / 10;
+                        motorSpeed1 = (inputValue_throttle - pidOutputValue_rollRate - pidOutputValue_pitchRate - pidOutputValue_yawRate) / 10;
+                        motorSpeed2 = (inputValue_throttle + pidOutputValue_rollRate + pidOutputValue_pitchRate - pidOutputValue_yawRate) / 10;
+                        motorSpeed3 = (inputValue_throttle + pidOutputValue_rollRate - pidOutputValue_pitchRate + pidOutputValue_yawRate) / 10;
+                        motorSpeed4 = (inputValue_throttle - pidOutputValue_rollRate + pidOutputValue_pitchRate + pidOutputValue_yawRate) / 10;
 
                         /* Adjust and limit motors maximum speed */
                         if (ESC_MAXIMUM_SPEED < motorSpeed1)

@@ -77,14 +77,14 @@
 static uint8_t instancesNumber = 0;
 static BMP180_CalibrationData_t BMP180_CalibrationData;
 /* Gyroscope calibration values */
-static float gyroscopeCalibrationRoll = 0;
-static float gyroscopeCalibrationPitch = 0;
-static float gyroscopeCalibrationYaw = 0;
+static float gyroscopeCalibrationRoll = -1.61;
+static float gyroscopeCalibrationPitch = 2.20;
+static float gyroscopeCalibrationYaw = 1.39;
 static bool_t gyroscopeCalibrationIsDone = false;
 /* Accelerometer calibration values */
-static float accelerometerCalibrationX = 0;
-static float accelerometerCalibrationY = 0;
-static float accelerometerCalibrationZ = 0;
+static float accelerometerCalibrationX = -0.04;
+static float accelerometerCalibrationY = 0.03;
+static float accelerometerCalibrationZ = 0.01;
 static bool_t accelerometerCalibrationIsDone = false;
 
 /* --- Private function declarations ----------------------------------------------------------- */
@@ -384,7 +384,7 @@ static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t * hgy87) {
     /* Enable digital low pass filter */
     uint8_t regData;
 
-    regData = MPU_6050_BIT_CONFIG_DLPF_CFG_5;
+    regData = MPU_6050_BIT_CONFIG_DLPF_CFG_3;
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_CONFIG, &regData, MPU6050_SET_BIT);
 }
 
