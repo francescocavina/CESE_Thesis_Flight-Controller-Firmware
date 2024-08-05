@@ -84,23 +84,6 @@ typedef struct magnetometerValues {
     float magneticFieldZ;
 } GY87_magnetometerValues_t;
 
-typedef struct BMP180_CalibrationData {
-    int16_t AC1;  // Read
-    int16_t AC2;  // Read
-    int16_t AC3;  // Read
-    uint16_t AC4; // Read
-    uint16_t AC5; // Read
-    uint16_t AC6; // Read
-    int16_t B1;   // Read
-    int16_t B2;   // Read
-    int32_t B5;   // Calculated
-    int16_t MB;   // Read
-    int16_t MC;   // Read
-    int16_t MD;   // Read
-    int32_t UT;   // Calculated
-    int32_t CT;   // Calculated
-} BMP180_CalibrationData_t;
-
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
@@ -181,31 +164,6 @@ void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues
  * @retval Magnetometer heading in degrees [°].
  */
 float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t * hgy87);
-
-/*
- * @brief  Reads barometer temperature value. Temperature value is set at
- *         initialization, therefore it won't change.
- * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
- *                the configuration information for the GY87 device.
- * @retval Temperature in [°C].
- */
-float GY87_ReadBarometerTemperature(GY87_HandleTypeDef_t * hgy87);
-
-/*
- * @brief  Reads barometer pressure value.
- * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
- *                the configuration information for the GY87 device.
- * @retval Pressure in Pascals [Pa].
- */
-float GY87_ReadBarometerPressure(GY87_HandleTypeDef_t * hgy87);
-
-/*
- * @brief  Reads barometer altitude value.
- * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
- *                the configuration information for the GY87 device.
- * @retval Altitude in meters [m].
- */
-float GY87_ReadBarometerAltitude(GY87_HandleTypeDef_t * hgy87);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
