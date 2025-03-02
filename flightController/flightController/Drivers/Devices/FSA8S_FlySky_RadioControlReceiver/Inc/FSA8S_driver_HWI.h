@@ -23,9 +23,9 @@
 
 /*
  * @file:    FSA8S_driver_HWI.h
- * @date:    26/09/2023
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.6.1
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer

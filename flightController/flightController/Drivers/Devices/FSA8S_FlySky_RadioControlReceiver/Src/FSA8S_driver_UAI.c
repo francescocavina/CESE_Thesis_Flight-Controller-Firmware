@@ -23,9 +23,9 @@
 
 /*
  * @file:    FSA8S_driver_UAI.c
- * @date:    26/09/2023
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.6.1
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -148,6 +148,7 @@ static void FSA8S_AmendData(IBUS_HandleTypeDef_t * hibus) {
 
     /* Declare variable for channel value */
     uint16_t channelValue;
+    float calibratedChannelValue;
 
     /* Check parameter */
     if (NULL != hibus) {
@@ -168,7 +169,14 @@ static void FSA8S_AmendData(IBUS_HandleTypeDef_t * hibus) {
             }
 
             /* Map channel value between minimum and maximum values and store it */
-            hibus->data[(i - 2) / 2] = channelValue * ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] * ((float)IBUS_CHANNEL_MAX_VALUE / IBUS_CHANNEL_MIN_RAW_VALUE))) / IBUS_CHANNEL_MIN_RAW_VALUE);
+            calibratedChannelValue = channelValue * ((float)(IBUS_CHANNEL_MAX_VALUE + (calibrationValues[(i - 2) / 2] * ((float)IBUS_CHANNEL_MAX_VALUE / IBUS_CHANNEL_MIN_RAW_VALUE))) / IBUS_CHANNEL_MIN_RAW_VALUE);
+
+            /* Apply saturation to prevent overflow */
+            if (calibratedChannelValue > UINT16_MAX) {
+                hibus->data[(i - 2) / 2] = UINT16_MAX;
+            } else {
+                hibus->data[(i - 2) / 2] = (uint16_t)calibratedChannelValue;
+            }
         }
     }
 }
@@ -183,14 +191,13 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
     if (NULL == huart) {
         return NULL;
     }
-
     /* Check if driver was already initialized */
     if (alreadyInitialized) {
         return NULL;
     }
 
-    /* Allocate dynamic memory for the IBUS_HandleTypeDef_t structure and for the buffer to receive
-     * data */
+/* Allocate dynamic memory for the IBUS_HandleTypeDef_t structure and for the buffer to receive
+ * data */
 #ifdef USE_FREERTOS
     IBUS_HandleTypeDef_t * hibus = (IBUS_HandleTypeDef_t *)pvPortMalloc(sizeof(IBUS_HandleTypeDef_t));
     uint8_t * buffer = (uint8_t *)pvPortMalloc(sizeof(uint8_t) * IBUS_BUFFER_LENGTH);
@@ -202,7 +209,7 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
 #endif
 
     /* Initialize iBus_HandleTypeDef structure */
-    if (hibus) {
+    if (hibus && buffer && data) {
         hibus->huart = huart;
         hibus->buffer = buffer;
         hibus->bufferSize = IBUS_BUFFER_LENGTH;
@@ -212,18 +219,25 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
             hibus->data[i] = IBUS_CHANNEL_VALUE_NULL;
         }
     } else {
-        /* Dynamic memory allocation was not successful */
+/* Dynamic memory allocation was not successful */
 #ifdef USE_FREERTOS
         /* Free up dynamic allocated memory */
-        vPortFree(hibus->buffer);
-        vPortFree(hibus->data);
-        vPortFree(hibus);
+        if (hibus->buffer)
+            vPortFree(hibus->buffer);
+        if (hibus->data)
+            vPortFree(hibus->data);
+        if (hibus)
+            vPortFree(hibus);
 #else
         /* Free up dynamic allocated memory */
-        free(hibus->buffer);
-        free(hibus->data);
-        free(hibus);
+        if (hibus->buffer)
+            free(hibus->buffer);
+        if (hibus->data)
+            free(hibus->data);
+        if (hibus)
+            free(hibus);
 #endif
+        return NULL;
     }
 
     /* Initialize iBus communication */
@@ -232,23 +246,29 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
         alreadyInitialized = true;
         return hibus;
     } else {
-        /* Initialization was unsuccessful */
+/* Initialization was unsuccessful */
 #ifdef USE_FREERTOS
         /* Free up dynamic allocated memory */
-        vPortFree(hibus->buffer);
-        vPortFree(hibus->data);
-        vPortFree(hibus);
+        if (hibus->buffer)
+            vPortFree(hibus->buffer);
+        if (hibus->data)
+            vPortFree(hibus->data);
+        if (hibus)
+            vPortFree(hibus);
 #else
         /* Free up dynamic allocated memory */
-        free(hibus->buffer);
-        free(hibus);
+        if (hibus->buffer)
+            free(hibus->buffer);
+        if (hibus->data)
+            free(hibus->data);
+        if (hibus)
+            free(hibus);
 #endif
         return NULL;
     }
 }
 
 uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel) {
-
     /* Check parameter */
     if (NULL == hibus) {
         return IBUS_CHANNEL_VALUE_NULL;
@@ -256,29 +276,56 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel
 
     /* Check parameter */
     if (!(channel > 0 && channel <= IBUS_CHANNELS)) {
-
 #ifdef FSA8S_USE_LOGGING
         LOG((uint8_t *)"FSA8S invalid channel to read.\r\n\n", LOG_ERROR);
 #endif
-
         return IBUS_CHANNEL_VALUE_NULL;
     }
 
-    while (1) {
-        /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */
-        if (FSA8S_CheckFirstBytes(hibus)) {
+    /* Set number of tries for flight controller reading */
+    const uint8_t MAX_ATTEMPTS = 10;
+    uint8_t attempts = 0;
 
+    /* Keep track of last valid reading */
+    static uint16_t lastValidReadings[IBUS_CHANNELS] = {0};
+
+    /* Local buffer for atomic processing */
+    uint8_t safeBuffer[IBUS_BUFFER_LENGTH];
+
+    while (attempts < MAX_ATTEMPTS) {
+/* Create atomic copy of DMA buffer */
+#ifdef USE_FREERTOS
+        taskENTER_CRITICAL();
+        memcpy(safeBuffer, hibus->buffer, IBUS_BUFFER_LENGTH);
+        taskEXIT_CRITICAL();
+#else
+        __disable_irq();
+        memcpy(safeBuffer, hibus->buffer, IBUS_BUFFER_LENGTH);
+        __enable_irq();
+#endif
+
+        /* Use temporary structure to process data safely */
+        IBUS_HandleTypeDef_t tempHandle = *hibus;
+        tempHandle.buffer = safeBuffer;
+
+        /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */
+        if (FSA8S_CheckFirstBytes(&tempHandle)) {
             /* Perform a checksum */
-            if (!FSA8S_Checksum(hibus)) {
-                /* Received data is corrupted */
-                /* Wait another transaction and check first to bytes */
-                continue;
-            } else {
-                /* Received data is correct */
-                /* Quit outer while loop */
-                break;
+            if (FSA8S_Checksum(&tempHandle)) {
+                /* Valid data received - process it */
+                FSA8S_AmendData(&tempHandle);
+
+                /* Copy processed data back to the original structure */
+                hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET] = tempHandle.data[channel - IBUS_CHANNEL_NUM_OFFSET];
+
+                /* Store this as last valid reading */
+                lastValidReadings[channel - IBUS_CHANNEL_NUM_OFFSET] = hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
+
+                return hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
             }
         }
+        attempts++;
+
 #ifdef USE_FREERTOS
         vTaskDelay(pdMS_TO_TICKS(1));
 #else
@@ -286,11 +333,8 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel
 #endif
     }
 
-    /* Get channels data in little-endian */
-    FSA8S_AmendData(hibus);
-
-    /* Return channel value */
-    return hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
+    /* Return last valid reading rather than blocking indefinitely */
+    return lastValidReadings[channel - IBUS_CHANNEL_NUM_OFFSET];
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

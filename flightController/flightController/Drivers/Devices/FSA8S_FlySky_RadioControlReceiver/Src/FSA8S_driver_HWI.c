@@ -23,9 +23,9 @@
 
 /*
  * @file:    FSA8S_driver_HWI.C
- * @date:    26/09/2023
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.6.1
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for the radio control receiver FlySky FS-A8S.
  *           It is divided in two parts: One high level abstraction layer
@@ -72,14 +72,23 @@
 bool_t IBUS_Init(IBUS_HandleTypeDef_t * hibus) {
 
     /* Check parameter */
-    if (NULL == hibus) {
+    /* BEGIN MODIFY 1 */
+    if (NULL == hibus || NULL == hibus->buffer || 0 == hibus->bufferSize) {
+        /* END MODIFY 1 */
+        return false;
+    }
+
+    /* Check if UART is initialized */
+    /* BEGIN MODIFY 2 */
+    if (NULL == hibus->huart || hibus->huart->gState == HAL_UART_STATE_RESET) {
+        /* END MODIFY 2 */
         return false;
     }
 
     /* Initialize DMA reception */
-    /* BEGIN MODIFY 1 */
+    /* BEGIN MODIFY 3 */
     if (HAL_OK != HAL_UART_Receive_DMA(hibus->huart, hibus->buffer, hibus->bufferSize)) {
-        /* END MODIFY 1 */
+        /* END MODIFY 3 */
 
         /* DMA initialization was unsuccessful */
         return false;
