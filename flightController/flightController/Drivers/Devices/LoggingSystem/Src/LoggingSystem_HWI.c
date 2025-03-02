@@ -23,9 +23,9 @@
 
 /*
  * @file:    LoggingSystem_HWI.c
- * @date:    03/03/2024
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for logging messages for the user via USB.
  *           It is divided in two parts: One high level abstraction layer
@@ -56,20 +56,20 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t USB_Write(uint8_t * string) {
+bool_t USB_Write(const uint8_t * string) {
 
     /* Check for NULL pointer */
     if (string == NULL) {
         return false;
     }
 
+    size_t length = strlen((const char *)string);
+
     /* BEGIN MODIFY 1 */
     if (hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED) {
-        if (CDC_Transmit_FS(string, strlen((const char *)string)) == USBD_BUSY) {
-            /* USB is busy */
+        if (CDC_Transmit_FS((uint8_t *)string, length) == USBD_BUSY) {
             return false;
         } else {
-            /* USB is not busy */
             return true;
         }
     }

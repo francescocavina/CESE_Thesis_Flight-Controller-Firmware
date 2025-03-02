@@ -23,9 +23,9 @@
 
 /*
  * @file:    LoggingSystem_UAI.c
- * @date:    03/03/2024
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for logging messages for the user via USB.
  *           It is divided in two parts: One high level abstraction layer
@@ -62,25 +62,24 @@ static const uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t LOG(uint8_t * message, LOGGING_TYPE_t logType) {
+bool_t LOG(const uint8_t * message, LOGGING_TYPE_t logType) {
 
     /* Check parameters */
     if (NULL == message) {
         return false;
     }
-
-    if (logType > LOG_RAW) { // Remove unnecessary check
+    if (logType > LOG_RAW) {
         return false;
     }
 
     /* Build log message */
     uint8_t logMessage[LOG_MESSAGE_MAX_LENGTH] = {0};
+    int written_chars = 0;
 
-    // Calculate required buffer size to prevent overflow
-    size_t prefixLen = 0;
-    const uint8_t * prefix = NULL;
-
+    /* Add prefix based on log type */
     if (logType != LOG_RAW) {
+        const uint8_t * prefix = NULL;
+
         if (LOG_INFORMATION == logType) {
             prefix = informationTypeLabel;
         } else if (LOG_DEBUGGING == logType) {
@@ -90,22 +89,20 @@ bool_t LOG(uint8_t * message, LOGGING_TYPE_t logType) {
         } else if (LOG_ERROR == logType) {
             prefix = errorTypeLabel;
         }
-        prefixLen = strlen((const char *)prefix);
+
+        if (prefix) {
+            written_chars = snprintf((char *)logMessage, LOG_MESSAGE_MAX_LENGTH, "%s%s", (char *)prefix, (char *)message);
+        }
+    } else {
+        /* Raw log without prefix */
+        written_chars = snprintf((char *)logMessage, LOG_MESSAGE_MAX_LENGTH, "%s", (char *)message);
     }
 
-    size_t messageLen = strlen((const char *)message);
-
-    // Check for potential buffer overflow
-    if ((prefixLen + messageLen) >= LOG_MESSAGE_MAX_LENGTH) {
-        // Message too long - either truncate or return error
+    /* Check if message was successfully formatted */
+    if (written_chars < 0 || written_chars >= LOG_MESSAGE_MAX_LENGTH) {
+        /* Message was truncated or error occurred */
         return false;
     }
-
-    // Safe concatenation
-    if (prefix) {
-        strcat((char *)logMessage, (const char *)prefix);
-    }
-    strcat((char *)logMessage, (const char *)message);
 
     /* Send message through USB port */
     return USB_Write(logMessage);

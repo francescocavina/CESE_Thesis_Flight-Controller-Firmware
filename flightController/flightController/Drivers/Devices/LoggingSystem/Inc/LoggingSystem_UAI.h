@@ -23,9 +23,9 @@
 
 /*
  * @file:    LoggingSystem_UAI.h
- * @date:    03/03/2024
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for logging messages for the user via USB.
  *           It is divided in two parts: One high level abstraction layer
@@ -67,12 +67,15 @@ typedef enum {
 /* --- Public function declarations ------------------------------------------------------------ */
 /*
  * @brief  Sends a string through the USB port with Logging Type as prefix.
- * @param  message: string to send.
- *         logType: type of message = LOG_INFORMATION, LOG_DEBUGGING, LOG_WARNING or LOG_ERROR.
+ * @param  message: string to send (must be null-terminated). The caller retains ownership.
+ *         logType: type of message = LOG_INFORMATION, LOG_DEBUGGING, LOG_WARNING, LOG_ERROR, or LOG_RAW.
  * @retval true:    message was successfully sent to the USB buffer.
  *         false:   message couldn't be sent to the USB buffer.
+ * @note   Maximum message length is defined by LOG_MESSAGE_MAX_LENGTH.
+ * @note   This function is not thread-safe and should be protected if called from multiple tasks.
+ * @example LOG((uint8_t*)"Motor initialized", LOG_INFORMATION);
  */
-bool_t LOG(uint8_t * message, LOGGING_TYPE_t logType);
+bool_t LOG(const uint8_t * message, LOGGING_TYPE_t logType);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

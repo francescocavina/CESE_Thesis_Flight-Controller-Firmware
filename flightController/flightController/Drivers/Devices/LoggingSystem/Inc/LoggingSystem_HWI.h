@@ -23,9 +23,9 @@
 
 /*
  * @file:    LoggingSystem_HWI.h
- * @date:    03/03/2024
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for logging messages for the user via USB.
  *           It is divided in two parts: One high level abstraction layer
@@ -69,10 +69,12 @@ typedef bool bool_t;
 /*
  * @brief  Sends a string through the USB port.
  * @param  string: characters to send.
- * @retval true: string sent successfully.
- *         false: string not sent.
+ * @return true if string sent successfully, false if:
+ *         - USB is not configured
+ *         - USB is busy
+ *         - string is NULL
  */
-bool_t USB_Write(uint8_t * string);
+bool_t USB_Write(const uint8_t * string);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
