@@ -1672,7 +1672,7 @@ __STATIC_INLINE void LL_APB1_GRP1_DisableClockLowPower(uint32_t Periphs) {
   *
   *         (*) value not defined in all devices.
   * @retval None
-*/
+  */
 __STATIC_INLINE void LL_APB2_GRP1_EnableClock(uint32_t Periphs) {
     __IO uint32_t tmpreg;
     SET_BIT(RCC->APB2ENR, Periphs);

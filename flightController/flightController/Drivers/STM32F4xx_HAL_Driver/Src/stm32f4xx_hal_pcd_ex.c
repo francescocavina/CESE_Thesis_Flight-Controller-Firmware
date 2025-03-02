@@ -140,7 +140,9 @@ HAL_StatusTypeDef HAL_PCDEx_DeActivateLPM(PCD_HandleTypeDef * hpcd) {
 
     return HAL_OK;
 }
-#endif /* defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx) || defined(STM32F412Zx) || defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) || defined(STM32F413xx) || defined(STM32F423xx) */
+#endif /* defined(STM32F446xx) || defined(STM32F469xx) || defined(STM32F479xx) || defined(STM32F412Zx) ||                                                                                                                                                \
+          defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) || defined(STM32F413xx) ||                                                                                                                                                \
+          defined(STM32F423xx) */
 #if defined(STM32F412Zx) || defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) || defined(STM32F413xx) || defined(STM32F423xx)
 /**
  * @brief  Handle BatteryCharging Process.
@@ -183,7 +185,7 @@ void HAL_PCDEx_BCD_VBUSDetect(PCD_HandleTypeDef * hpcd) {
     } else {
         /* start secondary detection to check connection to Charging Downstream
         Port or Dedicated Charging Port */
-        USBx->GCCFG &= ~USB_OTG_GCCFG_PDEN;
+        USBx->GCCFG &= ~(USB_OTG_GCCFG_PDEN);
         HAL_Delay(50U);
         USBx->GCCFG |= USB_OTG_GCCFG_SDEN;
         HAL_Delay(50U);
@@ -264,7 +266,8 @@ HAL_StatusTypeDef HAL_PCDEx_DeActivateBCD(PCD_HandleTypeDef * hpcd) {
 
     return HAL_OK;
 }
-#endif /* defined(STM32F412Zx) || defined(STM32F412Vx) || defined(STM32F412Rx) || defined(STM32F412Cx) || defined(STM32F413xx) || defined(STM32F423xx) */
+#endif /* defined(STM32F412Zx) || defined(STM32F412Vx) || defined(STM32F412Rx) ||                                                                                                                                                                        \
+          defined(STM32F412Cx) || defined(STM32F413xx) || defined(STM32F423xx) */
 #endif /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
 
 /**

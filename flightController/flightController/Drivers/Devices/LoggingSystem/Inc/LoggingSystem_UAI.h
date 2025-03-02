@@ -59,13 +59,14 @@ typedef enum {
     LOG_DEBUGGING = 1,
     LOG_WARNING = 2,
     LOG_ERROR = 3,
+    LOG_RAW = 4,
 } LOGGING_TYPE_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
 /*
- * @brief  Sends a string through the USB port.
+ * @brief  Sends a string through the USB port with Logging Type as prefix.
  * @param  message: string to send.
  *         logType: type of message = LOG_INFORMATION, LOG_DEBUGGING, LOG_WARNING or LOG_ERROR.
  * @retval true:    message was successfully sent to the USB buffer.

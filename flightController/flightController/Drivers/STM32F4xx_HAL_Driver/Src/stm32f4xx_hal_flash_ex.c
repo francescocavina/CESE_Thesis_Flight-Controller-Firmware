@@ -132,8 +132,8 @@ extern HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout);
  */
 
 /** @defgroup FLASHEx_Exported_Functions_Group1 Extended IO operation functions
- *  @brief   Extended IO operation functions
- *
+  *  @brief   Extended IO operation functions
+  *
 @verbatim
  ===============================================================================
                 ##### Extended programming operation functions #####
@@ -222,9 +222,6 @@ HAL_StatusTypeDef HAL_FLASHEx_Erase(FLASH_EraseInitTypeDef * pEraseInit, uint32_
  */
 HAL_StatusTypeDef HAL_FLASHEx_Erase_IT(FLASH_EraseInitTypeDef * pEraseInit) {
     HAL_StatusTypeDef status = HAL_OK;
-
-    /* Process Locked */
-    __HAL_LOCK(&pFlash);
 
     /* Check the parameters */
     assert_param(IS_FLASH_TYPEERASE(pEraseInit->TypeErase));

@@ -43,15 +43,15 @@
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define LOG_MESSAGE_MAX_LENGTH 256
+#define LOG_MESSAGE_MAX_LENGTH 1024
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
-static uint8_t * informationTypeLabel = (uint8_t *)"LOG:INFO:    ";
-static uint8_t * debuggingTypeLabel = (uint8_t *)"LOG:DEBUG:   ";
-static uint8_t * warningTypeLabel = (uint8_t *)"LOG:WARNING: ";
-static uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
+static const uint8_t * informationTypeLabel = (uint8_t *)"LOG:INFO:    ";
+static const uint8_t * debuggingTypeLabel = (uint8_t *)"LOG:DEBUG:   ";
+static const uint8_t * warningTypeLabel = (uint8_t *)"LOG:WARNING: ";
+static const uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
 
 /* --- Private function declarations ----------------------------------------------------------- */
 
@@ -69,33 +69,46 @@ bool_t LOG(uint8_t * message, LOGGING_TYPE_t logType) {
         return false;
     }
 
-    if (LOG_INFORMATION < 0 || logType > LOG_ERROR) {
+    if (logType > LOG_RAW) { // Remove unnecessary check
         return false;
     }
 
     /* Build log message */
     uint8_t logMessage[LOG_MESSAGE_MAX_LENGTH] = {0};
 
-    if (LOG_INFORMATION == logType) {
+    // Calculate required buffer size to prevent overflow
+    size_t prefixLen = 0;
+    const uint8_t * prefix = NULL;
 
-        strcat((char *)logMessage, (char *)informationTypeLabel);
-    } else if (LOG_DEBUGGING == logType) {
-
-        strcat((char *)logMessage, (char *)debuggingTypeLabel);
-    } else if (LOG_WARNING == logType) {
-
-        strcat((char *)logMessage, (char *)warningTypeLabel);
-    } else if (LOG_ERROR == logType) {
-
-        strcat((char *)logMessage, (char *)errorTypeLabel);
+    if (logType != LOG_RAW) {
+        if (LOG_INFORMATION == logType) {
+            prefix = informationTypeLabel;
+        } else if (LOG_DEBUGGING == logType) {
+            prefix = debuggingTypeLabel;
+        } else if (LOG_WARNING == logType) {
+            prefix = warningTypeLabel;
+        } else if (LOG_ERROR == logType) {
+            prefix = errorTypeLabel;
+        }
+        prefixLen = strlen((const char *)prefix);
     }
 
-    strcat((char *)logMessage, (char *)message);
+    size_t messageLen = strlen((const char *)message);
+
+    // Check for potential buffer overflow
+    if ((prefixLen + messageLen) >= LOG_MESSAGE_MAX_LENGTH) {
+        // Message too long - either truncate or return error
+        return false;
+    }
+
+    // Safe concatenation
+    if (prefix) {
+        strcat((char *)logMessage, (const char *)prefix);
+    }
+    strcat((char *)logMessage, (const char *)message);
 
     /* Send message through USB port */
-    USB_Write(logMessage);
-
-    return true;
+    return USB_Write(logMessage);
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

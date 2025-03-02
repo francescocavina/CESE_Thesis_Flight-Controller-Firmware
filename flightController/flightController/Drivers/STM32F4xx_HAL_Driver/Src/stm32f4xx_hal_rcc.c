@@ -110,8 +110,8 @@
  */
 
 /** @defgroup RCC_Exported_Functions_Group1 Initialization and de-initialization functions
- *  @brief    Initialization and Configuration functions
- *
+  *  @brief    Initialization and Configuration functions
+  *
 @verbatim
  ===============================================================================
            ##### Initialization and de-initialization functions #####
@@ -216,8 +216,8 @@ __weak HAL_StatusTypeDef HAL_RCC_DeInit(void) {
  * @retval HAL status
  */
 __weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef * RCC_OscInitStruct) {
-    uint32_t tickstart, pll_config;
-
+    uint32_t tickstart;
+    uint32_t pll_config;
     /* Check Null pointer */
     if (RCC_OscInitStruct == NULL) {
         return HAL_ERROR;
@@ -425,7 +425,7 @@ __weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef * RCC_OscInitStruc
                 /* Get Start Tick */
                 tickstart = HAL_GetTick();
 
-                /* Wait till PLL is ready */
+                /* Wait till PLL is disabled */
                 while (__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY) != RESET) {
                     if ((HAL_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
                         return HAL_TIMEOUT;
@@ -454,7 +454,7 @@ __weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef * RCC_OscInitStruc
                 /* Get Start Tick */
                 tickstart = HAL_GetTick();
 
-                /* Wait till PLL is ready */
+                /* Wait till PLL is disabled */
                 while (__HAL_RCC_GET_FLAG(RCC_FLAG_PLLRDY) != RESET) {
                     if ((HAL_GetTick() - tickstart) > PLL_TIMEOUT_VALUE) {
                         return HAL_TIMEOUT;
@@ -477,7 +477,7 @@ __weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef * RCC_OscInitStruc
                 if (((RCC_OscInitStruct->PLL.PLLState) == RCC_PLL_OFF) || (READ_BIT(pll_config, RCC_PLLCFGR_PLLSRC) != RCC_OscInitStruct->PLL.PLLSource) ||
                     (READ_BIT(pll_config, RCC_PLLCFGR_PLLM) != (RCC_OscInitStruct->PLL.PLLM) << RCC_PLLCFGR_PLLM_Pos) || (READ_BIT(pll_config, RCC_PLLCFGR_PLLN) != (RCC_OscInitStruct->PLL.PLLN) << RCC_PLLCFGR_PLLN_Pos) ||
                     (READ_BIT(pll_config, RCC_PLLCFGR_PLLP) != (((RCC_OscInitStruct->PLL.PLLP >> 1U) - 1U)) << RCC_PLLCFGR_PLLP_Pos) || (READ_BIT(pll_config, RCC_PLLCFGR_PLLQ) != (RCC_OscInitStruct->PLL.PLLQ << RCC_PLLCFGR_PLLQ_Pos)))
-#endif
+#endif /* RCC_PLLCFGR_PLLR */
                 {
                     return HAL_ERROR;
                 }
@@ -632,8 +632,8 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef * RCC_ClkInitStruct, ui
  */
 
 /** @defgroup RCC_Exported_Functions_Group2 Peripheral Control functions
- *  @brief   RCC clocks control functions
- *
+  *  @brief   RCC clocks control functions
+  *
 @verbatim
  ===============================================================================
                       ##### Peripheral Control functions #####
@@ -781,7 +781,9 @@ void HAL_RCC_DisableCSS(void) {
  * @retval SYSCLK frequency
  */
 __weak uint32_t HAL_RCC_GetSysClockFreq(void) {
-    uint32_t pllm = 0U, pllvco = 0U, pllp = 0U;
+    uint32_t pllm = 0U;
+    uint32_t pllvco = 0U;
+    uint32_t pllp = 0U;
     uint32_t sysclockfreq = 0U;
 
     /* Get SYSCLK source -------------------------------------------------------*/

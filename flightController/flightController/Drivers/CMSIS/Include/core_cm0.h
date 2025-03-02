@@ -1,11 +1,11 @@
 /**************************************************************************/ /**
                                                                               * @file     core_cm0.h
                                                                               * @brief    CMSIS Cortex-M0 Core Peripheral Access Layer Header File
-                                                                              * @version  V5.0.5
-                                                                              * @date     28. May 2018
+                                                                              * @version  V5.0.8
+                                                                              * @date     21. August 2019
                                                                               ******************************************************************************/
 /*
- * Copyright (c) 2009-2018 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -79,7 +79,7 @@ extern "C" {
 #endif
 
 #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-#if defined __ARM_PCS_VFP
+#if defined __ARM_FP
 #error "Compiler generates FPU instructions for a device without an FPU (check __FPU_PRESENT)"
 #endif
 
@@ -298,7 +298,7 @@ typedef struct {
     __IOM uint32_t ISER[1U]; /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
     uint32_t RESERVED0[31U];
     __IOM uint32_t ICER[1U]; /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
-    uint32_t RSERVED1[31U];
+    uint32_t RESERVED1[31U];
     __IOM uint32_t ISPR[1U]; /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
     uint32_t RESERVED2[31U];
     __IOM uint32_t ICPR[1U]; /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
@@ -590,7 +590,9 @@ typedef struct {
  */
 __STATIC_INLINE void __NVIC_EnableIRQ(IRQn_Type IRQn) {
     if ((int32_t)(IRQn) >= 0) {
+        __COMPILER_BARRIER();
         NVIC->ISER[0U] = (uint32_t)(1UL << (((uint32_t)IRQn) & 0x1FUL));
+        __COMPILER_BARRIER();
     }
 }
 
@@ -754,8 +756,9 @@ __STATIC_INLINE void NVIC_DecodePriority(uint32_t Priority, uint32_t PriorityGro
   \param [in]   vector    Address of interrupt handler function
  */
 __STATIC_INLINE void __NVIC_SetVector(IRQn_Type IRQn, uint32_t vector) {
-    uint32_t * vectors = (uint32_t *)0x0U;
-    vectors[(int32_t)IRQn + NVIC_USER_IRQ_OFFSET] = vector;
+    uint32_t * vectors = (uint32_t *)(NVIC_USER_IRQ_OFFSET << 2); /* point to 1st user interrupt */
+    *(vectors + (int32_t)IRQn) = vector;                          /* use pointer arithmetic to access vector */
+                                                                  /* ARM Application Note 321 states that the M0 does not require the architectural barrier */
 }
 
 /**
@@ -767,8 +770,8 @@ __STATIC_INLINE void __NVIC_SetVector(IRQn_Type IRQn, uint32_t vector) {
   \return                 Address of interrupt handler function
  */
 __STATIC_INLINE uint32_t __NVIC_GetVector(IRQn_Type IRQn) {
-    uint32_t * vectors = (uint32_t *)0x0U;
-    return vectors[(int32_t)IRQn + NVIC_USER_IRQ_OFFSET];
+    uint32_t * vectors = (uint32_t *)(NVIC_USER_IRQ_OFFSET << 2); /* point to 1st user interrupt */
+    return *(vectors + (int32_t)IRQn);                            /* use pointer arithmetic to access vector */
 }
 
 /**

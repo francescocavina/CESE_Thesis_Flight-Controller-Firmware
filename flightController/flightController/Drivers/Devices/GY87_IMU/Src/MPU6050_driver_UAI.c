@@ -47,11 +47,11 @@
 #include "QMC5883L_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define USE_FREERTOS                // Remove comment when using FreeRTOS
-#define GY87_USE_LOGGING            // Remove comment to allow driver info logging
+#define USE_FREERTOS // Remove comment when using FreeRTOS
+// #define GY87_USE_LOGGING            // Remove comment to allow driver info logging
 
 #define GY87_MAX_NUMBER_INSTANCES   (2)    // Maximum number of possible IMUs connected to the i2c bus
-#define GY87_CALIBRATION_ITERATIONS (3000) // No. of readings to get a calibration value
+#define GY87_CALIBRATION_ITERATIONS (1500) // No. of readings to get a calibration value
 #define MPU6050_SET_BIT             (1)
 #define MPU6050_CLEAR_BIT           (0)
 #define QMC5883L_SET_BIT            (1)
@@ -70,15 +70,13 @@
 /* --- Private variable declarations ----------------------------------------------------------- */
 static uint8_t instancesNumber = 0;
 /* Gyroscope calibration values */
-static float gyroscopeCalibrationRoll = -1.61;
-static float gyroscopeCalibrationPitch = 2.20;
-static float gyroscopeCalibrationYaw = 1.39;
-static bool_t gyroscopeCalibrationIsDone = false;
+static float gyroscopeCalibrationRoll = 0;
+static float gyroscopeCalibrationPitch = 0;
+static float gyroscopeCalibrationYaw = 0;
 /* Accelerometer calibration values */
-static float accelerometerCalibrationX = -0.04;
-static float accelerometerCalibrationY = 0.03;
-static float accelerometerCalibrationZ = 0.01;
-static bool_t accelerometerCalibrationIsDone = false;
+static float accelerometerCalibrationX = 0;
+static float accelerometerCalibrationY = 0;
+static float accelerometerCalibrationZ = 0;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -622,10 +620,12 @@ void GY87_Reset(GY87_HandleTypeDef_t * hgy87) {
     }
 }
 
-bool_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87) {
+GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en) {
 
     /* Declare structure to read the gyroscope values */
     GY87_gyroscopeValues_t gyroscopeValues;
+    /* Declare variable to write the gyroscope calibration values */
+    GY87_gyroscopeCalibrationValues_t gyroscopeCalibrationValues;
 
     /* Declare variables to accumulate measurements */
     float ratesRoll = 0;
@@ -634,39 +634,45 @@ bool_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87) {
 
     /* Check parameter and calculate calibration value */
     if (NULL != hgy87) {
+        if (true == fixedCalibration_en) {
+            gyroscopeCalibrationValues.fixedCalibration_en = true;
+        } else {
+            /* Calibrate gyroscope measurements */
+            for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
 
-        /* Calibrate gyroscope measurements */
-        for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
+                /* Read gyroscope values */
+                GY87_ReadGyroscope(hgy87, &gyroscopeValues);
 
-            /* Read gyroscope values */
-            GY87_ReadGyroscope(hgy87, &gyroscopeValues);
+                /* Accumulate measurements */
+                ratesRoll += gyroscopeValues.rotationRateRoll;
+                ratesPitch += gyroscopeValues.rotationRatePitch;
+                ratesYaw += gyroscopeValues.rotationRateYaw;
+            }
 
-            /* Accumulate measurements */
-            ratesRoll += gyroscopeValues.rotationRateRoll;
-            ratesPitch += gyroscopeValues.rotationRatePitch;
-            ratesYaw += gyroscopeValues.rotationRateYaw;
-        }
-
-        gyroscopeCalibrationRoll = ratesRoll / GY87_CALIBRATION_ITERATIONS;
-        gyroscopeCalibrationPitch = ratesPitch / GY87_CALIBRATION_ITERATIONS;
-        gyroscopeCalibrationYaw = ratesYaw / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationRoll = ratesRoll / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationPitch = ratesPitch / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationYaw = ratesYaw / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues.fixedCalibration_en = false;
 
 #ifdef GY87_USE_LOGGING
-        uint8_t loggingStr[120] = {0};
-        sprintf((char *)loggingStr, (const char *)"Gyroscope calibration done. CALVAL_ROLL = %.2f, CALVAL_PITCH = %.2f, CALVAL_YAW = %.2f\r\n\n", gyroscopeCalibrationRoll, gyroscopeCalibrationPitch, gyroscopeCalibrationYaw);
-        LOG(loggingStr, LOG_INFORMATION);
+            uint8_t loggingStr[120] = {0};
+            sprintf((char *)loggingStr, (const char *)"Gyroscope calibration done. CALVAL_ROLL = %.2f, CALVAL_PITCH = %.2f, CALVAL_YAW = %.2f\r\n\n", gyroscopeCalibrationRoll, gyroscopeCalibrationPitch, gyroscopeCalibrationYaw);
+            LOG(loggingStr, LOG_INFORMATION);
 #endif
+        }
 
-        gyroscopeCalibrationIsDone = true;
-
-        return true;
+        gyroscopeCalibrationValues.calibrationValueRateRoll = gyroscopeCalibrationRoll;
+        gyroscopeCalibrationValues.calibrationValueRatePitch = gyroscopeCalibrationPitch;
+        gyroscopeCalibrationValues.calibrationValueRateYaw = gyroscopeCalibrationYaw;
 
     } else {
-
-        gyroscopeCalibrationIsDone = false;
-
-        return false;
+        gyroscopeCalibrationValues.calibrationValueRateRoll = -1;
+        gyroscopeCalibrationValues.calibrationValueRatePitch = -1;
+        gyroscopeCalibrationValues.fixedCalibration_en = -1;
+        gyroscopeCalibrationValues.fixedCalibration_en = true;
     }
+
+    return gyroscopeCalibrationValues;
 }
 
 void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues) {
@@ -710,10 +716,12 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
     }
 }
 
-bool_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87) {
+GY87_accelerometerCalibrationValues_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en) {
 
     /* Declare structure to read the accelerometer values */
     GY87_accelerometerValues_t accelerometerValues;
+    /* Declare variable to write the gyroscope calibration values */
+    GY87_accelerometerCalibrationValues_t accelerometerCalibrationValues;
 
     /* Declare variables to accumulate measurements */
     float linearAccelerationsX = 0;
@@ -722,39 +730,45 @@ bool_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87) {
 
     /* Check parameter and calculate calibration value */
     if (NULL != hgy87) {
+        if (true == fixedCalibration_en) {
+            accelerometerCalibrationValues.fixedCalibration_en = true;
+        } else {
+            /* Calibrate gyroscope measurements */
+            for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
 
-        /* Calibrate gyroscope measurements */
-        for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
+                /* Read gyroscope values */
+                GY87_ReadAccelerometer(hgy87, &accelerometerValues);
 
-            /* Read gyroscope values */
-            GY87_ReadAccelerometer(hgy87, &accelerometerValues);
+                /* Accumulate measurements */
+                linearAccelerationsX += accelerometerValues.linearAccelerationX;
+                linearAccelerationsY += accelerometerValues.linearAccelerationY;
+                linearAccelerationsZ += (accelerometerValues.linearAccelerationZ - 1);
+            }
 
-            /* Accumulate measurements */
-            linearAccelerationsX += accelerometerValues.linearAccelerationX;
-            linearAccelerationsY += accelerometerValues.linearAccelerationY;
-            linearAccelerationsZ += (accelerometerValues.linearAccelerationZ - 1);
-        }
-
-        accelerometerCalibrationX = linearAccelerationsX / GY87_CALIBRATION_ITERATIONS;
-        accelerometerCalibrationY = linearAccelerationsY / GY87_CALIBRATION_ITERATIONS;
-        accelerometerCalibrationZ = linearAccelerationsZ / GY87_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationX = linearAccelerationsX / GY87_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationY = linearAccelerationsY / GY87_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationZ = linearAccelerationsZ / GY87_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationValues.fixedCalibration_en = false;
 
 #ifdef GY87_USE_LOGGING
-        uint8_t loggingStr[120] = {0};
-        sprintf((char *)loggingStr, (const char *)"Accelerometer calibration done. CALVAL_X = %.2f, CALVAL_Y = %.2f, CALVAL_Z = %.2f\r\n\n", accelerometerCalibrationX, accelerometerCalibrationY, accelerometerCalibrationZ);
-        LOG((uint8_t *)loggingStr, LOG_INFORMATION);
+            uint8_t loggingStr[120] = {0};
+            sprintf((char *)loggingStr, (const char *)"Accelerometer calibration done. CALVAL_X = %.2f, CALVAL_Y = %.2f, CALVAL_Z = %.2f\r\n\n", accelerometerCalibrationX, accelerometerCalibrationY, accelerometerCalibrationZ);
+            LOG((uint8_t *)loggingStr, LOG_INFORMATION);
 #endif
+        }
 
-        accelerometerCalibrationIsDone = true;
-
-        return true;
+        accelerometerCalibrationValues.calibrationValuelinearAccelerationX = accelerometerCalibrationX;
+        accelerometerCalibrationValues.calibrationValuelinearAccelerationY = accelerometerCalibrationY;
+        accelerometerCalibrationValues.calibrationValuelinearAccelerationZ = accelerometerCalibrationZ;
 
     } else {
-
-        accelerometerCalibrationIsDone = false;
-
-        return false;
+        accelerometerCalibrationValues.calibrationValuelinearAccelerationX = -1;
+        accelerometerCalibrationValues.calibrationValuelinearAccelerationY = -1;
+        accelerometerCalibrationValues.calibrationValuelinearAccelerationZ = -1;
+        accelerometerCalibrationValues.fixedCalibration_en = false;
     }
+
+    return accelerometerCalibrationValues;
 }
 
 void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues) {
@@ -766,6 +780,7 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
     int16_t scaleFactor = MPU_6050_AUX_VAL_ACCEL_FS_08;
 
     float accX, accY, accZ;
+    float denomRoll, denomPitch;
 
     /* Check parameters */
     if (NULL != hgy87 && NULL != accelerometerValues) {
@@ -789,8 +804,21 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
         accZ = accelerometerValues->linearAccelerationZ = ((float)accelerometerValues->rawValueZ / scaleFactor) - accelerometerCalibrationZ;
 
         /* Calculate roll and pitch angles using an approximation with linear accelerations */
-        accelerometerValues->angleRoll = atan(accY / sqrt(accX * accX + accZ * accZ)) * RADIANS_TO_DEGREES_CONST;
-        accelerometerValues->anglePitch = -atan(accX / sqrt(accY * accY + accZ * accZ)) * RADIANS_TO_DEGREES_CONST;
+        denomRoll = sqrt(accX * accX + accZ * accZ);
+        denomPitch = sqrt(accY * accY + accZ * accZ);
+
+        /* Prevent division by zero */
+        if (denomRoll > 0.0001f) {
+            accelerometerValues->angleRoll = atan(accY / denomRoll) * RADIANS_TO_DEGREES_CONST;
+        } else {
+            accelerometerValues->angleRoll = (accY >= 0) ? 90.0f : -90.0f;
+        }
+
+        if (denomPitch > 0.0001f) {
+            accelerometerValues->anglePitch = -atan(accX / denomPitch) * RADIANS_TO_DEGREES_CONST;
+        } else {
+            accelerometerValues->anglePitch = (accX >= 0) ? -90.0f : 90.0f;
+        }
 
     } else {
         /* Wrong parameters */
@@ -800,6 +828,8 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
         accelerometerValues->linearAccelerationX = 0;
         accelerometerValues->linearAccelerationY = 0;
         accelerometerValues->linearAccelerationZ = 0;
+        accelerometerValues->angleRoll = 0;
+        accelerometerValues->anglePitch = 0;
     }
 }
 

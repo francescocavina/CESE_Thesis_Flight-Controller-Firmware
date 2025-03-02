@@ -49,17 +49,34 @@
 /* --- Private function declarations ----------------------------------------------------------- */
 
 /* --- Public variable definitions ------------------------------------------------------------- */
+extern USBD_HandleTypeDef hUsbDeviceFS;
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-void USB_Write(uint8_t * string) {
+bool_t USB_Write(uint8_t * string) {
+
+    /* Check for NULL pointer */
+    if (string == NULL) {
+        return false;
+    }
 
     /* BEGIN MODIFY 1 */
-    CDC_Transmit_FS(string, strlen((const char *)string));
+    if (hUsbDeviceFS.dev_state == USBD_STATE_CONFIGURED) {
+        if (CDC_Transmit_FS(string, strlen((const char *)string)) == USBD_BUSY) {
+            /* USB is busy */
+            return false;
+        } else {
+            /* USB is not busy */
+            return true;
+        }
+    }
     /* END MODIFY 1 */
+
+    /* USB not configured */
+    return false;
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

@@ -7,7 +7,7 @@
  *          This file contains:
  *           - Data structures and the address mapping for all peripherals
  *           - peripherals registers declarations and bits definition
- *           - Macros to access peripheral’s registers hardware
+ *           - Macros to access peripheral's registers hardware
  *
  ******************************************************************************
  * @attention
@@ -64,15 +64,15 @@ extern "C" {
  */
 typedef enum {
     /******  Cortex-M4 Processor Exceptions Numbers ****************************************************************/
-    NonMaskableInt_IRQn = -14,    /*!< 2 Non Maskable Interrupt                                          */
-    MemoryManagement_IRQn = -12,  /*!< 4 Cortex-M4 Memory Management Interrupt                           */
-    BusFault_IRQn = -11,          /*!< 5 Cortex-M4 Bus Fault Interrupt                                   */
-    UsageFault_IRQn = -10,        /*!< 6 Cortex-M4 Usage Fault Interrupt                                 */
-    SVCall_IRQn = -5,             /*!< 11 Cortex-M4 SV Call Interrupt                                    */
-    DebugMonitor_IRQn = -4,       /*!< 12 Cortex-M4 Debug Monitor Interrupt                              */
-    PendSV_IRQn = -2,             /*!< 14 Cortex-M4 Pend SV Interrupt                                    */
-    SysTick_IRQn = -1,            /*!< 15 Cortex-M4 System Tick Interrupt                                */
-                                  /******  STM32 specific Interrupt Numbers **********************************************************************/
+    NonMaskableInt_IRQn = -14,   /*!< 2 Non Maskable Interrupt                                          */
+    MemoryManagement_IRQn = -12, /*!< 4 Cortex-M4 Memory Management Interrupt                           */
+    BusFault_IRQn = -11,         /*!< 5 Cortex-M4 Bus Fault Interrupt                                   */
+    UsageFault_IRQn = -10,       /*!< 6 Cortex-M4 Usage Fault Interrupt                                 */
+    SVCall_IRQn = -5,            /*!< 11 Cortex-M4 SV Call Interrupt                                    */
+    DebugMonitor_IRQn = -4,      /*!< 12 Cortex-M4 Debug Monitor Interrupt                              */
+    PendSV_IRQn = -2,            /*!< 14 Cortex-M4 Pend SV Interrupt                                    */
+    SysTick_IRQn = -1,           /*!< 15 Cortex-M4 System Tick Interrupt                                */
+    /******  STM32 specific Interrupt Numbers **********************************************************************/
     WWDG_IRQn = 0,                /*!< Window WatchDog Interrupt                                         */
     PVD_IRQn = 1,                 /*!< PVD through EXTI Line detection Interrupt                         */
     TAMP_STAMP_IRQn = 2,          /*!< Tamper and TimeStamp interrupts through the EXTI line             */
@@ -3876,7 +3876,7 @@ typedef struct {
 #define RCC_CR_PLLRDY_Msk  (0x1UL << RCC_CR_PLLRDY_Pos) /*!< 0x02000000 */
 #define RCC_CR_PLLRDY      RCC_CR_PLLRDY_Msk
 /*
- * @brief Specific device feature definitions (not present on all devices in the STM32F4 serie)
+ * @brief Specific device feature definitions (not present on all devices in the STM32F4 series)
  */
 #define RCC_PLLI2S_SUPPORT   /*!< Support PLLI2S oscillator */
 
@@ -4250,7 +4250,7 @@ typedef struct {
 #define RCC_AHB1ENR_DMA2EN      RCC_AHB1ENR_DMA2EN_Msk
 /********************  Bit definition for RCC_AHB2ENR register  ***************/
 /*
- * @brief Specific device feature definitions (not present on all devices in the STM32F4 serie)
+ * @brief Specific device feature definitions (not present on all devices in the STM32F4 series)
  */
 #define RCC_AHB2_SUPPORT        /*!< AHB2 Bus is supported */
 

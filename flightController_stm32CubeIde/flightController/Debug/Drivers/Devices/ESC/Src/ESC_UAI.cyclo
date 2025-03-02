@@ -1,0 +1,5 @@
+../Drivers/Devices/ESC/Src/ESC_UAI.c:80:15:ESC_CalculatePWMDutyCycle	3
+../Drivers/Devices/ESC/Src/ESC_UAI.c:93:15:ESC_AutoCalibrate	6
+../Drivers/Devices/ESC/Src/ESC_UAI.c:140:23:ESC_Init	5
+../Drivers/Devices/ESC/Src/ESC_UAI.c:214:8:ESC_Deinit	3
+../Drivers/Devices/ESC/Src/ESC_UAI.c:236:8:ESC_SetSpeed	10

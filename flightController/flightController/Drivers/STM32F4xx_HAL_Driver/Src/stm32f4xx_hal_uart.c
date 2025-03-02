@@ -412,6 +412,7 @@ HAL_StatusTypeDef HAL_UART_Init(UART_HandleTypeDef * huart) {
     huart->ErrorCode = HAL_UART_ERROR_NONE;
     huart->gState = HAL_UART_STATE_READY;
     huart->RxState = HAL_UART_STATE_READY;
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     return HAL_OK;
 }
@@ -477,6 +478,7 @@ HAL_StatusTypeDef HAL_HalfDuplex_Init(UART_HandleTypeDef * huart) {
     huart->ErrorCode = HAL_UART_ERROR_NONE;
     huart->gState = HAL_UART_STATE_READY;
     huart->RxState = HAL_UART_STATE_READY;
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     return HAL_OK;
 }
@@ -553,6 +555,7 @@ HAL_StatusTypeDef HAL_LIN_Init(UART_HandleTypeDef * huart, uint32_t BreakDetectL
     huart->ErrorCode = HAL_UART_ERROR_NONE;
     huart->gState = HAL_UART_STATE_READY;
     huart->RxState = HAL_UART_STATE_READY;
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     return HAL_OK;
 }
@@ -632,6 +635,7 @@ HAL_StatusTypeDef HAL_MultiProcessor_Init(UART_HandleTypeDef * huart, uint8_t Ad
     huart->ErrorCode = HAL_UART_ERROR_NONE;
     huart->gState = HAL_UART_STATE_READY;
     huart->RxState = HAL_UART_STATE_READY;
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     return HAL_OK;
 }
@@ -671,6 +675,7 @@ HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef * huart) {
     huart->gState = HAL_UART_STATE_RESET;
     huart->RxState = HAL_UART_STATE_RESET;
     huart->ReceptionType = HAL_UART_RECEPTION_STANDARD;
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     /* Process Unlock */
     __HAL_UNLOCK(huart);
@@ -710,6 +715,8 @@ __weak void HAL_UART_MspDeInit(UART_HandleTypeDef * huart) {
 /**
  * @brief  Register a User UART Callback
  *         To be used instead of the weak predefined callback
+ * @note   The HAL_UART_RegisterCallback() may be called before HAL_UART_Init(), HAL_HalfDuplex_Init(), HAL_LIN_Init(),
+ *         HAL_MultiProcessor_Init() to register callbacks for HAL_UART_MSPINIT_CB_ID and HAL_UART_MSPDEINIT_CB_ID
  * @param  huart uart handle
  * @param  CallbackID ID of the callback to be registered
  *         This parameter can be one of the following values:
@@ -735,8 +742,6 @@ HAL_StatusTypeDef HAL_UART_RegisterCallback(UART_HandleTypeDef * huart, HAL_UART
 
         return HAL_ERROR;
     }
-    /* Process locked */
-    __HAL_LOCK(huart);
 
     if (huart->gState == HAL_UART_STATE_READY) {
         switch (CallbackID) {
@@ -814,15 +819,15 @@ HAL_StatusTypeDef HAL_UART_RegisterCallback(UART_HandleTypeDef * huart, HAL_UART
         status = HAL_ERROR;
     }
 
-    /* Release Lock */
-    __HAL_UNLOCK(huart);
-
     return status;
 }
 
 /**
  * @brief  Unregister an UART Callback
  *         UART callaback is redirected to the weak predefined callback
+ * @note   The HAL_UART_UnRegisterCallback() may be called before HAL_UART_Init(), HAL_HalfDuplex_Init(),
+ *         HAL_LIN_Init(), HAL_MultiProcessor_Init() to un-register callbacks for HAL_UART_MSPINIT_CB_ID
+ *         and HAL_UART_MSPDEINIT_CB_ID
  * @param  huart uart handle
  * @param  CallbackID ID of the callback to be unregistered
  *         This parameter can be one of the following values:
@@ -840,9 +845,6 @@ HAL_StatusTypeDef HAL_UART_RegisterCallback(UART_HandleTypeDef * huart, HAL_UART
  */
 HAL_StatusTypeDef HAL_UART_UnRegisterCallback(UART_HandleTypeDef * huart, HAL_UART_CallbackIDTypeDef CallbackID) {
     HAL_StatusTypeDef status = HAL_OK;
-
-    /* Process locked */
-    __HAL_LOCK(huart);
 
     if (HAL_UART_STATE_READY == huart->gState) {
         switch (CallbackID) {
@@ -919,9 +921,6 @@ HAL_StatusTypeDef HAL_UART_UnRegisterCallback(UART_HandleTypeDef * huart, HAL_UA
         /* Return error status */
         status = HAL_ERROR;
     }
-
-    /* Release Lock */
-    __HAL_UNLOCK(huart);
 
     return status;
 }
@@ -1092,9 +1091,6 @@ HAL_StatusTypeDef HAL_UART_Transmit(UART_HandleTypeDef * huart, const uint8_t * 
             return HAL_ERROR;
         }
 
-        /* Process Locked */
-        __HAL_LOCK(huart);
-
         huart->ErrorCode = HAL_UART_ERROR_NONE;
         huart->gState = HAL_UART_STATE_BUSY_TX;
 
@@ -1113,11 +1109,10 @@ HAL_StatusTypeDef HAL_UART_Transmit(UART_HandleTypeDef * huart, const uint8_t * 
             pdata16bits = NULL;
         }
 
-        /* Process Unlocked */
-        __HAL_UNLOCK(huart);
-
         while (huart->TxXferCount > 0U) {
             if (UART_WaitOnFlagUntilTimeout(huart, UART_FLAG_TXE, RESET, tickstart, Timeout) != HAL_OK) {
+                huart->gState = HAL_UART_STATE_READY;
+
                 return HAL_TIMEOUT;
             }
             if (pdata8bits == NULL) {
@@ -1131,6 +1126,8 @@ HAL_StatusTypeDef HAL_UART_Transmit(UART_HandleTypeDef * huart, const uint8_t * 
         }
 
         if (UART_WaitOnFlagUntilTimeout(huart, UART_FLAG_TC, RESET, tickstart, Timeout) != HAL_OK) {
+            huart->gState = HAL_UART_STATE_READY;
+
             return HAL_TIMEOUT;
         }
 
@@ -1166,9 +1163,6 @@ HAL_StatusTypeDef HAL_UART_Receive(UART_HandleTypeDef * huart, uint8_t * pData, 
             return HAL_ERROR;
         }
 
-        /* Process Locked */
-        __HAL_LOCK(huart);
-
         huart->ErrorCode = HAL_UART_ERROR_NONE;
         huart->RxState = HAL_UART_STATE_BUSY_RX;
         huart->ReceptionType = HAL_UART_RECEPTION_STANDARD;
@@ -1188,12 +1182,11 @@ HAL_StatusTypeDef HAL_UART_Receive(UART_HandleTypeDef * huart, uint8_t * pData, 
             pdata16bits = NULL;
         }
 
-        /* Process Unlocked */
-        __HAL_UNLOCK(huart);
-
         /* Check the remain data to be received */
         while (huart->RxXferCount > 0U) {
             if (UART_WaitOnFlagUntilTimeout(huart, UART_FLAG_RXNE, RESET, tickstart, Timeout) != HAL_OK) {
+                huart->RxState = HAL_UART_STATE_READY;
+
                 return HAL_TIMEOUT;
             }
             if (pdata8bits == NULL) {
@@ -1237,18 +1230,12 @@ HAL_StatusTypeDef HAL_UART_Transmit_IT(UART_HandleTypeDef * huart, const uint8_t
             return HAL_ERROR;
         }
 
-        /* Process Locked */
-        __HAL_LOCK(huart);
-
         huart->pTxBuffPtr = pData;
         huart->TxXferSize = Size;
         huart->TxXferCount = Size;
 
         huart->ErrorCode = HAL_UART_ERROR_NONE;
         huart->gState = HAL_UART_STATE_BUSY_TX;
-
-        /* Process Unlocked */
-        __HAL_UNLOCK(huart);
 
         /* Enable the UART Transmit data register empty Interrupt */
         __HAL_UART_ENABLE_IT(huart, UART_IT_TXE);
@@ -1276,9 +1263,6 @@ HAL_StatusTypeDef HAL_UART_Receive_IT(UART_HandleTypeDef * huart, uint8_t * pDat
         if ((pData == NULL) || (Size == 0U)) {
             return HAL_ERROR;
         }
-
-        /* Process Locked */
-        __HAL_LOCK(huart);
 
         /* Set Reception type to Standard reception */
         huart->ReceptionType = HAL_UART_RECEPTION_STANDARD;
@@ -1309,9 +1293,6 @@ HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef * huart, const uint8_
             return HAL_ERROR;
         }
 
-        /* Process Locked */
-        __HAL_LOCK(huart);
-
         huart->pTxBuffPtr = pData;
         huart->TxXferSize = Size;
         huart->TxXferCount = Size;
@@ -1337,9 +1318,6 @@ HAL_StatusTypeDef HAL_UART_Transmit_DMA(UART_HandleTypeDef * huart, const uint8_
 
         /* Clear the TC flag in the SR register by writing 0 to it */
         __HAL_UART_CLEAR_FLAG(huart, UART_FLAG_TC);
-
-        /* Process Unlocked */
-        __HAL_UNLOCK(huart);
 
         /* Enable the DMA transfer for transmit request by setting the DMAT bit
            in the UART CR3 register */
@@ -1370,9 +1348,6 @@ HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef * huart, uint8_t * pDa
             return HAL_ERROR;
         }
 
-        /* Process Locked */
-        __HAL_LOCK(huart);
-
         /* Set Reception type to Standard reception */
         huart->ReceptionType = HAL_UART_RECEPTION_STANDARD;
 
@@ -1391,9 +1366,6 @@ HAL_StatusTypeDef HAL_UART_Receive_DMA(UART_HandleTypeDef * huart, uint8_t * pDa
 HAL_StatusTypeDef HAL_UART_DMAPause(UART_HandleTypeDef * huart) {
     uint32_t dmarequest = 0x00U;
 
-    /* Process Locked */
-    __HAL_LOCK(huart);
-
     dmarequest = HAL_IS_BIT_SET(huart->Instance->CR3, USART_CR3_DMAT);
     if ((huart->gState == HAL_UART_STATE_BUSY_TX) && dmarequest) {
         /* Disable the UART DMA Tx request */
@@ -1410,9 +1382,6 @@ HAL_StatusTypeDef HAL_UART_DMAPause(UART_HandleTypeDef * huart) {
         ATOMIC_CLEAR_BIT(huart->Instance->CR3, USART_CR3_DMAR);
     }
 
-    /* Process Unlocked */
-    __HAL_UNLOCK(huart);
-
     return HAL_OK;
 }
 
@@ -1423,8 +1392,6 @@ HAL_StatusTypeDef HAL_UART_DMAPause(UART_HandleTypeDef * huart) {
  * @retval HAL status
  */
 HAL_StatusTypeDef HAL_UART_DMAResume(UART_HandleTypeDef * huart) {
-    /* Process Locked */
-    __HAL_LOCK(huart);
 
     if (huart->gState == HAL_UART_STATE_BUSY_TX) {
         /* Enable the UART DMA Tx request */
@@ -1444,9 +1411,6 @@ HAL_StatusTypeDef HAL_UART_DMAResume(UART_HandleTypeDef * huart) {
         /* Enable the UART DMA Rx request */
         ATOMIC_SET_BIT(huart->Instance->CR3, USART_CR3_DMAR);
     }
-
-    /* Process Unlocked */
-    __HAL_UNLOCK(huart);
 
     return HAL_OK;
 }
@@ -1518,11 +1482,10 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle(UART_HandleTypeDef * huart, uint8_t *
             return HAL_ERROR;
         }
 
-        __HAL_LOCK(huart);
-
         huart->ErrorCode = HAL_UART_ERROR_NONE;
         huart->RxState = HAL_UART_STATE_BUSY_RX;
         huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+        huart->RxEventType = HAL_UART_RXEVENT_TC;
 
         /* Init tickstart for timeout management */
         tickstart = HAL_GetTick();
@@ -1539,8 +1502,6 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle(UART_HandleTypeDef * huart, uint8_t *
             pdata16bits = NULL;
         }
 
-        __HAL_UNLOCK(huart);
-
         /* Initialize output number of received elements */
         *RxLen = 0U;
 
@@ -1554,6 +1515,7 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle(UART_HandleTypeDef * huart, uint8_t *
                 /* If Set, but no data ever received, clear flag without exiting loop */
                 /* If Set, and data has already been received, this means Idle Event is valid : End reception */
                 if (*RxLen > 0U) {
+                    huart->RxEventType = HAL_UART_RXEVENT_IDLE;
                     huart->RxState = HAL_UART_STATE_READY;
 
                     return HAL_OK;
@@ -1622,10 +1584,9 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_IT(UART_HandleTypeDef * huart, uint8_
             return HAL_ERROR;
         }
 
-        __HAL_LOCK(huart);
-
         /* Set Reception type to reception till IDLE Event*/
         huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+        huart->RxEventType = HAL_UART_RXEVENT_TC;
 
         status = UART_Start_Receive_IT(huart, pData, Size);
 
@@ -1674,10 +1635,9 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef * huart, uint8
             return HAL_ERROR;
         }
 
-        __HAL_LOCK(huart);
-
         /* Set Reception type to reception till IDLE Event*/
         huart->ReceptionType = HAL_UART_RECEPTION_TOIDLE;
+        huart->RxEventType = HAL_UART_RXEVENT_TC;
 
         status = UART_Start_Receive_DMA(huart, pData, Size);
 
@@ -1699,6 +1659,35 @@ HAL_StatusTypeDef HAL_UARTEx_ReceiveToIdle_DMA(UART_HandleTypeDef * huart, uint8
     } else {
         return HAL_BUSY;
     }
+}
+
+/**
+ * @brief Provide Rx Event type that has lead to RxEvent callback execution.
+ * @note  When HAL_UARTEx_ReceiveToIdle_IT() or HAL_UARTEx_ReceiveToIdle_DMA() API are called, progress
+ *        of reception process is provided to application through calls of Rx Event callback (either default one
+ *        HAL_UARTEx_RxEventCallback() or user registered one). As several types of events could occur (IDLE event,
+ *        Half Transfer, or Transfer Complete), this function allows to retrieve the Rx Event type that has lead
+ *        to Rx Event callback execution.
+ * @note  This function is expected to be called within the user implementation of Rx Event Callback,
+ *        in order to provide the accurate value :
+ *        In Interrupt Mode :
+ *           - HAL_UART_RXEVENT_TC : when Reception has been completed (expected nb of data has been received)
+ *           - HAL_UART_RXEVENT_IDLE : when Idle event occurred prior reception has been completed (nb of
+ *             received data is lower than expected one)
+ *        In DMA Mode :
+ *           - HAL_UART_RXEVENT_TC : when Reception has been completed (expected nb of data has been received)
+ *           - HAL_UART_RXEVENT_HT : when half of expected nb of data has been received
+ *           - HAL_UART_RXEVENT_IDLE : when Idle event occurred prior reception has been completed (nb of
+ *             received data is lower than expected one).
+ *        In DMA mode, RxEvent callback could be called several times;
+ *        When DMA is configured in Normal Mode, HT event does not stop Reception process;
+ *        When DMA is configured in Circular Mode, HT, TC or IDLE events don't stop Reception process;
+ * @param  huart UART handle.
+ * @retval Rx Event Type (returned value will be a value of @ref UART_RxEvent_Type_Values)
+ */
+HAL_UART_RxEventTypeTypeDef HAL_UARTEx_GetRxEventType(UART_HandleTypeDef * huart) {
+    /* Return Rx Event type value, as stored in UART handle */
+    return (huart->RxEventType);
 }
 
 /**
@@ -2285,6 +2274,11 @@ void HAL_UART_IRQHandler(UART_HandleTypeDef * huart) {
                     /* Last bytes received, so no need as the abort is immediate */
                     (void)HAL_DMA_Abort(huart->hdmarx);
                 }
+
+                /* Initialize type of RxEvent that correspond to RxEvent callback execution;
+                In this case, Rx Event type is Idle Event */
+                huart->RxEventType = HAL_UART_RXEVENT_IDLE;
+
 #if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
                 /*Call registered Rx Event callback*/
                 huart->RxEventCallback(huart, (huart->RxXferSize - huart->RxXferCount));
@@ -2311,6 +2305,11 @@ void HAL_UART_IRQHandler(UART_HandleTypeDef * huart) {
                 huart->ReceptionType = HAL_UART_RECEPTION_STANDARD;
 
                 ATOMIC_CLEAR_BIT(huart->Instance->CR1, USART_CR1_IDLEIE);
+
+                /* Initialize type of RxEvent that correspond to RxEvent callback execution;
+                   In this case, Rx Event type is Idle Event */
+                huart->RxEventType = HAL_UART_RXEVENT_IDLE;
+
 #if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
                 /*Call registered Rx complete callback*/
                 huart->RxEventCallback(huart, nb_rx_data);
@@ -2533,6 +2532,7 @@ HAL_StatusTypeDef HAL_MultiProcessor_EnterMuteMode(UART_HandleTypeDef * huart) {
     ATOMIC_SET_BIT(huart->Instance->CR1, USART_CR1_RWU);
 
     huart->gState = HAL_UART_STATE_READY;
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     /* Process Unlocked */
     __HAL_UNLOCK(huart);
@@ -2559,6 +2559,7 @@ HAL_StatusTypeDef HAL_MultiProcessor_ExitMuteMode(UART_HandleTypeDef * huart) {
     ATOMIC_CLEAR_BIT(huart->Instance->CR1, USART_CR1_RWU);
 
     huart->gState = HAL_UART_STATE_READY;
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     /* Process Unlocked */
     __HAL_UNLOCK(huart);
@@ -2662,7 +2663,7 @@ HAL_StatusTypeDef HAL_HalfDuplex_EnableReceiver(UART_HandleTypeDef * huart) {
  *                the configuration information for the specified UART module.
  * @retval HAL state
  */
-HAL_UART_StateTypeDef HAL_UART_GetState(UART_HandleTypeDef * huart) {
+HAL_UART_StateTypeDef HAL_UART_GetState(const UART_HandleTypeDef * huart) {
     uint32_t temp1 = 0x00U, temp2 = 0x00U;
     temp1 = huart->gState;
     temp2 = huart->RxState;
@@ -2676,7 +2677,7 @@ HAL_UART_StateTypeDef HAL_UART_GetState(UART_HandleTypeDef * huart) {
  *               the configuration information for the specified UART.
  * @retval UART Error Code
  */
-uint32_t HAL_UART_GetError(UART_HandleTypeDef * huart) {
+uint32_t HAL_UART_GetError(const UART_HandleTypeDef * huart) {
     return huart->ErrorCode;
 }
 
@@ -2770,6 +2771,7 @@ static void UART_DMATxHalfCplt(DMA_HandleTypeDef * hdma) {
  */
 static void UART_DMAReceiveCplt(DMA_HandleTypeDef * hdma) {
     UART_HandleTypeDef * huart = (UART_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
+
     /* DMA Normal mode*/
     if ((hdma->Instance->CR & DMA_SxCR_CIRC) == 0U) {
         huart->RxXferCount = 0U;
@@ -2790,6 +2792,10 @@ static void UART_DMAReceiveCplt(DMA_HandleTypeDef * hdma) {
             ATOMIC_CLEAR_BIT(huart->Instance->CR1, USART_CR1_IDLEIE);
         }
     }
+
+    /* Initialize type of RxEvent that correspond to RxEvent callback execution;
+     In this case, Rx Event type is Transfer Complete */
+    huart->RxEventType = HAL_UART_RXEVENT_TC;
 
     /* Check current reception Mode :
        If Reception till IDLE event has been selected : use Rx Event callback */
@@ -2821,6 +2827,10 @@ static void UART_DMAReceiveCplt(DMA_HandleTypeDef * hdma) {
  */
 static void UART_DMARxHalfCplt(DMA_HandleTypeDef * hdma) {
     UART_HandleTypeDef * huart = (UART_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
+
+    /* Initialize type of RxEvent that correspond to RxEvent callback execution;
+       In this case, Rx Event type is Half Transfer */
+    huart->RxEventType = HAL_UART_RXEVENT_HT;
 
     /* Check current reception Mode :
        If Reception till IDLE event has been selected : use Rx Event callback */
@@ -2894,18 +2904,28 @@ static HAL_StatusTypeDef UART_WaitOnFlagUntilTimeout(UART_HandleTypeDef * huart,
     while ((__HAL_UART_GET_FLAG(huart, Flag) ? SET : RESET) == Status) {
         /* Check for the Timeout */
         if (Timeout != HAL_MAX_DELAY) {
-            if ((Timeout == 0U) || ((HAL_GetTick() - Tickstart) > Timeout)) {
-                /* Disable TXE, RXNE, PE and ERR (Frame error, noise error, overrun error) interrupts for the interrupt process */
-                ATOMIC_CLEAR_BIT(huart->Instance->CR1, (USART_CR1_RXNEIE | USART_CR1_PEIE | USART_CR1_TXEIE));
-                ATOMIC_CLEAR_BIT(huart->Instance->CR3, USART_CR3_EIE);
-
-                huart->gState = HAL_UART_STATE_READY;
-                huart->RxState = HAL_UART_STATE_READY;
-
-                /* Process Unlocked */
-                __HAL_UNLOCK(huart);
+            if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U)) {
 
                 return HAL_TIMEOUT;
+            }
+
+            if ((READ_BIT(huart->Instance->CR1, USART_CR1_RE) != 0U) && (Flag != UART_FLAG_TXE) && (Flag != UART_FLAG_TC)) {
+                if (__HAL_UART_GET_FLAG(huart, UART_FLAG_ORE) == SET) {
+                    /* Clear Overrun Error flag*/
+                    __HAL_UART_CLEAR_OREFLAG(huart);
+
+                    /* Blocking error : transfer is aborted
+                    Set the UART state ready to be able to start again the process,
+                    Disable Rx Interrupts if ongoing */
+                    UART_EndRxTransfer(huart);
+
+                    huart->ErrorCode = HAL_UART_ERROR_ORE;
+
+                    /* Process Unlocked */
+                    __HAL_UNLOCK(huart);
+
+                    return HAL_ERROR;
+                }
             }
         }
     }
@@ -2930,9 +2950,6 @@ HAL_StatusTypeDef UART_Start_Receive_IT(UART_HandleTypeDef * huart, uint8_t * pD
 
     huart->ErrorCode = HAL_UART_ERROR_NONE;
     huart->RxState = HAL_UART_STATE_BUSY_RX;
-
-    /* Process Unlocked */
-    __HAL_UNLOCK(huart);
 
     if (huart->Init.Parity != UART_PARITY_NONE) {
         /* Enable the UART Parity Error Interrupt */
@@ -2986,9 +3003,6 @@ HAL_StatusTypeDef UART_Start_Receive_DMA(UART_HandleTypeDef * huart, uint8_t * p
 
     /* Clear the Overrun flag just before enabling the DMA Rx request: can be mandatory for the second transfer */
     __HAL_UART_CLEAR_OREFLAG(huart);
-
-    /* Process Unlocked */
-    __HAL_UNLOCK(huart);
 
     if (huart->Init.Parity != UART_PARITY_NONE) {
         /* Enable the UART Parity Error Interrupt */
@@ -3297,6 +3311,9 @@ static HAL_StatusTypeDef UART_Receive_IT(UART_HandleTypeDef * huart) {
 
             /* Rx process is completed, restore huart->RxState to Ready */
             huart->RxState = HAL_UART_STATE_READY;
+
+            /* Initialize type of RxEvent to Transfer Complete */
+            huart->RxEventType = HAL_UART_RXEVENT_TC;
 
             /* Check current reception Mode :
                If Reception till IDLE event has been selected : */

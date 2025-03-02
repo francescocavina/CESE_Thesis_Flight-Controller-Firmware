@@ -59,6 +59,7 @@ void StartDefaultTask(void const * argument);
  * @retval int
  */
 int main(void) {
+
     /* USER CODE BEGIN 1 */
     /* USER CODE END 1 */
 
@@ -119,6 +120,7 @@ int main(void) {
     osKernelStart();
 
     /* We should never get here as control is now taken by the scheduler */
+
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     /* USER CODE END WHILE */

@@ -208,6 +208,9 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
         hibus->bufferSize = IBUS_BUFFER_LENGTH;
         hibus->data = data;
         hibus->channels = IBUS_CHANNELS;
+        for (uint8_t i = 0; i < IBUS_CHANNELS; i++) {
+            hibus->data[i] = IBUS_CHANNEL_VALUE_NULL;
+        }
     } else {
         /* Dynamic memory allocation was not successful */
 #ifdef USE_FREERTOS
@@ -261,22 +264,26 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel
         return IBUS_CHANNEL_VALUE_NULL;
     }
 
-    /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */
     while (1) {
-        while (!FSA8S_CheckFirstBytes(hibus)) {
-            /* Wait until a data frame with the right format is received */
-        }
+        /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */
+        if (FSA8S_CheckFirstBytes(hibus)) {
 
-        /* Perform a checksum */
-        if (!FSA8S_Checksum(hibus)) {
-            /* Received data is corrupted */
-            /* Wait another transaction and check first to bytes */
-            continue;
-        } else {
-            /* Received data is correct */
-            /* Quit outer while loop */
-            break;
+            /* Perform a checksum */
+            if (!FSA8S_Checksum(hibus)) {
+                /* Received data is corrupted */
+                /* Wait another transaction and check first to bytes */
+                continue;
+            } else {
+                /* Received data is correct */
+                /* Quit outer while loop */
+                break;
+            }
         }
+#ifdef USE_FREERTOS
+        vTaskDelay(pdMS_TO_TICKS(1));
+#else
+        HAL_Delay(1);
+#endif
     }
 
     /* Get channels data in little-endian */

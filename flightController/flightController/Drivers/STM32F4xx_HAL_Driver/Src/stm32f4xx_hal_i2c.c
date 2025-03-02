@@ -89,7 +89,7 @@
            add his own code by customization of function pointer HAL_I2C_SlaveRxCpltCallback()
       (+) In case of transfer Error, HAL_I2C_ErrorCallback() function is executed and user can
            add his own code by customization of function pointer HAL_I2C_ErrorCallback()
-      (+) Abort a master I2C process communication with Interrupt using HAL_I2C_Master_Abort_IT()
+      (+) Abort a master or memory I2C process communication with Interrupt using HAL_I2C_Master_Abort_IT()
       (+) End of abort process, HAL_I2C_AbortCpltCallback() is executed and user can
            add his own code by customization of function pointer HAL_I2C_AbortCpltCallback()
 
@@ -139,7 +139,7 @@
             or using HAL_I2C_Master_Seq_Receive_DMA()
       (+++) At reception end of current frame transfer, HAL_I2C_MasterRxCpltCallback() is executed and user can
            add his own code by customization of function pointer HAL_I2C_MasterRxCpltCallback()
-      (++) Abort a master IT or DMA I2C process communication with Interrupt using HAL_I2C_Master_Abort_IT()
+      (++) Abort a master or memory IT or DMA I2C process communication with Interrupt using HAL_I2C_Master_Abort_IT()
       (+++) End of abort process, HAL_I2C_AbortCpltCallback() is executed and user can
            add his own code by customization of function pointer HAL_I2C_AbortCpltCallback()
       (++) Enable/disable the Address listen mode in slave I2C mode using HAL_I2C_EnableListen_IT() HAL_I2C_DisableListen_IT()
@@ -193,7 +193,7 @@
            add his own code by customization of function pointer HAL_I2C_SlaveRxCpltCallback()
       (+) In case of transfer Error, HAL_I2C_ErrorCallback() function is executed and user can
            add his own code by customization of function pointer HAL_I2C_ErrorCallback()
-      (+) Abort a master I2C process communication with Interrupt using HAL_I2C_Master_Abort_IT()
+      (+) Abort a master or memory I2C process communication with Interrupt using HAL_I2C_Master_Abort_IT()
       (+) End of abort process, HAL_I2C_AbortCpltCallback() is executed and user can
            add his own code by customization of function pointer HAL_I2C_AbortCpltCallback()
 
@@ -313,7 +313,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-/** @addtogroup I2C_Private_Define
+/** @defgroup I2C_Private_Define I2C Private Define
  * @{
  */
 #define I2C_TIMEOUT_FLAG      35U         /*!< Timeout 35 ms             */
@@ -334,6 +334,14 @@
  */
 
 /* Private macro -------------------------------------------------------------*/
+/** @addtogroup I2C_Private_Macros
+ * @{
+ */
+/* Macro to get remaining data to transfer on DMA side */
+#define I2C_GET_DMA_REMAIN_DATA(__HANDLE__) __HAL_DMA_GET_COUNTER(__HANDLE__)
+/**
+ * @}
+ */
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 
@@ -383,6 +391,9 @@ static void I2C_MemoryTransmit_TXE_BTF(I2C_HandleTypeDef * hi2c);
 
 /* Private function to Convert Specific options */
 static void I2C_ConvertOtherXferOptions(I2C_HandleTypeDef * hi2c);
+
+/* Private function to flush DR register */
+static void I2C_Flush_DR(I2C_HandleTypeDef * hi2c);
 /**
  * @}
  */
@@ -905,6 +916,18 @@ HAL_StatusTypeDef HAL_I2C_UnRegisterAddrCallback(I2C_HandleTypeDef * hi2c) {
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
 
 /**
+ * @brief  I2C data register flush process.
+ * @param  hi2c I2C handle.
+ * @retval None
+ */
+static void I2C_Flush_DR(I2C_HandleTypeDef * hi2c) {
+    /* Write a dummy data in DR to clear TXE flag */
+    if (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_TXE) != RESET) {
+        hi2c->Instance->DR = 0x00U;
+    }
+}
+
+/**
  * @}
  */
 
@@ -1283,6 +1306,12 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive(I2C_HandleTypeDef * hi2c, uint16_t DevA
                 hi2c->XferCount--;
 
                 if (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BTF) == SET) {
+
+                    if (hi2c->XferSize == 3U) {
+                        /* Disable Acknowledge */
+                        CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+                    }
+
                     /* Read data from DR */
                     *hi2c->pBuffPtr = (uint8_t)hi2c->Instance->DR;
 
@@ -1558,10 +1587,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmit_IT(I2C_HandleTypeDef * hi2c, uint16_t 
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -1630,10 +1656,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive_IT(I2C_HandleTypeDef * hi2c, uint16_t D
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -1819,10 +1842,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Transmit_DMA(I2C_HandleTypeDef * hi2c, uint16_t
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -1960,10 +1980,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Receive_DMA(I2C_HandleTypeDef * hi2c, uint16_t 
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -2586,6 +2603,10 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read(I2C_HandleTypeDef * hi2c, uint16_t DevAddress
                 hi2c->XferCount--;
 
                 if (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BTF) == SET) {
+                    if (hi2c->XferSize == 3U) {
+                        /* Disable Acknowledge */
+                        CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+                    }
                     /* Read data from DR */
                     *hi2c->pBuffPtr = (uint8_t)hi2c->Instance->DR;
 
@@ -2640,10 +2661,7 @@ HAL_StatusTypeDef HAL_I2C_Mem_Write_IT(I2C_HandleTypeDef * hi2c, uint16_t DevAdd
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -2720,10 +2738,7 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read_IT(I2C_HandleTypeDef * hi2c, uint16_t DevAddr
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -2809,10 +2824,7 @@ HAL_StatusTypeDef HAL_I2C_Mem_Write_DMA(I2C_HandleTypeDef * hi2c, uint16_t DevAd
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -2975,10 +2987,7 @@ HAL_StatusTypeDef HAL_I2C_Mem_Read_DMA(I2C_HandleTypeDef * hi2c, uint16_t DevAdd
                 hi2c->Mode = HAL_I2C_MODE_NONE;
                 hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
-
-                return HAL_ERROR;
+                return HAL_BUSY;
             }
         } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
 
@@ -3271,10 +3280,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Seq_Transmit_IT(I2C_HandleTypeDef * hi2c, uint1
                     hi2c->Mode = HAL_I2C_MODE_NONE;
                     hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                    /* Process Unlocked */
-                    __HAL_UNLOCK(hi2c);
-
-                    return HAL_ERROR;
+                    return HAL_BUSY;
                 }
             } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
         }
@@ -3360,10 +3366,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Seq_Transmit_DMA(I2C_HandleTypeDef * hi2c, uint
                     hi2c->Mode = HAL_I2C_MODE_NONE;
                     hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                    /* Process Unlocked */
-                    __HAL_UNLOCK(hi2c);
-
-                    return HAL_ERROR;
+                    return HAL_BUSY;
                 }
             } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
         }
@@ -3522,10 +3525,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Seq_Receive_IT(I2C_HandleTypeDef * hi2c, uint16
                     hi2c->Mode = HAL_I2C_MODE_NONE;
                     hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                    /* Process Unlocked */
-                    __HAL_UNLOCK(hi2c);
-
-                    return HAL_ERROR;
+                    return HAL_BUSY;
                 }
             } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
         }
@@ -3631,10 +3631,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Seq_Receive_DMA(I2C_HandleTypeDef * hi2c, uint1
                     hi2c->Mode = HAL_I2C_MODE_NONE;
                     hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                    /* Process Unlocked */
-                    __HAL_UNLOCK(hi2c);
-
-                    return HAL_ERROR;
+                    return HAL_BUSY;
                 }
             } while (__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET);
         }
@@ -4267,7 +4264,7 @@ HAL_StatusTypeDef HAL_I2C_DisableListen_IT(I2C_HandleTypeDef * hi2c) {
 }
 
 /**
- * @brief  Abort a master I2C IT or DMA process communication with Interrupt.
+ * @brief  Abort a master or memory I2C IT or DMA process communication with Interrupt.
  * @param  hi2c Pointer to a I2C_HandleTypeDef structure that contains
  *         the configuration information for the specified I2C.
  * @param  DevAddress Target device address: The device 7 bits address value
@@ -4282,7 +4279,7 @@ HAL_StatusTypeDef HAL_I2C_Master_Abort_IT(I2C_HandleTypeDef * hi2c, uint16_t Dev
     UNUSED(DevAddress);
 
     /* Abort Master transfer during Receive or Transmit process    */
-    if ((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET) && (CurrentMode == HAL_I2C_MODE_MASTER)) {
+    if ((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BUSY) != RESET) && ((CurrentMode == HAL_I2C_MODE_MASTER) || (CurrentMode == HAL_I2C_MODE_MEM))) {
         /* Process Locked */
         __HAL_LOCK(hi2c);
 
@@ -4945,7 +4942,8 @@ static void I2C_MemoryTransmit_TXE_BTF(I2C_HandleTypeDef * hi2c) {
             /* Do nothing */
         }
     } else {
-        /* Do nothing */
+        /* Clear TXE and BTF flags */
+        I2C_Flush_DR(hi2c);
     }
 }
 
@@ -4958,7 +4956,9 @@ static void I2C_MemoryTransmit_TXE_BTF(I2C_HandleTypeDef * hi2c) {
 static void I2C_MasterReceive_RXNE(I2C_HandleTypeDef * hi2c) {
     if (hi2c->State == HAL_I2C_STATE_BUSY_RX) {
         uint32_t tmp;
+        uint32_t CurrentXferOptions;
 
+        CurrentXferOptions = hi2c->XferOptions;
         tmp = hi2c->XferCount;
         if (tmp > 3U) {
             /* Read data from DR */
@@ -5006,7 +5006,11 @@ static void I2C_MasterReceive_RXNE(I2C_HandleTypeDef * hi2c) {
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
                 } else {
                     hi2c->Mode = HAL_I2C_MODE_NONE;
-                    hi2c->PreviousState = I2C_STATE_MASTER_BUSY_RX;
+                    if ((CurrentXferOptions == I2C_FIRST_AND_LAST_FRAME) || (CurrentXferOptions == I2C_LAST_FRAME)) {
+                        hi2c->PreviousState = I2C_STATE_NONE;
+                    } else {
+                        hi2c->PreviousState = I2C_STATE_MASTER_BUSY_RX;
+                    }
 
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
                     hi2c->MasterRxCpltCallback(hi2c);
@@ -5133,7 +5137,11 @@ static void I2C_MasterReceive_BTF(I2C_HandleTypeDef * hi2c) {
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
         } else {
             hi2c->Mode = HAL_I2C_MODE_NONE;
-            hi2c->PreviousState = I2C_STATE_MASTER_BUSY_RX;
+            if ((CurrentXferOptions == I2C_FIRST_AND_LAST_FRAME) || (CurrentXferOptions == I2C_LAST_FRAME)) {
+                hi2c->PreviousState = I2C_STATE_NONE;
+            } else {
+                hi2c->PreviousState = I2C_STATE_MASTER_BUSY_RX;
+            }
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
             hi2c->MasterRxCpltCallback(hi2c);
 #else
@@ -5504,7 +5512,7 @@ static void I2C_Slave_STOPF(I2C_HandleTypeDef * hi2c) {
     /* If a DMA is ongoing, Update handle size context */
     if ((hi2c->Instance->CR2 & I2C_CR2_DMAEN) == I2C_CR2_DMAEN) {
         if ((CurrentState == HAL_I2C_STATE_BUSY_RX) || (CurrentState == HAL_I2C_STATE_BUSY_RX_LISTEN)) {
-            hi2c->XferCount = (uint16_t)(__HAL_DMA_GET_COUNTER(hi2c->hdmarx));
+            hi2c->XferCount = (uint16_t)(I2C_GET_DMA_REMAIN_DATA(hi2c->hdmarx));
 
             if (hi2c->XferCount != 0U) {
                 /* Set ErrorCode corresponding to a Non-Acknowledge */
@@ -5527,7 +5535,7 @@ static void I2C_Slave_STOPF(I2C_HandleTypeDef * hi2c) {
                 }
             }
         } else {
-            hi2c->XferCount = (uint16_t)(__HAL_DMA_GET_COUNTER(hi2c->hdmatx));
+            hi2c->XferCount = (uint16_t)(I2C_GET_DMA_REMAIN_DATA(hi2c->hdmatx));
 
             if (hi2c->XferCount != 0U) {
                 /* Set ErrorCode corresponding to a Non-Acknowledge */
@@ -5675,6 +5683,9 @@ static void I2C_Slave_AF(I2C_HandleTypeDef * hi2c) {
 
         /* Disable Acknowledge */
         CLEAR_BIT(hi2c->Instance->CR1, I2C_CR1_ACK);
+
+        /* Clear TXE flag */
+        I2C_Flush_DR(hi2c);
 
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
         hi2c->SlaveTxCpltCallback(hi2c);
@@ -6240,7 +6251,11 @@ static void I2C_DMAXferCplt(DMA_HandleTypeDef * hdma) {
 #endif /* USE_HAL_I2C_REGISTER_CALLBACKS */
             } else {
                 hi2c->Mode = HAL_I2C_MODE_NONE;
-                hi2c->PreviousState = I2C_STATE_MASTER_BUSY_RX;
+                if ((CurrentXferOptions == I2C_FIRST_AND_LAST_FRAME) || (CurrentXferOptions == I2C_LAST_FRAME)) {
+                    hi2c->PreviousState = I2C_STATE_NONE;
+                } else {
+                    hi2c->PreviousState = I2C_STATE_MASTER_BUSY_RX;
+                }
 
 #if (USE_HAL_I2C_REGISTER_CALLBACKS == 1)
                 hi2c->MasterRxCpltCallback(hi2c);
@@ -6391,15 +6406,17 @@ static HAL_StatusTypeDef I2C_WaitOnFlagUntilTimeout(I2C_HandleTypeDef * hi2c, ui
         /* Check for the Timeout */
         if (Timeout != HAL_MAX_DELAY) {
             if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U)) {
-                hi2c->PreviousState = I2C_STATE_NONE;
-                hi2c->State = HAL_I2C_STATE_READY;
-                hi2c->Mode = HAL_I2C_MODE_NONE;
-                hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
+                if ((__HAL_I2C_GET_FLAG(hi2c, Flag) == Status)) {
+                    hi2c->PreviousState = I2C_STATE_NONE;
+                    hi2c->State = HAL_I2C_STATE_READY;
+                    hi2c->Mode = HAL_I2C_MODE_NONE;
+                    hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
+                    /* Process Unlocked */
+                    __HAL_UNLOCK(hi2c);
 
-                return HAL_ERROR;
+                    return HAL_ERROR;
+                }
             }
         }
     }
@@ -6438,15 +6455,17 @@ static HAL_StatusTypeDef I2C_WaitOnMasterAddressFlagUntilTimeout(I2C_HandleTypeD
         /* Check for the Timeout */
         if (Timeout != HAL_MAX_DELAY) {
             if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U)) {
-                hi2c->PreviousState = I2C_STATE_NONE;
-                hi2c->State = HAL_I2C_STATE_READY;
-                hi2c->Mode = HAL_I2C_MODE_NONE;
-                hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
+                if ((__HAL_I2C_GET_FLAG(hi2c, Flag) == RESET)) {
+                    hi2c->PreviousState = I2C_STATE_NONE;
+                    hi2c->State = HAL_I2C_STATE_READY;
+                    hi2c->Mode = HAL_I2C_MODE_NONE;
+                    hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
+                    /* Process Unlocked */
+                    __HAL_UNLOCK(hi2c);
 
-                return HAL_ERROR;
+                    return HAL_ERROR;
+                }
             }
         }
     }
@@ -6471,15 +6490,17 @@ static HAL_StatusTypeDef I2C_WaitOnTXEFlagUntilTimeout(I2C_HandleTypeDef * hi2c,
         /* Check for the Timeout */
         if (Timeout != HAL_MAX_DELAY) {
             if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U)) {
-                hi2c->PreviousState = I2C_STATE_NONE;
-                hi2c->State = HAL_I2C_STATE_READY;
-                hi2c->Mode = HAL_I2C_MODE_NONE;
-                hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
+                if ((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_TXE) == RESET)) {
+                    hi2c->PreviousState = I2C_STATE_NONE;
+                    hi2c->State = HAL_I2C_STATE_READY;
+                    hi2c->Mode = HAL_I2C_MODE_NONE;
+                    hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
+                    /* Process Unlocked */
+                    __HAL_UNLOCK(hi2c);
 
-                return HAL_ERROR;
+                    return HAL_ERROR;
+                }
             }
         }
     }
@@ -6504,15 +6525,17 @@ static HAL_StatusTypeDef I2C_WaitOnBTFFlagUntilTimeout(I2C_HandleTypeDef * hi2c,
         /* Check for the Timeout */
         if (Timeout != HAL_MAX_DELAY) {
             if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U)) {
-                hi2c->PreviousState = I2C_STATE_NONE;
-                hi2c->State = HAL_I2C_STATE_READY;
-                hi2c->Mode = HAL_I2C_MODE_NONE;
-                hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
+                if ((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_BTF) == RESET)) {
+                    hi2c->PreviousState = I2C_STATE_NONE;
+                    hi2c->State = HAL_I2C_STATE_READY;
+                    hi2c->Mode = HAL_I2C_MODE_NONE;
+                    hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-                /* Process Unlocked */
-                __HAL_UNLOCK(hi2c);
+                    /* Process Unlocked */
+                    __HAL_UNLOCK(hi2c);
 
-                return HAL_ERROR;
+                    return HAL_ERROR;
+                }
             }
         }
     }
@@ -6536,15 +6559,17 @@ static HAL_StatusTypeDef I2C_WaitOnSTOPFlagUntilTimeout(I2C_HandleTypeDef * hi2c
 
         /* Check for the Timeout */
         if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U)) {
-            hi2c->PreviousState = I2C_STATE_NONE;
-            hi2c->State = HAL_I2C_STATE_READY;
-            hi2c->Mode = HAL_I2C_MODE_NONE;
-            hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
+            if ((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_STOPF) == RESET)) {
+                hi2c->PreviousState = I2C_STATE_NONE;
+                hi2c->State = HAL_I2C_STATE_READY;
+                hi2c->Mode = HAL_I2C_MODE_NONE;
+                hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-            /* Process Unlocked */
-            __HAL_UNLOCK(hi2c);
+                /* Process Unlocked */
+                __HAL_UNLOCK(hi2c);
 
-            return HAL_ERROR;
+                return HAL_ERROR;
+            }
         }
     }
     return HAL_OK;
@@ -6602,15 +6627,17 @@ static HAL_StatusTypeDef I2C_WaitOnRXNEFlagUntilTimeout(I2C_HandleTypeDef * hi2c
 
         /* Check for the Timeout */
         if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U)) {
-            hi2c->PreviousState = I2C_STATE_NONE;
-            hi2c->State = HAL_I2C_STATE_READY;
-            hi2c->Mode = HAL_I2C_MODE_NONE;
-            hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
+            if ((__HAL_I2C_GET_FLAG(hi2c, I2C_FLAG_RXNE) == RESET)) {
+                hi2c->PreviousState = I2C_STATE_NONE;
+                hi2c->State = HAL_I2C_STATE_READY;
+                hi2c->Mode = HAL_I2C_MODE_NONE;
+                hi2c->ErrorCode |= HAL_I2C_ERROR_TIMEOUT;
 
-            /* Process Unlocked */
-            __HAL_UNLOCK(hi2c);
+                /* Process Unlocked */
+                __HAL_UNLOCK(hi2c);
 
-            return HAL_ERROR;
+                return HAL_ERROR;
+            }
         }
     }
     return HAL_OK;

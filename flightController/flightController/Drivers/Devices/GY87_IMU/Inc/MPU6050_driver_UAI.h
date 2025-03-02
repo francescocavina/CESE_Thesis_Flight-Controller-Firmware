@@ -55,6 +55,13 @@ extern "C" {
 /* --- Public macros definitions --------------------------------------------------------------- */
 
 /* --- Public data type declarations ----------------------------------------------------------- */
+typedef struct gyroscopeCalibrationValues {
+    float calibrationValueRateRoll;
+    float calibrationValueRatePitch;
+    float calibrationValueRateYaw;
+    bool_t fixedCalibration_en;
+} GY87_gyroscopeCalibrationValues_t;
+
 typedef struct gyroscopeValues {
     int16_t rawValueX;
     int16_t rawValueY;
@@ -63,6 +70,13 @@ typedef struct gyroscopeValues {
     float rotationRatePitch;
     float rotationRateYaw;
 } GY87_gyroscopeValues_t;
+
+typedef struct accelerometerCalibrationValues {
+    float calibrationValuelinearAccelerationX;
+    float calibrationValuelinearAccelerationY;
+    float calibrationValuelinearAccelerationZ;
+    bool_t fixedCalibration_en;
+} GY87_accelerometerCalibrationValues_t;
 
 typedef struct accelerometerValues {
     int16_t rawValueX;
@@ -111,7 +125,7 @@ void GY87_Reset(GY87_HandleTypeDef_t * hgy87);
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-bool_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87);
+GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en);
 
 /*
  * @brief  Reads gyroscope values.
@@ -129,7 +143,7 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-bool_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87);
+GY87_accelerometerCalibrationValues_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en);
 
 /*
  * @brief  Reads accelerometer values.

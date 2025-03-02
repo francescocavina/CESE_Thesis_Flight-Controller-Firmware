@@ -44,7 +44,9 @@ typedef enum { HAL_UNLOCKED = 0x00U, HAL_LOCKED = 0x01U } HAL_LockTypeDef;
 
 /* Exported macro ------------------------------------------------------------*/
 
-#define UNUSED(X)                (void)X /* To avoid gcc/g++ warnings */
+#if !defined(UNUSED)
+#define UNUSED(X) (void)X /* To avoid gcc/g++ warnings */
+#endif                    /* UNUSED */
 
 #define HAL_MAX_DELAY            0xFFFFFFFFU
 

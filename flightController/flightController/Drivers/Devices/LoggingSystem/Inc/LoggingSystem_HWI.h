@@ -69,9 +69,10 @@ typedef bool bool_t;
 /*
  * @brief  Sends a string through the USB port.
  * @param  string: characters to send.
- * @retval None
+ * @retval true: string sent successfully.
+ *         false: string not sent.
  */
-void USB_Write(uint8_t * string);
+bool_t USB_Write(uint8_t * string);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

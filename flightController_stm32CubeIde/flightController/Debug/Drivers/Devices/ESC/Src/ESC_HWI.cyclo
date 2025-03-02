@@ -1,0 +1,3 @@
+../Drivers/Devices/ESC/Src/ESC_HWI.c:56:8:PWM_Init	6
+../Drivers/Devices/ESC/Src/ESC_HWI.c:88:8:PWM_Deinit	7
+../Drivers/Devices/ESC/Src/ESC_HWI.c:127:8:PWM_SetDutyCycle	10

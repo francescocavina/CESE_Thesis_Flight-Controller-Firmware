@@ -1,0 +1,5 @@
+D:/Francesco/Thesis/CESE_Thesis_Flight-Controller-Firmware/flightController_v2/flightController/CMakeFiles/flightController.dir
+D:/Francesco/Thesis/CESE_Thesis_Flight-Controller-Firmware/flightController_v2/flightController/CMakeFiles/edit_cache.dir
+D:/Francesco/Thesis/CESE_Thesis_Flight-Controller-Firmware/flightController_v2/flightController/CMakeFiles/rebuild_cache.dir
+D:/Francesco/Thesis/CESE_Thesis_Flight-Controller-Firmware/flightController_v2/flightController/cmake/stm32cubemx/CMakeFiles/edit_cache.dir
+D:/Francesco/Thesis/CESE_Thesis_Flight-Controller-Firmware/flightController_v2/flightController/cmake/stm32cubemx/CMakeFiles/rebuild_cache.dir

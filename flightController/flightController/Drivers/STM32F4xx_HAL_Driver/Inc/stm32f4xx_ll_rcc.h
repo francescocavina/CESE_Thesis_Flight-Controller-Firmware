@@ -621,7 +621,7 @@ typedef struct {
 #define LL_RCC_SDIO_CLKSOURCE RCC_DCKCFGR2_SDIOSEL /*!< SDIO Clock source selection */
 #else
 #define LL_RCC_SDIO_CLKSOURCE RCC_PLLCFGR_PLLQ /*!< SDIO Clock source selection */
-#endif
+#endif                                         /* RCC_DCKCFGR_SDIOSEL */
 /**
  * @}
  */
