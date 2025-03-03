@@ -56,10 +56,12 @@ extern "C" {
 
 /* --- Public data type declarations ----------------------------------------------------------- */
 typedef struct gyroscopeCalibrationValues {
-    float calibrationValueRateRoll;
-    float calibrationValueRatePitch;
-    float calibrationValueRateYaw;
+    bool_t calibrationDone;
     bool_t fixedCalibration_en;
+    float calibrationRateRoll;
+    float calibrationRatePitch;
+    float calibrationRateYaw;
+
 } GY87_gyroscopeCalibrationValues_t;
 
 typedef struct gyroscopeValues {
@@ -72,10 +74,11 @@ typedef struct gyroscopeValues {
 } GY87_gyroscopeValues_t;
 
 typedef struct accelerometerCalibrationValues {
-    float calibrationValuelinearAccelerationX;
-    float calibrationValuelinearAccelerationY;
-    float calibrationValuelinearAccelerationZ;
+    bool_t calibrationDone;
     bool_t fixedCalibration_en;
+    float calibrationLinearAccelerationX;
+    float calibrationLinearAccelerationY;
+    float calibrationLinearAccelerationZ;
 } GY87_accelerometerCalibrationValues_t;
 
 typedef struct accelerometerValues {
@@ -125,7 +128,7 @@ void GY87_Reset(GY87_HandleTypeDef_t * hgy87);
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en);
+void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues, bool_t fixedCalibration_en);
 
 /*
  * @brief  Reads gyroscope values.
@@ -134,7 +137,7 @@ GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *
  *         gyroscopeValues: Pointer to a GY87_gyroscopeValues_t structure that stores the gyroscope values.
  * @retval None
  */
-void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues);
+void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues);
 
 /*
  * @brief  Calibrates accelerometer measurement.
@@ -143,7 +146,7 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-GY87_accelerometerCalibrationValues_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en);
+void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues, bool_t fixedCalibration_en);
 
 /*
  * @brief  Reads accelerometer values.
@@ -152,7 +155,7 @@ GY87_accelerometerCalibrationValues_t GY87_CalibrateAccelerometer(GY87_HandleTyp
  *         accelerometerValues: Pointer to a GY87_accelerometerValues_t structure that stores the accelerometer values.
  * @retval None
  */
-void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues);
+void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues);
 
 /*
  * @brief  Reads temperature sensor value.

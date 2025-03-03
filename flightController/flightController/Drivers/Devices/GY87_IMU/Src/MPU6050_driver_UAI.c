@@ -51,7 +51,7 @@
 // #define GY87_USE_LOGGING            // Remove comment to allow driver info logging
 
 #define GY87_MAX_NUMBER_INSTANCES   (2)    // Maximum number of possible IMUs connected to the i2c bus
-#define GY87_CALIBRATION_ITERATIONS (1000) // No. of readings to get a calibration value
+#define GY87_CALIBRATION_ITERATIONS (2000) // No. of readings to get a calibration value
 #define MPU6050_SET_BIT             (1)
 #define MPU6050_CLEAR_BIT           (0)
 #define QMC5883L_SET_BIT            (1)
@@ -627,12 +627,10 @@ void GY87_Reset(GY87_HandleTypeDef_t * hgy87) {
     }
 }
 
-GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en) {
+void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues, bool_t fixedCalibration_en) {
 
     /* Declare structure to read the gyroscope values */
     GY87_gyroscopeValues_t gyroscopeValues;
-    /* Declare variable to write the gyroscope calibration values */
-    GY87_gyroscopeCalibrationValues_t gyroscopeCalibrationValues;
 
     /* Declare variables to accumulate measurements */
     float ratesRoll = 0;
@@ -640,26 +638,41 @@ GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *
     float ratesYaw = 0;
 
     /* Check parameter and calculate calibration value */
-    if (NULL != hgy87) {
+    if (NULL != hgy87 && NULL != gyroscopeCalibrationValues) {
         if (true == fixedCalibration_en) {
-            gyroscopeCalibrationValues.fixedCalibration_en = true;
+            gyroscopeCalibrationValues->calibrationDone = true;
+            gyroscopeCalibrationValues->fixedCalibration_en = true;
+            gyroscopeCalibrationValues->calibrationRateRoll = 0;
+            gyroscopeCalibrationValues->calibrationRatePitch = 0;
+            gyroscopeCalibrationValues->calibrationRateYaw = 0;
         } else {
+            /* Define chunk size for yielding */
+            const uint16_t YIELD_CHUNK = 200;
+
             /* Calibrate gyroscope measurements */
             for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
 
                 /* Read gyroscope values */
-                GY87_ReadGyroscope(hgy87, &gyroscopeValues);
+                GY87_ReadGyroscope(hgy87, &gyroscopeValues, gyroscopeCalibrationValues);
 
                 /* Accumulate measurements */
                 ratesRoll += gyroscopeValues.rotationRateRoll;
                 ratesPitch += gyroscopeValues.rotationRatePitch;
                 ratesYaw += gyroscopeValues.rotationRateYaw;
+
+                if ((i % YIELD_CHUNK) == 0 && i > 0) {
+#ifdef USE_FREERTOS
+                    /* Allow other tasks to run */
+                    taskYIELD();
+#endif
+                }
             }
 
-            gyroscopeCalibrationRoll = ratesRoll / GY87_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationPitch = ratesPitch / GY87_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationYaw = ratesYaw / GY87_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationValues.fixedCalibration_en = false;
+            gyroscopeCalibrationValues->calibrationDone = true;
+            gyroscopeCalibrationValues->fixedCalibration_en = false;
+            gyroscopeCalibrationValues->calibrationRateRoll = ratesRoll / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationRatePitch = ratesPitch / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationRateYaw = ratesYaw / GY87_CALIBRATION_ITERATIONS;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
@@ -668,20 +681,16 @@ GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *
 #endif
         }
 
-        gyroscopeCalibrationValues.calibrationValueRateRoll = gyroscopeCalibrationRoll;
-        gyroscopeCalibrationValues.calibrationValueRatePitch = gyroscopeCalibrationPitch;
-        gyroscopeCalibrationValues.calibrationValueRateYaw = gyroscopeCalibrationYaw;
-
     } else {
-        gyroscopeCalibrationValues.calibrationValueRateRoll = -1;
-        gyroscopeCalibrationValues.calibrationValueRatePitch = -1;
-        gyroscopeCalibrationValues.fixedCalibration_en = true;
+        gyroscopeCalibrationValues->calibrationDone = false;
+        gyroscopeCalibrationValues->fixedCalibration_en = true;
+        gyroscopeCalibrationValues->calibrationRateRoll = 0;
+        gyroscopeCalibrationValues->calibrationRatePitch = 0;
+        gyroscopeCalibrationValues->calibrationRateYaw = 0;
     }
-
-    return gyroscopeCalibrationValues;
 }
 
-void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues) {
+void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues) {
 
     /* Declare variable for raw data */
     uint8_t gyroscopeRawData[2];
@@ -690,25 +699,25 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
     int16_t scaleFactor = MPU_6050_AUX_VAL_GYRO_SF_0500;
 
     /* Check parameters */
-    if (NULL != hgy87 && NULL != gyroscopeValues) {
+    if (NULL != hgy87 && NULL != gyroscopeValues && NULL != gyroscopeCalibrationValues) {
 
         /* Read gyroscope raw value for X axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_XOUT_H, gyroscopeRawData, sizeof(uint16_t));
         gyroscopeValues->rawValueX = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along X axis (roll) */
-        gyroscopeValues->rotationRateRoll = -((float)gyroscopeValues->rawValueX / scaleFactor) - gyroscopeCalibrationRoll;
+        gyroscopeValues->rotationRateRoll = -((float)gyroscopeValues->rawValueX / scaleFactor) - gyroscopeCalibrationValues->calibrationRateRoll;
 
         /* Read gyroscope raw value for Y axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_YOUT_H, gyroscopeRawData, sizeof(uint16_t));
         gyroscopeValues->rawValueY = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along Y axis (pitch) */
-        gyroscopeValues->rotationRatePitch = -((float)gyroscopeValues->rawValueY / scaleFactor) - gyroscopeCalibrationPitch;
+        gyroscopeValues->rotationRatePitch = -((float)gyroscopeValues->rawValueY / scaleFactor) - gyroscopeCalibrationValues->calibrationRatePitch;
 
         /* Read gyroscope raw value for Z axis  */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_ZOUT_H, gyroscopeRawData, sizeof(uint16_t));
         gyroscopeValues->rawValueZ = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along Z axis (yaw)  */
-        gyroscopeValues->rotationRateYaw = ((float)gyroscopeValues->rawValueZ / scaleFactor) - gyroscopeCalibrationYaw;
+        gyroscopeValues->rotationRateYaw = ((float)gyroscopeValues->rawValueZ / scaleFactor) - gyroscopeCalibrationValues->calibrationRateYaw;
 
     } else {
 
@@ -722,12 +731,10 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
     }
 }
 
-GY87_accelerometerCalibrationValues_t GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, bool_t fixedCalibration_en) {
+void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues, bool_t fixedCalibration_en) {
 
     /* Declare structure to read the accelerometer values */
     GY87_accelerometerValues_t accelerometerValues;
-    /* Declare variable to write the gyroscope calibration values */
-    GY87_accelerometerCalibrationValues_t accelerometerCalibrationValues;
 
     /* Declare variables to accumulate measurements */
     float linearAccelerationsX = 0;
@@ -735,26 +742,41 @@ GY87_accelerometerCalibrationValues_t GY87_CalibrateAccelerometer(GY87_HandleTyp
     float linearAccelerationsZ = 0;
 
     /* Check parameter and calculate calibration value */
-    if (NULL != hgy87) {
+    if (NULL != hgy87 && NULL != accelerometerCalibrationValues) {
         if (true == fixedCalibration_en) {
-            accelerometerCalibrationValues.fixedCalibration_en = true;
+            accelerometerCalibrationValues->calibrationDone = true;
+            accelerometerCalibrationValues->fixedCalibration_en = true;
+            accelerometerCalibrationValues->calibrationLinearAccelerationX = 0;
+            accelerometerCalibrationValues->calibrationLinearAccelerationY = 0;
+            accelerometerCalibrationValues->calibrationLinearAccelerationZ = 0;
         } else {
-            /* Calibrate gyroscope measurements */
+            /* Define chunk size for yielding */
+            const uint16_t YIELD_CHUNK = 50;
+
+            /* Calibrate accelerometer measurements */
             for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
 
-                /* Read gyroscope values */
-                GY87_ReadAccelerometer(hgy87, &accelerometerValues);
+                /* Read accelerometer values */
+                GY87_ReadAccelerometer(hgy87, &accelerometerValues, accelerometerCalibrationValues);
 
                 /* Accumulate measurements */
                 linearAccelerationsX += accelerometerValues.linearAccelerationX;
                 linearAccelerationsY += accelerometerValues.linearAccelerationY;
                 linearAccelerationsZ += (accelerometerValues.linearAccelerationZ - 1);
+
+                if ((i % YIELD_CHUNK) == 0 && i > 0) {
+#ifdef USE_FREERTOS
+                    /* Allow other tasks to run */
+                    taskYIELD();
+#endif
+                }
             }
 
-            accelerometerCalibrationX = linearAccelerationsX / GY87_CALIBRATION_ITERATIONS;
-            accelerometerCalibrationY = linearAccelerationsY / GY87_CALIBRATION_ITERATIONS;
-            accelerometerCalibrationZ = linearAccelerationsZ / GY87_CALIBRATION_ITERATIONS;
-            accelerometerCalibrationValues.fixedCalibration_en = false;
+            accelerometerCalibrationValues->calibrationDone = true;
+            accelerometerCalibrationValues->fixedCalibration_en = false;
+            accelerometerCalibrationValues->calibrationLinearAccelerationX = linearAccelerationsX / GY87_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationValues->calibrationLinearAccelerationY = linearAccelerationsY / GY87_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationValues->calibrationLinearAccelerationZ = linearAccelerationsZ / GY87_CALIBRATION_ITERATIONS;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
@@ -763,21 +785,16 @@ GY87_accelerometerCalibrationValues_t GY87_CalibrateAccelerometer(GY87_HandleTyp
 #endif
         }
 
-        accelerometerCalibrationValues.calibrationValuelinearAccelerationX = accelerometerCalibrationX;
-        accelerometerCalibrationValues.calibrationValuelinearAccelerationY = accelerometerCalibrationY;
-        accelerometerCalibrationValues.calibrationValuelinearAccelerationZ = accelerometerCalibrationZ;
-
     } else {
-        accelerometerCalibrationValues.calibrationValuelinearAccelerationX = -1;
-        accelerometerCalibrationValues.calibrationValuelinearAccelerationY = -1;
-        accelerometerCalibrationValues.calibrationValuelinearAccelerationZ = -1;
-        accelerometerCalibrationValues.fixedCalibration_en = false;
+        accelerometerCalibrationValues->calibrationDone = false;
+        accelerometerCalibrationValues->fixedCalibration_en = true;
+        accelerometerCalibrationValues->calibrationLinearAccelerationX = 0;
+        accelerometerCalibrationValues->calibrationLinearAccelerationY = 0;
+        accelerometerCalibrationValues->calibrationLinearAccelerationZ = 0;
     }
-
-    return accelerometerCalibrationValues;
 }
 
-void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues) {
+void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues) {
 
     /* Declare variable for raw data */
     uint8_t accelerometerRawData[2];
@@ -789,25 +806,25 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
     float denomRoll, denomPitch;
 
     /* Check parameters */
-    if (NULL != hgy87 && NULL != accelerometerValues) {
+    if (NULL != hgy87 && NULL != accelerometerValues && NULL != accelerometerCalibrationValues) {
 
         /* Read accelerometer raw value for X axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_ACCEL_XOUT_H, accelerometerRawData, sizeof(uint16_t));
         accelerometerValues->rawValueX = (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
         /* Calculate accelerometer linear acceleration along X axis */
-        accX = accelerometerValues->linearAccelerationX = -((float)accelerometerValues->rawValueX / scaleFactor) - accelerometerCalibrationX;
+        accX = accelerometerValues->linearAccelerationX = -((float)accelerometerValues->rawValueX / scaleFactor) - accelerometerCalibrationValues->calibrationLinearAccelerationX;
 
         /* Read accelerometer raw value for Y axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_ACCEL_YOUT_H, accelerometerRawData, sizeof(uint16_t));
         accelerometerValues->rawValueY = (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
         /* Calculate accelerometer linear acceleration along Y axis */
-        accY = accelerometerValues->linearAccelerationY = -((float)accelerometerValues->rawValueY / scaleFactor) - accelerometerCalibrationY;
+        accY = accelerometerValues->linearAccelerationY = -((float)accelerometerValues->rawValueY / scaleFactor) - accelerometerCalibrationValues->calibrationLinearAccelerationY;
 
         /* Read accelerometer raw value for Z axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_ACCEL_ZOUT_H, accelerometerRawData, sizeof(uint16_t));
         accelerometerValues->rawValueZ = (int16_t)(accelerometerRawData[0] << 8 | accelerometerRawData[1]);
         /* Calculate accelerometer linear acceleration along Z axis */
-        accZ = accelerometerValues->linearAccelerationZ = ((float)accelerometerValues->rawValueZ / scaleFactor) - accelerometerCalibrationZ;
+        accZ = accelerometerValues->linearAccelerationZ = ((float)accelerometerValues->rawValueZ / scaleFactor) - accelerometerCalibrationValues->calibrationLinearAccelerationZ;
 
         /* Calculate roll and pitch angles using an approximation with linear accelerations */
         denomRoll = sqrt(accX * accX + accZ * accZ);
