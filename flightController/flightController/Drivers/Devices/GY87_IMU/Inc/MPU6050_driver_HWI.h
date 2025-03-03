@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_HWI.h
- * @date:    10/03/2024
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.5.0
+ * @version: v2.0.0
  *
  * @brief:   This is a driver for the GY87 IMU module.
  *           It is divided in three parts: One high level abstraction layer

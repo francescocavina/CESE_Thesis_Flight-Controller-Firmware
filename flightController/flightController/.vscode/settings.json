@@ -2,6 +2,7 @@
     "files.associations": {
         "compare": "c",
         "esc_uai.h": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "loggingsystem_uai.h": "c"
     }
 }

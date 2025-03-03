@@ -27,7 +27,7 @@
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   This is a template for header files.
+ * @brief:   This file contains the flight controller user settings.
  */
 
 #ifndef USER_SETTINGS_H
@@ -45,7 +45,7 @@ extern "C" {
 /* ############################################################################################# */
 
 /* --- IMU SENSORS ----------------------------------------------------------------------------- */
-#define GY87_CALIBRATION_EN (0)
+#define GY87_CALIBRATION_EN (1)
 
 /* --- POWER ON/OFF DRIVER --------------------------------------------------------------------- */
 #define PW_ON_OFF_DRIVER_TIME                                                                                                                                                                                                                            \

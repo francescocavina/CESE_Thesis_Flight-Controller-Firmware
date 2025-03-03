@@ -160,7 +160,7 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
  *                the configuration information for the GY87 device.
  * @retval Temperature in degrees Celsius [°C].
  */
-int16_t GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87);
+float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87);
 
 /*
  * @brief  Reads magnetometer values.

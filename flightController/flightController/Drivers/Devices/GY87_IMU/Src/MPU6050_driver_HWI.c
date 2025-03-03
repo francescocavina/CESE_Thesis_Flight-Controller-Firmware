@@ -23,9 +23,9 @@
 
 /*
  * @file:    MPU6050_driver_HWI.c
- * @date:    10/03/2024
+ * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.5.0
+ * @version: v2.0.0
  *
  * @brief:  This is a driver for the GY87 IMU module.
  *           It is divided in three parts: One high level abstraction layer
@@ -46,13 +46,15 @@
 #include "MPU6050_driver_register_map.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define MPU_6050_I2C_READ_TIMEOUT  (100) // 100 ms
-#define MPU_6050_I2C_WRITE_TIMEOUT (100) // 100 ms
-#define MPU_6050_ADDR_SIZE         (1)   // 1 Byte
+#define MPU_6050_I2C_READ_TIMEOUT  (15)
+#define MPU_6050_I2C_WRITE_TIMEOUT (15)
+#define MPU_6050_ADDR_SIZE         (1) // 1 Byte
 #define MPU_6050_MIN_REG_ADDR      (0x00)
 #define MPU_6050_MAX_REG_ADDR      (0x75)
 #define MPU_6050_MIN_DATA_SIZE     (1)
 #define MPU_6050_MAX_DATA_SIZE     (10)
+#define MPU_6050_MAX_RETRIES       (3) // Maximum retry attempts
+#define MPU_6050_RETRY_DELAY       (1) // Delay between retries (ms)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -95,20 +97,44 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
     if (NULL == hi2c) {
         return false;
     }
+    if (reg > MPU_6050_MAX_REG_ADDR) {
+        return false;
+    }
     if (NULL == data) {
         return false;
     }
-
-    /* Read I2C device data by passing a data register */
-    /* BEGIN MODIFY 1 */
-    if (HAL_OK != HAL_I2C_Mem_Read(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize, MPU_6050_I2C_READ_TIMEOUT)) {
-        /* END MODIFY 1 */
-        /* Data couldn't be read */
+    if (dataSize < MPU_6050_MIN_DATA_SIZE || dataSize > MPU_6050_MAX_DATA_SIZE) {
         return false;
-    } else {
-        /* Data read successfully */
-        return true;
     }
+
+    /* Implement retry logic */
+    uint8_t retries = 0;
+    /* BEGIN MODIFY 1 */
+    HAL_StatusTypeDef status;
+    /* END MODIFY 1 */
+
+    while (retries < MPU_6050_MAX_RETRIES) {
+        /* Read I2C device data by passing a data register */
+        /* BEGIN MODIFY 2 */
+        status = HAL_I2C_Mem_Read(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, dataSize, MPU_6050_I2C_READ_TIMEOUT);
+        /* END MODIFY 2 */
+
+        if (status == HAL_OK) {
+            /* Data read successfully */
+            return true;
+        }
+
+        /* Increment retry counter */
+        retries++;
+
+        /* Only delay between retries, not after the last attempt */
+        if (retries < MPU_6050_MAX_RETRIES) {
+            HAL_Delay(MPU_6050_RETRY_DELAY);
+        }
+    }
+
+    /* All retries failed */
+    return false;
 }
 
 bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data) {
@@ -117,21 +143,41 @@ bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t
     if (NULL == hi2c) {
         return false;
     }
+    if (reg > MPU_6050_MAX_REG_ADDR) {
+        return false;
+    }
     if (NULL == data) {
         return false;
     }
 
-    /* Write to I2C device register */
-    /* BEGIN MODIFY 2 */
-    if (HAL_OK != HAL_I2C_Mem_Write(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, sizeof(*data), MPU_6050_I2C_WRITE_TIMEOUT)) {
-        /* END MODIFY 2 */
-        /* Data couldn't be written */
-        return false;
-    } else {
+    /* Implement retry logic */
+    uint8_t retries = 0;
+    /* BEGIN MODIFY 3 */
+    HAL_StatusTypeDef status;
+    /* END MODIFY 3 */
 
-        /* Data written successfully */
-        return true;
+    while (retries < MPU_6050_MAX_RETRIES) {
+        /* Write to I2C device register */
+        /* BEGIN MODIFY 4 */
+        status = HAL_I2C_Mem_Write(hi2c, address, reg, MPU_6050_ADDR_SIZE, data, sizeof(*data), MPU_6050_I2C_WRITE_TIMEOUT);
+        /* END MODIFY 4 */
+
+        if (status == HAL_OK) {
+            /* Data written successfully */
+            return true;
+        }
+
+        /* Increment retry counter */
+        retries++;
+
+        /* Only delay between retries, not after the last attempt */
+        if (retries < MPU_6050_MAX_RETRIES) {
+            HAL_Delay(MPU_6050_RETRY_DELAY);
+        }
     }
+
+    /* All retries failed */
+    return false;
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

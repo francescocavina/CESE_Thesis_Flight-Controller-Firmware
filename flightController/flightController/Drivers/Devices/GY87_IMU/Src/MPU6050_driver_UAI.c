@@ -51,7 +51,7 @@
 // #define GY87_USE_LOGGING            // Remove comment to allow driver info logging
 
 #define GY87_MAX_NUMBER_INSTANCES   (2)    // Maximum number of possible IMUs connected to the i2c bus
-#define GY87_CALIBRATION_ITERATIONS (1500) // No. of readings to get a calibration value
+#define GY87_CALIBRATION_ITERATIONS (1000) // No. of readings to get a calibration value
 #define MPU6050_SET_BIT             (1)
 #define MPU6050_CLEAR_BIT           (0)
 #define QMC5883L_SET_BIT            (1)
@@ -270,16 +270,19 @@ static GY87_HandleTypeDef_t * GY87_InstanceInit(I2C_HandleTypeDef * hi2c) {
 
     /* Check if dynamic memory allocation was successful */
     if (NULL == hgy87 || NULL == buffer) {
-        /* Dynamic memory allocation was not successful */
+/* Dynamic memory allocation was not successful */
 #ifdef USE_FREERTOS
         /* Free up dynamic allocated memory */
-        vPortFree(hgy87->buffer);
-        vPortFree(hgy87);
+        if (buffer)
+            vPortFree(buffer);
+        if (hgy87)
+            vPortFree(hgy87);
 #else
         /* Free up dynamic allocated memory */
-        hgy87->buffer = 0;
-        free(hgy87->buffer);
-        free(hgy87);
+        if (buffer)
+            free(buffer);
+        if (hgy87)
+            free(hgy87);
 #endif
         return NULL;
     } else {
@@ -565,7 +568,7 @@ GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c) {
         /* Initialize I2C communication */
         if (I2C_Init(hgy87)) {
 
-            /* Initialization was successful */
+/* Initialization was successful */
 #ifdef GY87_USE_LOGGING
             LOG((uint8_t *)"MPU6050 IMU detected.\r\n\n", LOG_INFORMATION);
 #endif
@@ -578,15 +581,19 @@ GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c) {
             return hgy87;
         } else {
 
-            /* Initialization was unsuccessful */
+/* Initialization was unsuccessful */
 #ifdef USE_FREERTOS
             /* Free up dynamic allocated memory */
-            vPortFree(hgy87->buffer);
-            vPortFree(hgy87);
+            if (hgy87->buffer)
+                vPortFree(hgy87->buffer);
+            if (hgy87)
+                vPortFree(hgy87);
 #else
             /* Free up dynamic allocated memory */
-            free(hgy87->buffer);
-            free(hgy87);
+            if (hgy87->buffer)
+                free(hgy87->buffer);
+            if (hgy87)
+                free(hgy87);
 #endif
 
 #ifdef GY87_USE_LOGGING
@@ -596,7 +603,7 @@ GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c) {
         }
     } else {
 
-        /* Instance couldn't be created */
+/* Instance couldn't be created */
 #ifdef GY87_USE_LOGGING
         LOG((uint8_t *)"GY87 IMU couldn't be initialized.\r\n\n", LOG_ERROR);
 #endif
@@ -668,7 +675,6 @@ GY87_gyroscopeCalibrationValues_t GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *
     } else {
         gyroscopeCalibrationValues.calibrationValueRateRoll = -1;
         gyroscopeCalibrationValues.calibrationValueRatePitch = -1;
-        gyroscopeCalibrationValues.fixedCalibration_en = -1;
         gyroscopeCalibrationValues.fixedCalibration_en = true;
     }
 
@@ -833,16 +839,12 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
     }
 }
 
-int16_t GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87) {
+float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87) {
 
     /* Declare variable for raw data */
     uint8_t temperatureSensorRawData[2];
-
-    /* Define variable for scale factoring raw data */
-    int16_t scaleFactor = MPU_6050_AUX_VAL_TEMP_SF;
-
-    /* Define variable to offset raw data */
-    int16_t offset = MPU_6050_AUX_VAL_TEMP_OFS;
+    int16_t rawTemperature;
+    float temperature;
 
     /* Check parameter */
     if (NULL == hgy87) {
@@ -852,7 +854,15 @@ int16_t GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87) {
     /* Read temperature sensor */
     MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_TEMP_OUT_H, temperatureSensorRawData, sizeof(uint16_t));
 
-    return ((int16_t)(temperatureSensorRawData[0] << 8 | temperatureSensorRawData[1]) / scaleFactor) + offset;
+    rawTemperature = (int16_t)((((int16_t)temperatureSensorRawData[0]) << 8) | ((int16_t)temperatureSensorRawData[1]));
+    temperature = ((float)rawTemperature / (float)MPU_6050_AUX_VAL_TEMP_SF) + (float)MPU_6050_AUX_VAL_TEMP_OFS;
+
+    /* Sanity check - typical environmental temperature range */
+    if (temperature < -5.0f || temperature > 60.0f) {
+        return 0;
+    } else {
+        return temperature;
+    }
 }
 
 void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues_t * magnetometerValues) {
