@@ -219,23 +219,25 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
             hibus->data[i] = IBUS_CHANNEL_VALUE_NULL;
         }
     } else {
-/* Dynamic memory allocation was not successful */
+        /* Dynamic memory allocation was not successful */
 #ifdef USE_FREERTOS
         /* Free up dynamic allocated memory */
-        if (hibus->buffer)
-            vPortFree(hibus->buffer);
-        if (hibus->data)
-            vPortFree(hibus->data);
-        if (hibus)
+        if (hibus) {
+            if (hibus->buffer)
+                vPortFree(hibus->buffer);
+            if (hibus->data)
+                vPortFree(hibus->data);
             vPortFree(hibus);
+        }
 #else
         /* Free up dynamic allocated memory */
-        if (hibus->buffer)
-            free(hibus->buffer);
-        if (hibus->data)
-            free(hibus->data);
-        if (hibus)
+        if (hibus) {
+            if (hibus->buffer)
+                free(hibus->buffer);
+            if (hibus->data)
+                free(hibus->data);
             free(hibus);
+        }
 #endif
         return NULL;
     }
@@ -246,23 +248,25 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
         alreadyInitialized = true;
         return hibus;
     } else {
-/* Initialization was unsuccessful */
+        /* Initialization was unsuccessful */
 #ifdef USE_FREERTOS
         /* Free up dynamic allocated memory */
-        if (hibus->buffer)
-            vPortFree(hibus->buffer);
-        if (hibus->data)
-            vPortFree(hibus->data);
-        if (hibus)
+        if (hibus) {
+            if (hibus->buffer)
+                vPortFree(hibus->buffer);
+            if (hibus->data)
+                vPortFree(hibus->data);
             vPortFree(hibus);
+        }
 #else
         /* Free up dynamic allocated memory */
-        if (hibus->buffer)
-            free(hibus->buffer);
-        if (hibus->data)
-            free(hibus->data);
-        if (hibus)
+        if (hibus) {
+            if (hibus->buffer)
+                free(hibus->buffer);
+            if (hibus->data)
+                free(hibus->data);
             free(hibus);
+        }
 #endif
         return NULL;
     }
@@ -283,7 +287,7 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel
     }
 
     /* Set number of tries for flight controller reading */
-    const uint8_t MAX_ATTEMPTS = 10;
+    const uint8_t MAX_ATTEMPTS = 5;
     uint8_t attempts = 0;
 
     /* Keep track of last valid reading */
@@ -331,6 +335,11 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel
 #else
         HAL_Delay(1);
 #endif
+    }
+
+    /* Check if DMA is hung */
+    if (attempts >= MAX_ATTEMPTS) {
+        IBUS_CheckAndResetDMA(hibus);
     }
 
     /* Return last valid reading rather than blocking indefinitely */

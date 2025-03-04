@@ -32,6 +32,7 @@
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "main_app.h"
+#include "ErrorLED.h"
 #include "user_settings.h"
 #include "controlSystem_settings.h"
 #include "debug_signals_ids.h"
@@ -51,32 +52,32 @@
 #define TASK_CONTROLSYSTEM_PRIORITY    (5)
 #define TASK_USBCOMMUNICATION_PRIORITY (4)
 #define TASK_DEBUGGING_PRIORITY        (4)
-#define TASK_BATTERYLEVEL_PRIORITY     (1)
-#define TASK_BATTERYALARM_PRIORITY     (1)
+#define TASK_BATTERYLEVEL_PRIORITY     (2)
+#define TASK_BATTERYALARM_PRIORITY     (2)
 #define TASK_HEARTBEATLIGHT_PRIORITY   (2)
 #define TASK_FLIGHTLIGHTS_PRIORITY     (2)
 /* Logging and Debugging Settings */
 #define MAIN_APP_LOGGING_DEBUGGING                               (1)
 #define MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE                   (1024)
 #define MAIN_APP_DEBUGGING_FSA8S_MAIN                            (1)
-#define MAIN_APP_DEBUGGING_FSA8S_AUX                             (1)
+#define MAIN_APP_DEBUGGING_FSA8S_AUX                             (0)
 #define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES     (1)
 #define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES                 (1)
 #define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES (1)
 #define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES             (1)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (0)
 #define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (0) // Not necessary
 #define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (0) // Not necessary
-#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (1) // Not necessary
-#define MAIN_APP_DEBUGGING_ESCS                                  (1)
-#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES        (1)
+#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (0) // Not necessary
+#define MAIN_APP_DEBUGGING_ESCS                                  (0)
+#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES        (0)
 #define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES           (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS           (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID              (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE          (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS            (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID               (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS           (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID              (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE          (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS            (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID               (0)
 #define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK             (1)
 /* Drivers Settings */
 #define FSA8S_CHANNELS                     (10) // Number of remote control channels to read
@@ -172,15 +173,16 @@ static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL
 static uint16_t FSA8S_channelValues[FSA8S_CHANNELS] = {0};
 
 /* GY87 IMU Variables */
-static GY87_gyroscopeCalibrationValues_t GY87_gyroscopeCalibrationValues = {0.0, 0.0, 0.0, true};
+static bool_t gyroscopeCalibrationIsDone = false;
+static GY87_gyroscopeCalibrationValues_t GY87_gyroscopeCalibrationValues = {false, true, 0.0, 0.0, 0.0};
 static GY87_gyroscopeValues_t GY87_gyroscopeValues;
-static GY87_accelerometerCalibrationValues_t GY87_accelerometerCalibrationValues = {0.0, 0.0, 0.0, true};
+static bool_t accelerometerCalibrationIsDone = false;
+static GY87_accelerometerCalibrationValues_t GY87_accelerometerCalibrationValues = {false, true, 0.0, 0.0, 0.0};
 static GY87_accelerometerValues_t GY87_accelerometerValues;
 static GY87_magnetometerValues_t GY87_magnetometerValues;
 static float GY87_magnetometerHeadingValue = 0;
 static float GY87_temperature = 0;
-static bool_t gyroscopeCalibrationIsDone = false;
-static bool_t accelerometerCalibrationIsDone = false;
+
 /* Kalman Filter Variables */
 static float Kalman_predictionValue_rollAngle = 0;
 static float Kalman_predictionValue_pitchAngle = 0;
@@ -246,30 +248,30 @@ static float FlightController_batteryLevelValue = 11.1;
 /*
  * @brief  Creates system software timers.
  * @param  None
- * @retval None
+ * @retval true if the timers are created successfully, false otherwise.
  */
-void FreeRTOS_CreateTimers(void);
+bool_t FreeRTOS_CreateTimers(void);
 
 /*
  * @brief  Creates system software queues.
  * @param  None
- * @retval None
+ * @retval true if the queues are created successfully, false otherwise.
  */
-void FreeRTOS_CreateQueues(void);
+bool_t FreeRTOS_CreateQueues(void);
 
 /*
  * @brief  Creates system software mutexes.
  * @param  None
- * @retval None
+ * @retval true if the mutexes are created successfully, false otherwise.
  */
-void FreeRTOS_CreateMutexes(void);
+bool_t FreeRTOS_CreateMutexes(void);
 
 /*
  * @brief  Creates other system tasks.
  * @param  None
- * @retval None
+ * @retval true if the tasks are created successfully, false otherwise.
  */
-void FreeRTOS_CreateTasks(void);
+bool_t FreeRTOS_CreateTasks(void);
 
 /*
  * @brief  Task: Controls the whole system as a closed-loop system, taking as inputs the data
@@ -404,96 +406,124 @@ extern ADC_HandleTypeDef hadc1;
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-void FreeRTOS_CreateTimers(void) {
+bool_t FreeRTOS_CreateTimers(void) {
 
     /* Timer 2: BatteryLevelAlarm */
     Timer_Handle_BatteryLevelAlarm = xTimerCreate("BatteryLevelAlarm", pdMS_TO_TICKS(200), pdTRUE, (void *)0, Timer_Callback_BatteryLevelAlarm);
-    if (NULL != Timer_Handle_BatteryLevelAlarm) {
-        /* Start timer */
-        xTimerStart(Timer_Handle_BatteryLevelAlarm, 0);
+    if (Timer_Handle_BatteryLevelAlarm == NULL) {
+        return false;
     }
+    /* Start timer */
+    xTimerStart(Timer_Handle_BatteryLevelAlarm, 0);
 
     /* Timer 3: FlightLights */
     Timer_Handle_FlightLights = xTimerCreate("FlightLights", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer_Callback_FlightLights);
-    if (NULL != Timer_Handle_FlightLights) {
-        /* Start timer */
-        xTimerStart(Timer_Handle_FlightLights, 0);
+    if (Timer_Handle_FlightLights == NULL) {
+        return false;
     }
+    /* Start timer */
+    xTimerStart(Timer_Handle_FlightLights, 0);
 
     /* Timer 4: ControlSystem */
     Timer_Handle_ControlSystem = xTimerCreate("ControlSystem", pdMS_TO_TICKS(1), pdTRUE, (void *)0, Timer_Callback_ControlSystem);
-    if (NULL != Timer_Handle_ControlSystem) {
-        /* Start timer */
-        xTimerStart(Timer_Handle_ControlSystem, 0);
+    if (Timer_Handle_ControlSystem == NULL) {
+        return false;
     }
+    /* Start timer */
+    xTimerStart(Timer_Handle_ControlSystem, 0);
+
+    /* Successfully created all timers */
+    return true;
 }
 
-void FreeRTOS_CreateQueues(void) {
+bool_t FreeRTOS_CreateQueues(void) {
 
     /* Queue 1: USB Communication - Logging */
     Queue_Handle_USB_Communication_Info = xQueueCreate(USB_COMMUNICATION_INFO_QUEUE_SIZE, sizeof(uint8_t *));
-    configASSERT(Queue_Handle_USB_Communication_Info != NULL);
+    if (Queue_Handle_USB_Communication_Info == NULL) {
+        return false;
+    }
 
     /* Queue 2: USB Communication - Debugging */
     Queue_Handle_USB_Communication_Debug = xQueueCreate(USB_COMMUNICATION_DEBUG_QUEUE_SIZE, sizeof(uint8_t *));
-    configASSERT(Queue_Handle_USB_Communication_Debug != NULL);
+    if (Queue_Handle_USB_Communication_Debug == NULL) {
+        return false;
+    }
+
+    /* Successfully created all queues */
+    return true;
 }
 
-void FreeRTOS_CreateMutexes(void) {
+bool_t FreeRTOS_CreateMutexes(void) {
 
     /* Mutex 1: Log Debugging String */
     Mutex_Handle_LogDebuggingString = xSemaphoreCreateMutex();
-    configASSERT(Mutex_Handle_LogDebuggingString != NULL);
+    if (Mutex_Handle_LogDebuggingString == NULL) {
+        return false;
+    }
 
     /* Mutex 2: Log Information String */
     Mutex_Handle_LogInformationString = xSemaphoreCreateMutex();
-    configASSERT(Mutex_Handle_LogInformationString != NULL);
+    if (Mutex_Handle_LogInformationString == NULL) {
+        return false;
+    }
+
+    /* Successfully created all mutexes */
+    return true;
 }
 
-void FreeRTOS_CreateTasks(void) {
-
-    BaseType_t ret;
+bool_t FreeRTOS_CreateTasks(void) {
 
     /* Task 1: ControlSystem */
-    ret = xTaskCreate(Task_ControlSystem, "Task_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_CONTROLSYSTEM_PRIORITY), &Task_Handle_ControlSystem);
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
+    xTaskCreate(Task_ControlSystem, "Task_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_CONTROLSYSTEM_PRIORITY), &Task_Handle_ControlSystem);
+    if (Task_Handle_ControlSystem == NULL) {
+        return false;
+    }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
     /* Task 2: USB_Communication */
-    ret = xTaskCreate(Task_USB_Communication, "Task_USB_Communication", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_USBCOMMUNICATION_PRIORITY), &Task_Handle_USB_Communication);
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
+    xTaskCreate(Task_USB_Communication, "Task_USB_Communication", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_USBCOMMUNICATION_PRIORITY), &Task_Handle_USB_Communication);
+    if (Task_Handle_USB_Communication == NULL) {
+        return false;
+    }
     /* Suspend it */
     vTaskSuspend(Task_Handle_USB_Communication);
 
     /* Task 3: Debugging */
-    ret = xTaskCreate(Task_Debugging, "Task_Debugging", (3 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_DEBUGGING_PRIORITY), &Task_Handle_Debugging);
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
+    xTaskCreate(Task_Debugging, "Task_Debugging", (3 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_DEBUGGING_PRIORITY), &Task_Handle_Debugging);
+    if (Task_Handle_Debugging == NULL) {
+        return false;
+    }
     /* Suspend it */
     vTaskSuspend(Task_Handle_Debugging);
 #endif
 
     /* Task 4: BatteryLevel */
-    ret = xTaskCreate(Task_BatteryLevel, "Task_BatteryLevel", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYLEVEL_PRIORITY), &Task_Handle_BatteryLevel);
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
+    xTaskCreate(Task_BatteryLevel, "Task_BatteryLevel", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYLEVEL_PRIORITY), &Task_Handle_BatteryLevel);
+    if (Task_Handle_BatteryLevel == NULL) {
+        return false;
+    }
 
     /* Task 5: BatteryAlarm */
-    ret = xTaskCreate(Task_BatteryAlarm, "Task_BatteryAlarm", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYALARM_PRIORITY), &Task_Handle_BatteryAlarm);
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
+    xTaskCreate(Task_BatteryAlarm, "Task_BatteryAlarm", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYALARM_PRIORITY), &Task_Handle_BatteryAlarm);
+    if (Task_Handle_BatteryAlarm == NULL) {
+        return false;
+    }
 
     /* Task 6: HeartbeatLight */
-    ret = xTaskCreate(Task_HeartbeatLight, "Task_HeartbeatLight", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_HEARTBEATLIGHT_PRIORITY), &Task_Handle_HeartbeatLight);
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
+    xTaskCreate(Task_HeartbeatLight, "Task_HeartbeatLight", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_HEARTBEATLIGHT_PRIORITY), &Task_Handle_HeartbeatLight);
+    if (Task_Handle_HeartbeatLight == NULL) {
+        return false;
+    }
 
     /* Task 7: FlightLights */
-    ret = xTaskCreate(Task_FlightLights, "Task_FlightLights", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTLIGHTS_PRIORITY), &Task_Handle_FlightLights);
-    /* Check the task was created successfully. */
-    configASSERT(ret == pdPASS);
+    xTaskCreate(Task_FlightLights, "Task_FlightLights", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTLIGHTS_PRIORITY), &Task_Handle_FlightLights);
+    if (Task_Handle_FlightLights == NULL) {
+        return false;
+    }
+
+    /* Successfully created all tasks */
+    return true;
 }
 
 void Task_ControlSystem(void * ptr) {
@@ -513,24 +543,26 @@ void Task_ControlSystem(void * ptr) {
 
         /* Calibrate GY-87 gyroscope sensor */
         if (false == gyroscopeCalibrationIsDone) {
-            GY87_gyroscopeCalibrationValues = GY87_CalibrateGyroscope(hgy87, !((bool_t)GY87_CALIBRATION_EN));
-            gyroscopeCalibrationIsDone = true;
+            GY87_CalibrateGyroscope(hgy87, &GY87_gyroscopeCalibrationValues, !((bool_t)GY87_CALIBRATION_EN));
+            gyroscopeCalibrationIsDone = GY87_gyroscopeCalibrationValues.calibrationDone;
         }
         /* Calibrate GY-87 accelerometer sensor */
         if (false == accelerometerCalibrationIsDone) {
-            GY87_accelerometerCalibrationValues = GY87_CalibrateAccelerometer(hgy87, !((bool_t)GY87_CALIBRATION_EN));
-            accelerometerCalibrationIsDone = true;
+            GY87_CalibrateAccelerometer(hgy87, &GY87_accelerometerCalibrationValues, !((bool_t)GY87_CALIBRATION_EN));
+            accelerometerCalibrationIsDone = GY87_accelerometerCalibrationValues.calibrationDone;
         }
         /* Check that both sensors are calibrated */
         if (gyroscopeCalibrationIsDone && accelerometerCalibrationIsDone && false == FlightController_isInitialized) {
             FlightController_isInitialized = true;
 
-/* Reasume supsended debugging tasks */
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
+            /* Reasume supsended debugging tasks */
             vTaskResume(Task_Handle_USB_Communication);
             vTaskResume(Task_Handle_Debugging);
 #endif
         }
+
+        FlightController_isInitialized = true;
 
         /* Control system processing */
         if (FlightController_isInitialized && 0 == CONTROL_SYSTEM_MODE) {
@@ -541,180 +573,16 @@ void Task_ControlSystem(void * ptr) {
             }
 
             /* Read GY-87 gyroscope sensor */
-            GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
+            GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues, &GY87_gyroscopeCalibrationValues);
 
             /* Read GY-87 accelerometer sensor */
-            GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
+            GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues, &GY87_accelerometerCalibrationValues);
 
             /* Calculate Kalman angles */
             Kalman_CalculateAngle(&Kalman_predictionValue_rollAngle, &Kalman_uncertaintyValue_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
             Kalman_CalculateAngle(&Kalman_predictionValue_pitchAngle, &Kalman_uncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
 
         } else if (FlightController_isInitialized && 1 == CONTROL_SYSTEM_MODE) {
-
-            /* Avoid uncontrolled motor start */
-            while (false == throttleStick_startedDown) {
-
-                /* Read throttle input from radio controller */
-                reference_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-
-                if (15 > reference_throttle) {
-
-                    throttleStick_startedDown = true;
-
-                } else {
-
-                    throttleStick_startedDown = false;
-                }
-            }
-
-            /* Check if ESCs are enabled (Switch B on radio controller) */
-            if (500 <= FSA8S_ReadChannel(rc_controller, CHANNEL_6)) {
-                ESC_isEnabled = true;
-            } else {
-                ESC_isEnabled = false;
-            }
-
-            /* Turn off motors in case ESCs are disabled */
-            if (false == ESC_isEnabled) {
-
-                /* Save motors speed */
-                ESC_speeds[1] = 0;
-                ESC_speeds[2] = 0;
-                ESC_speeds[3] = 0;
-                ESC_speeds[4] = 0;
-
-                /* Turn off motors */
-                ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
-                ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
-                ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
-                ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
-
-                /* Reset PID variables */
-                CSM_ResetPID();
-
-            } else {
-
-                /* Check if timer has expired */
-                if (Timer_Flag_ControlSystem) {
-
-                    /* Read input throttle from radio controller */
-                    reference_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-
-                    /* Check if throttle stick is low */
-                    if (CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE > reference_throttle) {
-
-                        /* Save motors speed */
-                        ESC_speeds[1] = 0;
-                        ESC_speeds[2] = 0;
-                        ESC_speeds[3] = 0;
-                        ESC_speeds[4] = 0;
-
-                        /* Turn off motors */
-                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
-                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
-                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
-                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
-
-                        /* Reset PID variables */
-                        CSM_ResetPID();
-
-                    } else {
-
-                        /* Read GY-87 gyroscope sensor */
-                        GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues);
-                        /* Read GY-87 accelerometer sensor */
-                        GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues);
-
-                        /* Calculate Kalman roll angle */
-                        Kalman_CalculateAngle(&Kalman_predictionValue_rollAngle, &Kalman_uncertaintyValue_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
-                        /* Calculate Kalman pitch angle */
-                        Kalman_CalculateAngle(&Kalman_predictionValue_pitchAngle, &Kalman_uncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
-
-                        /* Read inputs from radio controller */
-                        reference_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                        reference_rollValue = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
-                        reference_pitchValue = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
-                        reference_yawValue = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
-
-                        /* Adjust and limit throttle input */
-                        if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < reference_throttle) {
-                            reference_throttle = CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE;
-                        }
-
-                        /* Calculate desired angles by mapping radio controller values to angles */
-                        reference_rollAngle = 0.03 * (reference_rollValue - 500);
-                        reference_pitchAngle = 0.03 * (reference_pitchValue - 500);
-
-                        /* Calculate angles errors */
-                        error_rollAngle = reference_rollAngle - Kalman_predictionValue_rollAngle;
-                        error_pitchAngle = reference_pitchAngle - Kalman_predictionValue_pitchAngle;
-
-                        /* Calculate PID for roll angle */
-                        CSM_CalculatePID(&pidOutput_rollAngle, &previousIterm_rollAngle, &previousErrorValue_rollAngle, error_rollAngle, KP_ROLL_ANGLE, KI_ROLL_ANGLE, KD_ROLL_ANGLE);
-                        /* Calculate PID for pitch angle */
-                        CSM_CalculatePID(&pidOutput_pitchAngle, &previousIterm_pitchAngle, &previousErrorValue_pitchAngle, error_pitchAngle, KP_PITCH_ANGLE, KI_PITCH_ANGLE, KD_PITCH_ANGLE);
-
-                        /* Calculate desired rates */
-                        desiredValue_rollRate = pidOutput_rollAngle;
-                        desiredValue_pitchRate = pidOutput_pitchAngle;
-                        desiredValue_yawRate = 0.03 * (reference_yawValue - 500);
-
-                        /* Calculate rates errors */
-                        error_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
-                        error_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues.rotationRatePitch;
-                        error_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
-
-                        /* Calculate PID for roll rate */
-                        CSM_CalculatePID(&pidOutput_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, error_rollRate, KP_ROLL_RATE, KI_ROLL_RATE, KD_ROLL_RATE);
-                        /* Calculate PID for pitch rate */
-                        CSM_CalculatePID(&pidOutput_pitchRate, &previousIterm_pitchRate, &previousErrorValue_pitchRate, error_pitchRate, KP_PITCH_RATE, KI_PITCH_RATE, KD_PITCH_RATE);
-                        /* Calculate PID for yaw rate */
-                        CSM_CalculatePID(&pidOutput_yawRate, &previousIterm_yawRate, &previousErrorValue_yawRate, error_yawRate, KP_YAW_RATE, KI_YAW_RATE, KD_YAW_RATE);
-
-                        /* Calculate motors speed */
-                        motorSpeed1 = (reference_throttle - pidOutput_rollRate - pidOutput_pitchRate - pidOutput_yawRate) / 10;
-                        motorSpeed2 = (reference_throttle + pidOutput_rollRate + pidOutput_pitchRate - pidOutput_yawRate) / 10;
-                        motorSpeed3 = (reference_throttle + pidOutput_rollRate - pidOutput_pitchRate + pidOutput_yawRate) / 10;
-                        motorSpeed4 = (reference_throttle - pidOutput_rollRate + pidOutput_pitchRate + pidOutput_yawRate) / 10;
-
-                        /* Adjust and limit motors maximum speed */
-                        if (ESC_MAXIMUM_SPEED < motorSpeed1)
-                            motorSpeed1 = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < motorSpeed2)
-                            motorSpeed2 = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < motorSpeed3)
-                            motorSpeed3 = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < motorSpeed4)
-                            motorSpeed4 = ESC_MAXIMUM_SPEED;
-
-                        /* Adjust and limit motors minimum speed */
-                        if (ESC_MINIMUM_SPEED > motorSpeed1)
-                            motorSpeed1 = ESC_MINIMUM_SPEED;
-                        if (ESC_MINIMUM_SPEED > motorSpeed2)
-                            motorSpeed2 = ESC_MINIMUM_SPEED;
-                        if (ESC_MINIMUM_SPEED > motorSpeed3)
-                            motorSpeed3 = ESC_MINIMUM_SPEED;
-                        if (ESC_MINIMUM_SPEED > motorSpeed4)
-                            motorSpeed4 = ESC_MINIMUM_SPEED;
-
-                        /* Save motors speed */
-                        ESC_speeds[1] = motorSpeed1;
-                        ESC_speeds[2] = motorSpeed2;
-                        ESC_speeds[3] = motorSpeed3;
-                        ESC_speeds[4] = motorSpeed4;
-
-                        /* Set motors speed */
-                        ESC_SetSpeed(hesc, hesc->esc1, ESC_speeds[4]);
-                        ESC_SetSpeed(hesc, hesc->esc2, ESC_speeds[2]);
-                        ESC_SetSpeed(hesc, hesc->esc3, ESC_speeds[3]);
-                        ESC_SetSpeed(hesc, hesc->esc4, ESC_speeds[1]);
-                    }
-
-                    /* Reset Timer4 flag */
-                    Timer_Flag_ControlSystem = false;
-                }
-            }
         }
 
 #if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
@@ -735,7 +603,7 @@ void Task_USB_Communication(void * ptr) {
     uint8_t * logDebuggingString = NULL;
 
     /* Timing parameters */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(100);
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(10);
     const TickType_t xQueueWait = pdMS_TO_TICKS(5);
     const TickType_t xLogRetryDelay = pdMS_TO_TICKS(5);
     const uint8_t maxLogRetries = 3;
@@ -805,7 +673,7 @@ void Task_Debugging(void * ptr) {
     (void)ptr;
 
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(100);
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(10);
     /* Get initial tick count */
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
@@ -826,7 +694,7 @@ void Task_Debugging(void * ptr) {
 
 #if (MAIN_APP_DEBUGGING_FSA8S_MAIN == 1)
         /* Log channel values */
-        snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%d", FSA8S_CHANNEL_VALUES_1, FSA8S_channelValues[0], FSA8S_CHANNEL_VALUES_2, FSA8S_channelValues[1], FSA8S_CHANNEL_VALUES_3, FSA8S_channelValues[2],
+        snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%d", FSA8S_CHANNEL_VALUES_3, FSA8S_channelValues[2], FSA8S_CHANNEL_VALUES_1, FSA8S_channelValues[0], FSA8S_CHANNEL_VALUES_2, FSA8S_channelValues[1],
                  FSA8S_CHANNEL_VALUES_4, FSA8S_channelValues[3], FSA8S_CHANNEL_VALUES_6, FSA8S_channelValues[5]);
 #endif
 
@@ -838,14 +706,14 @@ void Task_Debugging(void * ptr) {
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES)
         /* Log GY87 gyroscope calibration values */
-        snprintf((char *)debuggingStr_GY87_gyroscopeCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f", GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_ROLL, GY87_gyroscopeCalibrationValues.calibrationValueRateRoll,
-                 GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_PITCH, GY87_gyroscopeCalibrationValues.calibrationValueRatePitch, GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_YAW, GY87_gyroscopeCalibrationValues.calibrationValueRateYaw);
+        snprintf((char *)debuggingStr_GY87_gyroscopeCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f", GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_ROLL, GY87_gyroscopeCalibrationValues.calibrationRateRoll,
+                 GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_PITCH, GY87_gyroscopeCalibrationValues.calibrationRatePitch, GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_YAW, GY87_gyroscopeCalibrationValues.calibrationRateYaw);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES)
         /* Log GY87 accelerometer calibration values */
-        snprintf((char *)debuggingStr_GY87_accelerometerCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f", GY87_ACC_CALIBRATION_VALUES_LINEAR_X, GY87_accelerometerCalibrationValues.calibrationValuelinearAccelerationX,
-                 GY87_ACC_CALIBRATION_VALUES_LINEAR_Y, GY87_accelerometerCalibrationValues.calibrationValuelinearAccelerationY, GY87_ACC_CALIBRATION_VALUES_LINEAR_Z, GY87_accelerometerCalibrationValues.calibrationValuelinearAccelerationZ);
+        snprintf((char *)debuggingStr_GY87_accelerometerCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f", GY87_ACC_CALIBRATION_VALUES_LINEAR_X, GY87_accelerometerCalibrationValues.calibrationLinearAccelerationX,
+                 GY87_ACC_CALIBRATION_VALUES_LINEAR_Y, GY87_accelerometerCalibrationValues.calibrationLinearAccelerationY, GY87_ACC_CALIBRATION_VALUES_LINEAR_Z, GY87_accelerometerCalibrationValues.calibrationLinearAccelerationZ);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES == 1)
@@ -992,6 +860,8 @@ void Task_OnOffButton(void * ptr) {
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime = xTaskGetTickCount();
 
 #if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
     /* Get initial stack watermark */
@@ -1016,7 +886,7 @@ void Task_OnOffButton(void * ptr) {
 #endif
 
         /* Set task time delay */
-        vTaskDelay(xTaskPeriod);
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
     }
 }
 
@@ -1027,6 +897,8 @@ void Task_BatteryLevel(void * ptr) {
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(1000);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime = xTaskGetTickCount();
 
 #if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
     /* Get initial stack watermark */
@@ -1059,7 +931,7 @@ void Task_BatteryLevel(void * ptr) {
 #endif
 
         /* Set task time delay */
-        vTaskDelay(xTaskPeriod);
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
     }
 }
 
@@ -1072,6 +944,8 @@ void Task_BatteryAlarm(void * ptr) {
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime = xTaskGetTickCount();
 
 #if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
     /* Get initial stack watermark */
@@ -1108,7 +982,7 @@ void Task_BatteryAlarm(void * ptr) {
 #endif
 
         /* Set task time delay */
-        vTaskDelay(xTaskPeriod);
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
     }
 }
 
@@ -1480,7 +1354,7 @@ void FlightController_Init(void) {
     // configASSERT(ret == pdPASS);
 
     /* Timer1: OnOffButton */
-    Timer_Handle_OnOffButton = xTimerCreate("OnOffButton", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer_Callback_OnOffButton);
+    // Timer_Handle_OnOffButton = xTimerCreate("OnOffButton", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer_Callback_OnOffButton);
 
     /* Turn on-board LED off */
     HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
@@ -1492,33 +1366,37 @@ void FlightController_Init(void) {
         /* Initialize drivers */
         rc_controller = FSA8S_Init(&huart2);
         if (NULL == rc_controller) {
-            /* Turn on-board LED off */
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-            while (1)
-                ;
+            /* Error */
+            ErrorLED_Start(FSA8S_InitializationError);
         }
-
         hgy87 = GY87_Init(&hi2c1);
         if (NULL == hgy87) {
-            /* Turn on-board LED off */
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-            while (1)
-                ;
+            /* Error */
+            ErrorLED_Start(GY87_InitializationError);
         }
-
         hesc = ESC_Init(&htim3);
         if (NULL == hesc) {
-            /* Turn on-board LED off */
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-            while (1)
-                ;
+            /* Error */
+            ErrorLED_Start(ESC_InitializationError);
         }
 
         /* Create system timers, queues, mutexes and tasks */
-        FreeRTOS_CreateTimers();
-        FreeRTOS_CreateQueues();
-        FreeRTOS_CreateMutexes();
-        FreeRTOS_CreateTasks();
+        if (FreeRTOS_CreateTimers() == false) {
+            /* Error */
+            ErrorLED_Start(FreeRTOS_TimersCreationError);
+        }
+        if (FreeRTOS_CreateQueues() == false) {
+            /* Error */
+            ErrorLED_Start(FreeRTOS_QueuesCreationError);
+        }
+        if (FreeRTOS_CreateMutexes() == false) {
+            /* Error */
+            ErrorLED_Start(FreeRTOS_MutexesCreationError);
+        }
+        if (FreeRTOS_CreateTasks() == false) {
+            /* Error */
+            ErrorLED_Start(FreeRTOS_TasksCreationError);
+        }
     }
 }
 

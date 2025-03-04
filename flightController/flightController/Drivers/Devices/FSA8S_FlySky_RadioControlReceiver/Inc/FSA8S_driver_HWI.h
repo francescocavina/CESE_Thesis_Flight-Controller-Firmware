@@ -104,6 +104,13 @@ typedef bool bool_t;
  */
 bool_t IBUS_Init(IBUS_HandleTypeDef_t * hibus);
 
+/**
+ * @brief  Checks DMA status and resets it if necessary
+ * @param  hibus: Pointer to IBUS handle
+ * @retval true if DMA was reset, false otherwise
+ */
+bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t * hibus);
+
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }
