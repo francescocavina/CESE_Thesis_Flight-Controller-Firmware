@@ -32,16 +32,16 @@
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "main_app.h"
-#include "error_led.h"
-#include "control_system_support.h"
-#include "user_settings.h"
 #include "control_system_settings.h"
+#include "control_system_support.h"
 #include "debug_signals_ids.h"
+#include "error_led.h"
+#include "user_settings.h"
 
-#include "LoggingSystem_UAI.h"
-#include "FSA8S_driver_UAI.h"
-#include "MPU6050_driver_UAI.h"
 #include "ESC_UAI.h"
+#include "FSA8S_driver_UAI.h"
+#include "LoggingSystem_UAI.h"
+#include "MPU6050_driver_UAI.h"
 
 #include <string.h>
 
@@ -91,103 +91,103 @@
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Flight Controller State */
-static bool_t FlightController_isRunning = false;
+static bool_t FlightController_isRunning     = false;
 static bool_t FlightController_isInitialized = false;
 
 /* Drivers Handles */
-static IBUS_HandleTypeDef_t * rc_controller = NULL;
-static GY87_HandleTypeDef_t * hgy87 = NULL;
-static ESC_HandleTypeDef_t * hesc = NULL;
+static IBUS_HandleTypeDef_t *rc_controller = NULL;
+static GY87_HandleTypeDef_t *hgy87         = NULL;
+static ESC_HandleTypeDef_t  *hesc          = NULL;
 
 /* Timers Handles */
 static TimerHandle_t Timer_Handle_OnOffButton = NULL;
 /* Queues Handles */
 static QueueHandle_t Queue_Handle_ControlSystemValues_Debug = NULL; // Queue to send pointers to Task_Debugging with Task_ControlSystem variables
-static QueueHandle_t Queue_Handle_USB_Communication_Info = NULL;    // Queue to send pointers to Task_USB_Communication with information strings
-static QueueHandle_t Queue_Handle_USB_Communication_Debug = NULL;   // Queue to send pointers to Task_USB_Communication with debugging strings
-static QueueHandle_t Queue_Handle_FlightLights_Commands = NULL;     // Queue to send pointers to Task_FlightLights with flight lights radio controller commands
-static QueueHandle_t Queue_Handle_BatteryLevel = NULL;              // Queue to send battery level from Task_BatteryLevel to Task_BatteryAlarm
+static QueueHandle_t Queue_Handle_USB_Communication_Info    = NULL; // Queue to send pointers to Task_USB_Communication with information strings
+static QueueHandle_t Queue_Handle_USB_Communication_Debug   = NULL; // Queue to send pointers to Task_USB_Communication with debugging strings
+static QueueHandle_t Queue_Handle_FlightLights_Commands     = NULL; // Queue to send pointers to Task_FlightLights with flight lights radio controller commands
+static QueueHandle_t Queue_Handle_BatteryLevel              = NULL; // Queue to send battery level from Task_BatteryLevel to Task_BatteryAlarm
 /* Semaphores Handles */
 static SemaphoreHandle_t Semaphore_Handle_controlSystemValuesSwap = NULL;
-static SemaphoreHandle_t Semaphore_Handle_debuggingBufferSwap = NULL;
-static SemaphoreHandle_t Semaphore_Handle_flightLightsBufferSwap = NULL;
+static SemaphoreHandle_t Semaphore_Handle_debuggingBufferSwap     = NULL;
+static SemaphoreHandle_t Semaphore_Handle_flightLightsBufferSwap  = NULL;
 
 /* Tasks Handles */
-static TaskHandle_t Task_Handle_OnOffButton = NULL;
-static TaskHandle_t Task_Handle_ControlSystem = NULL;
+static TaskHandle_t Task_Handle_OnOffButton       = NULL;
+static TaskHandle_t Task_Handle_ControlSystem     = NULL;
 static TaskHandle_t Task_Handle_USB_Communication = NULL;
-static TaskHandle_t Task_Handle_Debugging = NULL;
-static TaskHandle_t Task_Handle_BatteryLevel = NULL;
-static TaskHandle_t Task_Handle_BatteryAlarm = NULL;
-static TaskHandle_t Task_Handle_HeartbeatLight = NULL;
-static TaskHandle_t Task_Handle_FlightLights = NULL;
+static TaskHandle_t Task_Handle_Debugging         = NULL;
+static TaskHandle_t Task_Handle_BatteryLevel      = NULL;
+static TaskHandle_t Task_Handle_BatteryAlarm      = NULL;
+static TaskHandle_t Task_Handle_HeartbeatLight    = NULL;
+static TaskHandle_t Task_Handle_FlightLights      = NULL;
 /* Timers Variables */
-static bool_t Timer_Flag_OnOffButton = false;
+static bool_t   Timer_Flag_OnOffButton           = false;
 static uint16_t Timer_AutoReloadTime_OnOffButton = PW_ON_OFF_DRIVER_TIME;
 
 /* Control System Variables Debugging */
-static ControlSystemValues_t controlSystemValues_A;
-static ControlSystemValues_t controlSystemValues_B;
-static ControlSystemValues_t * controlSystemActiveValues_TaskControlSystem = &controlSystemValues_A; // Task_ControlSystem writes here
-static ControlSystemValues_t * controlSystemActiveValues_TaskDebugging = &controlSystemValues_B;     // Task_Debugging reads from here
+static ControlSystemValues_t  controlSystemValues_A;
+static ControlSystemValues_t  controlSystemValues_B;
+static ControlSystemValues_t *controlSystemActiveValues_TaskControlSystem = &controlSystemValues_A; // Task_ControlSystem writes here
+static ControlSystemValues_t *controlSystemActiveValues_TaskDebugging     = &controlSystemValues_B; // Task_Debugging reads from here
 
 /* Flight Lights Commands */
-static uint16_t FlightLights_Buffer_A[3] = {0};
-static uint16_t FlightLights_Buffer_B[3] = {0};
-static uint16_t * FlightLightsActiveBuffer_TaskControlSystem = FlightLights_Buffer_A; // Task_ControlSystem writes here
-static uint16_t * FlightLightsActiveBuffer_TaskFlightLights = FlightLights_Buffer_B;  // Task_FlightLights reads from here here
+static uint16_t  FlightLights_Buffer_A[3]                   = {0};
+static uint16_t  FlightLights_Buffer_B[3]                   = {0};
+static uint16_t *FlightLightsActiveBuffer_TaskControlSystem = FlightLights_Buffer_A; // Task_ControlSystem writes here
+static uint16_t *FlightLightsActiveBuffer_TaskFlightLights  = FlightLights_Buffer_B; // Task_FlightLights reads from here here
 
 /* Stack High Watermarks Variables */
-static UBaseType_t Task_StackHighWatermark_OnOffButton = 0;
-static UBaseType_t Task_StackHighWatermark_ControlSystem = 0;
+static UBaseType_t Task_StackHighWatermark_OnOffButton       = 0;
+static UBaseType_t Task_StackHighWatermark_ControlSystem     = 0;
 static UBaseType_t Task_StackHighWatermark_USB_Communication = 0;
-static UBaseType_t Task_StackHighWatermark_Debugging = 0;
-static UBaseType_t Task_StackHighWatermark_BatteryLevel = 0;
-static UBaseType_t Task_StackHighWatermark_BatteryAlarm = 0;
-static UBaseType_t Task_StackHighWatermark_HeartbeatLight = 0;
-static UBaseType_t Task_StackHighWatermark_FlightLights = 0;
+static UBaseType_t Task_StackHighWatermark_Debugging         = 0;
+static UBaseType_t Task_StackHighWatermark_BatteryLevel      = 0;
+static UBaseType_t Task_StackHighWatermark_BatteryAlarm      = 0;
+static UBaseType_t Task_StackHighWatermark_HeartbeatLight    = 0;
+static UBaseType_t Task_StackHighWatermark_FlightLights      = 0;
 
 /* Debugging Variables */
-static uint8_t debuggingStr_A[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
-static uint8_t debuggingStr_B[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
-static uint8_t * debuggingActiveBuffer_TaskDebugging = debuggingStr_A;        // Task_Debugging writes here
-static uint8_t * debuggingActiveBuffer_TaskUSBCommunication = debuggingStr_B; // Task_USB_Communication reads from here
-static uint8_t debuggingStr_SystemTime[16] = {0};                             // Size checked
-static uint8_t debuggingStr_FSA8S_main[50] = {0};                             // Size checked
-static uint8_t debuggingStr_FSA8S_aux[50] = {0};                              // Size checked
-static uint8_t debuggingStr_GY87_gyroscopeCalibrationValues[40] = {0};        // Size checked
-static uint8_t debuggingStr_GY87_gyroscopeValues[40] = {0};                   // Size checked
-static uint8_t debuggingStr_GY87_accelerometerCalibrationValues[40] = {0};    // Size checked
-static uint8_t debuggingStr_GY87_accelerometerValues[40] = {0};               // Size checked
-static uint8_t debuggingStr_GY87_accelerometerAngles[40] = {0};               // Size checked
-static uint8_t debuggingStr_GY87_magnetometerValues[40] = {0};                // Size checked
-static uint8_t debuggingStr_GY87_magnetometerHeadingValue[16] = {0};          // Size checked
-static uint8_t debuggingStr_GY87_temperature[16] = {0};                       // Size checked
-static uint8_t debuggingStr_ESCs[40] = {0};                                   // Size checked
-static uint8_t debuggingStr_BatteryLevel[10] = {0};                           // Size checked
-static uint8_t debuggingStr_ControlSystem_ReferenceAngles[40] = {0};
-static uint8_t debuggingStr_ControlSystem_KalmanAngles[30] = {0}; // Size checked
-static uint8_t debuggingStr_ControlSystem_AnglesErrors[40] = {0};
-static uint8_t debuggingStr_ControlSystem_AnglesPID[40] = {0};
-static uint8_t debuggingStr_ControlSystem_ReferenceRates[40] = {0};
-static uint8_t debuggingStr_ControlSystem_RatesErrors[40] = {0};
-static uint8_t debuggingStr_ControlSystem_RatesPID[40] = {0};
-static uint8_t debuggingStr_TasksStackHighWatermark[80] = {0}; // Size checked
+static uint8_t  debuggingStr_A[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
+static uint8_t  debuggingStr_B[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
+static uint8_t *debuggingActiveBuffer_TaskDebugging                  = debuggingStr_A; // Task_Debugging writes here
+static uint8_t *debuggingActiveBuffer_TaskUSBCommunication           = debuggingStr_B; // Task_USB_Communication reads from here
+static uint8_t  debuggingStr_SystemTime[16]                          = {0};            // Size checked
+static uint8_t  debuggingStr_FSA8S_main[50]                          = {0};            // Size checked
+static uint8_t  debuggingStr_FSA8S_aux[50]                           = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_gyroscopeCalibrationValues[40]     = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_gyroscopeValues[40]                = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_accelerometerCalibrationValues[40] = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_accelerometerValues[40]            = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_accelerometerAngles[40]            = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_magnetometerValues[40]             = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]       = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_temperature[16]                    = {0};            // Size checked
+static uint8_t  debuggingStr_ESCs[40]                                = {0};            // Size checked
+static uint8_t  debuggingStr_BatteryLevel[10]                        = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_ReferenceAngles[40]       = {0};
+static uint8_t  debuggingStr_ControlSystem_KalmanAngles[30]          = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_AnglesErrors[40]          = {0};
+static uint8_t  debuggingStr_ControlSystem_AnglesPID[40]             = {0};
+static uint8_t  debuggingStr_ControlSystem_ReferenceRates[40]        = {0};
+static uint8_t  debuggingStr_ControlSystem_RatesErrors[40]           = {0};
+static uint8_t  debuggingStr_ControlSystem_RatesPID[40]              = {0};
+static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0}; // Size checked
 
 /* FS-A8S Radio Controller Variables */
-static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
-static uint16_t FSA8S_channelValues[FSA8S_CHANNELS] = {0};
+static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS]            = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
+static uint16_t        FSA8S_channelValues[FSA8S_CHANNELS] = {0};
 
 /* GY87 IMU Variables */
-static bool_t gyroscopeCalibrationIsDone = false;
-static GY87_gyroscopeCalibrationValues_t GY87_gyroscopeCalibrationValues = {false, true, 0.0, 0.0, 0.0};
-static GY87_gyroscopeValues_t GY87_gyroscopeValues;
-static bool_t accelerometerCalibrationIsDone = false;
+static bool_t                                gyroscopeCalibrationIsDone      = false;
+static GY87_gyroscopeCalibrationValues_t     GY87_gyroscopeCalibrationValues = {false, true, 0.0, 0.0, 0.0};
+static GY87_gyroscopeValues_t                GY87_gyroscopeValues;
+static bool_t                                accelerometerCalibrationIsDone      = false;
 static GY87_accelerometerCalibrationValues_t GY87_accelerometerCalibrationValues = {false, true, 0.0, 0.0, 0.0};
-static GY87_accelerometerValues_t GY87_accelerometerValues;
-static GY87_magnetometerValues_t GY87_magnetometerValues;
-static float GY87_magnetometerHeadingValue = 0;
-static float GY87_temperature = 0;
+static GY87_accelerometerValues_t            GY87_accelerometerValues;
+static GY87_magnetometerValues_t             GY87_magnetometerValues;
+static float                                 GY87_magnetometerHeadingValue = 0;
+static float                                 GY87_temperature              = 0;
 
 /* Control System Mode 1 */
 /* ESCs Values*/
@@ -231,28 +231,28 @@ bool_t FreeRTOS_CreateTasks(void);
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_ControlSystem(void * ptr);
+void Task_ControlSystem(void *ptr);
 
 /*
  * @brief  Task: Sends data through USB port.
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_USB_Communication(void * ptr);
+void Task_USB_Communication(void *ptr);
 
 /*
  * @brief  Task: Logs flight controller data.
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_Debugging(void * ptr);
+void Task_Debugging(void *ptr);
 
 /*
  * @brief  Task: Reads the on-board on/off button and turns on/off the flight controller.
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_OnOffButton(void * ptr);
+void Task_OnOffButton(void *ptr);
 
 /*
  * @brief  Task: Reads the flight controller battery level and gives a signal whenever the level
@@ -260,28 +260,28 @@ void Task_OnOffButton(void * ptr);
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_BatteryLevel(void * ptr);
+void Task_BatteryLevel(void *ptr);
 
 /*
  * @brief  Task: Activates an alarm whenever the battery level is below an user-defined threshold.
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_BatteryAlarm(void * ptr);
+void Task_BatteryAlarm(void *ptr);
 
 /*
  * @brief  Task: Blinks an on-board-LED.
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_HeartbeatLight(void * ptr);
+void Task_HeartbeatLight(void *ptr);
 
 /*
  * @brief  Task: Produces blinking sequences with the 4 flight lights.
  * @param  Task pointer: not used.
  * @retval None
  */
-void Task_FlightLights(void * ptr);
+void Task_FlightLights(void *ptr);
 
 /* --- Private function callback declarations ---------------------------------------------------*/
 /*
@@ -321,11 +321,11 @@ void Timer_Callback_FlightLights(TimerHandle_t xTimer);
 void Timer_Callback_ControlSystem(TimerHandle_t xTimer);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
-extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef  hi2c1;
 extern UART_HandleTypeDef huart2;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern TIM_HandleTypeDef htim3;
-extern ADC_HandleTypeDef hadc1;
+extern DMA_HandleTypeDef  hdma_usart2_rx;
+extern TIM_HandleTypeDef  htim3;
+extern ADC_HandleTypeDef  hadc1;
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
@@ -453,7 +453,7 @@ bool_t FreeRTOS_CreateTasks(void) {
     return true;
 }
 
-void Task_ControlSystem(void * ptr) {
+void Task_ControlSystem(void *ptr) {
     (void)ptr;
 
     /* Change delay from time in [ms] to ticks */
@@ -522,17 +522,17 @@ void Task_ControlSystem(void * ptr) {
             controlSystemActiveValues_TaskControlSystem->radioController_channelValues[i] = FSA8S_channelValues[i];
         }
         /* IMU Calibration (Gyroscope) */
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_calibrationDone = GY87_gyroscopeCalibrationValues.calibrationDone;
+        controlSystemActiveValues_TaskControlSystem->gyroCalibration_calibrationDone     = GY87_gyroscopeCalibrationValues.calibrationDone;
         controlSystemActiveValues_TaskControlSystem->gyroCalibration_fixedCalibration_en = GY87_gyroscopeCalibrationValues.fixedCalibration_en;
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRateRoll = GY87_gyroscopeCalibrationValues.calibrationRateRoll;
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRatePitch = GY87_gyroscopeCalibrationValues.calibrationRatePitch;
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRateYaw = GY87_gyroscopeCalibrationValues.calibrationRateYaw;
+        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRateRoll    = GY87_gyroscopeCalibrationValues.calibrationRateRoll;
+        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRatePitch   = GY87_gyroscopeCalibrationValues.calibrationRatePitch;
+        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRateYaw     = GY87_gyroscopeCalibrationValues.calibrationRateYaw;
         /* IMU Measurements (controlSystemActiveValues_TaskControlSystem->Gyroscope) */
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateRoll = GY87_gyroscopeValues.rotationRateRoll;
+        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateRoll  = GY87_gyroscopeValues.rotationRateRoll;
         controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRatePitch = GY87_gyroscopeValues.rotationRatePitch;
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateYaw = GY87_gyroscopeValues.rotationRateYaw;
+        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateYaw   = GY87_gyroscopeValues.rotationRateYaw;
         /* IMU Calibration (Accelerometer) */
-        controlSystemActiveValues_TaskControlSystem->accCalibration_calibrationDone = GY87_accelerometerCalibrationValues.calibrationDone;
+        controlSystemActiveValues_TaskControlSystem->accCalibration_calibrationDone     = GY87_accelerometerCalibrationValues.calibrationDone;
         controlSystemActiveValues_TaskControlSystem->accCalibration_fixedCalibration_en = GY87_accelerometerCalibrationValues.fixedCalibration_en;
         controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationX = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationX;
         controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationY = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationY;
@@ -541,12 +541,12 @@ void Task_ControlSystem(void * ptr) {
         controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationX = GY87_accelerometerValues.linearAccelerationX;
         controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationY = GY87_accelerometerValues.linearAccelerationY;
         controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationZ = GY87_accelerometerValues.linearAccelerationZ;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_angleRoll = GY87_accelerometerValues.angleRoll;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_anglePitch = GY87_accelerometerValues.anglePitch;
+        controlSystemActiveValues_TaskControlSystem->accMeasurement_angleRoll           = GY87_accelerometerValues.angleRoll;
+        controlSystemActiveValues_TaskControlSystem->accMeasurement_anglePitch          = GY87_accelerometerValues.anglePitch;
         /* IMU Measurements (Magnetometer) */
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldX = GY87_magnetometerValues.magneticFieldX;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldY = GY87_magnetometerValues.magneticFieldY;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldZ = GY87_magnetometerValues.magneticFieldZ;
+        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldX  = GY87_magnetometerValues.magneticFieldX;
+        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldY  = GY87_magnetometerValues.magneticFieldY;
+        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldZ  = GY87_magnetometerValues.magneticFieldZ;
         controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticHeading = GY87_magnetometerHeadingValue;
         /* IMU Measurements (Temperature Sensor) */
         controlSystemActiveValues_TaskControlSystem->temperature = GY87_temperature;
@@ -559,12 +559,12 @@ void Task_ControlSystem(void * ptr) {
         /* Try to swap buffers when ready to send */
         if (xSemaphoreTake(Semaphore_Handle_controlSystemValuesSwap, 0) == pdTRUE) {
             /* Swap buffers as Task_ControlSystem is not using 'controlSystemActiveValues_TaskControlSystem' */
-            ControlSystemValues_t * tempValues = controlSystemActiveValues_TaskControlSystem;
+            ControlSystemValues_t *tempValues           = controlSystemActiveValues_TaskControlSystem;
             controlSystemActiveValues_TaskControlSystem = controlSystemActiveValues_TaskDebugging;
-            controlSystemActiveValues_TaskDebugging = tempValues;
+            controlSystemActiveValues_TaskDebugging     = tempValues;
 
             /* Signal Task_USB_Communication */
-            ControlSystemValues_t * logControlSystemValues = controlSystemActiveValues_TaskDebugging;
+            ControlSystemValues_t *logControlSystemValues = controlSystemActiveValues_TaskDebugging;
             xQueueSend(Queue_Handle_ControlSystemValues_Debug, &logControlSystemValues, 0);
         }
 
@@ -578,9 +578,9 @@ void Task_ControlSystem(void * ptr) {
         /* Flight Lights buffer swap implementation */
         if (xSemaphoreTake(Semaphore_Handle_flightLightsBufferSwap, 0) == pdTRUE) {
             /* Swap buffers for Flight Lights */
-            uint16_t * tempFlightLightsBuffer = FlightLightsActiveBuffer_TaskControlSystem;
+            uint16_t *tempFlightLightsBuffer           = FlightLightsActiveBuffer_TaskControlSystem;
             FlightLightsActiveBuffer_TaskControlSystem = FlightLightsActiveBuffer_TaskFlightLights;
-            FlightLightsActiveBuffer_TaskFlightLights = tempFlightLightsBuffer;
+            FlightLightsActiveBuffer_TaskFlightLights  = tempFlightLightsBuffer;
 
             /* Signal Task_FlightLights */
             xQueueSend(Queue_Handle_FlightLights_Commands, &FlightLightsActiveBuffer_TaskFlightLights, 0);
@@ -596,12 +596,12 @@ void Task_ControlSystem(void * ptr) {
     }
 }
 
-void Task_USB_Communication(void * ptr) {
+void Task_USB_Communication(void *ptr) {
     (void)ptr;
 
     /* Message pointer variables */
-    uint8_t * logInformationString = NULL;
-    uint8_t * logDebuggingString = NULL;
+    uint8_t *logInformationString = NULL;
+    uint8_t *logDebuggingString   = NULL;
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(10);
@@ -639,7 +639,7 @@ void Task_USB_Communication(void * ptr) {
     }
 }
 
-void Task_Debugging(void * ptr) {
+void Task_Debugging(void *ptr) {
     (void)ptr;
 
     /* Change delay from time in [ms] to ticks */
@@ -647,9 +647,9 @@ void Task_Debugging(void * ptr) {
     /* Get initial tick count */
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
-    ControlSystemValues_t * logControlSystemValues;
-    uint32_t system_tick = 0;
-    uint16_t written_chars = 0;
+    ControlSystemValues_t *logControlSystemValues;
+    uint32_t               system_tick   = 0;
+    uint16_t               written_chars = 0;
 
     float FlightController_batteryLevel;
 
@@ -822,12 +822,12 @@ void Task_Debugging(void * ptr) {
         /* Try to swap buffers when ready to send */
         if (xSemaphoreTake(Semaphore_Handle_debuggingBufferSwap, 0) == pdTRUE) {
             /* Swap buffers as Task_USB_Communication is not using 'debuggingActiveBuffer_TaskUSBCommunication' */
-            uint8_t * tempBuffer = debuggingActiveBuffer_TaskUSBCommunication;
+            uint8_t *tempBuffer                        = debuggingActiveBuffer_TaskUSBCommunication;
             debuggingActiveBuffer_TaskUSBCommunication = debuggingActiveBuffer_TaskDebugging;
-            debuggingActiveBuffer_TaskDebugging = tempBuffer;
+            debuggingActiveBuffer_TaskDebugging        = tempBuffer;
 
             /* Signal Task_USB_Communication */
-            uint8_t * logDebuggingString = debuggingActiveBuffer_TaskUSBCommunication;
+            uint8_t *logDebuggingString = debuggingActiveBuffer_TaskUSBCommunication;
             xQueueSend(Queue_Handle_USB_Communication_Debug, &logDebuggingString, 0);
         }
 
@@ -841,7 +841,7 @@ void Task_Debugging(void * ptr) {
     }
 }
 
-void Task_OnOffButton(void * ptr) {
+void Task_OnOffButton(void *ptr) {
     (void)ptr;
 
     /* Change delay from time in [ms] to ticks */
@@ -871,11 +871,11 @@ void Task_OnOffButton(void * ptr) {
     }
 }
 
-void Task_BatteryLevel(void * ptr) {
+void Task_BatteryLevel(void *ptr) {
     (void)ptr;
 
     uint16_t adcValue;
-    float FlightController_batteryLevel;
+    float    FlightController_batteryLevel;
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(1000);
@@ -915,22 +915,22 @@ void Task_BatteryLevel(void * ptr) {
     }
 }
 
-void Task_BatteryAlarm(void * ptr) {
+void Task_BatteryAlarm(void *ptr) {
     (void)ptr;
 
-    uint8_t alarmSequence[] = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    uint8_t alarmSequenceSize = sizeof(alarmSequence);
+    uint8_t alarmSequence[]     = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t alarmSequenceSize   = sizeof(alarmSequence);
     uint8_t alarmSequenceCursor = 0;
 
     const uint16_t ALARM_SEQUENCE_DELAY = 200;
 
     /* For main task timing */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xTaskPeriod   = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    TickType_t       xLastWakeTime = xTaskGetTickCount();
 
     /* For alarm sequence timing */
     TickType_t xAlarmLastWakeTime = xLastWakeTime;
-    TickType_t xAlarmPeriod = pdMS_TO_TICKS(ALARM_SEQUENCE_DELAY);
+    TickType_t xAlarmPeriod       = pdMS_TO_TICKS(ALARM_SEQUENCE_DELAY);
 
     float FlightController_batteryLevel;
 
@@ -972,7 +972,7 @@ void Task_BatteryAlarm(void * ptr) {
     }
 }
 
-void Task_HeartbeatLight(void * ptr) {
+void Task_HeartbeatLight(void *ptr) {
     (void)ptr;
 
     uint8_t ledState = GPIO_PIN_RESET;
@@ -1002,7 +1002,7 @@ void Task_HeartbeatLight(void * ptr) {
     }
 }
 
-void Task_FlightLights(void * ptr) {
+void Task_FlightLights(void *ptr) {
     (void)ptr;
 
     typedef struct {
@@ -1014,7 +1014,7 @@ void Task_FlightLights(void * ptr) {
     } LightSequence;
 
     /* Consolidated sequence definitions */
-    static const LightSequence sequences[3] = {/* Sequence A */
+    static const LightSequence sequences[3] = {                              /* Sequence A */
                                                {
                                                    {1, 0, 0, 0, 0, 0, 0, 0}, /* LED1 */
                                                    {0, 0, 1, 0, 0, 0, 0, 0}, /* LED2 */
@@ -1039,32 +1039,32 @@ void Task_FlightLights(void * ptr) {
                                                    8                         /* size */
                                                }};
 
-    uint16_t * flightLightsCommands = NULL;
-    uint16_t flightLightCommand_sequenceSpeed = 0;
-    uint16_t flightLightCommand_sequenceSelect = 0;
-    uint16_t flightLightCommand_sequenceEnable = 0;
+    uint16_t *flightLightsCommands              = NULL;
+    uint16_t  flightLightCommand_sequenceSpeed  = 0;
+    uint16_t  flightLightCommand_sequenceSelect = 0;
+    uint16_t  flightLightCommand_sequenceEnable = 0;
 
-    const uint16_t CHANNEL_THRESHOLD_LOW = 250;
-    const uint16_t CHANNEL_THRESHOLD_MID = 750;
+    const uint16_t CHANNEL_THRESHOLD_LOW   = 250;
+    const uint16_t CHANNEL_THRESHOLD_MID   = 750;
     const uint16_t LIGHTS_ENABLE_THRESHOLD = 500;
-    const uint16_t BASE_SEQUENCE_DELAY = 200;
+    const uint16_t BASE_SEQUENCE_DELAY     = 200;
 
-    uint8_t activeSequence = 0;
-    uint8_t sequenceCursor = 0;
+    uint8_t  activeSequence       = 0;
+    uint8_t  sequenceCursor       = 0;
     uint16_t currentSequenceDelay = BASE_SEQUENCE_DELAY;
 
     /* For main task timing */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xTaskPeriod   = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    TickType_t       xLastWakeTime = xTaskGetTickCount();
 
     /* For LED sequence timing */
     TickType_t xSequenceLastWakeTime = xLastWakeTime;
-    TickType_t xSequencePeriod = pdMS_TO_TICKS(currentSequenceDelay);
+    TickType_t xSequencePeriod       = pdMS_TO_TICKS(currentSequenceDelay);
 
     while (1) {
         /* Read the flight lights commands */
         if (xQueueReceive(Queue_Handle_FlightLights_Commands, &flightLightsCommands, 0) == pdPASS) {
-            flightLightCommand_sequenceSpeed = flightLightsCommands[0];
+            flightLightCommand_sequenceSpeed  = flightLightsCommands[0];
             flightLightCommand_sequenceSelect = flightLightsCommands[1];
             flightLightCommand_sequenceEnable = flightLightsCommands[2];
 
@@ -1085,7 +1085,7 @@ void Task_FlightLights(void * ptr) {
 
             /* Adjust sequence speed based on potentiometer */
             currentSequenceDelay = BASE_SEQUENCE_DELAY + flightLightCommand_sequenceSpeed / 5;
-            xSequencePeriod = pdMS_TO_TICKS(currentSequenceDelay);
+            xSequencePeriod      = pdMS_TO_TICKS(currentSequenceDelay);
 
             /* Check if it's time to update the LED sequence */
             if ((xTaskGetTickCount() - xSequenceLastWakeTime) >= xSequencePeriod) {

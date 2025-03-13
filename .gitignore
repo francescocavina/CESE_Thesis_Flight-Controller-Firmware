@@ -189,5 +189,3 @@ build
 *.ld
 *.mxproject
 *.project
-.pre-commit-config
-.clang-format
