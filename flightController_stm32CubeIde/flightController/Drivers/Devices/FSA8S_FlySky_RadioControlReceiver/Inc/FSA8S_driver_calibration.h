@@ -62,6 +62,6 @@
 #define CHANNEL_13_CALIBRATION_VALUE (0) // FlySkyfly FS-i6X model only supports 10 channel using iBus
 #define CHANNEL_14_CALIBRATION_VALUE (0) // FlySkyfly FS-i6X model only supports 10 channel using iBus
 
-#endif /* INC_FSA8S_DRIVER_CALIBRATION_H_ */
+#endif                                   /* INC_FSA8S_DRIVER_CALIBRATION_H_ */
 
 /* --- End of file ----------------------------------------------------------------------------- */

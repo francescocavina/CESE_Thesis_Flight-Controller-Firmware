@@ -117,8 +117,8 @@ extern "C" {
  */
 #if !defined(LSI_VALUE)
 #define LSI_VALUE 32000U /*!< LSI Typical Value in Hz*/
-#endif /* LSI_VALUE */   /*!< Value of the Internal Low Speed oscillator in Hz                                                                                                                                                                           \
-                          The real value may vary depending on the variations                                                                                                                                                                            \
+#endif /* LSI_VALUE */   /*!< Value of the Internal Low Speed oscillator in Hz \
+                          The real value may vary depending on the variations  \
                           in voltage and temperature.*/
 /**
  * @brief External Low Speed oscillator (LSE) value.
@@ -147,12 +147,12 @@ extern "C" {
 /**
  * @brief This is the HAL system configuration section
  */
-#define VDD_VALUE                            3300U /*!< Value of VDD in mv */
-#define TICK_INT_PRIORITY                    15U   /*!< tick interrupt priority */
-#define USE_RTOS                             0U
-#define PREFETCH_ENABLE                      1U
-#define INSTRUCTION_CACHE_ENABLE             1U
-#define DATA_CACHE_ENABLE                    1U
+#define VDD_VALUE                3300U /*!< Value of VDD in mv */
+#define TICK_INT_PRIORITY        15U   /*!< tick interrupt priority */
+#define USE_RTOS                 0U
+#define PREFETCH_ENABLE          1U
+#define INSTRUCTION_CACHE_ENABLE 1U
+#define DATA_CACHE_ENABLE        1U
 
 #define USE_HAL_ADC_REGISTER_CALLBACKS       0U /* ADC register callback disabled       */
 #define USE_HAL_CAN_REGISTER_CALLBACKS       0U /* CAN register callback disabled       */
@@ -228,13 +228,13 @@ extern "C" {
 /* PHY Configuration delay */
 #define PHY_CONFIG_DELAY 0x00000FFFU
 
-#define PHY_READ_TO      0x0000FFFFU
-#define PHY_WRITE_TO     0x0000FFFFU
+#define PHY_READ_TO  0x0000FFFFU
+#define PHY_WRITE_TO 0x0000FFFFU
 
 /* Section 3: Common PHY Registers */
 
-#define PHY_BCR                     ((uint16_t)0x0000U) /*!< Transceiver Basic Control Register   */
-#define PHY_BSR                     ((uint16_t)0x0001U) /*!< Transceiver Basic Status Register    */
+#define PHY_BCR ((uint16_t)0x0000U)                     /*!< Transceiver Basic Control Register   */
+#define PHY_BSR ((uint16_t)0x0001U)                     /*!< Transceiver Basic Status Register    */
 
 #define PHY_RESET                   ((uint16_t)0x8000U) /*!< PHY Reset */
 #define PHY_LOOPBACK                ((uint16_t)0x4000U) /*!< Select loop-back mode */
@@ -247,12 +247,12 @@ extern "C" {
 #define PHY_POWERDOWN               ((uint16_t)0x0800U) /*!< Select the power down mode           */
 #define PHY_ISOLATE                 ((uint16_t)0x0400U) /*!< Isolate PHY from MII                 */
 
-#define PHY_AUTONEGO_COMPLETE       ((uint16_t)0x0020U) /*!< Auto-Negotiation process completed   */
-#define PHY_LINKED_STATUS           ((uint16_t)0x0004U) /*!< Valid link established               */
-#define PHY_JABBER_DETECTION        ((uint16_t)0x0002U) /*!< Jabber condition detected            */
+#define PHY_AUTONEGO_COMPLETE ((uint16_t)0x0020U)       /*!< Auto-Negotiation process completed   */
+#define PHY_LINKED_STATUS     ((uint16_t)0x0004U)       /*!< Valid link established               */
+#define PHY_JABBER_DETECTION  ((uint16_t)0x0002U)       /*!< Jabber condition detected            */
 
 /* Section 4: Extended PHY Registers */
-#define PHY_SR            ((uint16_t)) /*!< PHY status register Offset                      */
+#define PHY_SR ((uint16_t))            /*!< PHY status register Offset                      */
 
 #define PHY_SPEED_STATUS  ((uint16_t)) /*!< PHY Speed mask                                  */
 #define PHY_DUPLEX_STATUS ((uint16_t)) /*!< PHY Duplex mask                                 */
@@ -483,7 +483,7 @@ extern "C" {
  */
 #define assert_param(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
 /* Exported functions ------------------------------------------------------- */
-void assert_failed(uint8_t * file, uint32_t line);
+void assert_failed(uint8_t *file, uint32_t line);
 #else
 #define assert_param(expr) ((void)0U)
 #endif /* USE_FULL_ASSERT */

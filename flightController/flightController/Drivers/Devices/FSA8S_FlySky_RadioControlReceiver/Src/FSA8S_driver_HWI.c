@@ -69,7 +69,7 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t IBUS_Init(IBUS_HandleTypeDef_t * hibus) {
+bool_t IBUS_Init(IBUS_HandleTypeDef_t *hibus) {
 
     /* Check parameter */
     /* BEGIN MODIFY 1 */
@@ -98,7 +98,7 @@ bool_t IBUS_Init(IBUS_HandleTypeDef_t * hibus) {
     return true;
 }
 
-bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t * hibus) {
+bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t *hibus) {
     if (hibus == NULL || hibus->huart == NULL) {
         return false;
     }
@@ -110,7 +110,7 @@ bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t * hibus) {
         HAL_UART_DMAStop(hibus->huart);
 
         // Reset error flags
-        hibus->huart->ErrorCode = HAL_UART_ERROR_NONE;
+        hibus->huart->ErrorCode         = HAL_UART_ERROR_NONE;
         hibus->huart->hdmarx->ErrorCode = HAL_DMA_ERROR_NONE;
 
         // Restart DMA reception

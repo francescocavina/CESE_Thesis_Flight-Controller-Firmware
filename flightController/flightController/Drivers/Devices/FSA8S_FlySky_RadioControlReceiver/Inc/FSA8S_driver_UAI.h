@@ -44,9 +44,9 @@
 #define INC_FSA8S_DRIVER_UAI_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include "FSA8S_driver_HWI.h"
 
@@ -62,15 +62,15 @@ extern "C" {
  * @brief Enumeration for channel number.
  */
 typedef enum {
-    CHANNEL_1 = 1,
-    CHANNEL_2 = 2,
-    CHANNEL_3 = 3,
-    CHANNEL_4 = 4,
-    CHANNEL_5 = 5,
-    CHANNEL_6 = 6,
-    CHANNEL_7 = 7,
-    CHANNEL_8 = 8,
-    CHANNEL_9 = 9,
+    CHANNEL_1  = 1,
+    CHANNEL_2  = 2,
+    CHANNEL_3  = 3,
+    CHANNEL_4  = 4,
+    CHANNEL_5  = 5,
+    CHANNEL_6  = 6,
+    CHANNEL_7  = 7,
+    CHANNEL_8  = 8,
+    CHANNEL_9  = 9,
     CHANNEL_10 = 10,
     CHANNEL_11 = 11,
     CHANNEL_12 = 12,
@@ -93,7 +93,7 @@ typedef enum {
  *                of an initialization error or because the driver had already
  *                been initialized before.
  */
-IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart);
+IBUS_HandleTypeDef_t *FSA8S_Init(UART_HandleTypeDef *huart);
 
 /**
  * @brief  Reads a radio control receiver channel (14 available).
@@ -104,7 +104,7 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart);
  *         0:       If hibus parameter is NULL or channel number is not between
  *                  CHANNEL_1 to CHANNEL_14.
  */
-uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel);
+uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

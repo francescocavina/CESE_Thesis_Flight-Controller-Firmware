@@ -34,10 +34,10 @@
 #include "main_app.h"
 #include "user_settings.h"
 
-#include "LoggingSystem_UAI.h"
-#include "FSA8S_driver_UAI.h"
-#include "MPU6050_driver_UAI.h"
 #include "ESC_UAI.h"
+#include "FSA8S_driver_UAI.h"
+#include "LoggingSystem_UAI.h"
+#include "MPU6050_driver_UAI.h"
 
 #include <string.h>
 
@@ -86,18 +86,18 @@
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Flight Controller State */
-static bool_t FlightController_isRunning = false;
+static bool_t FlightController_isRunning     = false;
 static bool_t FlightController_isInitialized = false;
 
 /* Tasks Handles */
-static TaskHandle_t FlightController_StartUp_Handle = NULL;
-static TaskHandle_t FlightController_ControlSystem_Handle = NULL;
-static TaskHandle_t FlightController_Data_Logging_Handle = NULL;
-static TaskHandle_t FlightController_OnOffButton_Handle = NULL;
-static TaskHandle_t FlightController_BatteryLevel_Handle = NULL;
-static TaskHandle_t FlightController_BatteryAlarm_Handle = NULL;
+static TaskHandle_t FlightController_StartUp_Handle        = NULL;
+static TaskHandle_t FlightController_ControlSystem_Handle  = NULL;
+static TaskHandle_t FlightController_Data_Logging_Handle   = NULL;
+static TaskHandle_t FlightController_OnOffButton_Handle    = NULL;
+static TaskHandle_t FlightController_BatteryLevel_Handle   = NULL;
+static TaskHandle_t FlightController_BatteryAlarm_Handle   = NULL;
 static TaskHandle_t FlightController_HeartbeatLight_Handle = NULL;
-static TaskHandle_t FlightController_FlightLights_Handle = NULL;
+static TaskHandle_t FlightController_FlightLights_Handle   = NULL;
 
 /* Timers Handles */
 static TimerHandle_t Timer1_Handle = NULL;
@@ -106,35 +106,35 @@ static TimerHandle_t Timer3_Handle = NULL;
 static TimerHandle_t Timer4_Handle = NULL;
 
 /* Timers Variables */
-static bool_t Timer1_running = false;
-static bool_t Timer2_flag = false;
-static bool_t Timer3_flag = false;
-static bool_t Timer4_flag = false;
+static bool_t   Timer1_running        = false;
+static bool_t   Timer2_flag           = false;
+static bool_t   Timer3_flag           = false;
+static bool_t   Timer4_flag           = false;
 static uint16_t Timer1_AutoReloadTime = PW_ON_OFF_DRIVER_TIME;
 static uint16_t Timer2_AutoReloadTime = 200;
 static uint16_t Timer3_AutoReloadTime = 200;
 static uint16_t Timer4_AutoReloadTime = CONTROL_SYSTEM_LOOP_PERIOD_MS;
 
 /* Drivers Handles */
-static IBUS_HandleTypeDef_t * rc_controller = NULL;
-static GY87_HandleTypeDef_t * hgy87 = NULL;
-static ESC_HandleTypeDef_t * hesc = NULL;
+static IBUS_HandleTypeDef_t *rc_controller = NULL;
+static GY87_HandleTypeDef_t *hgy87         = NULL;
+static ESC_HandleTypeDef_t  *hesc          = NULL;
 
 /* FS-A8S Radio Controller Variables */
-static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
-static uint16_t FSA8S_channelValues[FSA8S_CHANNELS] = {0};
+static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS]            = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
+static uint16_t        FSA8S_channelValues[FSA8S_CHANNELS] = {0};
 
 /* GY-87 IMU Variables */
-static GY87_gyroscopeValues_t GY87_gyroscopeValues;
+static GY87_gyroscopeValues_t     GY87_gyroscopeValues;
 static GY87_accelerometerValues_t GY87_accelerometerValues;
-static GY87_magnetometerValues_t GY87_magnetometerValues;
-static float GY87_magnetometerHeadingValue = 0;
-static bool_t gyroscopeCalibrationIsDone = false;
-static bool_t accelerometerCalibrationIsDone = false;
+static GY87_magnetometerValues_t  GY87_magnetometerValues;
+static float                      GY87_magnetometerHeadingValue  = 0;
+static bool_t                     gyroscopeCalibrationIsDone     = false;
+static bool_t                     accelerometerCalibrationIsDone = false;
 /* Kalman Filter Variables */
-static float Kalman_predictionValue_rollAngle = 0;
-static float Kalman_predictionValue_pitchAngle = 0;
-static float Kalman_uncertaintyValue_rollAngle = 2 * 2;
+static float Kalman_predictionValue_rollAngle   = 0;
+static float Kalman_predictionValue_pitchAngle  = 0;
+static float Kalman_uncertaintyValue_rollAngle  = 2 * 2;
 static float Kalman_uncertaintyValue_pitchAngle = 2 * 2;
 
 /* Control System Mode 1 */
@@ -143,62 +143,62 @@ static bool_t throttleStick_startedDown = false;
 /* References: General */
 static float inputValue_throttle = 0;
 /* References: Angles */
-static float inputValue_rollAngle = 0;
+static float inputValue_rollAngle  = 0;
 static float inputValue_pitchAngle = 0;
 /* Desired references: Angles */
-static float desiredValue_rollAngle = 0;
+static float desiredValue_rollAngle  = 0;
 static float desiredValue_pitchAngle = 0;
 /* Errors: Angles */
-static float errorValue_rollAngle = 0;
+static float errorValue_rollAngle  = 0;
 static float errorValue_pitchAngle = 0;
 /* Previously stored errors: Angles */
-static float previousErrorValue_rollAngle = 0;
+static float previousErrorValue_rollAngle  = 0;
 static float previousErrorValue_pitchAngle = 0;
 /* Previously stored terms: Angles */
-static float previousIterm_rollAngle = 0;
+static float previousIterm_rollAngle  = 0;
 static float previousIterm_pitchAngle = 0;
 /* PID gains: Angles */
-static float kP_rollAngle = 2;
+static float kP_rollAngle  = 2;
 static float kP_pitchAngle = 2;
-static float kI_rollAngle = 0;
+static float kI_rollAngle  = 0;
 static float kI_pitchAngle = 0;
-static float kD_rollAngle = 0;
+static float kD_rollAngle  = 0;
 static float kD_pitchAngle = 0;
 /* PID outputs: Angles */
-static float pidOutputValue_rollAngle = 0;
+static float pidOutputValue_rollAngle  = 0;
 static float pidOutputValue_pitchAngle = 0;
 /* References: Rates */
 static float inputValue_yawRate = 0;
 /* Desired references: Rates */
-static float desiredValue_rollRate = 0;
+static float desiredValue_rollRate  = 0;
 static float desiredValue_pitchRate = 0;
-static float desiredValue_yawRate = 0;
+static float desiredValue_yawRate   = 0;
 /* Errors: Rates */
-static float errorValue_rollRate = 0;
+static float errorValue_rollRate  = 0;
 static float errorValue_pitchRate = 0;
-static float errorValue_yawRate = 0;
+static float errorValue_yawRate   = 0;
 /* Previously stored errors: Rates */
-static float previousErrorValue_rollRate = 0;
+static float previousErrorValue_rollRate  = 0;
 static float previousErrorValue_pitchRate = 0;
-static float previousErrorValue_yawRate = 0;
+static float previousErrorValue_yawRate   = 0;
 /* Previously stored terms: Rates  */
-static float previousIterm_rollRate = 0;
+static float previousIterm_rollRate  = 0;
 static float previousIterm_pitchRate = 0;
-static float previousIterm_yawRate = 0;
+static float previousIterm_yawRate   = 0;
 /* PID gains: Rates */
-static float kP_rollRate = 1.404;
+static float kP_rollRate  = 1.404;
 static float kP_pitchRate = 0;
-static float kP_yawRate = 0;
-static float kI_rollRate = 0.596;
+static float kP_yawRate   = 0;
+static float kI_rollRate  = 0.596;
 static float kI_pitchRate = 0;
-static float kI_yawRate = 0;
-static float kD_rollRate = 0;
+static float kI_yawRate   = 0;
+static float kD_rollRate  = 0;
 static float kD_pitchRate = 0.0;
-static float kD_yawRate = 0;
+static float kD_yawRate   = 0;
 /* PID outputs: Rates */
-static float pidOutputValue_rollRate = 0;
+static float pidOutputValue_rollRate  = 0;
 static float pidOutputValue_pitchRate = 0;
-static float pidOutputValue_yawRate = 0;
+static float pidOutputValue_yawRate   = 0;
 /* Motors inputs */
 static float motorSpeed1 = 0;
 static float motorSpeed2 = 0;
@@ -206,7 +206,7 @@ static float motorSpeed3 = 0;
 static float motorSpeed4 = 0;
 /* ESCs */
 static bool_t ESC_isEnabled = false;
-static float ESC_speeds[5] = {0};
+static float  ESC_speeds[5] = {0};
 
 /* Flight Controller Battery Level */
 static float FlightController_batteryLevelValue = 11.1;
@@ -240,7 +240,7 @@ void FreeRTOS_CreateTimers(void);
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_StartUp(void * ptr);
+void FlightController_StartUp(void *ptr);
 
 /*
  * @brief  Task: Controls the whole system as a closed-loop system, taking as inputs the data
@@ -249,21 +249,21 @@ void FlightController_StartUp(void * ptr);
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_ControlSystem(void * ptr);
+void FlightController_ControlSystem(void *ptr);
 
 /*
  * @brief  Task: Logs flight controller data.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_Data_Logging(void * ptr);
+void FlightController_Data_Logging(void *ptr);
 
 /*
  * @brief  Task: Reads the on-board on/off button and turns on/off the flight controller.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_OnOffButton(void * ptr);
+void FlightController_OnOffButton(void *ptr);
 
 /*
  * @brief  Task: Reads the flight controller battery level and gives a signal whenever the level
@@ -271,28 +271,28 @@ void FlightController_OnOffButton(void * ptr);
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_BatteryLevel(void * ptr);
+void FlightController_BatteryLevel(void *ptr);
 
 /*
  * @brief  Task: Activates an alarm whenever the battery level is below an user-defined threshold.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_BatteryAlarm(void * ptr);
+void FlightController_BatteryAlarm(void *ptr);
 
 /*
  * @brief  Task: Blinks an on-board-LED.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_HeartbeatLight(void * ptr);
+void FlightController_HeartbeatLight(void *ptr);
 
 /*
  * @brief  Task: Produces blinking sequences with the 4 flight lights.
  * @param  Task pointer: not used.
  * @retval None
  */
-void FlightController_FlightLights(void * ptr);
+void FlightController_FlightLights(void *ptr);
 
 /* --- Private function callback declarations ---------------------------------------------------*/
 /*
@@ -336,7 +336,7 @@ void Timer4_Callback(TimerHandle_t xTimer);
  * @param  TODO
  * @retval None
  */
-void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
+void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
 
 /*
  * @brief  Calculates the PID controller output.
@@ -349,7 +349,7 @@ void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float
  *         kD:                 Derivative gain.
  * @retval None
  */
-void CSM_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD);
+void CSM_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD);
 
 /*
  * @brief  Resets the PID controller errors and integral terms values.
@@ -359,11 +359,11 @@ void CSM_CalculatePID(float * PID_Output, float * previousIterm, float * previou
 void CSM_ResetPID(void);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
-extern I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef  hi2c1;
 extern UART_HandleTypeDef huart2;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-extern TIM_HandleTypeDef htim3;
-extern ADC_HandleTypeDef hadc1;
+extern DMA_HandleTypeDef  hdma_usart2_rx;
+extern TIM_HandleTypeDef  htim3;
+extern ADC_HandleTypeDef  hadc1;
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
@@ -485,7 +485,7 @@ void FreeRTOS_CreateTimers(void) {
     }
 }
 
-void FlightController_StartUp(void * ptr) {
+void FlightController_StartUp(void *ptr) {
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
@@ -535,7 +535,7 @@ void FlightController_StartUp(void * ptr) {
     }
 }
 
-void FlightController_ControlSystem(void * ptr) {
+void FlightController_ControlSystem(void *ptr) {
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xDelay = pdMS_TO_TICKS(1);
@@ -556,7 +556,7 @@ void FlightController_ControlSystem(void * ptr) {
             }
         } else {
 
-            gyroscopeCalibrationIsDone = true;
+            gyroscopeCalibrationIsDone     = true;
             accelerometerCalibrationIsDone = true;
         }
 
@@ -689,10 +689,10 @@ void FlightController_ControlSystem(void * ptr) {
                         Kalman_CalculateAngle(&Kalman_predictionValue_pitchAngle, &Kalman_uncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
 
                         /* Read inputs from radio controller */
-                        inputValue_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                        inputValue_rollAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
+                        inputValue_throttle   = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                        inputValue_rollAngle  = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
                         inputValue_pitchAngle = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
-                        inputValue_yawRate = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
+                        inputValue_yawRate    = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
 
                         /*  Manual Calibration */
                         //                        kP_rollRate = FSA8S_ReadChannel(rc_controller, CHANNEL_7) / 250;
@@ -704,11 +704,11 @@ void FlightController_ControlSystem(void * ptr) {
                         }
 
                         /* Calculate desired angles by mapping radio controller values to angles */
-                        desiredValue_rollAngle = 0.03 * (inputValue_rollAngle - 500);
+                        desiredValue_rollAngle  = 0.03 * (inputValue_rollAngle - 500);
                         desiredValue_pitchAngle = 0.03 * (inputValue_pitchAngle - 500);
 
                         /* Calculate angles errors */
-                        errorValue_rollAngle = desiredValue_rollAngle - Kalman_predictionValue_rollAngle;
+                        errorValue_rollAngle  = desiredValue_rollAngle - Kalman_predictionValue_rollAngle;
                         errorValue_pitchAngle = desiredValue_pitchAngle - Kalman_predictionValue_pitchAngle;
 
                         /* Calculate PID for roll angle */
@@ -717,14 +717,14 @@ void FlightController_ControlSystem(void * ptr) {
                         CSM_CalculatePID(&pidOutputValue_pitchAngle, &previousIterm_pitchAngle, &previousErrorValue_pitchAngle, errorValue_pitchAngle, kP_pitchAngle, kI_pitchAngle, kD_pitchAngle);
 
                         /* Calculate desired rates */
-                        desiredValue_rollRate = pidOutputValue_rollAngle;
+                        desiredValue_rollRate  = pidOutputValue_rollAngle;
                         desiredValue_pitchRate = pidOutputValue_pitchAngle;
-                        desiredValue_yawRate = 0.03 * (inputValue_yawRate - 500);
+                        desiredValue_yawRate   = 0.03 * (inputValue_yawRate - 500);
 
                         /* Calculate rates errors */
-                        errorValue_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
+                        errorValue_rollRate  = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
                         errorValue_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues.rotationRatePitch;
-                        errorValue_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
+                        errorValue_yawRate   = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
 
                         /* Calculate PID for roll rate */
                         CSM_CalculatePID(&pidOutputValue_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, errorValue_rollRate, kP_rollRate, kI_rollRate, kD_rollRate);
@@ -783,7 +783,7 @@ void FlightController_ControlSystem(void * ptr) {
     }
 }
 
-void FlightController_Data_Logging(void * ptr) {
+void FlightController_Data_Logging(void *ptr) {
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY * LOGGING_TASK_DELAY_MULTIPLIER);
@@ -908,7 +908,7 @@ void FlightController_Data_Logging(void * ptr) {
     }
 }
 
-void FlightController_OnOffButton(void * ptr) {
+void FlightController_OnOffButton(void *ptr) {
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xDelay = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
@@ -930,7 +930,7 @@ void FlightController_OnOffButton(void * ptr) {
     }
 }
 
-void FlightController_BatteryLevel(void * ptr) {
+void FlightController_BatteryLevel(void *ptr) {
 
     uint16_t adcValue;
 
@@ -962,10 +962,10 @@ void FlightController_BatteryLevel(void * ptr) {
     }
 }
 
-void FlightController_BatteryAlarm(void * ptr) {
+void FlightController_BatteryAlarm(void *ptr) {
 
-    uint8_t alarmSequence[] = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    uint8_t alarmSequenceSize = sizeof(alarmSequence);
+    uint8_t alarmSequence[]     = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t alarmSequenceSize   = sizeof(alarmSequence);
     uint8_t alarmSequenceCursor = 0;
 
     /* Change delay from time in [ms] to ticks */
@@ -1001,7 +1001,7 @@ void FlightController_BatteryAlarm(void * ptr) {
     }
 }
 
-void FlightController_HeartbeatLight(void * ptr) {
+void FlightController_HeartbeatLight(void *ptr) {
 
     uint8_t ledState = GPIO_PIN_RESET;
 
@@ -1030,7 +1030,7 @@ void FlightController_HeartbeatLight(void * ptr) {
     }
 }
 
-void FlightController_FlightLights(void * ptr) {
+void FlightController_FlightLights(void *ptr) {
 
     /* Define flight lights sequences */
     uint8_t flightLightsSequenceA1[] = {1, 0, 0, 0, 0, 0, 0, 0};
@@ -1048,8 +1048,8 @@ void FlightController_FlightLights(void * ptr) {
     uint8_t flightLightsSequenceC2[] = {0, 0, 0, 0, 1, 0, 0, 0};
     uint8_t flightLightsSequenceC4[] = {0, 0, 0, 0, 1, 0, 0, 0};
 
-    uint8_t flightLightsSequence = 0;
-    uint8_t flightLightsSequenceSize = 0;
+    uint8_t flightLightsSequence       = 0;
+    uint8_t flightLightsSequenceSize   = 0;
     uint8_t flightLightsSequenceCursor = 0;
 
     /* Change delay from time in [ms] to ticks */
@@ -1133,18 +1133,18 @@ void FlightController_FlightLights(void * ptr) {
     }
 }
 
-void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
+void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
 
     float kalmanGain;
 
-    *kalmanState = *kalmanState + CONTROL_SYSTEM_LOOP_PERIOD_S * kalmanInput;
+    *kalmanState       = *kalmanState + CONTROL_SYSTEM_LOOP_PERIOD_S * kalmanInput;
     *kalmanUncertainty = *kalmanUncertainty + CONTROL_SYSTEM_LOOP_PERIOD_S * CONTROL_SYSTEM_LOOP_PERIOD_S * 4 * 4;
-    kalmanGain = *kalmanUncertainty * 1 / (1 * *kalmanUncertainty + 3 * 3);
-    *kalmanState = *kalmanState + kalmanGain * (kalmanMeasurement - *kalmanState);
+    kalmanGain         = *kalmanUncertainty * 1 / (1 * *kalmanUncertainty + 3 * 3);
+    *kalmanState       = *kalmanState + kalmanGain * (kalmanMeasurement - *kalmanState);
     *kalmanUncertainty = (1 - kalmanGain) * *kalmanUncertainty;
 }
 
-void CSM_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD) {
+void CSM_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD) {
 
     float Pterm;
     float Iterm;
@@ -1176,26 +1176,26 @@ void CSM_CalculatePID(float * PID_Output, float * previousIterm, float * previou
     }
 
     /* Return values */
-    *PID_Output = pidOutputValue;
+    *PID_Output         = pidOutputValue;
     *previousErrorValue = errorValue;
-    *previousIterm = Iterm;
+    *previousIterm      = Iterm;
 }
 
 void CSM_ResetPID(void) {
 
     /* Reset previously stored PID errors and terms values: Angles */
-    previousErrorValue_rollAngle = 0;
+    previousErrorValue_rollAngle  = 0;
     previousErrorValue_pitchAngle = 0;
-    previousIterm_rollAngle = 0;
-    previousIterm_pitchAngle = 0;
+    previousIterm_rollAngle       = 0;
+    previousIterm_pitchAngle      = 0;
 
     /* Reset previously stored PID errors and terms values: Rates */
-    previousErrorValue_rollRate = 0;
+    previousErrorValue_rollRate  = 0;
     previousErrorValue_pitchRate = 0;
-    previousErrorValue_yawRate = 0;
-    previousIterm_rollRate = 0;
-    previousIterm_pitchRate = 0;
-    previousIterm_yawRate = 0;
+    previousErrorValue_yawRate   = 0;
+    previousIterm_rollRate       = 0;
+    previousIterm_pitchRate      = 0;
+    previousIterm_yawRate        = 0;
 }
 
 /* --- Private callback function implementation ------------------------------------------------ */

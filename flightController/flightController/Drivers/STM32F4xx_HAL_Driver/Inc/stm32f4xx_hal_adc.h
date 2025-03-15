@@ -56,15 +56,16 @@ extern "C" {
  *         If ADC is not in the appropriate state to modify some parameters, these parameters setting is bypassed
  *         without error reporting (as it can be the expected behaviour in case of intended action to update another parameter (which fulfills the ADC state condition) on the fly).
  */
-typedef struct {
+typedef struct
+{
     uint32_t ClockPrescaler;               /*!< Select ADC clock prescaler. The clock is common for
                                                 all the ADCs.
                                                 This parameter can be a value of @ref ADC_ClockPrescaler */
     uint32_t Resolution;                   /*!< Configures the ADC resolution.
                                                 This parameter can be a value of @ref ADC_Resolution */
     uint32_t DataAlign;                    /*!< Specifies ADC data alignment to right (MSB on register bit 11 and LSB on register bit 0) (default setting)
-                                                or to left (if regular group: MSB on register bit 15 and LSB on register bit 4, if injected group (MSB kept as signed value due to potential negative value after offset application): MSB on register bit 14 and LSB on
-                                              register bit 3).                    This parameter can be a value of @ref ADC_Data_align */
+                                                or to left (if regular group: MSB on register bit 15 and LSB on register bit 4, if injected group (MSB kept as signed value due to potential negative value after offset application): MSB on register bit 14 and LSB on register bit 3).
+                                                This parameter can be a value of @ref ADC_Data_align */
     uint32_t ScanConvMode;                 /*!< Configures the sequencer of regular and injected groups.
                                                 This parameter can be associated to parameter 'DiscontinuousConvMode' to have main sequence subdivided in successive parts.
                                                 If disabled: Conversion is performed in single mode (one channel converted, the one defined in rank 1).
@@ -77,8 +78,8 @@ typedef struct {
                                                 Note: For injected group, end of conversion (flag&IT) is raised only at the end of the sequence.
                                                       Therefore, if end of conversion is set to end of each conversion, injected group should not be used with interruption (HAL_ADCEx_InjectedStart_IT)
                                                       or polling (HAL_ADCEx_InjectedStart and HAL_ADCEx_InjectedPollForConversion). By the way, polling is still possible since driver will use an estimated timing for end of injected conversion.
-                                                Note: If overrun feature is intended to be used, use ADC in mode 'interruption' (function HAL_ADC_Start_IT() ) with parameter EOCSelection set to end of each conversion or in mode 'transfer by DMA' (function
-                                              HAL_ADC_Start_DMA()).                 If overrun feature is intended to be bypassed, use ADC in mode 'polling' or 'interruption' with parameter EOCSelection must be set to end of sequence */
+                                                Note: If overrun feature is intended to be used, use ADC in mode 'interruption' (function HAL_ADC_Start_IT() ) with parameter EOCSelection set to end of each conversion or in mode 'transfer by DMA' (function HAL_ADC_Start_DMA()).
+                                                      If overrun feature is intended to be bypassed, use ADC in mode 'polling' or 'interruption' with parameter EOCSelection must be set to end of sequence */
     FunctionalState ContinuousConvMode;    /*!< Specifies whether the conversion is performed in single mode (one conversion) or continuous mode for regular group,
                                                 after the selected trigger occurred (software start or external trigger).
                                                 This parameter can be set to ENABLE or DISABLE. */
@@ -111,7 +112,8 @@ typedef struct {
  * @note   The setting of these parameters with function HAL_ADC_ConfigChannel() is conditioned to ADC state.
  *         ADC can be either disabled or enabled without conversion on going on regular group.
  */
-typedef struct {
+typedef struct
+{
     uint32_t Channel;      /*!< Specifies the channel to configure into ADC regular group.
                                 This parameter can be a value of @ref ADC_channels */
     uint32_t Rank;         /*!< Specifies the rank in the regular group sequencer.
@@ -131,7 +133,8 @@ typedef struct {
 /**
  * @brief ADC Configuration multi-mode structure definition
  */
-typedef struct {
+typedef struct
+{
     uint32_t WatchdogMode;   /*!< Configures the ADC analog watchdog mode.
                                   This parameter can be a value of @ref ADC_analog_watchdog_selection */
     uint32_t HighThreshold;  /*!< Configures the ADC analog watchdog High threshold value.
@@ -162,17 +165,15 @@ typedef struct {
 #define HAL_ADC_STATE_ERROR_DMA      0x00000040U /*!< DMA error occurrence */
 
 /* States of ADC group regular */
-#define HAL_ADC_STATE_REG_BUSY                                                                                                                                                                                                                           \
-    0x00000100U                           /*!< A conversion on group regular is ongoing or can occur (either by continuous mode,                                                                                                                         \
-                                               external trigger, low power auto power-on (if feature available), multimode ADC master control (if feature available)) */
-#define HAL_ADC_STATE_REG_EOC 0x00000200U /*!< Conversion data available on group regular */
-#define HAL_ADC_STATE_REG_OVR 0x00000400U /*!< Overrun occurrence */
+#define HAL_ADC_STATE_REG_BUSY 0x00000100U /*!< A conversion on group regular is ongoing or can occur (either by continuous mode, \
+                                                external trigger, low power auto power-on (if feature available), multimode ADC master control (if feature available)) */
+#define HAL_ADC_STATE_REG_EOC 0x00000200U  /*!< Conversion data available on group regular */
+#define HAL_ADC_STATE_REG_OVR 0x00000400U  /*!< Overrun occurrence */
 
 /* States of ADC group injected */
-#define HAL_ADC_STATE_INJ_BUSY                                                                                                                                                                                                                           \
-    0x00001000U                           /*!< A conversion on group injected is ongoing or can occur (either by auto-injection mode,                                                                                                                    \
-                                               external trigger, low power auto power-on (if feature available), multimode ADC master control (if feature available)) */
-#define HAL_ADC_STATE_INJ_EOC 0x00002000U /*!< Conversion data available on group injected */
+#define HAL_ADC_STATE_INJ_BUSY 0x00001000U /*!< A conversion on group injected is ongoing or can occur (either by auto-injection mode, \
+                                                external trigger, low power auto power-on (if feature available), multimode ADC master control (if feature available)) */
+#define HAL_ADC_STATE_INJ_EOC 0x00002000U  /*!< Conversion data available on group injected */
 
 /* States of ADC analog watchdogs */
 #define HAL_ADC_STATE_AWD1 0x00010000U /*!< Out-of-window occurrence of analog watchdog 1 */
@@ -191,28 +192,28 @@ typedef struct __ADC_HandleTypeDef
 typedef struct
 #endif
 {
-    ADC_TypeDef * Instance; /*!< Register base address */
+    ADC_TypeDef *Instance;                                              /*!< Register base address */
 
-    ADC_InitTypeDef Init; /*!< ADC required parameters */
+    ADC_InitTypeDef Init;                                               /*!< ADC required parameters */
 
-    __IO uint32_t NbrOfCurrentConversionRank; /*!< ADC number of current conversion rank */
+    __IO uint32_t NbrOfCurrentConversionRank;                           /*!< ADC number of current conversion rank */
 
-    DMA_HandleTypeDef * DMA_Handle; /*!< Pointer DMA Handler */
+    DMA_HandleTypeDef *DMA_Handle;                                      /*!< Pointer DMA Handler */
 
-    HAL_LockTypeDef Lock; /*!< ADC locking object */
+    HAL_LockTypeDef Lock;                                               /*!< ADC locking object */
 
-    __IO uint32_t State; /*!< ADC communication state */
+    __IO uint32_t State;                                                /*!< ADC communication state */
 
-    __IO uint32_t ErrorCode; /*!< ADC Error code */
+    __IO uint32_t ErrorCode;                                            /*!< ADC Error code */
 #if (USE_HAL_ADC_REGISTER_CALLBACKS == 1)
-    void (*ConvCpltCallback)(struct __ADC_HandleTypeDef * hadc);         /*!< ADC conversion complete callback */
-    void (*ConvHalfCpltCallback)(struct __ADC_HandleTypeDef * hadc);     /*!< ADC conversion DMA half-transfer callback */
-    void (*LevelOutOfWindowCallback)(struct __ADC_HandleTypeDef * hadc); /*!< ADC analog watchdog 1 callback */
-    void (*ErrorCallback)(struct __ADC_HandleTypeDef * hadc);            /*!< ADC error callback */
-    void (*InjectedConvCpltCallback)(struct __ADC_HandleTypeDef * hadc); /*!< ADC group injected conversion complete callback */
-    void (*MspInitCallback)(struct __ADC_HandleTypeDef * hadc);          /*!< ADC Msp Init callback */
-    void (*MspDeInitCallback)(struct __ADC_HandleTypeDef * hadc);        /*!< ADC Msp DeInit callback */
-#endif                                                                   /* USE_HAL_ADC_REGISTER_CALLBACKS */
+    void (*ConvCpltCallback)(struct __ADC_HandleTypeDef *hadc);         /*!< ADC conversion complete callback */
+    void (*ConvHalfCpltCallback)(struct __ADC_HandleTypeDef *hadc);     /*!< ADC conversion DMA half-transfer callback */
+    void (*LevelOutOfWindowCallback)(struct __ADC_HandleTypeDef *hadc); /*!< ADC analog watchdog 1 callback */
+    void (*ErrorCallback)(struct __ADC_HandleTypeDef *hadc);            /*!< ADC error callback */
+    void (*InjectedConvCpltCallback)(struct __ADC_HandleTypeDef *hadc); /*!< ADC group injected conversion complete callback */
+    void (*MspInitCallback)(struct __ADC_HandleTypeDef *hadc);          /*!< ADC Msp Init callback */
+    void (*MspDeInitCallback)(struct __ADC_HandleTypeDef *hadc);        /*!< ADC Msp DeInit callback */
+#endif                                                                  /* USE_HAL_ADC_REGISTER_CALLBACKS */
 } ADC_HandleTypeDef;
 
 #if (USE_HAL_ADC_REGISTER_CALLBACKS == 1)
@@ -220,21 +221,21 @@ typedef struct
  * @brief  HAL ADC Callback ID enumeration definition
  */
 typedef enum {
-    HAL_ADC_CONVERSION_COMPLETE_CB_ID = 0x00U,     /*!< ADC conversion complete callback ID */
-    HAL_ADC_CONVERSION_HALF_CB_ID = 0x01U,         /*!< ADC conversion DMA half-transfer callback ID */
-    HAL_ADC_LEVEL_OUT_OF_WINDOW_1_CB_ID = 0x02U,   /*!< ADC analog watchdog 1 callback ID */
-    HAL_ADC_ERROR_CB_ID = 0x03U,                   /*!< ADC error callback ID */
+    HAL_ADC_CONVERSION_COMPLETE_CB_ID     = 0x00U, /*!< ADC conversion complete callback ID */
+    HAL_ADC_CONVERSION_HALF_CB_ID         = 0x01U, /*!< ADC conversion DMA half-transfer callback ID */
+    HAL_ADC_LEVEL_OUT_OF_WINDOW_1_CB_ID   = 0x02U, /*!< ADC analog watchdog 1 callback ID */
+    HAL_ADC_ERROR_CB_ID                   = 0x03U, /*!< ADC error callback ID */
     HAL_ADC_INJ_CONVERSION_COMPLETE_CB_ID = 0x04U, /*!< ADC group injected conversion complete callback ID */
-    HAL_ADC_MSPINIT_CB_ID = 0x05U,                 /*!< ADC Msp Init callback ID          */
-    HAL_ADC_MSPDEINIT_CB_ID = 0x06U                /*!< ADC Msp DeInit callback ID        */
+    HAL_ADC_MSPINIT_CB_ID                 = 0x05U, /*!< ADC Msp Init callback ID          */
+    HAL_ADC_MSPDEINIT_CB_ID               = 0x06U  /*!< ADC Msp DeInit callback ID        */
 } HAL_ADC_CallbackIDTypeDef;
 
 /**
  * @brief  HAL ADC Callback pointer definition
  */
-typedef void (*pADC_CallbackTypeDef)(ADC_HandleTypeDef * hadc); /*!< pointer to a ADC callback function */
+typedef void (*pADC_CallbackTypeDef)(ADC_HandleTypeDef *hadc); /*!< pointer to a ADC callback function */
 
-#endif /* USE_HAL_ADC_REGISTER_CALLBACKS */
+#endif                                                         /* USE_HAL_ADC_REGISTER_CALLBACKS */
 
 /**
  * @}
@@ -248,12 +249,11 @@ typedef void (*pADC_CallbackTypeDef)(ADC_HandleTypeDef * hadc); /*!< pointer to 
 /** @defgroup ADC_Error_Code ADC Error Code
  * @{
  */
-#define HAL_ADC_ERROR_NONE 0x00U /*!< No error                                              */
-#define HAL_ADC_ERROR_INTERNAL                                                                                                                                                                                                                           \
-    0x01U                       /*!< ADC IP internal error: if problem of clocking,                                                                                                                                                                      \
-                                     enable/disable, erroneous state                       */
-#define HAL_ADC_ERROR_OVR 0x02U /*!< Overrun error                                         */
-#define HAL_ADC_ERROR_DMA 0x04U /*!< DMA transfer error                                    */
+#define HAL_ADC_ERROR_NONE     0x00U           /*!< No error                                              */
+#define HAL_ADC_ERROR_INTERNAL 0x01U           /*!< ADC IP internal error: if problem of clocking, \
+                                                    enable/disable, erroneous state                       */
+#define HAL_ADC_ERROR_OVR 0x02U                /*!< Overrun error                                         */
+#define HAL_ADC_ERROR_DMA 0x04U                /*!< DMA transfer error                                    */
 #if (USE_HAL_ADC_REGISTER_CALLBACKS == 1)
 #define HAL_ADC_ERROR_INVALID_CALLBACK (0x10U) /*!< Invalid Callback error */
 #endif                                         /* USE_HAL_ADC_REGISTER_CALLBACKS */
@@ -355,25 +355,25 @@ typedef void (*pADC_CallbackTypeDef)(ADC_HandleTypeDef * hadc); /*!< pointer to 
 /** @defgroup ADC_channels  ADC Common Channels
  * @{
  */
-#define ADC_CHANNEL_0       0x00000000U
-#define ADC_CHANNEL_1       ((uint32_t)ADC_CR1_AWDCH_0)
-#define ADC_CHANNEL_2       ((uint32_t)ADC_CR1_AWDCH_1)
-#define ADC_CHANNEL_3       ((uint32_t)(ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_4       ((uint32_t)ADC_CR1_AWDCH_2)
-#define ADC_CHANNEL_5       ((uint32_t)(ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_6       ((uint32_t)(ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1))
-#define ADC_CHANNEL_7       ((uint32_t)(ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_8       ((uint32_t)ADC_CR1_AWDCH_3)
-#define ADC_CHANNEL_9       ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_10      ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_1))
-#define ADC_CHANNEL_11      ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_12      ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2))
-#define ADC_CHANNEL_13      ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_14      ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1))
-#define ADC_CHANNEL_15      ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_16      ((uint32_t)ADC_CR1_AWDCH_4)
-#define ADC_CHANNEL_17      ((uint32_t)(ADC_CR1_AWDCH_4 | ADC_CR1_AWDCH_0))
-#define ADC_CHANNEL_18      ((uint32_t)(ADC_CR1_AWDCH_4 | ADC_CR1_AWDCH_1))
+#define ADC_CHANNEL_0  0x00000000U
+#define ADC_CHANNEL_1  ((uint32_t)ADC_CR1_AWDCH_0)
+#define ADC_CHANNEL_2  ((uint32_t)ADC_CR1_AWDCH_1)
+#define ADC_CHANNEL_3  ((uint32_t)(ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_4  ((uint32_t)ADC_CR1_AWDCH_2)
+#define ADC_CHANNEL_5  ((uint32_t)(ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_6  ((uint32_t)(ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1))
+#define ADC_CHANNEL_7  ((uint32_t)(ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_8  ((uint32_t)ADC_CR1_AWDCH_3)
+#define ADC_CHANNEL_9  ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_10 ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_1))
+#define ADC_CHANNEL_11 ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_12 ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2))
+#define ADC_CHANNEL_13 ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_14 ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1))
+#define ADC_CHANNEL_15 ((uint32_t)(ADC_CR1_AWDCH_3 | ADC_CR1_AWDCH_2 | ADC_CR1_AWDCH_1 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_16 ((uint32_t)ADC_CR1_AWDCH_4)
+#define ADC_CHANNEL_17 ((uint32_t)(ADC_CR1_AWDCH_4 | ADC_CR1_AWDCH_0))
+#define ADC_CHANNEL_18 ((uint32_t)(ADC_CR1_AWDCH_4 | ADC_CR1_AWDCH_1))
 
 #define ADC_CHANNEL_VREFINT ((uint32_t)ADC_CHANNEL_17)
 #define ADC_CHANNEL_VBAT    ((uint32_t)ADC_CHANNEL_18)
@@ -477,14 +477,15 @@ typedef void (*pADC_CallbackTypeDef)(ADC_HandleTypeDef * hadc); /*!< pointer to 
  * @retval None
  */
 #if (USE_HAL_ADC_REGISTER_CALLBACKS == 1)
-#define __HAL_ADC_RESET_HANDLE_STATE(__HANDLE__)                                                                                                                                                                                                         \
-    do {                                                                                                                                                                                                                                                 \
-        (__HANDLE__)->State = HAL_ADC_STATE_RESET;                                                                                                                                                                                                       \
-        (__HANDLE__)->MspInitCallback = NULL;                                                                                                                                                                                                            \
-        (__HANDLE__)->MspDeInitCallback = NULL;                                                                                                                                                                                                          \
+#define __HAL_ADC_RESET_HANDLE_STATE(__HANDLE__)               \
+    do {                                                       \
+        (__HANDLE__)->State             = HAL_ADC_STATE_RESET; \
+        (__HANDLE__)->MspInitCallback   = NULL;                \
+        (__HANDLE__)->MspDeInitCallback = NULL;                \
     } while (0)
 #else
-#define __HAL_ADC_RESET_HANDLE_STATE(__HANDLE__) ((__HANDLE__)->State = HAL_ADC_STATE_RESET)
+#define __HAL_ADC_RESET_HANDLE_STATE(__HANDLE__) \
+    ((__HANDLE__)->State = HAL_ADC_STATE_RESET)
 #endif
 
 /**
@@ -556,15 +557,15 @@ typedef void (*pADC_CallbackTypeDef)(ADC_HandleTypeDef * hadc); /*!< pointer to 
  * @{
  */
 /* Initialization/de-initialization functions ***********************************/
-HAL_StatusTypeDef HAL_ADC_Init(ADC_HandleTypeDef * hadc);
-HAL_StatusTypeDef HAL_ADC_DeInit(ADC_HandleTypeDef * hadc);
-void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc);
-void HAL_ADC_MspDeInit(ADC_HandleTypeDef * hadc);
+HAL_StatusTypeDef HAL_ADC_Init(ADC_HandleTypeDef *hadc);
+HAL_StatusTypeDef HAL_ADC_DeInit(ADC_HandleTypeDef *hadc);
+void              HAL_ADC_MspInit(ADC_HandleTypeDef *hadc);
+void              HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc);
 
 #if (USE_HAL_ADC_REGISTER_CALLBACKS == 1)
 /* Callbacks Register/UnRegister functions  ***********************************/
-HAL_StatusTypeDef HAL_ADC_RegisterCallback(ADC_HandleTypeDef * hadc, HAL_ADC_CallbackIDTypeDef CallbackID, pADC_CallbackTypeDef pCallback);
-HAL_StatusTypeDef HAL_ADC_UnRegisterCallback(ADC_HandleTypeDef * hadc, HAL_ADC_CallbackIDTypeDef CallbackID);
+HAL_StatusTypeDef HAL_ADC_RegisterCallback(ADC_HandleTypeDef *hadc, HAL_ADC_CallbackIDTypeDef CallbackID, pADC_CallbackTypeDef pCallback);
+HAL_StatusTypeDef HAL_ADC_UnRegisterCallback(ADC_HandleTypeDef *hadc, HAL_ADC_CallbackIDTypeDef CallbackID);
 #endif /* USE_HAL_ADC_REGISTER_CALLBACKS */
 /**
  * @}
@@ -574,26 +575,26 @@ HAL_StatusTypeDef HAL_ADC_UnRegisterCallback(ADC_HandleTypeDef * hadc, HAL_ADC_C
  * @{
  */
 /* I/O operation functions ******************************************************/
-HAL_StatusTypeDef HAL_ADC_Start(ADC_HandleTypeDef * hadc);
-HAL_StatusTypeDef HAL_ADC_Stop(ADC_HandleTypeDef * hadc);
-HAL_StatusTypeDef HAL_ADC_PollForConversion(ADC_HandleTypeDef * hadc, uint32_t Timeout);
+HAL_StatusTypeDef HAL_ADC_Start(ADC_HandleTypeDef *hadc);
+HAL_StatusTypeDef HAL_ADC_Stop(ADC_HandleTypeDef *hadc);
+HAL_StatusTypeDef HAL_ADC_PollForConversion(ADC_HandleTypeDef *hadc, uint32_t Timeout);
 
-HAL_StatusTypeDef HAL_ADC_PollForEvent(ADC_HandleTypeDef * hadc, uint32_t EventType, uint32_t Timeout);
+HAL_StatusTypeDef HAL_ADC_PollForEvent(ADC_HandleTypeDef *hadc, uint32_t EventType, uint32_t Timeout);
 
-HAL_StatusTypeDef HAL_ADC_Start_IT(ADC_HandleTypeDef * hadc);
-HAL_StatusTypeDef HAL_ADC_Stop_IT(ADC_HandleTypeDef * hadc);
+HAL_StatusTypeDef HAL_ADC_Start_IT(ADC_HandleTypeDef *hadc);
+HAL_StatusTypeDef HAL_ADC_Stop_IT(ADC_HandleTypeDef *hadc);
 
-void HAL_ADC_IRQHandler(ADC_HandleTypeDef * hadc);
+void HAL_ADC_IRQHandler(ADC_HandleTypeDef *hadc);
 
-HAL_StatusTypeDef HAL_ADC_Start_DMA(ADC_HandleTypeDef * hadc, uint32_t * pData, uint32_t Length);
-HAL_StatusTypeDef HAL_ADC_Stop_DMA(ADC_HandleTypeDef * hadc);
+HAL_StatusTypeDef HAL_ADC_Start_DMA(ADC_HandleTypeDef *hadc, uint32_t *pData, uint32_t Length);
+HAL_StatusTypeDef HAL_ADC_Stop_DMA(ADC_HandleTypeDef *hadc);
 
-uint32_t HAL_ADC_GetValue(ADC_HandleTypeDef * hadc);
+uint32_t HAL_ADC_GetValue(ADC_HandleTypeDef *hadc);
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc);
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef * hadc);
-void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef * hadc);
-void HAL_ADC_ErrorCallback(ADC_HandleTypeDef * hadc);
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc);
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef *hadc);
+void HAL_ADC_LevelOutOfWindowCallback(ADC_HandleTypeDef *hadc);
+void HAL_ADC_ErrorCallback(ADC_HandleTypeDef *hadc);
 /**
  * @}
  */
@@ -602,8 +603,8 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef * hadc);
  * @{
  */
 /* Peripheral Control functions *************************************************/
-HAL_StatusTypeDef HAL_ADC_ConfigChannel(ADC_HandleTypeDef * hadc, ADC_ChannelConfTypeDef * sConfig);
-HAL_StatusTypeDef HAL_ADC_AnalogWDGConfig(ADC_HandleTypeDef * hadc, ADC_AnalogWDGConfTypeDef * AnalogWDGConfig);
+HAL_StatusTypeDef HAL_ADC_ConfigChannel(ADC_HandleTypeDef *hadc, ADC_ChannelConfTypeDef *sConfig);
+HAL_StatusTypeDef HAL_ADC_AnalogWDGConfig(ADC_HandleTypeDef *hadc, ADC_AnalogWDGConfTypeDef *AnalogWDGConfig);
 /**
  * @}
  */
@@ -612,8 +613,8 @@ HAL_StatusTypeDef HAL_ADC_AnalogWDGConfig(ADC_HandleTypeDef * hadc, ADC_AnalogWD
  * @{
  */
 /* Peripheral State functions ***************************************************/
-uint32_t HAL_ADC_GetState(ADC_HandleTypeDef * hadc);
-uint32_t HAL_ADC_GetError(ADC_HandleTypeDef * hadc);
+uint32_t HAL_ADC_GetState(ADC_HandleTypeDef *hadc);
+uint32_t HAL_ADC_GetError(ADC_HandleTypeDef *hadc);
 /**
  * @}
  */
@@ -652,7 +653,8 @@ uint32_t HAL_ADC_GetError(ADC_HandleTypeDef * hadc);
  * @param __HANDLE__ ADC handle
  * @retval SET (ADC enabled) or RESET (ADC disabled)
  */
-#define ADC_IS_ENABLE(__HANDLE__) (((((__HANDLE__)->Instance->SR & ADC_SR_ADONS) == ADC_SR_ADONS)) ? SET : RESET)
+#define ADC_IS_ENABLE(__HANDLE__) \
+    (((((__HANDLE__)->Instance->SR & ADC_SR_ADONS) == ADC_SR_ADONS)) ? SET : RESET)
 
 /**
  * @brief Test if conversion trigger of regular group is software start
@@ -660,7 +662,8 @@ uint32_t HAL_ADC_GetError(ADC_HandleTypeDef * hadc);
  * @param __HANDLE__ ADC handle
  * @retval SET (software start) or RESET (external trigger)
  */
-#define ADC_IS_SOFTWARE_START_REGULAR(__HANDLE__) (((__HANDLE__)->Instance->CR2 & ADC_CR2_EXTEN) == RESET)
+#define ADC_IS_SOFTWARE_START_REGULAR(__HANDLE__) \
+    (((__HANDLE__)->Instance->CR2 & ADC_CR2_EXTEN) == RESET)
 
 /**
  * @brief Test if conversion trigger of injected group is software start
@@ -668,7 +671,8 @@ uint32_t HAL_ADC_GetError(ADC_HandleTypeDef * hadc);
  * @param __HANDLE__ ADC handle
  * @retval SET (software start) or RESET (external trigger)
  */
-#define ADC_IS_SOFTWARE_START_INJECTED(__HANDLE__) (((__HANDLE__)->Instance->CR2 & ADC_CR2_JEXTEN) == RESET)
+#define ADC_IS_SOFTWARE_START_INJECTED(__HANDLE__) \
+    (((__HANDLE__)->Instance->CR2 & ADC_CR2_JEXTEN) == RESET)
 
 /**
  * @brief Simultaneously clears and sets specific bits of the handle State
@@ -684,38 +688,88 @@ uint32_t HAL_ADC_GetError(ADC_HandleTypeDef * hadc);
  * @param __HANDLE__ ADC handle
  * @retval None
  */
-#define ADC_CLEAR_ERRORCODE(__HANDLE__)  ((__HANDLE__)->ErrorCode = HAL_ADC_ERROR_NONE)
+#define ADC_CLEAR_ERRORCODE(__HANDLE__) \
+    ((__HANDLE__)->ErrorCode = HAL_ADC_ERROR_NONE)
 
-#define IS_ADC_CLOCKPRESCALER(ADC_CLOCK) (((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV2) || ((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV4) || ((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV6) || ((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV8))
-#define IS_ADC_SAMPLING_DELAY(DELAY)                                                                                                                                                                                                                     \
-    (((DELAY) == ADC_TWOSAMPLINGDELAY_5CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_6CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_7CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_8CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_9CYCLES) ||                    \
-     ((DELAY) == ADC_TWOSAMPLINGDELAY_10CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_11CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_12CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_13CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_14CYCLES) ||               \
-     ((DELAY) == ADC_TWOSAMPLINGDELAY_15CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_16CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_17CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_18CYCLES) || ((DELAY) == ADC_TWOSAMPLINGDELAY_19CYCLES) ||               \
-     ((DELAY) == ADC_TWOSAMPLINGDELAY_20CYCLES))
-#define IS_ADC_RESOLUTION(RESOLUTION) (((RESOLUTION) == ADC_RESOLUTION_12B) || ((RESOLUTION) == ADC_RESOLUTION_10B) || ((RESOLUTION) == ADC_RESOLUTION_8B) || ((RESOLUTION) == ADC_RESOLUTION_6B))
-#define IS_ADC_EXT_TRIG_EDGE(EDGE)    (((EDGE) == ADC_EXTERNALTRIGCONVEDGE_NONE) || ((EDGE) == ADC_EXTERNALTRIGCONVEDGE_RISING) || ((EDGE) == ADC_EXTERNALTRIGCONVEDGE_FALLING) || ((EDGE) == ADC_EXTERNALTRIGCONVEDGE_RISINGFALLING))
-#define IS_ADC_EXT_TRIG(REGTRIG)                                                                                                                                                                                                                         \
-    (((REGTRIG) == ADC_EXTERNALTRIGCONV_T1_CC1) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T1_CC2) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T1_CC3) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_CC2) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_CC3) ||               \
-     ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_CC4) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_TRGO) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T3_CC1) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T3_TRGO) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T4_CC4) ||             \
-     ((REGTRIG) == ADC_EXTERNALTRIGCONV_T5_CC1) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T5_CC2) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T5_CC3) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T8_CC1) || ((REGTRIG) == ADC_EXTERNALTRIGCONV_T8_TRGO) ||              \
-     ((REGTRIG) == ADC_EXTERNALTRIGCONV_Ext_IT11) || ((REGTRIG) == ADC_SOFTWARE_START))
-#define IS_ADC_DATA_ALIGN(ALIGN) (((ALIGN) == ADC_DATAALIGN_RIGHT) || ((ALIGN) == ADC_DATAALIGN_LEFT))
-#define IS_ADC_SAMPLE_TIME(TIME)                                                                                                                                                                                                                         \
-    (((TIME) == ADC_SAMPLETIME_3CYCLES) || ((TIME) == ADC_SAMPLETIME_15CYCLES) || ((TIME) == ADC_SAMPLETIME_28CYCLES) || ((TIME) == ADC_SAMPLETIME_56CYCLES) || ((TIME) == ADC_SAMPLETIME_84CYCLES) || ((TIME) == ADC_SAMPLETIME_112CYCLES) ||           \
-     ((TIME) == ADC_SAMPLETIME_144CYCLES) || ((TIME) == ADC_SAMPLETIME_480CYCLES))
-#define IS_ADC_EOCSelection(EOCSelection) (((EOCSelection) == ADC_EOC_SINGLE_CONV) || ((EOCSelection) == ADC_EOC_SEQ_CONV) || ((EOCSelection) == ADC_EOC_SINGLE_SEQ_CONV))
-#define IS_ADC_EVENT_TYPE(EVENT)          (((EVENT) == ADC_AWD_EVENT) || ((EVENT) == ADC_OVR_EVENT))
-#define IS_ADC_ANALOG_WATCHDOG(WATCHDOG)                                                                                                                                                                                                                 \
-    (((WATCHDOG) == ADC_ANALOGWATCHDOG_SINGLE_REG) || ((WATCHDOG) == ADC_ANALOGWATCHDOG_SINGLE_INJEC) || ((WATCHDOG) == ADC_ANALOGWATCHDOG_SINGLE_REGINJEC) || ((WATCHDOG) == ADC_ANALOGWATCHDOG_ALL_REG) ||                                             \
-     ((WATCHDOG) == ADC_ANALOGWATCHDOG_ALL_INJEC) || ((WATCHDOG) == ADC_ANALOGWATCHDOG_ALL_REGINJEC) || ((WATCHDOG) == ADC_ANALOGWATCHDOG_NONE))
-#define IS_ADC_CHANNELS_TYPE(CHANNEL_TYPE) (((CHANNEL_TYPE) == ADC_ALL_CHANNELS) || ((CHANNEL_TYPE) == ADC_REGULAR_CHANNELS) || ((CHANNEL_TYPE) == ADC_INJECTED_CHANNELS))
-#define IS_ADC_THRESHOLD(THRESHOLD)        ((THRESHOLD) <= 0xFFFU)
+#define IS_ADC_CLOCKPRESCALER(ADC_CLOCK) (((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV2) || \
+                                          ((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV4) || \
+                                          ((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV6) || \
+                                          ((ADC_CLOCK) == ADC_CLOCK_SYNC_PCLK_DIV8))
+#define IS_ADC_SAMPLING_DELAY(DELAY) (((DELAY) == ADC_TWOSAMPLINGDELAY_5CYCLES) ||  \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_6CYCLES) ||  \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_7CYCLES) ||  \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_8CYCLES) ||  \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_9CYCLES) ||  \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_10CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_11CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_12CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_13CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_14CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_15CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_16CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_17CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_18CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_19CYCLES) || \
+                                      ((DELAY) == ADC_TWOSAMPLINGDELAY_20CYCLES))
+#define IS_ADC_RESOLUTION(RESOLUTION) (((RESOLUTION) == ADC_RESOLUTION_12B) || \
+                                       ((RESOLUTION) == ADC_RESOLUTION_10B) || \
+                                       ((RESOLUTION) == ADC_RESOLUTION_8B) ||  \
+                                       ((RESOLUTION) == ADC_RESOLUTION_6B))
+#define IS_ADC_EXT_TRIG_EDGE(EDGE) (((EDGE) == ADC_EXTERNALTRIGCONVEDGE_NONE) ||    \
+                                    ((EDGE) == ADC_EXTERNALTRIGCONVEDGE_RISING) ||  \
+                                    ((EDGE) == ADC_EXTERNALTRIGCONVEDGE_FALLING) || \
+                                    ((EDGE) == ADC_EXTERNALTRIGCONVEDGE_RISINGFALLING))
+#define IS_ADC_EXT_TRIG(REGTRIG) (((REGTRIG) == ADC_EXTERNALTRIGCONV_T1_CC1) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T1_CC2) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T1_CC3) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_CC2) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_CC3) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_CC4) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T2_TRGO) ||  \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T3_CC1) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T3_TRGO) ||  \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T4_CC4) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T5_CC1) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T5_CC2) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T5_CC3) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T8_CC1) ||   \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_T8_TRGO) ||  \
+                                  ((REGTRIG) == ADC_EXTERNALTRIGCONV_Ext_IT11) || \
+                                  ((REGTRIG) == ADC_SOFTWARE_START))
+#define IS_ADC_DATA_ALIGN(ALIGN) (((ALIGN) == ADC_DATAALIGN_RIGHT) || \
+                                  ((ALIGN) == ADC_DATAALIGN_LEFT))
+#define IS_ADC_SAMPLE_TIME(TIME) (((TIME) == ADC_SAMPLETIME_3CYCLES) ||   \
+                                  ((TIME) == ADC_SAMPLETIME_15CYCLES) ||  \
+                                  ((TIME) == ADC_SAMPLETIME_28CYCLES) ||  \
+                                  ((TIME) == ADC_SAMPLETIME_56CYCLES) ||  \
+                                  ((TIME) == ADC_SAMPLETIME_84CYCLES) ||  \
+                                  ((TIME) == ADC_SAMPLETIME_112CYCLES) || \
+                                  ((TIME) == ADC_SAMPLETIME_144CYCLES) || \
+                                  ((TIME) == ADC_SAMPLETIME_480CYCLES))
+#define IS_ADC_EOCSelection(EOCSelection) (((EOCSelection) == ADC_EOC_SINGLE_CONV) || \
+                                           ((EOCSelection) == ADC_EOC_SEQ_CONV) ||    \
+                                           ((EOCSelection) == ADC_EOC_SINGLE_SEQ_CONV))
+#define IS_ADC_EVENT_TYPE(EVENT) (((EVENT) == ADC_AWD_EVENT) || \
+                                  ((EVENT) == ADC_OVR_EVENT))
+#define IS_ADC_ANALOG_WATCHDOG(WATCHDOG) (((WATCHDOG) == ADC_ANALOGWATCHDOG_SINGLE_REG) ||      \
+                                          ((WATCHDOG) == ADC_ANALOGWATCHDOG_SINGLE_INJEC) ||    \
+                                          ((WATCHDOG) == ADC_ANALOGWATCHDOG_SINGLE_REGINJEC) || \
+                                          ((WATCHDOG) == ADC_ANALOGWATCHDOG_ALL_REG) ||         \
+                                          ((WATCHDOG) == ADC_ANALOGWATCHDOG_ALL_INJEC) ||       \
+                                          ((WATCHDOG) == ADC_ANALOGWATCHDOG_ALL_REGINJEC) ||    \
+                                          ((WATCHDOG) == ADC_ANALOGWATCHDOG_NONE))
+#define IS_ADC_CHANNELS_TYPE(CHANNEL_TYPE) (((CHANNEL_TYPE) == ADC_ALL_CHANNELS) ||     \
+                                            ((CHANNEL_TYPE) == ADC_REGULAR_CHANNELS) || \
+                                            ((CHANNEL_TYPE) == ADC_INJECTED_CHANNELS))
+#define IS_ADC_THRESHOLD(THRESHOLD) ((THRESHOLD) <= 0xFFFU)
 
 #define IS_ADC_REGULAR_LENGTH(LENGTH)      (((LENGTH) >= 1U) && ((LENGTH) <= 16U))
 #define IS_ADC_REGULAR_RANK(RANK)          (((RANK) >= 1U) && ((RANK) <= (16U)))
 #define IS_ADC_REGULAR_DISC_NUMBER(NUMBER) (((NUMBER) >= 1U) && ((NUMBER) <= 8U))
-#define IS_ADC_RANGE(RESOLUTION, ADC_VALUE)                                                                                                                                                                                                              \
-    ((((RESOLUTION) == ADC_RESOLUTION_12B) && ((ADC_VALUE) <= 0x0FFFU)) || (((RESOLUTION) == ADC_RESOLUTION_10B) && ((ADC_VALUE) <= 0x03FFU)) || (((RESOLUTION) == ADC_RESOLUTION_8B) && ((ADC_VALUE) <= 0x00FFU)) ||                                    \
+#define IS_ADC_RANGE(RESOLUTION, ADC_VALUE)                                \
+    ((((RESOLUTION) == ADC_RESOLUTION_12B) && ((ADC_VALUE) <= 0x0FFFU)) || \
+     (((RESOLUTION) == ADC_RESOLUTION_10B) && ((ADC_VALUE) <= 0x03FFU)) || \
+     (((RESOLUTION) == ADC_RESOLUTION_8B) && ((ADC_VALUE) <= 0x00FFU)) ||  \
      (((RESOLUTION) == ADC_RESOLUTION_6B) && ((ADC_VALUE) <= 0x003FU)))
 
 /**

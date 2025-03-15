@@ -56,10 +56,10 @@ extern "C" {
  */
 typedef enum {
     LOG_INFORMATION = 0,
-    LOG_DEBUGGING = 1,
-    LOG_WARNING = 2,
-    LOG_ERROR = 3,
-    LOG_RAW = 4,
+    LOG_DEBUGGING   = 1,
+    LOG_WARNING     = 2,
+    LOG_ERROR       = 3,
+    LOG_RAW         = 4,
 } LOGGING_TYPE_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
@@ -75,7 +75,7 @@ typedef enum {
  * @note   This function is not thread-safe and should be protected if called from multiple tasks.
  * @example LOG((uint8_t*)"Motor initialized", LOG_INFORMATION);
  */
-bool_t LOG(const uint8_t * message, LOGGING_TYPE_t logType);
+bool_t LOG(const uint8_t *message, LOGGING_TYPE_t logType);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

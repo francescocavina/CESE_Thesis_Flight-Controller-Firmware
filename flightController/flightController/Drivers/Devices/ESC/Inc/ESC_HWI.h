@@ -39,13 +39,13 @@
 #define INC_ESC_HWI_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 /* BEGIN MODIFY 1 */
-#include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include "stm32f4xx_hal.h"
 /* END MODIFY 1 */
 #include "LoggingSystem_UAI.h"
 
@@ -68,7 +68,7 @@ typedef bool bool_t;
  */
 typedef struct {
     /* BEGIN MODIFY 2 */
-    TIM_HandleTypeDef * htim; /* Pointer to TIM_HandleTypeDef structure */
+    TIM_HandleTypeDef *htim; /* Pointer to TIM_HandleTypeDef structure */
     /* END MODIFY 2 */
     uint8_t esc1;
     uint8_t esc2;
@@ -79,7 +79,10 @@ typedef struct {
 /**
  * @brief Enumeration for PWM channel number.
  */
-typedef enum { PWM_CHANNEL_1 = 1, PWM_CHANNEL_2 = 2, PWM_CHANNEL_3 = 3, PWM_CHANNEL_4 = 4 } PWM_CHANNEL_t;
+typedef enum { PWM_CHANNEL_1 = 1,
+               PWM_CHANNEL_2 = 2,
+               PWM_CHANNEL_3 = 3,
+               PWM_CHANNEL_4 = 4 } PWM_CHANNEL_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
@@ -91,7 +94,7 @@ typedef enum { PWM_CHANNEL_1 = 1, PWM_CHANNEL_2 = 2, PWM_CHANNEL_3 = 3, PWM_CHAN
  * @retval true:    If PWM could be initialized.
  *         false:   If PWM couldn't be initialized.
  */
-bool_t PWM_Init(ESC_HandleTypeDef_t * hesc);
+bool_t PWM_Init(ESC_HandleTypeDef_t *hesc);
 
 /**
  * @brief  De-initializes the PWM Timer peripheral.
@@ -100,7 +103,7 @@ bool_t PWM_Init(ESC_HandleTypeDef_t * hesc);
  * @retval true:    If PWM could be de-initialized.
  *         false:   If PWM couldn't be de-initialized.
  */
-bool_t PWM_Deinit(ESC_HandleTypeDef_t * hesc);
+bool_t PWM_Deinit(ESC_HandleTypeDef_t *hesc);
 
 /**
  * @brief  Sets PWM duty cycle.
@@ -113,7 +116,7 @@ bool_t PWM_Deinit(ESC_HandleTypeDef_t * hesc);
  * @retval true:     If duty cycle could be set.
  *         false:    If duty cycle couldn't be set.
  */
-bool_t PWM_SetDutyCycle(ESC_HandleTypeDef_t * hesc, uint8_t channel, uint32_t dutyCycle);
+bool_t PWM_SetDutyCycle(ESC_HandleTypeDef_t *hesc, uint8_t channel, uint32_t dutyCycle);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

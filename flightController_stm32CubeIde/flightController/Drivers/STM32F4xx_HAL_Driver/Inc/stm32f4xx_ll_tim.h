@@ -138,13 +138,13 @@ static const uint8_t SHIFT_TAB_OISx[] = {
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval none
  */
-#define TIM_GET_CHANNEL_INDEX(__CHANNEL__)                                                                                                                                                                                                               \
-    (((__CHANNEL__) == LL_TIM_CHANNEL_CH1)    ? 0U                                                                                                                                                                                                       \
-     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH1N) ? 1U                                                                                                                                                                                                       \
-     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH2)  ? 2U                                                                                                                                                                                                       \
-     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH2N) ? 3U                                                                                                                                                                                                       \
-     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH3)  ? 4U                                                                                                                                                                                                       \
-     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH3N) ? 5U                                                                                                                                                                                                       \
+#define TIM_GET_CHANNEL_INDEX(__CHANNEL__)         \
+    (((__CHANNEL__) == LL_TIM_CHANNEL_CH1)    ? 0U \
+     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH1N) ? 1U \
+     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH2)  ? 2U \
+     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH2N) ? 3U \
+     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH3)  ? 4U \
+     : ((__CHANNEL__) == LL_TIM_CHANNEL_CH3N) ? 5U \
                                               : 6U)
 
 /** @brief  Calculate the deadtime sampling period(in ps).
@@ -155,8 +155,9 @@ static const uint8_t SHIFT_TAB_OISx[] = {
  *         @arg @ref LL_TIM_CLOCKDIVISION_DIV4
  * @retval none
  */
-#define TIM_CALC_DTS(__TIMCLK__, __CKD__)                                                                                                                                                                                                                \
-    (((__CKD__) == LL_TIM_CLOCKDIVISION_DIV1) ? ((uint64_t)1000000000000U / (__TIMCLK__)) : ((__CKD__) == LL_TIM_CLOCKDIVISION_DIV2) ? ((uint64_t)1000000000000U / ((__TIMCLK__) >> 1U)) : ((uint64_t)1000000000000U / ((__TIMCLK__) >> 2U)))
+#define TIM_CALC_DTS(__TIMCLK__, __CKD__)                                                                                                                                                \
+    (((__CKD__) == LL_TIM_CLOCKDIVISION_DIV1) ? ((uint64_t)1000000000000U / (__TIMCLK__)) : ((__CKD__) == LL_TIM_CLOCKDIVISION_DIV2) ? ((uint64_t)1000000000000U / ((__TIMCLK__) >> 1U)) \
+                                                                                                                                     : ((uint64_t)1000000000000U / ((__TIMCLK__) >> 2U)))
 /**
  * @}
  */
@@ -171,32 +172,32 @@ static const uint8_t SHIFT_TAB_OISx[] = {
  * @brief  TIM Time Base configuration structure definition.
  */
 typedef struct {
-    uint16_t Prescaler; /*!< Specifies the prescaler value used to divide the TIM clock.
-                             This parameter can be a number between Min_Data=0x0000 and Max_Data=0xFFFF.
+    uint16_t Prescaler;         /*!< Specifies the prescaler value used to divide the TIM clock.
+                                     This parameter can be a number between Min_Data=0x0000 and Max_Data=0xFFFF.
+        
+                                     This feature can be modified afterwards using unitary function
+                                     @ref LL_TIM_SetPrescaler().*/
 
-                             This feature can be modified afterwards using unitary function
-                             @ref LL_TIM_SetPrescaler().*/
+    uint32_t CounterMode;       /*!< Specifies the counter mode.
+                                     This parameter can be a value of @ref TIM_LL_EC_COUNTERMODE.
+      
+                                     This feature can be modified afterwards using unitary function
+                                     @ref LL_TIM_SetCounterMode().*/
 
-    uint32_t CounterMode; /*!< Specifies the counter mode.
-                               This parameter can be a value of @ref TIM_LL_EC_COUNTERMODE.
+    uint32_t Autoreload;        /*!< Specifies the auto reload value to be loaded into the active
+                                     Auto-Reload Register at the next update event.
+                                     This parameter must be a number between Min_Data=0x0000 and Max_Data=0xFFFF.
+                                     Some timer instances may support 32 bits counters. In that case this parameter must
+                                     be a number between 0x0000 and 0xFFFFFFFF.
+       
+                                     This feature can be modified afterwards using unitary function
+                                     @ref LL_TIM_SetAutoReload().*/
 
-                               This feature can be modified afterwards using unitary function
-                               @ref LL_TIM_SetCounterMode().*/
-
-    uint32_t Autoreload; /*!< Specifies the auto reload value to be loaded into the active
-                              Auto-Reload Register at the next update event.
-                              This parameter must be a number between Min_Data=0x0000 and Max_Data=0xFFFF.
-                              Some timer instances may support 32 bits counters. In that case this parameter must
-                              be a number between 0x0000 and 0xFFFFFFFF.
-
-                              This feature can be modified afterwards using unitary function
-                              @ref LL_TIM_SetAutoReload().*/
-
-    uint32_t ClockDivision; /*!< Specifies the clock division.
-                                 This parameter can be a value of @ref TIM_LL_EC_CLOCKDIVISION.
-
-                                 This feature can be modified afterwards using unitary function
-                                 @ref LL_TIM_SetClockDivision().*/
+    uint32_t ClockDivision;     /*!< Specifies the clock division.
+                                     This parameter can be a value of @ref TIM_LL_EC_CLOCKDIVISION.
+    
+                                     This feature can be modified afterwards using unitary function
+                                     @ref LL_TIM_SetClockDivision().*/
 
     uint32_t RepetitionCounter; /*!< Specifies the repetition counter value. Each time the RCR downcounter
                                     reaches zero, an update event is generated and counting restarts
@@ -217,23 +218,23 @@ typedef struct {
  * @brief  TIM Output Compare configuration structure definition.
  */
 typedef struct {
-    uint32_t OCMode; /*!< Specifies the output mode.
-                          This parameter can be a value of @ref TIM_LL_EC_OCMODE.
+    uint32_t OCMode;       /*!< Specifies the output mode.
+                                This parameter can be a value of @ref TIM_LL_EC_OCMODE.
+      
+                                This feature can be modified afterwards using unitary function
+                                @ref LL_TIM_OC_SetMode().*/
 
-                          This feature can be modified afterwards using unitary function
-                          @ref LL_TIM_OC_SetMode().*/
+    uint32_t OCState;      /*!< Specifies the TIM Output Compare state.
+                                This parameter can be a value of @ref TIM_LL_EC_OCSTATE.
+     
+                                This feature can be modified afterwards using unitary functions
+                                @ref LL_TIM_CC_EnableChannel() or @ref LL_TIM_CC_DisableChannel().*/
 
-    uint32_t OCState; /*!< Specifies the TIM Output Compare state.
-                           This parameter can be a value of @ref TIM_LL_EC_OCSTATE.
-
-                           This feature can be modified afterwards using unitary functions
-                           @ref LL_TIM_CC_EnableChannel() or @ref LL_TIM_CC_DisableChannel().*/
-
-    uint32_t OCNState; /*!< Specifies the TIM complementary Output Compare state.
-                            This parameter can be a value of @ref TIM_LL_EC_OCSTATE.
-
-                            This feature can be modified afterwards using unitary functions
-                            @ref LL_TIM_CC_EnableChannel() or @ref LL_TIM_CC_DisableChannel().*/
+    uint32_t OCNState;     /*!< Specifies the TIM complementary Output Compare state.
+                                This parameter can be a value of @ref TIM_LL_EC_OCSTATE.
+    
+                                This feature can be modified afterwards using unitary functions
+                                @ref LL_TIM_CC_EnableChannel() or @ref LL_TIM_CC_DisableChannel().*/
 
     uint32_t CompareValue; /*!< Specifies the Compare value to be loaded into the Capture Compare Register.
                                 This parameter can be a number between Min_Data=0x0000 and Max_Data=0xFFFF.
@@ -241,23 +242,23 @@ typedef struct {
                                 This feature can be modified afterwards using unitary function
                                 LL_TIM_OC_SetCompareCHx (x=1..6).*/
 
-    uint32_t OCPolarity; /*!< Specifies the output polarity.
-                              This parameter can be a value of @ref TIM_LL_EC_OCPOLARITY.
+    uint32_t OCPolarity;   /*!< Specifies the output polarity.
+                                This parameter can be a value of @ref TIM_LL_EC_OCPOLARITY.
+  
+                                This feature can be modified afterwards using unitary function
+                                @ref LL_TIM_OC_SetPolarity().*/
 
-                              This feature can be modified afterwards using unitary function
-                              @ref LL_TIM_OC_SetPolarity().*/
+    uint32_t OCNPolarity;  /*!< Specifies the complementary output polarity.
+                                This parameter can be a value of @ref TIM_LL_EC_OCPOLARITY.
+ 
+                                This feature can be modified afterwards using unitary function
+                                @ref LL_TIM_OC_SetPolarity().*/
 
-    uint32_t OCNPolarity; /*!< Specifies the complementary output polarity.
-                               This parameter can be a value of @ref TIM_LL_EC_OCPOLARITY.
-
-                               This feature can be modified afterwards using unitary function
-                               @ref LL_TIM_OC_SetPolarity().*/
-
-    uint32_t OCIdleState; /*!< Specifies the TIM Output Compare pin state during Idle state.
-                               This parameter can be a value of @ref TIM_LL_EC_OCIDLESTATE.
-
-                               This feature can be modified afterwards using unitary function
-                               @ref LL_TIM_OC_SetIdleState().*/
+    uint32_t OCIdleState;  /*!< Specifies the TIM Output Compare pin state during Idle state.
+                                This parameter can be a value of @ref TIM_LL_EC_OCIDLESTATE.
+ 
+                                This feature can be modified afterwards using unitary function
+                                @ref LL_TIM_OC_SetIdleState().*/
 
     uint32_t OCNIdleState; /*!< Specifies the TIM Output Compare pin state during Idle state.
                                 This parameter can be a value of @ref TIM_LL_EC_OCIDLESTATE.
@@ -272,11 +273,11 @@ typedef struct {
 
 typedef struct {
 
-    uint32_t ICPolarity; /*!< Specifies the active edge of the input signal.
-                              This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
-
-                              This feature can be modified afterwards using unitary function
-                              @ref LL_TIM_IC_SetPolarity().*/
+    uint32_t ICPolarity;    /*!< Specifies the active edge of the input signal.
+                                 This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
+   
+                                 This feature can be modified afterwards using unitary function
+                                 @ref LL_TIM_IC_SetPolarity().*/
 
     uint32_t ICActiveInput; /*!< Specifies the input.
                                  This parameter can be a value of @ref TIM_LL_EC_ACTIVEINPUT.
@@ -284,34 +285,34 @@ typedef struct {
                                  This feature can be modified afterwards using unitary function
                                  @ref LL_TIM_IC_SetActiveInput().*/
 
-    uint32_t ICPrescaler; /*!< Specifies the Input Capture Prescaler.
-                               This parameter can be a value of @ref TIM_LL_EC_ICPSC.
+    uint32_t ICPrescaler;   /*!< Specifies the Input Capture Prescaler.
+                                 This parameter can be a value of @ref TIM_LL_EC_ICPSC.
+  
+                                 This feature can be modified afterwards using unitary function
+                                 @ref LL_TIM_IC_SetPrescaler().*/
 
-                               This feature can be modified afterwards using unitary function
-                               @ref LL_TIM_IC_SetPrescaler().*/
-
-    uint32_t ICFilter; /*!< Specifies the input capture filter.
-                            This parameter can be a value of @ref TIM_LL_EC_IC_FILTER.
-
-                            This feature can be modified afterwards using unitary function
-                            @ref LL_TIM_IC_SetFilter().*/
+    uint32_t ICFilter;      /*!< Specifies the input capture filter.
+                                 This parameter can be a value of @ref TIM_LL_EC_IC_FILTER.
+     
+                                 This feature can be modified afterwards using unitary function
+                                 @ref LL_TIM_IC_SetFilter().*/
 } LL_TIM_IC_InitTypeDef;
 
 /**
  * @brief  TIM Encoder interface configuration structure definition.
  */
 typedef struct {
-    uint32_t EncoderMode; /*!< Specifies the encoder resolution (x2 or x4).
-                               This parameter can be a value of @ref TIM_LL_EC_ENCODERMODE.
+    uint32_t EncoderMode;    /*!< Specifies the encoder resolution (x2 or x4).
+                                  This parameter can be a value of @ref TIM_LL_EC_ENCODERMODE.
+   
+                                  This feature can be modified afterwards using unitary function
+                                  @ref LL_TIM_SetEncoderMode().*/
 
-                               This feature can be modified afterwards using unitary function
-                               @ref LL_TIM_SetEncoderMode().*/
-
-    uint32_t IC1Polarity; /*!< Specifies the active edge of TI1 input.
-                               This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
-
-                               This feature can be modified afterwards using unitary function
-                               @ref LL_TIM_IC_SetPolarity().*/
+    uint32_t IC1Polarity;    /*!< Specifies the active edge of TI1 input.
+                                  This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
+   
+                                  This feature can be modified afterwards using unitary function
+                                  @ref LL_TIM_IC_SetPolarity().*/
 
     uint32_t IC1ActiveInput; /*!< Specifies the TI1 input source
                                   This parameter can be a value of @ref TIM_LL_EC_ACTIVEINPUT.
@@ -319,23 +320,23 @@ typedef struct {
                                   This feature can be modified afterwards using unitary function
                                   @ref LL_TIM_IC_SetActiveInput().*/
 
-    uint32_t IC1Prescaler; /*!< Specifies the TI1 input prescaler value.
-                                This parameter can be a value of @ref TIM_LL_EC_ICPSC.
+    uint32_t IC1Prescaler;   /*!< Specifies the TI1 input prescaler value.
+                                  This parameter can be a value of @ref TIM_LL_EC_ICPSC.
+  
+                                  This feature can be modified afterwards using unitary function
+                                  @ref LL_TIM_IC_SetPrescaler().*/
 
-                                This feature can be modified afterwards using unitary function
-                                @ref LL_TIM_IC_SetPrescaler().*/
+    uint32_t IC1Filter;      /*!< Specifies the TI1 input filter.
+                                  This parameter can be a value of @ref TIM_LL_EC_IC_FILTER.
+     
+                                  This feature can be modified afterwards using unitary function
+                                  @ref LL_TIM_IC_SetFilter().*/
 
-    uint32_t IC1Filter; /*!< Specifies the TI1 input filter.
-                             This parameter can be a value of @ref TIM_LL_EC_IC_FILTER.
-
-                             This feature can be modified afterwards using unitary function
-                             @ref LL_TIM_IC_SetFilter().*/
-
-    uint32_t IC2Polarity; /*!< Specifies the active edge of TI2 input.
-                              This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
-
-                              This feature can be modified afterwards using unitary function
-                              @ref LL_TIM_IC_SetPolarity().*/
+    uint32_t IC2Polarity;    /*!< Specifies the active edge of TI2 input.
+                                 This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
+   
+                                 This feature can be modified afterwards using unitary function
+                                 @ref LL_TIM_IC_SetPolarity().*/
 
     uint32_t IC2ActiveInput; /*!< Specifies the TI2 input source
                                   This parameter can be a value of @ref TIM_LL_EC_ACTIVEINPUT.
@@ -343,17 +344,17 @@ typedef struct {
                                   This feature can be modified afterwards using unitary function
                                   @ref LL_TIM_IC_SetActiveInput().*/
 
-    uint32_t IC2Prescaler; /*!< Specifies the TI2 input prescaler value.
-                                This parameter can be a value of @ref TIM_LL_EC_ICPSC.
+    uint32_t IC2Prescaler;   /*!< Specifies the TI2 input prescaler value.
+                                  This parameter can be a value of @ref TIM_LL_EC_ICPSC.
+  
+                                  This feature can be modified afterwards using unitary function
+                                  @ref LL_TIM_IC_SetPrescaler().*/
 
-                                This feature can be modified afterwards using unitary function
-                                @ref LL_TIM_IC_SetPrescaler().*/
-
-    uint32_t IC2Filter; /*!< Specifies the TI2 input filter.
-                             This parameter can be a value of @ref TIM_LL_EC_IC_FILTER.
-
-                             This feature can be modified afterwards using unitary function
-                             @ref LL_TIM_IC_SetFilter().*/
+    uint32_t IC2Filter;      /*!< Specifies the TI2 input filter.
+                                  This parameter can be a value of @ref TIM_LL_EC_IC_FILTER.
+     
+                                  This feature can be modified afterwards using unitary function
+                                  @ref LL_TIM_IC_SetFilter().*/
 
 } LL_TIM_ENCODER_InitTypeDef;
 
@@ -362,26 +363,26 @@ typedef struct {
  */
 typedef struct {
 
-    uint32_t IC1Polarity; /*!< Specifies the active edge of TI1 input.
-                               This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
+    uint32_t IC1Polarity;      /*!< Specifies the active edge of TI1 input.
+                                    This parameter can be a value of @ref TIM_LL_EC_IC_POLARITY.
+     
+                                    This feature can be modified afterwards using unitary function
+                                    @ref LL_TIM_IC_SetPolarity().*/
 
-                               This feature can be modified afterwards using unitary function
-                               @ref LL_TIM_IC_SetPolarity().*/
+    uint32_t IC1Prescaler;     /*!< Specifies the TI1 input prescaler value.
+                                    Prescaler must be set to get a maximum counter period longer than the
+                                    time interval between 2 consecutive changes on the Hall inputs.
+                                    This parameter can be a value of @ref TIM_LL_EC_ICPSC.
+    
+                                    This feature can be modified afterwards using unitary function
+                                    @ref LL_TIM_IC_SetPrescaler().*/
 
-    uint32_t IC1Prescaler; /*!< Specifies the TI1 input prescaler value.
-                                Prescaler must be set to get a maximum counter period longer than the
-                                time interval between 2 consecutive changes on the Hall inputs.
-                                This parameter can be a value of @ref TIM_LL_EC_ICPSC.
-
-                                This feature can be modified afterwards using unitary function
-                                @ref LL_TIM_IC_SetPrescaler().*/
-
-    uint32_t IC1Filter; /*!< Specifies the TI1 input filter.
-                             This parameter can be a value of
-                             @ref TIM_LL_EC_IC_FILTER.
-
-                             This feature can be modified afterwards using unitary function
-                             @ref LL_TIM_IC_SetFilter().*/
+    uint32_t IC1Filter;        /*!< Specifies the TI1 input filter.
+                                    This parameter can be a value of
+                                    @ref TIM_LL_EC_IC_FILTER.
+       
+                                    This feature can be modified afterwards using unitary function
+                                    @ref LL_TIM_IC_SetFilter().*/
 
     uint32_t CommutationDelay; /*!< Specifies the compare value to be loaded into the Capture Compare Register.
                                     A positive pulse (TRGO event) is generated with a programmable delay every time
@@ -396,57 +397,57 @@ typedef struct {
  * @brief  BDTR (Break and Dead Time) structure definition
  */
 typedef struct {
-    uint32_t OSSRState; /*!< Specifies the Off-State selection used in Run mode.
-                             This parameter can be a value of @ref TIM_LL_EC_OSSR
+    uint32_t OSSRState;       /*!< Specifies the Off-State selection used in Run mode.
+                                   This parameter can be a value of @ref TIM_LL_EC_OSSR
+      
+                                   This feature can be modified afterwards using unitary function
+                                   @ref LL_TIM_SetOffStates()
+      
+                                   @note This bit-field cannot be modified as long as LOCK level 2 has been
+                                    programmed. */
 
-                             This feature can be modified afterwards using unitary function
-                             @ref LL_TIM_SetOffStates()
+    uint32_t OSSIState;       /*!< Specifies the Off-State used in Idle state.
+                                   This parameter can be a value of @ref TIM_LL_EC_OSSI
+      
+                                   This feature can be modified afterwards using unitary function
+                                   @ref LL_TIM_SetOffStates()
+      
+                                   @note This bit-field cannot be modified as long as LOCK level 2 has been
+                                   programmed. */
 
-                             @note This bit-field cannot be modified as long as LOCK level 2 has been
-                              programmed. */
+    uint32_t LockLevel;       /*!< Specifies the LOCK level parameters.
+                                   This parameter can be a value of @ref TIM_LL_EC_LOCKLEVEL
+      
+                                   @note The LOCK bits can be written only once after the reset. Once the TIMx_BDTR
+                                   register has been written, their content is frozen until the next reset.*/
 
-    uint32_t OSSIState; /*!< Specifies the Off-State used in Idle state.
-                             This parameter can be a value of @ref TIM_LL_EC_OSSI
+    uint8_t DeadTime;         /*!< Specifies the delay time between the switching-off and the
+                                   switching-on of the outputs.
+                                   This parameter can be a number between Min_Data = 0x00 and Max_Data = 0xFF.
+        
+                                   This feature can be modified afterwards using unitary function
+                                   @ref LL_TIM_OC_SetDeadTime()
+        
+                                   @note This bit-field can not be modified as long as LOCK level 1, 2 or 3 has been
+                                    programmed. */
 
-                             This feature can be modified afterwards using unitary function
-                             @ref LL_TIM_SetOffStates()
+    uint16_t BreakState;      /*!< Specifies whether the TIM Break input is enabled or not.
+                                   This parameter can be a value of @ref TIM_LL_EC_BREAK_ENABLE
+     
+                                   This feature can be modified afterwards using unitary functions
+                                   @ref LL_TIM_EnableBRK() or @ref LL_TIM_DisableBRK()
+     
+                                   @note This bit-field can not be modified as long as LOCK level 1 has been
+                                   programmed. */
 
-                             @note This bit-field cannot be modified as long as LOCK level 2 has been
-                             programmed. */
-
-    uint32_t LockLevel; /*!< Specifies the LOCK level parameters.
-                             This parameter can be a value of @ref TIM_LL_EC_LOCKLEVEL
-
-                             @note The LOCK bits can be written only once after the reset. Once the TIMx_BDTR
-                             register has been written, their content is frozen until the next reset.*/
-
-    uint8_t DeadTime; /*!< Specifies the delay time between the switching-off and the
-                           switching-on of the outputs.
-                           This parameter can be a number between Min_Data = 0x00 and Max_Data = 0xFF.
-
-                           This feature can be modified afterwards using unitary function
-                           @ref LL_TIM_OC_SetDeadTime()
-
-                           @note This bit-field can not be modified as long as LOCK level 1, 2 or 3 has been
-                            programmed. */
-
-    uint16_t BreakState; /*!< Specifies whether the TIM Break input is enabled or not.
-                              This parameter can be a value of @ref TIM_LL_EC_BREAK_ENABLE
-
-                              This feature can be modified afterwards using unitary functions
-                              @ref LL_TIM_EnableBRK() or @ref LL_TIM_DisableBRK()
-
-                              @note This bit-field can not be modified as long as LOCK level 1 has been
-                              programmed. */
-
-    uint32_t BreakPolarity; /*!< Specifies the TIM Break Input pin polarity.
-                                 This parameter can be a value of @ref TIM_LL_EC_BREAK_POLARITY
-
-                                 This feature can be modified afterwards using unitary function
-                                 @ref LL_TIM_ConfigBRK()
-
-                                 @note This bit-field can not be modified as long as LOCK level 1 has been
-                                 programmed. */
+    uint32_t BreakPolarity;   /*!< Specifies the TIM Break Input pin polarity.
+                                   This parameter can be a value of @ref TIM_LL_EC_BREAK_POLARITY
+  
+                                   This feature can be modified afterwards using unitary function
+                                   @ref LL_TIM_ConfigBRK()
+  
+                                   @note This bit-field can not be modified as long as LOCK level 1 has been
+                                   programmed. */
 
     uint32_t AutomaticOutput; /*!< Specifies whether the TIM Automatic Output feature is enabled or not.
                                    This parameter can be a value of @ref TIM_LL_EC_AUTOMATICOUTPUT_ENABLE
@@ -637,8 +638,8 @@ typedef struct {
 #define LL_TIM_OCMODE_FORCED_INACTIVE TIM_CCMR1_OC1M_2                      /*!<OCyREF is forced low*/
 #define LL_TIM_OCMODE_FORCED_ACTIVE   (TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_0) /*!<OCyREF is forced high*/
 #define LL_TIM_OCMODE_PWM1            (TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1) /*!<In upcounting, channel y is active as long as TIMx_CNT<TIMx_CCRy else inactive.  In downcounting, channel y is inactive as long as TIMx_CNT>TIMx_CCRy else active.*/
-#define LL_TIM_OCMODE_PWM2                                                                                                                                                                                                                               \
-    (TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0) /*!<In upcounting, channel y is inactive as long as TIMx_CNT<TIMx_CCRy else active.  In downcounting, channel y is active as long as TIMx_CNT>TIMx_CCRy else inactive*/
+#define LL_TIM_OCMODE_PWM2 \
+    (TIM_CCMR1_OC1M_2 | TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_0)                /*!<In upcounting, channel y is inactive as long as TIMx_CNT<TIMx_CCRy else active.  In downcounting, channel y is active as long as TIMx_CNT>TIMx_CCRy else inactive*/
 /**
  * @}
  */
@@ -921,7 +922,7 @@ typedef struct {
 /** @defgroup TIM_LL_EC_TIM11_TI1_RMP  TIM11 External Input Capture 1 Remap
  * @{
  */
-#define LL_TIM_TIM11_TI1_RMP_GPIO TIM11_OR_RMP_MASK /*!< TIM11 channel 1 is connected to GPIO */
+#define LL_TIM_TIM11_TI1_RMP_GPIO TIM11_OR_RMP_MASK                         /*!< TIM11 channel 1 is connected to GPIO */
 #if defined(SPDIFRX)
 #define LL_TIM_TIM11_TI1_RMP_SPDIFRX (TIM_OR_TI1_RMP_0 | TIM11_OR_RMP_MASK) /*!< TIM11 channel 1 is connected to SPDIFRX */
 
@@ -938,7 +939,7 @@ typedef struct {
  */
 #if defined(LPTIM_OR_TIM1_ITR2_RMP) && defined(LPTIM_OR_TIM5_ITR1_RMP) && defined(LPTIM_OR_TIM9_ITR1_RMP)
 
-#define LL_TIM_LPTIM_REMAP_MASK        0x10000000U
+#define LL_TIM_LPTIM_REMAP_MASK 0x10000000U
 
 #define LL_TIM_TIM9_ITR1_RMP_TIM3_TRGO LL_TIM_LPTIM_REMAP_MASK                            /*!< TIM9_ITR1 is connected to TIM3 TRGO */
 #define LL_TIM_TIM9_ITR1_RMP_LPTIM     (LL_TIM_LPTIM_REMAP_MASK | LPTIM_OR_TIM9_ITR1_RMP) /*!< TIM9_ITR1 is connected to LPTIM1 output */
@@ -949,7 +950,7 @@ typedef struct {
 #define LL_TIM_TIM1_ITR2_RMP_TIM3_TRGO LL_TIM_LPTIM_REMAP_MASK                            /*!< TIM1_ITR2 is connected to TIM3 TRGO */
 #define LL_TIM_TIM1_ITR2_RMP_LPTIM     (LL_TIM_LPTIM_REMAP_MASK | LPTIM_OR_TIM1_ITR2_RMP) /*!< TIM1_ITR2 is connected to LPTIM1 output */
 
-#endif /* LPTIM_OR_TIM1_ITR2_RMP &&  LPTIM_OR_TIM5_ITR1_RMP && LPTIM_OR_TIM9_ITR1_RMP */
+#endif                                                                                    /* LPTIM_OR_TIM1_ITR2_RMP &&  LPTIM_OR_TIM5_ITR1_RMP && LPTIM_OR_TIM9_ITR1_RMP */
 
 /**
  * @}
@@ -998,14 +999,14 @@ typedef struct {
  * @param  __DT__ deadtime duration (in ns)
  * @retval DTG[0:7]
  */
-#define __LL_TIM_CALC_DEADTIME(__TIMCLK__, __CKD__, __DT__)                                                                                                                                                                                              \
-    ((((uint64_t)((__DT__)*1000U)) < ((DT_DELAY_1 + 1U) * TIM_CALC_DTS((__TIMCLK__), (__CKD__)))) ? (uint8_t)(((uint64_t)((__DT__)*1000U) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) & DT_DELAY_1)                                                         \
-     : (((uint64_t)((__DT__)*1000U)) < ((64U + (DT_DELAY_2 + 1U)) * 2U * TIM_CALC_DTS((__TIMCLK__), (__CKD__))))                                                                                                                                         \
-         ? (uint8_t)(DT_RANGE_2 | ((uint8_t)((uint8_t)((((uint64_t)((__DT__)*1000U)) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) >> 1U) - (uint8_t)64) & DT_DELAY_2))                                                                                       \
-     : (((uint64_t)((__DT__)*1000U)) < ((32U + (DT_DELAY_3 + 1U)) * 8U * TIM_CALC_DTS((__TIMCLK__), (__CKD__))))                                                                                                                                         \
-         ? (uint8_t)(DT_RANGE_3 | ((uint8_t)((uint8_t)(((((uint64_t)(__DT__)*1000U)) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) >> 3U) - (uint8_t)32) & DT_DELAY_3))                                                                                       \
-     : (((uint64_t)((__DT__)*1000U)) < ((32U + (DT_DELAY_4 + 1U)) * 16U * TIM_CALC_DTS((__TIMCLK__), (__CKD__))))                                                                                                                                        \
-         ? (uint8_t)(DT_RANGE_4 | ((uint8_t)((uint8_t)(((((uint64_t)(__DT__)*1000U)) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) >> 4U) - (uint8_t)32) & DT_DELAY_4))                                                                                       \
+#define __LL_TIM_CALC_DEADTIME(__TIMCLK__, __CKD__, __DT__)                                                                                                                                      \
+    ((((uint64_t)((__DT__)*1000U)) < ((DT_DELAY_1 + 1U) * TIM_CALC_DTS((__TIMCLK__), (__CKD__)))) ? (uint8_t)(((uint64_t)((__DT__)*1000U) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) & DT_DELAY_1) \
+     : (((uint64_t)((__DT__)*1000U)) < ((64U + (DT_DELAY_2 + 1U)) * 2U * TIM_CALC_DTS((__TIMCLK__), (__CKD__))))                                                                                 \
+         ? (uint8_t)(DT_RANGE_2 | ((uint8_t)((uint8_t)((((uint64_t)((__DT__)*1000U)) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) >> 1U) - (uint8_t)64) & DT_DELAY_2))                               \
+     : (((uint64_t)((__DT__)*1000U)) < ((32U + (DT_DELAY_3 + 1U)) * 8U * TIM_CALC_DTS((__TIMCLK__), (__CKD__))))                                                                                 \
+         ? (uint8_t)(DT_RANGE_3 | ((uint8_t)((uint8_t)(((((uint64_t)(__DT__)*1000U)) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) >> 3U) - (uint8_t)32) & DT_DELAY_3))                               \
+     : (((uint64_t)((__DT__)*1000U)) < ((32U + (DT_DELAY_4 + 1U)) * 16U * TIM_CALC_DTS((__TIMCLK__), (__CKD__))))                                                                                \
+         ? (uint8_t)(DT_RANGE_4 | ((uint8_t)((uint8_t)(((((uint64_t)(__DT__)*1000U)) / TIM_CALC_DTS((__TIMCLK__), (__CKD__))) >> 4U) - (uint8_t)32) & DT_DELAY_4))                               \
          : 0U)
 
 /**
@@ -1084,7 +1085,7 @@ typedef struct {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableCounter(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableCounter(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->CR1, TIM_CR1_CEN);
 }
 
@@ -1094,7 +1095,7 @@ __STATIC_INLINE void LL_TIM_EnableCounter(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableCounter(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableCounter(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->CR1, TIM_CR1_CEN);
 }
 
@@ -1104,7 +1105,7 @@ __STATIC_INLINE void LL_TIM_DisableCounter(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledCounter(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledCounter(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->CR1, TIM_CR1_CEN) == (TIM_CR1_CEN)) ? 1UL : 0UL);
 }
 
@@ -1114,7 +1115,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledCounter(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableUpdateEvent(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableUpdateEvent(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->CR1, TIM_CR1_UDIS);
 }
 
@@ -1124,7 +1125,7 @@ __STATIC_INLINE void LL_TIM_EnableUpdateEvent(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableUpdateEvent(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableUpdateEvent(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->CR1, TIM_CR1_UDIS);
 }
 
@@ -1134,7 +1135,7 @@ __STATIC_INLINE void LL_TIM_DisableUpdateEvent(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval Inverted state of bit (0 or 1).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledUpdateEvent(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledUpdateEvent(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->CR1, TIM_CR1_UDIS) == (uint32_t)RESET) ? 1UL : 0UL);
 }
 
@@ -1154,7 +1155,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledUpdateEvent(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_UPDATESOURCE_COUNTER
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetUpdateSource(TIM_TypeDef * TIMx, uint32_t UpdateSource) {
+__STATIC_INLINE void LL_TIM_SetUpdateSource(TIM_TypeDef *TIMx, uint32_t UpdateSource) {
     MODIFY_REG(TIMx->CR1, TIM_CR1_URS, UpdateSource);
 }
 
@@ -1166,7 +1167,7 @@ __STATIC_INLINE void LL_TIM_SetUpdateSource(TIM_TypeDef * TIMx, uint32_t UpdateS
  *         @arg @ref LL_TIM_UPDATESOURCE_REGULAR
  *         @arg @ref LL_TIM_UPDATESOURCE_COUNTER
  */
-__STATIC_INLINE uint32_t LL_TIM_GetUpdateSource(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetUpdateSource(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_BIT(TIMx->CR1, TIM_CR1_URS));
 }
 
@@ -1179,7 +1180,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetUpdateSource(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_ONEPULSEMODE_REPETITIVE
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetOnePulseMode(TIM_TypeDef * TIMx, uint32_t OnePulseMode) {
+__STATIC_INLINE void LL_TIM_SetOnePulseMode(TIM_TypeDef *TIMx, uint32_t OnePulseMode) {
     MODIFY_REG(TIMx->CR1, TIM_CR1_OPM, OnePulseMode);
 }
 
@@ -1191,7 +1192,7 @@ __STATIC_INLINE void LL_TIM_SetOnePulseMode(TIM_TypeDef * TIMx, uint32_t OnePuls
  *         @arg @ref LL_TIM_ONEPULSEMODE_SINGLE
  *         @arg @ref LL_TIM_ONEPULSEMODE_REPETITIVE
  */
-__STATIC_INLINE uint32_t LL_TIM_GetOnePulseMode(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetOnePulseMode(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_BIT(TIMx->CR1, TIM_CR1_OPM));
 }
 
@@ -1214,7 +1215,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetOnePulseMode(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_COUNTERMODE_CENTER_UP_DOWN
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetCounterMode(TIM_TypeDef * TIMx, uint32_t CounterMode) {
+__STATIC_INLINE void LL_TIM_SetCounterMode(TIM_TypeDef *TIMx, uint32_t CounterMode) {
     MODIFY_REG(TIMx->CR1, (TIM_CR1_DIR | TIM_CR1_CMS), CounterMode);
 }
 
@@ -1233,7 +1234,7 @@ __STATIC_INLINE void LL_TIM_SetCounterMode(TIM_TypeDef * TIMx, uint32_t CounterM
  *         @arg @ref LL_TIM_COUNTERMODE_CENTER_DOWN
  *         @arg @ref LL_TIM_COUNTERMODE_CENTER_UP_DOWN
  */
-__STATIC_INLINE uint32_t LL_TIM_GetCounterMode(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetCounterMode(TIM_TypeDef *TIMx) {
     uint32_t counter_mode;
 
     counter_mode = (uint32_t)(READ_BIT(TIMx->CR1, TIM_CR1_CMS));
@@ -1251,7 +1252,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetCounterMode(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableARRPreload(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableARRPreload(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->CR1, TIM_CR1_ARPE);
 }
 
@@ -1261,7 +1262,7 @@ __STATIC_INLINE void LL_TIM_EnableARRPreload(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableARRPreload(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableARRPreload(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->CR1, TIM_CR1_ARPE);
 }
 
@@ -1271,7 +1272,7 @@ __STATIC_INLINE void LL_TIM_DisableARRPreload(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledARRPreload(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledARRPreload(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->CR1, TIM_CR1_ARPE) == (TIM_CR1_ARPE)) ? 1UL : 0UL);
 }
 
@@ -1289,7 +1290,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledARRPreload(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_CLOCKDIVISION_DIV4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetClockDivision(TIM_TypeDef * TIMx, uint32_t ClockDivision) {
+__STATIC_INLINE void LL_TIM_SetClockDivision(TIM_TypeDef *TIMx, uint32_t ClockDivision) {
     MODIFY_REG(TIMx->CR1, TIM_CR1_CKD, ClockDivision);
 }
 
@@ -1306,7 +1307,7 @@ __STATIC_INLINE void LL_TIM_SetClockDivision(TIM_TypeDef * TIMx, uint32_t ClockD
  *         @arg @ref LL_TIM_CLOCKDIVISION_DIV2
  *         @arg @ref LL_TIM_CLOCKDIVISION_DIV4
  */
-__STATIC_INLINE uint32_t LL_TIM_GetClockDivision(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetClockDivision(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_BIT(TIMx->CR1, TIM_CR1_CKD));
 }
 
@@ -1319,7 +1320,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetClockDivision(TIM_TypeDef * TIMx) {
  * @param  Counter Counter value (between Min_Data=0 and Max_Data=0xFFFF or 0xFFFFFFFF)
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetCounter(TIM_TypeDef * TIMx, uint32_t Counter) {
+__STATIC_INLINE void LL_TIM_SetCounter(TIM_TypeDef *TIMx, uint32_t Counter) {
     WRITE_REG(TIMx->CNT, Counter);
 }
 
@@ -1331,7 +1332,7 @@ __STATIC_INLINE void LL_TIM_SetCounter(TIM_TypeDef * TIMx, uint32_t Counter) {
  * @param  TIMx Timer instance
  * @retval Counter value (between Min_Data=0 and Max_Data=0xFFFF or 0xFFFFFFFF)
  */
-__STATIC_INLINE uint32_t LL_TIM_GetCounter(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetCounter(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CNT));
 }
 
@@ -1343,7 +1344,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetCounter(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_COUNTERDIRECTION_UP
  *         @arg @ref LL_TIM_COUNTERDIRECTION_DOWN
  */
-__STATIC_INLINE uint32_t LL_TIM_GetDirection(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetDirection(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_BIT(TIMx->CR1, TIM_CR1_DIR));
 }
 
@@ -1358,7 +1359,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetDirection(TIM_TypeDef * TIMx) {
  * @param  Prescaler between Min_Data=0 and Max_Data=65535
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetPrescaler(TIM_TypeDef * TIMx, uint32_t Prescaler) {
+__STATIC_INLINE void LL_TIM_SetPrescaler(TIM_TypeDef *TIMx, uint32_t Prescaler) {
     WRITE_REG(TIMx->PSC, Prescaler);
 }
 
@@ -1368,7 +1369,7 @@ __STATIC_INLINE void LL_TIM_SetPrescaler(TIM_TypeDef * TIMx, uint32_t Prescaler)
  * @param  TIMx Timer instance
  * @retval  Prescaler value between Min_Data=0 and Max_Data=65535
  */
-__STATIC_INLINE uint32_t LL_TIM_GetPrescaler(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetPrescaler(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->PSC));
 }
 
@@ -1383,7 +1384,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetPrescaler(TIM_TypeDef * TIMx) {
  * @param  AutoReload between Min_Data=0 and Max_Data=65535
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetAutoReload(TIM_TypeDef * TIMx, uint32_t AutoReload) {
+__STATIC_INLINE void LL_TIM_SetAutoReload(TIM_TypeDef *TIMx, uint32_t AutoReload) {
     WRITE_REG(TIMx->ARR, AutoReload);
 }
 
@@ -1395,7 +1396,7 @@ __STATIC_INLINE void LL_TIM_SetAutoReload(TIM_TypeDef * TIMx, uint32_t AutoReloa
  * @param  TIMx Timer instance
  * @retval Auto-reload value
  */
-__STATIC_INLINE uint32_t LL_TIM_GetAutoReload(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetAutoReload(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->ARR));
 }
 
@@ -1408,7 +1409,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetAutoReload(TIM_TypeDef * TIMx) {
  * @param  RepetitionCounter between Min_Data=0 and Max_Data=255 or 65535 for advanced timer.
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetRepetitionCounter(TIM_TypeDef * TIMx, uint32_t RepetitionCounter) {
+__STATIC_INLINE void LL_TIM_SetRepetitionCounter(TIM_TypeDef *TIMx, uint32_t RepetitionCounter) {
     WRITE_REG(TIMx->RCR, RepetitionCounter);
 }
 
@@ -1420,7 +1421,7 @@ __STATIC_INLINE void LL_TIM_SetRepetitionCounter(TIM_TypeDef * TIMx, uint32_t Re
  * @param  TIMx Timer instance
  * @retval Repetition counter value
  */
-__STATIC_INLINE uint32_t LL_TIM_GetRepetitionCounter(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_GetRepetitionCounter(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->RCR));
 }
 
@@ -1442,7 +1443,7 @@ __STATIC_INLINE uint32_t LL_TIM_GetRepetitionCounter(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_CC_EnablePreload(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_CC_EnablePreload(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->CR2, TIM_CR2_CCPC);
 }
 
@@ -1454,7 +1455,7 @@ __STATIC_INLINE void LL_TIM_CC_EnablePreload(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_CC_DisablePreload(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_CC_DisablePreload(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->CR2, TIM_CR2_CCPC);
 }
 
@@ -1469,7 +1470,7 @@ __STATIC_INLINE void LL_TIM_CC_DisablePreload(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_CCUPDATESOURCE_COMG_AND_TRGI
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_CC_SetUpdate(TIM_TypeDef * TIMx, uint32_t CCUpdateSource) {
+__STATIC_INLINE void LL_TIM_CC_SetUpdate(TIM_TypeDef *TIMx, uint32_t CCUpdateSource) {
     MODIFY_REG(TIMx->CR2, TIM_CR2_CCUS, CCUpdateSource);
 }
 
@@ -1482,7 +1483,7 @@ __STATIC_INLINE void LL_TIM_CC_SetUpdate(TIM_TypeDef * TIMx, uint32_t CCUpdateSo
  *         @arg @ref LL_TIM_CCDMAREQUEST_UPDATE
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_CC_SetDMAReqTrigger(TIM_TypeDef * TIMx, uint32_t DMAReqTrigger) {
+__STATIC_INLINE void LL_TIM_CC_SetDMAReqTrigger(TIM_TypeDef *TIMx, uint32_t DMAReqTrigger) {
     MODIFY_REG(TIMx->CR2, TIM_CR2_CCDS, DMAReqTrigger);
 }
 
@@ -1494,7 +1495,7 @@ __STATIC_INLINE void LL_TIM_CC_SetDMAReqTrigger(TIM_TypeDef * TIMx, uint32_t DMA
  *         @arg @ref LL_TIM_CCDMAREQUEST_CC
  *         @arg @ref LL_TIM_CCDMAREQUEST_UPDATE
  */
-__STATIC_INLINE uint32_t LL_TIM_CC_GetDMAReqTrigger(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_CC_GetDMAReqTrigger(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_BIT(TIMx->CR2, TIM_CR2_CCDS));
 }
 
@@ -1512,7 +1513,7 @@ __STATIC_INLINE uint32_t LL_TIM_CC_GetDMAReqTrigger(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_LOCKLEVEL_3
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_CC_SetLockLevel(TIM_TypeDef * TIMx, uint32_t LockLevel) {
+__STATIC_INLINE void LL_TIM_CC_SetLockLevel(TIM_TypeDef *TIMx, uint32_t LockLevel) {
     MODIFY_REG(TIMx->BDTR, TIM_BDTR_LOCK, LockLevel);
 }
 
@@ -1536,7 +1537,7 @@ __STATIC_INLINE void LL_TIM_CC_SetLockLevel(TIM_TypeDef * TIMx, uint32_t LockLev
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_CC_EnableChannel(TIM_TypeDef * TIMx, uint32_t Channels) {
+__STATIC_INLINE void LL_TIM_CC_EnableChannel(TIM_TypeDef *TIMx, uint32_t Channels) {
     SET_BIT(TIMx->CCER, Channels);
 }
 
@@ -1560,7 +1561,7 @@ __STATIC_INLINE void LL_TIM_CC_EnableChannel(TIM_TypeDef * TIMx, uint32_t Channe
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_CC_DisableChannel(TIM_TypeDef * TIMx, uint32_t Channels) {
+__STATIC_INLINE void LL_TIM_CC_DisableChannel(TIM_TypeDef *TIMx, uint32_t Channels) {
     CLEAR_BIT(TIMx->CCER, Channels);
 }
 
@@ -1584,7 +1585,7 @@ __STATIC_INLINE void LL_TIM_CC_DisableChannel(TIM_TypeDef * TIMx, uint32_t Chann
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_CC_IsEnabledChannel(TIM_TypeDef * TIMx, uint32_t Channels) {
+__STATIC_INLINE uint32_t LL_TIM_CC_IsEnabledChannel(TIM_TypeDef *TIMx, uint32_t Channels) {
     return ((READ_BIT(TIMx->CCER, Channels) == (Channels)) ? 1UL : 0UL);
 }
 
@@ -1620,9 +1621,9 @@ __STATIC_INLINE uint32_t LL_TIM_CC_IsEnabledChannel(TIM_TypeDef * TIMx, uint32_t
  *         @arg @ref LL_TIM_OCIDLESTATE_LOW or @ref LL_TIM_OCIDLESTATE_HIGH
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_ConfigOutput(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t Configuration) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_ConfigOutput(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Configuration) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     CLEAR_BIT(*pReg, (TIM_CCMR1_CC1S << SHIFT_TAB_OCxx[iChannel]));
     MODIFY_REG(TIMx->CCER, (TIM_CCER_CC1P << SHIFT_TAB_CCxP[iChannel]), (Configuration & TIM_CCER_CC1P) << SHIFT_TAB_CCxP[iChannel]);
     MODIFY_REG(TIMx->CR2, (TIM_CR2_OIS1 << SHIFT_TAB_OISx[iChannel]), (Configuration & TIM_CR2_OIS1) << SHIFT_TAB_OISx[iChannel]);
@@ -1652,9 +1653,9 @@ __STATIC_INLINE void LL_TIM_OC_ConfigOutput(TIM_TypeDef * TIMx, uint32_t Channel
  *         @arg @ref LL_TIM_OCMODE_PWM2
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetMode(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t Mode) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_SetMode(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Mode) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     MODIFY_REG(*pReg, ((TIM_CCMR1_OC1M | TIM_CCMR1_CC1S) << SHIFT_TAB_OCxx[iChannel]), Mode << SHIFT_TAB_OCxx[iChannel]);
 }
 
@@ -1680,9 +1681,9 @@ __STATIC_INLINE void LL_TIM_OC_SetMode(TIM_TypeDef * TIMx, uint32_t Channel, uin
  *         @arg @ref LL_TIM_OCMODE_PWM1
  *         @arg @ref LL_TIM_OCMODE_PWM2
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_GetMode(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    const __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE uint32_t LL_TIM_OC_GetMode(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t              iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    const __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     return (READ_BIT(*pReg, ((TIM_CCMR1_OC1M | TIM_CCMR1_CC1S) << SHIFT_TAB_OCxx[iChannel])) >> SHIFT_TAB_OCxx[iChannel]);
 }
 
@@ -1709,7 +1710,7 @@ __STATIC_INLINE uint32_t LL_TIM_OC_GetMode(TIM_TypeDef * TIMx, uint32_t Channel)
  *         @arg @ref LL_TIM_OCPOLARITY_LOW
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetPolarity(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t Polarity) {
+__STATIC_INLINE void LL_TIM_OC_SetPolarity(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Polarity) {
     uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
     MODIFY_REG(TIMx->CCER, (TIM_CCER_CC1P << SHIFT_TAB_CCxP[iChannel]), Polarity << SHIFT_TAB_CCxP[iChannel]);
 }
@@ -1736,7 +1737,7 @@ __STATIC_INLINE void LL_TIM_OC_SetPolarity(TIM_TypeDef * TIMx, uint32_t Channel,
  *         @arg @ref LL_TIM_OCPOLARITY_HIGH
  *         @arg @ref LL_TIM_OCPOLARITY_LOW
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_GetPolarity(TIM_TypeDef * TIMx, uint32_t Channel) {
+__STATIC_INLINE uint32_t LL_TIM_OC_GetPolarity(TIM_TypeDef *TIMx, uint32_t Channel) {
     uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
     return (READ_BIT(TIMx->CCER, (TIM_CCER_CC1P << SHIFT_TAB_CCxP[iChannel])) >> SHIFT_TAB_CCxP[iChannel]);
 }
@@ -1768,7 +1769,7 @@ __STATIC_INLINE uint32_t LL_TIM_OC_GetPolarity(TIM_TypeDef * TIMx, uint32_t Chan
  *         @arg @ref LL_TIM_OCIDLESTATE_HIGH
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetIdleState(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t IdleState) {
+__STATIC_INLINE void LL_TIM_OC_SetIdleState(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t IdleState) {
     uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
     MODIFY_REG(TIMx->CR2, (TIM_CR2_OIS1 << SHIFT_TAB_OISx[iChannel]), IdleState << SHIFT_TAB_OISx[iChannel]);
 }
@@ -1795,7 +1796,7 @@ __STATIC_INLINE void LL_TIM_OC_SetIdleState(TIM_TypeDef * TIMx, uint32_t Channel
  *         @arg @ref LL_TIM_OCIDLESTATE_LOW
  *         @arg @ref LL_TIM_OCIDLESTATE_HIGH
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_GetIdleState(TIM_TypeDef * TIMx, uint32_t Channel) {
+__STATIC_INLINE uint32_t LL_TIM_OC_GetIdleState(TIM_TypeDef *TIMx, uint32_t Channel) {
     uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
     return (READ_BIT(TIMx->CR2, (TIM_CR2_OIS1 << SHIFT_TAB_OISx[iChannel])) >> SHIFT_TAB_OISx[iChannel]);
 }
@@ -1815,9 +1816,9 @@ __STATIC_INLINE uint32_t LL_TIM_OC_GetIdleState(TIM_TypeDef * TIMx, uint32_t Cha
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_EnableFast(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_EnableFast(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     SET_BIT(*pReg, (TIM_CCMR1_OC1FE << SHIFT_TAB_OCxx[iChannel]));
 }
 
@@ -1835,9 +1836,9 @@ __STATIC_INLINE void LL_TIM_OC_EnableFast(TIM_TypeDef * TIMx, uint32_t Channel) 
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_DisableFast(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_DisableFast(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     CLEAR_BIT(*pReg, (TIM_CCMR1_OC1FE << SHIFT_TAB_OCxx[iChannel]));
 }
 
@@ -1855,10 +1856,10 @@ __STATIC_INLINE void LL_TIM_OC_DisableFast(TIM_TypeDef * TIMx, uint32_t Channel)
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledFast(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    const __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
-    uint32_t bitfield = TIM_CCMR1_OC1FE << SHIFT_TAB_OCxx[iChannel];
+__STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledFast(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t              iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    const __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+    uint32_t             bitfield = TIM_CCMR1_OC1FE << SHIFT_TAB_OCxx[iChannel];
     return ((READ_BIT(*pReg, bitfield) == bitfield) ? 1UL : 0UL);
 }
 
@@ -1876,9 +1877,9 @@ __STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledFast(TIM_TypeDef * TIMx, uint32_t Ch
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_EnablePreload(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_EnablePreload(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     SET_BIT(*pReg, (TIM_CCMR1_OC1PE << SHIFT_TAB_OCxx[iChannel]));
 }
 
@@ -1896,9 +1897,9 @@ __STATIC_INLINE void LL_TIM_OC_EnablePreload(TIM_TypeDef * TIMx, uint32_t Channe
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_DisablePreload(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_DisablePreload(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     CLEAR_BIT(*pReg, (TIM_CCMR1_OC1PE << SHIFT_TAB_OCxx[iChannel]));
 }
 
@@ -1916,10 +1917,10 @@ __STATIC_INLINE void LL_TIM_OC_DisablePreload(TIM_TypeDef * TIMx, uint32_t Chann
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledPreload(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    const __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
-    uint32_t bitfield = TIM_CCMR1_OC1PE << SHIFT_TAB_OCxx[iChannel];
+__STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledPreload(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t              iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    const __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+    uint32_t             bitfield = TIM_CCMR1_OC1PE << SHIFT_TAB_OCxx[iChannel];
     return ((READ_BIT(*pReg, bitfield) == bitfield) ? 1UL : 0UL);
 }
 
@@ -1940,9 +1941,9 @@ __STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledPreload(TIM_TypeDef * TIMx, uint32_t
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_EnableClear(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_EnableClear(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     SET_BIT(*pReg, (TIM_CCMR1_OC1CE << SHIFT_TAB_OCxx[iChannel]));
 }
 
@@ -1962,9 +1963,9 @@ __STATIC_INLINE void LL_TIM_OC_EnableClear(TIM_TypeDef * TIMx, uint32_t Channel)
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_DisableClear(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_OC_DisableClear(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     CLEAR_BIT(*pReg, (TIM_CCMR1_OC1CE << SHIFT_TAB_OCxx[iChannel]));
 }
 
@@ -1986,10 +1987,10 @@ __STATIC_INLINE void LL_TIM_OC_DisableClear(TIM_TypeDef * TIMx, uint32_t Channel
  *         @arg @ref LL_TIM_CHANNEL_CH4
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledClear(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    const __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
-    uint32_t bitfield = TIM_CCMR1_OC1CE << SHIFT_TAB_OCxx[iChannel];
+__STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledClear(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t              iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    const __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+    uint32_t             bitfield = TIM_CCMR1_OC1CE << SHIFT_TAB_OCxx[iChannel];
     return ((READ_BIT(*pReg, bitfield) == bitfield) ? 1UL : 0UL);
 }
 
@@ -2004,7 +2005,7 @@ __STATIC_INLINE uint32_t LL_TIM_OC_IsEnabledClear(TIM_TypeDef * TIMx, uint32_t C
  * @param  DeadTime between Min_Data=0 and Max_Data=255
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetDeadTime(TIM_TypeDef * TIMx, uint32_t DeadTime) {
+__STATIC_INLINE void LL_TIM_OC_SetDeadTime(TIM_TypeDef *TIMx, uint32_t DeadTime) {
     MODIFY_REG(TIMx->BDTR, TIM_BDTR_DTG, DeadTime);
 }
 
@@ -2020,7 +2021,7 @@ __STATIC_INLINE void LL_TIM_OC_SetDeadTime(TIM_TypeDef * TIMx, uint32_t DeadTime
  * @param  CompareValue between Min_Data=0 and Max_Data=65535
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetCompareCH1(TIM_TypeDef * TIMx, uint32_t CompareValue) {
+__STATIC_INLINE void LL_TIM_OC_SetCompareCH1(TIM_TypeDef *TIMx, uint32_t CompareValue) {
     WRITE_REG(TIMx->CCR1, CompareValue);
 }
 
@@ -2036,7 +2037,7 @@ __STATIC_INLINE void LL_TIM_OC_SetCompareCH1(TIM_TypeDef * TIMx, uint32_t Compar
  * @param  CompareValue between Min_Data=0 and Max_Data=65535
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetCompareCH2(TIM_TypeDef * TIMx, uint32_t CompareValue) {
+__STATIC_INLINE void LL_TIM_OC_SetCompareCH2(TIM_TypeDef *TIMx, uint32_t CompareValue) {
     WRITE_REG(TIMx->CCR2, CompareValue);
 }
 
@@ -2052,7 +2053,7 @@ __STATIC_INLINE void LL_TIM_OC_SetCompareCH2(TIM_TypeDef * TIMx, uint32_t Compar
  * @param  CompareValue between Min_Data=0 and Max_Data=65535
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetCompareCH3(TIM_TypeDef * TIMx, uint32_t CompareValue) {
+__STATIC_INLINE void LL_TIM_OC_SetCompareCH3(TIM_TypeDef *TIMx, uint32_t CompareValue) {
     WRITE_REG(TIMx->CCR3, CompareValue);
 }
 
@@ -2068,7 +2069,7 @@ __STATIC_INLINE void LL_TIM_OC_SetCompareCH3(TIM_TypeDef * TIMx, uint32_t Compar
  * @param  CompareValue between Min_Data=0 and Max_Data=65535
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_OC_SetCompareCH4(TIM_TypeDef * TIMx, uint32_t CompareValue) {
+__STATIC_INLINE void LL_TIM_OC_SetCompareCH4(TIM_TypeDef *TIMx, uint32_t CompareValue) {
     WRITE_REG(TIMx->CCR4, CompareValue);
 }
 
@@ -2083,7 +2084,7 @@ __STATIC_INLINE void LL_TIM_OC_SetCompareCH4(TIM_TypeDef * TIMx, uint32_t Compar
  * @param  TIMx Timer instance
  * @retval CompareValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH1(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR1));
 }
 
@@ -2098,7 +2099,7 @@ __STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval CompareValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH2(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR2));
 }
 
@@ -2113,7 +2114,7 @@ __STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval CompareValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH3(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR3));
 }
 
@@ -2128,7 +2129,7 @@ __STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval CompareValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH4(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR4));
 }
 
@@ -2174,9 +2175,9 @@ __STATIC_INLINE uint32_t LL_TIM_OC_GetCompareCH4(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_IC_POLARITY_RISING or @ref LL_TIM_IC_POLARITY_FALLING or @ref LL_TIM_IC_POLARITY_BOTHEDGE
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_IC_Config(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t Configuration) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_IC_Config(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Configuration) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     MODIFY_REG(*pReg, ((TIM_CCMR1_IC1F | TIM_CCMR1_IC1PSC | TIM_CCMR1_CC1S) << SHIFT_TAB_ICxx[iChannel]), ((Configuration >> 16U) & (TIM_CCMR1_IC1F | TIM_CCMR1_IC1PSC | TIM_CCMR1_CC1S)) << SHIFT_TAB_ICxx[iChannel]);
     MODIFY_REG(TIMx->CCER, ((TIM_CCER_CC1NP | TIM_CCER_CC1P) << SHIFT_TAB_CCxP[iChannel]), (Configuration & (TIM_CCER_CC1NP | TIM_CCER_CC1P)) << SHIFT_TAB_CCxP[iChannel]);
 }
@@ -2199,9 +2200,9 @@ __STATIC_INLINE void LL_TIM_IC_Config(TIM_TypeDef * TIMx, uint32_t Channel, uint
  *         @arg @ref LL_TIM_ACTIVEINPUT_TRC
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_IC_SetActiveInput(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t ICActiveInput) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_IC_SetActiveInput(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t ICActiveInput) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     MODIFY_REG(*pReg, ((TIM_CCMR1_CC1S) << SHIFT_TAB_ICxx[iChannel]), (ICActiveInput >> 16U) << SHIFT_TAB_ICxx[iChannel]);
 }
 
@@ -2222,9 +2223,9 @@ __STATIC_INLINE void LL_TIM_IC_SetActiveInput(TIM_TypeDef * TIMx, uint32_t Chann
  *         @arg @ref LL_TIM_ACTIVEINPUT_INDIRECTTI
  *         @arg @ref LL_TIM_ACTIVEINPUT_TRC
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetActiveInput(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    const __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE uint32_t LL_TIM_IC_GetActiveInput(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t              iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    const __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     return ((READ_BIT(*pReg, ((TIM_CCMR1_CC1S) << SHIFT_TAB_ICxx[iChannel])) >> SHIFT_TAB_ICxx[iChannel]) << 16U);
 }
 
@@ -2247,9 +2248,9 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetActiveInput(TIM_TypeDef * TIMx, uint32_t C
  *         @arg @ref LL_TIM_ICPSC_DIV8
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_IC_SetPrescaler(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t ICPrescaler) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_IC_SetPrescaler(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t ICPrescaler) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     MODIFY_REG(*pReg, ((TIM_CCMR1_IC1PSC) << SHIFT_TAB_ICxx[iChannel]), (ICPrescaler >> 16U) << SHIFT_TAB_ICxx[iChannel]);
 }
 
@@ -2271,9 +2272,9 @@ __STATIC_INLINE void LL_TIM_IC_SetPrescaler(TIM_TypeDef * TIMx, uint32_t Channel
  *         @arg @ref LL_TIM_ICPSC_DIV4
  *         @arg @ref LL_TIM_ICPSC_DIV8
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetPrescaler(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    const __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE uint32_t LL_TIM_IC_GetPrescaler(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t              iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    const __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     return ((READ_BIT(*pReg, ((TIM_CCMR1_IC1PSC) << SHIFT_TAB_ICxx[iChannel])) >> SHIFT_TAB_ICxx[iChannel]) << 16U);
 }
 
@@ -2308,9 +2309,9 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetPrescaler(TIM_TypeDef * TIMx, uint32_t Cha
  *         @arg @ref LL_TIM_IC_FILTER_FDIV32_N8
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_IC_SetFilter(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t ICFilter) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE void LL_TIM_IC_SetFilter(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t ICFilter) {
+    uint8_t        iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     MODIFY_REG(*pReg, ((TIM_CCMR1_IC1F) << SHIFT_TAB_ICxx[iChannel]), (ICFilter >> 16U) << SHIFT_TAB_ICxx[iChannel]);
 }
 
@@ -2344,9 +2345,9 @@ __STATIC_INLINE void LL_TIM_IC_SetFilter(TIM_TypeDef * TIMx, uint32_t Channel, u
  *         @arg @ref LL_TIM_IC_FILTER_FDIV32_N6
  *         @arg @ref LL_TIM_IC_FILTER_FDIV32_N8
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetFilter(TIM_TypeDef * TIMx, uint32_t Channel) {
-    uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
-    const __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
+__STATIC_INLINE uint32_t LL_TIM_IC_GetFilter(TIM_TypeDef *TIMx, uint32_t Channel) {
+    uint8_t              iChannel = TIM_GET_CHANNEL_INDEX(Channel);
+    const __IO uint32_t *pReg     = (__IO uint32_t *)((uint32_t)((uint32_t)(&TIMx->CCMR1) + OFFSET_TAB_CCMRx[iChannel]));
     return ((READ_BIT(*pReg, ((TIM_CCMR1_IC1F) << SHIFT_TAB_ICxx[iChannel])) >> SHIFT_TAB_ICxx[iChannel]) << 16U);
 }
 
@@ -2372,7 +2373,7 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetFilter(TIM_TypeDef * TIMx, uint32_t Channe
  *         @arg @ref LL_TIM_IC_POLARITY_BOTHEDGE
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_IC_SetPolarity(TIM_TypeDef * TIMx, uint32_t Channel, uint32_t ICPolarity) {
+__STATIC_INLINE void LL_TIM_IC_SetPolarity(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t ICPolarity) {
     uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
     MODIFY_REG(TIMx->CCER, ((TIM_CCER_CC1NP | TIM_CCER_CC1P) << SHIFT_TAB_CCxP[iChannel]), ICPolarity << SHIFT_TAB_CCxP[iChannel]);
 }
@@ -2398,7 +2399,7 @@ __STATIC_INLINE void LL_TIM_IC_SetPolarity(TIM_TypeDef * TIMx, uint32_t Channel,
  *         @arg @ref LL_TIM_IC_POLARITY_FALLING
  *         @arg @ref LL_TIM_IC_POLARITY_BOTHEDGE
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetPolarity(TIM_TypeDef * TIMx, uint32_t Channel) {
+__STATIC_INLINE uint32_t LL_TIM_IC_GetPolarity(TIM_TypeDef *TIMx, uint32_t Channel) {
     uint8_t iChannel = TIM_GET_CHANNEL_INDEX(Channel);
     return (READ_BIT(TIMx->CCER, ((TIM_CCER_CC1NP | TIM_CCER_CC1P) << SHIFT_TAB_CCxP[iChannel])) >> SHIFT_TAB_CCxP[iChannel]);
 }
@@ -2411,7 +2412,7 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetPolarity(TIM_TypeDef * TIMx, uint32_t Chan
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_IC_EnableXORCombination(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_IC_EnableXORCombination(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->CR2, TIM_CR2_TI1S);
 }
 
@@ -2423,7 +2424,7 @@ __STATIC_INLINE void LL_TIM_IC_EnableXORCombination(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_IC_DisableXORCombination(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_IC_DisableXORCombination(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->CR2, TIM_CR2_TI1S);
 }
 
@@ -2435,7 +2436,7 @@ __STATIC_INLINE void LL_TIM_IC_DisableXORCombination(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_IsEnabledXORCombination(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IC_IsEnabledXORCombination(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->CR2, TIM_CR2_TI1S) == (TIM_CR2_TI1S)) ? 1UL : 0UL);
 }
 
@@ -2450,7 +2451,7 @@ __STATIC_INLINE uint32_t LL_TIM_IC_IsEnabledXORCombination(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval CapturedValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH1(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR1));
 }
 
@@ -2465,7 +2466,7 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval CapturedValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH2(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR2));
 }
 
@@ -2480,7 +2481,7 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval CapturedValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH3(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR3));
 }
 
@@ -2495,7 +2496,7 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval CapturedValue (between Min_Data=0 and Max_Data=65535)
  */
-__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH4(TIM_TypeDef *TIMx) {
     return (uint32_t)(READ_REG(TIMx->CCR4));
 }
 
@@ -2515,7 +2516,7 @@ __STATIC_INLINE uint32_t LL_TIM_IC_GetCaptureCH4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableExternalClock(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableExternalClock(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->SMCR, TIM_SMCR_ECE);
 }
 
@@ -2527,7 +2528,7 @@ __STATIC_INLINE void LL_TIM_EnableExternalClock(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableExternalClock(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableExternalClock(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->SMCR, TIM_SMCR_ECE);
 }
 
@@ -2539,7 +2540,7 @@ __STATIC_INLINE void LL_TIM_DisableExternalClock(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledExternalClock(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledExternalClock(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SMCR, TIM_SMCR_ECE) == (TIM_SMCR_ECE)) ? 1UL : 0UL);
 }
 
@@ -2562,7 +2563,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledExternalClock(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_CLOCKSOURCE_EXT_MODE2
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetClockSource(TIM_TypeDef * TIMx, uint32_t ClockSource) {
+__STATIC_INLINE void LL_TIM_SetClockSource(TIM_TypeDef *TIMx, uint32_t ClockSource) {
     MODIFY_REG(TIMx->SMCR, TIM_SMCR_SMS | TIM_SMCR_ECE, ClockSource);
 }
 
@@ -2578,7 +2579,7 @@ __STATIC_INLINE void LL_TIM_SetClockSource(TIM_TypeDef * TIMx, uint32_t ClockSou
  *         @arg @ref LL_TIM_ENCODERMODE_X4_TI12
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetEncoderMode(TIM_TypeDef * TIMx, uint32_t EncoderMode) {
+__STATIC_INLINE void LL_TIM_SetEncoderMode(TIM_TypeDef *TIMx, uint32_t EncoderMode) {
     MODIFY_REG(TIMx->SMCR, TIM_SMCR_SMS, EncoderMode);
 }
 
@@ -2606,7 +2607,7 @@ __STATIC_INLINE void LL_TIM_SetEncoderMode(TIM_TypeDef * TIMx, uint32_t EncoderM
  *         @arg @ref LL_TIM_TRGO_OC4REF
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetTriggerOutput(TIM_TypeDef * TIMx, uint32_t TimerSynchronization) {
+__STATIC_INLINE void LL_TIM_SetTriggerOutput(TIM_TypeDef *TIMx, uint32_t TimerSynchronization) {
     MODIFY_REG(TIMx->CR2, TIM_CR2_MMS, TimerSynchronization);
 }
 
@@ -2623,7 +2624,7 @@ __STATIC_INLINE void LL_TIM_SetTriggerOutput(TIM_TypeDef * TIMx, uint32_t TimerS
  *         @arg @ref LL_TIM_SLAVEMODE_TRIGGER
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetSlaveMode(TIM_TypeDef * TIMx, uint32_t SlaveMode) {
+__STATIC_INLINE void LL_TIM_SetSlaveMode(TIM_TypeDef *TIMx, uint32_t SlaveMode) {
     MODIFY_REG(TIMx->SMCR, TIM_SMCR_SMS, SlaveMode);
 }
 
@@ -2644,7 +2645,7 @@ __STATIC_INLINE void LL_TIM_SetSlaveMode(TIM_TypeDef * TIMx, uint32_t SlaveMode)
  *         @arg @ref LL_TIM_TS_ETRF
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetTriggerInput(TIM_TypeDef * TIMx, uint32_t TriggerInput) {
+__STATIC_INLINE void LL_TIM_SetTriggerInput(TIM_TypeDef *TIMx, uint32_t TriggerInput) {
     MODIFY_REG(TIMx->SMCR, TIM_SMCR_TS, TriggerInput);
 }
 
@@ -2656,7 +2657,7 @@ __STATIC_INLINE void LL_TIM_SetTriggerInput(TIM_TypeDef * TIMx, uint32_t Trigger
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableMasterSlaveMode(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableMasterSlaveMode(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->SMCR, TIM_SMCR_MSM);
 }
 
@@ -2668,7 +2669,7 @@ __STATIC_INLINE void LL_TIM_EnableMasterSlaveMode(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableMasterSlaveMode(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableMasterSlaveMode(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->SMCR, TIM_SMCR_MSM);
 }
 
@@ -2680,7 +2681,7 @@ __STATIC_INLINE void LL_TIM_DisableMasterSlaveMode(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledMasterSlaveMode(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledMasterSlaveMode(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SMCR, TIM_SMCR_MSM) == (TIM_SMCR_MSM)) ? 1UL : 0UL);
 }
 
@@ -2719,7 +2720,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledMasterSlaveMode(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_ETR_FILTER_FDIV32_N8
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ConfigETR(TIM_TypeDef * TIMx, uint32_t ETRPolarity, uint32_t ETRPrescaler, uint32_t ETRFilter) {
+__STATIC_INLINE void LL_TIM_ConfigETR(TIM_TypeDef *TIMx, uint32_t ETRPolarity, uint32_t ETRPrescaler, uint32_t ETRFilter) {
     MODIFY_REG(TIMx->SMCR, TIM_SMCR_ETP | TIM_SMCR_ETPS | TIM_SMCR_ETF, ETRPolarity | ETRPrescaler | ETRFilter);
 }
 
@@ -2738,7 +2739,7 @@ __STATIC_INLINE void LL_TIM_ConfigETR(TIM_TypeDef * TIMx, uint32_t ETRPolarity, 
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableBRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableBRK(TIM_TypeDef *TIMx) {
     __IO uint32_t tmpreg;
     SET_BIT(TIMx->BDTR, TIM_BDTR_BKE);
     /* Note: Any write operation to this bit takes a delay of 1 APB clock cycle to become effective. */
@@ -2754,7 +2755,7 @@ __STATIC_INLINE void LL_TIM_EnableBRK(TIM_TypeDef * TIMx) {
  *       a timer instance provides a break input.
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableBRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableBRK(TIM_TypeDef *TIMx) {
     __IO uint32_t tmpreg;
     CLEAR_BIT(TIMx->BDTR, TIM_BDTR_BKE);
     /* Note: Any write operation to this bit takes a delay of 1 APB clock cycle to become effective. */
@@ -2773,7 +2774,7 @@ __STATIC_INLINE void LL_TIM_DisableBRK(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_BREAK_POLARITY_HIGH
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ConfigBRK(TIM_TypeDef * TIMx, uint32_t BreakPolarity) {
+__STATIC_INLINE void LL_TIM_ConfigBRK(TIM_TypeDef *TIMx, uint32_t BreakPolarity) {
     __IO uint32_t tmpreg;
     MODIFY_REG(TIMx->BDTR, TIM_BDTR_BKP, BreakPolarity);
     /* Note: Any write operation to BKP bit takes a delay of 1 APB clock cycle to become effective. */
@@ -2796,7 +2797,7 @@ __STATIC_INLINE void LL_TIM_ConfigBRK(TIM_TypeDef * TIMx, uint32_t BreakPolarity
  *         @arg @ref LL_TIM_OSSR_ENABLE
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetOffStates(TIM_TypeDef * TIMx, uint32_t OffStateIdle, uint32_t OffStateRun) {
+__STATIC_INLINE void LL_TIM_SetOffStates(TIM_TypeDef *TIMx, uint32_t OffStateIdle, uint32_t OffStateRun) {
     MODIFY_REG(TIMx->BDTR, TIM_BDTR_OSSI | TIM_BDTR_OSSR, OffStateIdle | OffStateRun);
 }
 
@@ -2808,7 +2809,7 @@ __STATIC_INLINE void LL_TIM_SetOffStates(TIM_TypeDef * TIMx, uint32_t OffStateId
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableAutomaticOutput(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableAutomaticOutput(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->BDTR, TIM_BDTR_AOE);
 }
 
@@ -2820,7 +2821,7 @@ __STATIC_INLINE void LL_TIM_EnableAutomaticOutput(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableAutomaticOutput(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableAutomaticOutput(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->BDTR, TIM_BDTR_AOE);
 }
 
@@ -2832,7 +2833,7 @@ __STATIC_INLINE void LL_TIM_DisableAutomaticOutput(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledAutomaticOutput(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledAutomaticOutput(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->BDTR, TIM_BDTR_AOE) == (TIM_BDTR_AOE)) ? 1UL : 0UL);
 }
 
@@ -2846,7 +2847,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledAutomaticOutput(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableAllOutputs(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableAllOutputs(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->BDTR, TIM_BDTR_MOE);
 }
 
@@ -2860,7 +2861,7 @@ __STATIC_INLINE void LL_TIM_EnableAllOutputs(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableAllOutputs(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableAllOutputs(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->BDTR, TIM_BDTR_MOE);
 }
 
@@ -2872,7 +2873,7 @@ __STATIC_INLINE void LL_TIM_DisableAllOutputs(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledAllOutputs(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledAllOutputs(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->BDTR, TIM_BDTR_MOE) == (TIM_BDTR_MOE)) ? 1UL : 0UL);
 }
 
@@ -2930,7 +2931,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledAllOutputs(TIM_TypeDef * TIMx) {
  *         @arg @ref LL_TIM_DMABURST_LENGTH_18TRANSFERS
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ConfigDMABurst(TIM_TypeDef * TIMx, uint32_t DMABurstBaseAddress, uint32_t DMABurstLength) {
+__STATIC_INLINE void LL_TIM_ConfigDMABurst(TIM_TypeDef *TIMx, uint32_t DMABurstBaseAddress, uint32_t DMABurstLength) {
     MODIFY_REG(TIMx->DCR, (TIM_DCR_DBL | TIM_DCR_DBA), (DMABurstBaseAddress | DMABurstLength));
 }
 
@@ -2999,7 +3000,7 @@ __STATIC_INLINE void LL_TIM_ConfigDMABurst(TIM_TypeDef * TIMx, uint32_t DMABurst
  *
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_SetRemap(TIM_TypeDef * TIMx, uint32_t Remap) {
+__STATIC_INLINE void LL_TIM_SetRemap(TIM_TypeDef *TIMx, uint32_t Remap) {
 #if defined(LPTIM_OR_TIM1_ITR2_RMP) && defined(LPTIM_OR_TIM5_ITR1_RMP) && defined(LPTIM_OR_TIM9_ITR1_RMP)
     if ((Remap & LL_TIM_LPTIM_REMAP_MASK) == LL_TIM_LPTIM_REMAP_MASK) {
         /* Connect TIMx internal trigger to LPTIM1 output */
@@ -3026,7 +3027,7 @@ __STATIC_INLINE void LL_TIM_SetRemap(TIM_TypeDef * TIMx, uint32_t Remap) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_UPDATE(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_UIF));
 }
 
@@ -3036,7 +3037,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_UPDATE(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_UIF) == (TIM_SR_UIF)) ? 1UL : 0UL);
 }
 
@@ -3046,7 +3047,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC1(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC1IF));
 }
 
@@ -3056,7 +3057,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC1(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC1IF) == (TIM_SR_CC1IF)) ? 1UL : 0UL);
 }
 
@@ -3066,7 +3067,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC2(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC2IF));
 }
 
@@ -3076,7 +3077,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC2(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC2IF) == (TIM_SR_CC2IF)) ? 1UL : 0UL);
 }
 
@@ -3086,7 +3087,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC3(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC3IF));
 }
 
@@ -3096,7 +3097,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC3(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC3IF) == (TIM_SR_CC3IF)) ? 1UL : 0UL);
 }
 
@@ -3106,7 +3107,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC4(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC4IF));
 }
 
@@ -3116,7 +3117,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC4(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC4IF) == (TIM_SR_CC4IF)) ? 1UL : 0UL);
 }
 
@@ -3126,7 +3127,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_COM(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_COMIF));
 }
 
@@ -3136,7 +3137,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_COM(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_COMIF) == (TIM_SR_COMIF)) ? 1UL : 0UL);
 }
 
@@ -3146,7 +3147,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_TRIG(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_TIF));
 }
 
@@ -3156,7 +3157,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_TRIG(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_TIF) == (TIM_SR_TIF)) ? 1UL : 0UL);
 }
 
@@ -3166,7 +3167,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_BRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_BRK(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_BIF));
 }
 
@@ -3176,7 +3177,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_BRK(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_BRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_BRK(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_BIF) == (TIM_SR_BIF)) ? 1UL : 0UL);
 }
 
@@ -3186,7 +3187,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_BRK(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC1OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC1OVR(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC1OF));
 }
 
@@ -3197,7 +3198,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC1OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC1OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC1OVR(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC1OF) == (TIM_SR_CC1OF)) ? 1UL : 0UL);
 }
 
@@ -3207,7 +3208,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC1OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC2OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC2OVR(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC2OF));
 }
 
@@ -3218,7 +3219,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC2OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC2OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC2OVR(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC2OF) == (TIM_SR_CC2OF)) ? 1UL : 0UL);
 }
 
@@ -3228,7 +3229,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC2OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC3OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC3OVR(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC3OF));
 }
 
@@ -3239,7 +3240,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC3OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC3OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC3OVR(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC3OF) == (TIM_SR_CC3OF)) ? 1UL : 0UL);
 }
 
@@ -3249,7 +3250,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC3OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_ClearFlag_CC4OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_ClearFlag_CC4OVR(TIM_TypeDef *TIMx) {
     WRITE_REG(TIMx->SR, ~(TIM_SR_CC4OF));
 }
 
@@ -3260,7 +3261,7 @@ __STATIC_INLINE void LL_TIM_ClearFlag_CC4OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC4OVR(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC4OVR(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->SR, TIM_SR_CC4OF) == (TIM_SR_CC4OF)) ? 1UL : 0UL);
 }
 
@@ -3277,7 +3278,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsActiveFlag_CC4OVR(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_UPDATE(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_UIE);
 }
 
@@ -3287,7 +3288,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_UPDATE(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_UIE);
 }
 
@@ -3297,7 +3298,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_UPDATE(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_UIE) == (TIM_DIER_UIE)) ? 1UL : 0UL);
 }
 
@@ -3307,7 +3308,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_CC1(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC1IE);
 }
 
@@ -3317,7 +3318,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_CC1(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC1IE);
 }
 
@@ -3327,7 +3328,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC1(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC1IE) == (TIM_DIER_CC1IE)) ? 1UL : 0UL);
 }
 
@@ -3337,7 +3338,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_CC2(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC2IE);
 }
 
@@ -3347,7 +3348,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_CC2(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC2IE);
 }
 
@@ -3357,7 +3358,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC2(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC2IE) == (TIM_DIER_CC2IE)) ? 1UL : 0UL);
 }
 
@@ -3367,7 +3368,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_CC3(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC3IE);
 }
 
@@ -3377,7 +3378,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_CC3(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC3IE);
 }
 
@@ -3387,7 +3388,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC3(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC3IE) == (TIM_DIER_CC3IE)) ? 1UL : 0UL);
 }
 
@@ -3397,7 +3398,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_CC4(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC4IE);
 }
 
@@ -3407,7 +3408,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_CC4(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC4IE);
 }
 
@@ -3417,7 +3418,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC4(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC4IE) == (TIM_DIER_CC4IE)) ? 1UL : 0UL);
 }
 
@@ -3427,7 +3428,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_COM(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_COMIE);
 }
 
@@ -3437,7 +3438,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_COM(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_COMIE);
 }
 
@@ -3447,7 +3448,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_COM(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_COMIE) == (TIM_DIER_COMIE)) ? 1UL : 0UL);
 }
 
@@ -3457,7 +3458,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_TRIG(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_TIE);
 }
 
@@ -3467,7 +3468,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_TRIG(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_TIE);
 }
 
@@ -3477,7 +3478,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_TRIG(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_TIE) == (TIM_DIER_TIE)) ? 1UL : 0UL);
 }
 
@@ -3487,7 +3488,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableIT_BRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableIT_BRK(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_BIE);
 }
 
@@ -3497,7 +3498,7 @@ __STATIC_INLINE void LL_TIM_EnableIT_BRK(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableIT_BRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableIT_BRK(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_BIE);
 }
 
@@ -3507,7 +3508,7 @@ __STATIC_INLINE void LL_TIM_DisableIT_BRK(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_BRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_BRK(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_BIE) == (TIM_DIER_BIE)) ? 1UL : 0UL);
 }
 
@@ -3524,7 +3525,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledIT_BRK(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableDMAReq_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableDMAReq_UPDATE(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_UDE);
 }
 
@@ -3534,7 +3535,7 @@ __STATIC_INLINE void LL_TIM_EnableDMAReq_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableDMAReq_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableDMAReq_UPDATE(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_UDE);
 }
 
@@ -3544,7 +3545,7 @@ __STATIC_INLINE void LL_TIM_DisableDMAReq_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_UPDATE(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_UDE) == (TIM_DIER_UDE)) ? 1UL : 0UL);
 }
 
@@ -3554,7 +3555,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableDMAReq_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableDMAReq_CC1(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC1DE);
 }
 
@@ -3564,7 +3565,7 @@ __STATIC_INLINE void LL_TIM_EnableDMAReq_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableDMAReq_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableDMAReq_CC1(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC1DE);
 }
 
@@ -3574,7 +3575,7 @@ __STATIC_INLINE void LL_TIM_DisableDMAReq_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC1(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC1DE) == (TIM_DIER_CC1DE)) ? 1UL : 0UL);
 }
 
@@ -3584,7 +3585,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableDMAReq_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableDMAReq_CC2(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC2DE);
 }
 
@@ -3594,7 +3595,7 @@ __STATIC_INLINE void LL_TIM_EnableDMAReq_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableDMAReq_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableDMAReq_CC2(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC2DE);
 }
 
@@ -3604,7 +3605,7 @@ __STATIC_INLINE void LL_TIM_DisableDMAReq_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC2(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC2DE) == (TIM_DIER_CC2DE)) ? 1UL : 0UL);
 }
 
@@ -3614,7 +3615,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableDMAReq_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableDMAReq_CC3(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC3DE);
 }
 
@@ -3624,7 +3625,7 @@ __STATIC_INLINE void LL_TIM_EnableDMAReq_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableDMAReq_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableDMAReq_CC3(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC3DE);
 }
 
@@ -3634,7 +3635,7 @@ __STATIC_INLINE void LL_TIM_DisableDMAReq_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC3(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC3DE) == (TIM_DIER_CC3DE)) ? 1UL : 0UL);
 }
 
@@ -3644,7 +3645,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableDMAReq_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableDMAReq_CC4(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_CC4DE);
 }
 
@@ -3654,7 +3655,7 @@ __STATIC_INLINE void LL_TIM_EnableDMAReq_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableDMAReq_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableDMAReq_CC4(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_CC4DE);
 }
 
@@ -3664,7 +3665,7 @@ __STATIC_INLINE void LL_TIM_DisableDMAReq_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC4(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_CC4DE) == (TIM_DIER_CC4DE)) ? 1UL : 0UL);
 }
 
@@ -3674,7 +3675,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableDMAReq_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableDMAReq_COM(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_COMDE);
 }
 
@@ -3684,7 +3685,7 @@ __STATIC_INLINE void LL_TIM_EnableDMAReq_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableDMAReq_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableDMAReq_COM(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_COMDE);
 }
 
@@ -3694,7 +3695,7 @@ __STATIC_INLINE void LL_TIM_DisableDMAReq_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_COM(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_COMDE) == (TIM_DIER_COMDE)) ? 1UL : 0UL);
 }
 
@@ -3704,7 +3705,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_EnableDMAReq_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_EnableDMAReq_TRIG(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->DIER, TIM_DIER_TDE);
 }
 
@@ -3714,7 +3715,7 @@ __STATIC_INLINE void LL_TIM_EnableDMAReq_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_DisableDMAReq_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_DisableDMAReq_TRIG(TIM_TypeDef *TIMx) {
     CLEAR_BIT(TIMx->DIER, TIM_DIER_TDE);
 }
 
@@ -3724,7 +3725,7 @@ __STATIC_INLINE void LL_TIM_DisableDMAReq_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval State of bit (1 or 0).
  */
-__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_TRIG(TIM_TypeDef *TIMx) {
     return ((READ_BIT(TIMx->DIER, TIM_DIER_TDE) == (TIM_DIER_TDE)) ? 1UL : 0UL);
 }
 
@@ -3741,7 +3742,7 @@ __STATIC_INLINE uint32_t LL_TIM_IsEnabledDMAReq_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_UPDATE(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_UPDATE(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_UG);
 }
 
@@ -3751,7 +3752,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_UPDATE(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_CC1(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_CC1(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_CC1G);
 }
 
@@ -3761,7 +3762,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_CC1(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_CC2(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_CC2(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_CC2G);
 }
 
@@ -3771,7 +3772,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_CC2(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_CC3(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_CC3(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_CC3G);
 }
 
@@ -3781,7 +3782,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_CC3(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_CC4(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_CC4(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_CC4G);
 }
 
@@ -3791,7 +3792,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_CC4(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_COM(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_COM(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_COMG);
 }
 
@@ -3801,7 +3802,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_COM(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_TRIG(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_TRIG(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_TG);
 }
 
@@ -3811,7 +3812,7 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_TRIG(TIM_TypeDef * TIMx) {
  * @param  TIMx Timer instance
  * @retval None
  */
-__STATIC_INLINE void LL_TIM_GenerateEvent_BRK(TIM_TypeDef * TIMx) {
+__STATIC_INLINE void LL_TIM_GenerateEvent_BRK(TIM_TypeDef *TIMx) {
     SET_BIT(TIMx->EGR, TIM_EGR_BG);
 }
 
@@ -3824,19 +3825,19 @@ __STATIC_INLINE void LL_TIM_GenerateEvent_BRK(TIM_TypeDef * TIMx) {
  * @{
  */
 
-ErrorStatus LL_TIM_DeInit(TIM_TypeDef * TIMx);
-void LL_TIM_StructInit(LL_TIM_InitTypeDef * TIM_InitStruct);
-ErrorStatus LL_TIM_Init(TIM_TypeDef * TIMx, LL_TIM_InitTypeDef * TIM_InitStruct);
-void LL_TIM_OC_StructInit(LL_TIM_OC_InitTypeDef * TIM_OC_InitStruct);
-ErrorStatus LL_TIM_OC_Init(TIM_TypeDef * TIMx, uint32_t Channel, LL_TIM_OC_InitTypeDef * TIM_OC_InitStruct);
-void LL_TIM_IC_StructInit(LL_TIM_IC_InitTypeDef * TIM_ICInitStruct);
-ErrorStatus LL_TIM_IC_Init(TIM_TypeDef * TIMx, uint32_t Channel, LL_TIM_IC_InitTypeDef * TIM_IC_InitStruct);
-void LL_TIM_ENCODER_StructInit(LL_TIM_ENCODER_InitTypeDef * TIM_EncoderInitStruct);
-ErrorStatus LL_TIM_ENCODER_Init(TIM_TypeDef * TIMx, LL_TIM_ENCODER_InitTypeDef * TIM_EncoderInitStruct);
-void LL_TIM_HALLSENSOR_StructInit(LL_TIM_HALLSENSOR_InitTypeDef * TIM_HallSensorInitStruct);
-ErrorStatus LL_TIM_HALLSENSOR_Init(TIM_TypeDef * TIMx, LL_TIM_HALLSENSOR_InitTypeDef * TIM_HallSensorInitStruct);
-void LL_TIM_BDTR_StructInit(LL_TIM_BDTR_InitTypeDef * TIM_BDTRInitStruct);
-ErrorStatus LL_TIM_BDTR_Init(TIM_TypeDef * TIMx, LL_TIM_BDTR_InitTypeDef * TIM_BDTRInitStruct);
+ErrorStatus LL_TIM_DeInit(TIM_TypeDef *TIMx);
+void        LL_TIM_StructInit(LL_TIM_InitTypeDef *TIM_InitStruct);
+ErrorStatus LL_TIM_Init(TIM_TypeDef *TIMx, LL_TIM_InitTypeDef *TIM_InitStruct);
+void        LL_TIM_OC_StructInit(LL_TIM_OC_InitTypeDef *TIM_OC_InitStruct);
+ErrorStatus LL_TIM_OC_Init(TIM_TypeDef *TIMx, uint32_t Channel, LL_TIM_OC_InitTypeDef *TIM_OC_InitStruct);
+void        LL_TIM_IC_StructInit(LL_TIM_IC_InitTypeDef *TIM_ICInitStruct);
+ErrorStatus LL_TIM_IC_Init(TIM_TypeDef *TIMx, uint32_t Channel, LL_TIM_IC_InitTypeDef *TIM_IC_InitStruct);
+void        LL_TIM_ENCODER_StructInit(LL_TIM_ENCODER_InitTypeDef *TIM_EncoderInitStruct);
+ErrorStatus LL_TIM_ENCODER_Init(TIM_TypeDef *TIMx, LL_TIM_ENCODER_InitTypeDef *TIM_EncoderInitStruct);
+void        LL_TIM_HALLSENSOR_StructInit(LL_TIM_HALLSENSOR_InitTypeDef *TIM_HallSensorInitStruct);
+ErrorStatus LL_TIM_HALLSENSOR_Init(TIM_TypeDef *TIMx, LL_TIM_HALLSENSOR_InitTypeDef *TIM_HallSensorInitStruct);
+void        LL_TIM_BDTR_StructInit(LL_TIM_BDTR_InitTypeDef *TIM_BDTRInitStruct);
+ErrorStatus LL_TIM_BDTR_Init(TIM_TypeDef *TIMx, LL_TIM_BDTR_InitTypeDef *TIM_BDTRInitStruct);
 /**
  * @}
  */

@@ -116,11 +116,11 @@ typedef struct {
  * @brief  UTILS System, AHB and APB buses clock configuration structure definition
  */
 typedef struct {
-    uint32_t AHBCLKDivider; /*!< The AHB clock (HCLK) divider. This clock is derived from the system clock (SYSCLK).
-                                 This parameter can be a value of @ref RCC_LL_EC_SYSCLK_DIV
-
-                                 This feature can be modified afterwards using unitary function
-                                 @ref LL_RCC_SetAHBPrescaler(). */
+    uint32_t AHBCLKDivider;  /*!< The AHB clock (HCLK) divider. This clock is derived from the system clock (SYSCLK).
+                                  This parameter can be a value of @ref RCC_LL_EC_SYSCLK_DIV
+ 
+                                  This feature can be modified afterwards using unitary function
+                                  @ref LL_RCC_SetAHBPrescaler(). */
 
     uint32_t APB1CLKDivider; /*!< The APB1 clock (PCLK1) divider. This clock is derived from the AHB clock (HCLK).
                                   This parameter can be a value of @ref RCC_LL_EC_APB1_DIV
@@ -253,7 +253,7 @@ __STATIC_INLINE uint32_t LL_GetPackageType(void) {
 __STATIC_INLINE void LL_InitTick(uint32_t HCLKFrequency, uint32_t Ticks) {
     /* Configure the SysTick to have interrupt in 1ms time base */
     SysTick->LOAD = (uint32_t)((HCLKFrequency / Ticks) - 1UL);            /* set reload register */
-    SysTick->VAL = 0UL;                                                   /* Load the SysTick Counter Value */
+    SysTick->VAL  = 0UL;                                                  /* Load the SysTick Counter Value */
     SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk; /* Enable the Systick Timer */
 }
 
@@ -268,10 +268,10 @@ void LL_mDelay(uint32_t Delay);
  * @{
  */
 
-void LL_SetSystemCoreClock(uint32_t HCLKFrequency);
+void        LL_SetSystemCoreClock(uint32_t HCLKFrequency);
 ErrorStatus LL_SetFlashLatency(uint32_t HCLK_Frequency);
-ErrorStatus LL_PLL_ConfigSystemClock_HSI(LL_UTILS_PLLInitTypeDef * UTILS_PLLInitStruct, LL_UTILS_ClkInitTypeDef * UTILS_ClkInitStruct);
-ErrorStatus LL_PLL_ConfigSystemClock_HSE(uint32_t HSEFrequency, uint32_t HSEBypass, LL_UTILS_PLLInitTypeDef * UTILS_PLLInitStruct, LL_UTILS_ClkInitTypeDef * UTILS_ClkInitStruct);
+ErrorStatus LL_PLL_ConfigSystemClock_HSI(LL_UTILS_PLLInitTypeDef *UTILS_PLLInitStruct, LL_UTILS_ClkInitTypeDef *UTILS_ClkInitStruct);
+ErrorStatus LL_PLL_ConfigSystemClock_HSE(uint32_t HSEFrequency, uint32_t HSEBypass, LL_UTILS_PLLInitTypeDef *UTILS_PLLInitStruct, LL_UTILS_ClkInitTypeDef *UTILS_ClkInitStruct);
 
 /**
  * @}

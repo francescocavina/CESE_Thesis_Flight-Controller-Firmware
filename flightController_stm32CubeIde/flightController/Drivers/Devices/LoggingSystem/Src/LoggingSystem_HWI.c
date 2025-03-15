@@ -55,7 +55,7 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-void USB_Write(uint8_t * string) {
+void USB_Write(uint8_t *string) {
 
     /* BEGIN MODIFY 1 */
     CDC_Transmit_FS(string, strlen((const char *)string));

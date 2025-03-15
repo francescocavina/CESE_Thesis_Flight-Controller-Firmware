@@ -51,10 +51,10 @@
 #if defined(__ICCARM__) || defined(__CC_ARM) || defined(__GNUC__)
 #include <stdint.h>
 extern uint32_t SystemCoreClock;
-void xPortSysTickHandler(void);
+void            xPortSysTickHandler(void);
 #endif
-#define configENABLE_FPU                        0
-#define configENABLE_MPU                        0
+#define configENABLE_FPU 0
+#define configENABLE_MPU 0
 
 #define configUSE_PREEMPTION                    1
 #define configSUPPORT_STATIC_ALLOCATION         1
@@ -126,11 +126,11 @@ See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 /* Normal assert() semantics without relying on the provision of an assert.h
 header file. */
 /* USER CODE BEGIN 1 */
-#define configASSERT(x)                                                                                                                                                                                                                                  \
-    if ((x) == 0) {                                                                                                                                                                                                                                      \
-        taskDISABLE_INTERRUPTS();                                                                                                                                                                                                                        \
-        for (;;)                                                                                                                                                                                                                                         \
-            ;                                                                                                                                                                                                                                            \
+#define configASSERT(x)           \
+    if ((x) == 0) {               \
+        taskDISABLE_INTERRUPTS(); \
+        for (;;)                  \
+            ;                     \
     }
 /* USER CODE END 1 */
 

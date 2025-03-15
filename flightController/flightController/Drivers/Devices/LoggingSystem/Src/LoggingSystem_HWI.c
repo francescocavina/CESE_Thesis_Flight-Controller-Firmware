@@ -56,7 +56,7 @@ extern USBD_HandleTypeDef hUsbDeviceFS;
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t USB_Write(const uint8_t * string) {
+bool_t USB_Write(const uint8_t *string) {
 
     /* Check for NULL pointer */
     if (string == NULL) {

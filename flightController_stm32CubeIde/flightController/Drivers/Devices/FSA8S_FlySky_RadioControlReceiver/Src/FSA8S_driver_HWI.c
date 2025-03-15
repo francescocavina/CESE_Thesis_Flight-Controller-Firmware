@@ -69,7 +69,7 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t IBUS_Init(IBUS_HandleTypeDef_t * hibus) {
+bool_t IBUS_Init(IBUS_HandleTypeDef_t *hibus) {
 
     /* Check parameter */
     if (NULL == hibus) {

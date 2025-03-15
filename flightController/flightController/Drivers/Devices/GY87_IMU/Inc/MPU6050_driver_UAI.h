@@ -58,9 +58,9 @@ extern "C" {
 typedef struct gyroscopeCalibrationValues {
     bool_t calibrationDone;
     bool_t fixedCalibration_en;
-    float calibrationRateRoll;
-    float calibrationRatePitch;
-    float calibrationRateYaw;
+    float  calibrationRateRoll;
+    float  calibrationRatePitch;
+    float  calibrationRateYaw;
 
 } GY87_gyroscopeCalibrationValues_t;
 
@@ -68,37 +68,37 @@ typedef struct gyroscopeValues {
     int16_t rawValueX;
     int16_t rawValueY;
     int16_t rawValueZ;
-    float rotationRateRoll;
-    float rotationRatePitch;
-    float rotationRateYaw;
+    float   rotationRateRoll;
+    float   rotationRatePitch;
+    float   rotationRateYaw;
 } GY87_gyroscopeValues_t;
 
 typedef struct accelerometerCalibrationValues {
     bool_t calibrationDone;
     bool_t fixedCalibration_en;
-    float calibrationLinearAccelerationX;
-    float calibrationLinearAccelerationY;
-    float calibrationLinearAccelerationZ;
+    float  calibrationLinearAccelerationX;
+    float  calibrationLinearAccelerationY;
+    float  calibrationLinearAccelerationZ;
 } GY87_accelerometerCalibrationValues_t;
 
 typedef struct accelerometerValues {
     int16_t rawValueX;
     int16_t rawValueY;
     int16_t rawValueZ;
-    float linearAccelerationX;
-    float linearAccelerationY;
-    float linearAccelerationZ;
-    float angleRoll;
-    float anglePitch;
+    float   linearAccelerationX;
+    float   linearAccelerationY;
+    float   linearAccelerationZ;
+    float   angleRoll;
+    float   anglePitch;
 } GY87_accelerometerValues_t;
 
 typedef struct magnetometerValues {
     int16_t rawValueX;
     int16_t rawValueY;
     int16_t rawValueZ;
-    float magneticFieldX;
-    float magneticFieldY;
-    float magneticFieldZ;
+    float   magneticFieldX;
+    float   magneticFieldY;
+    float   magneticFieldZ;
 } GY87_magnetometerValues_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
@@ -111,7 +111,7 @@ typedef struct magnetometerValues {
  * @retval Pointer to a GY87_HandleTypeDef_t structure that contains
  *         the configuration information for the GY87 device.
  */
-GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c);
+GY87_HandleTypeDef_t *GY87_Init(I2C_HandleTypeDef *hi2c);
 
 /*
  * @brief  Resets the device.
@@ -119,7 +119,7 @@ GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-void GY87_Reset(GY87_HandleTypeDef_t * hgy87);
+void GY87_Reset(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Calibrates gyroscope measurement.
@@ -128,7 +128,7 @@ void GY87_Reset(GY87_HandleTypeDef_t * hgy87);
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues, bool_t fixedCalibration_en);
+void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues, bool_t fixedCalibration_en);
 
 /*
  * @brief  Reads gyroscope values.
@@ -137,7 +137,7 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeCalibra
  *         gyroscopeValues: Pointer to a GY87_gyroscopeValues_t structure that stores the gyroscope values.
  * @retval None
  */
-void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues);
+void GY87_ReadGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeValues_t *gyroscopeValues, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues);
 
 /*
  * @brief  Calibrates accelerometer measurement.
@@ -146,7 +146,7 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues, bool_t fixedCalibration_en);
+void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues, bool_t fixedCalibration_en);
 
 /*
  * @brief  Reads accelerometer values.
@@ -155,7 +155,7 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_acceleromete
  *         accelerometerValues: Pointer to a GY87_accelerometerValues_t structure that stores the accelerometer values.
  * @retval None
  */
-void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues);
+void GY87_ReadAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerValues_t *accelerometerValues, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues);
 
 /*
  * @brief  Reads temperature sensor value.
@@ -163,7 +163,7 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
  *                the configuration information for the GY87 device.
  * @retval Temperature in degrees Celsius [°C].
  */
-float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87);
+float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Reads magnetometer values.
@@ -172,7 +172,7 @@ float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87);
  *         magnetometerValues: Pointer to a GY87_magnetometerValues_t structure that stores the magnetometer values.
  * @retval None
  */
-void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues_t * magnetometerValues);
+void GY87_ReadMagnetometer(GY87_HandleTypeDef_t *hgy87, GY87_magnetometerValues_t *magnetometerValues);
 
 /*
  * @brief  Reads magnetometer heading.
@@ -180,7 +180,7 @@ void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues
  *                the configuration information for the GY87 device.
  * @retval Magnetometer heading in degrees [°].
  */
-float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t * hgy87);
+float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t *hgy87);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

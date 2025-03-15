@@ -67,8 +67,8 @@
  * @param  size Fifo size
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_PCDEx_SetTxFiFo(PCD_HandleTypeDef * hpcd, uint8_t fifo, uint16_t size) {
-    uint8_t i;
+HAL_StatusTypeDef HAL_PCDEx_SetTxFiFo(PCD_HandleTypeDef *hpcd, uint8_t fifo, uint16_t size) {
+    uint8_t  i;
     uint32_t Tx_Offset;
 
     /*  TXn min size = 16 words. (n  : Transmit FIFO index)
@@ -104,7 +104,7 @@ HAL_StatusTypeDef HAL_PCDEx_SetTxFiFo(PCD_HandleTypeDef * hpcd, uint8_t fifo, ui
  * @param  size Size of Rx fifo
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_PCDEx_SetRxFiFo(PCD_HandleTypeDef * hpcd, uint16_t size) {
+HAL_StatusTypeDef HAL_PCDEx_SetRxFiFo(PCD_HandleTypeDef *hpcd, uint16_t size) {
     hpcd->Instance->GRXFSIZ = size;
 
     return HAL_OK;
@@ -115,11 +115,11 @@ HAL_StatusTypeDef HAL_PCDEx_SetRxFiFo(PCD_HandleTypeDef * hpcd, uint16_t size) {
  * @param  hpcd PCD handle
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef * hpcd) {
-    USB_OTG_GlobalTypeDef * USBx = hpcd->Instance;
+HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef *hpcd) {
+    USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
 
     hpcd->lpm_active = 1U;
-    hpcd->LPM_State = LPM_L0;
+    hpcd->LPM_State  = LPM_L0;
     USBx->GINTMSK |= USB_OTG_GINTMSK_LPMINTM;
     USBx->GLPMCFG |= (USB_OTG_GLPMCFG_LPMEN | USB_OTG_GLPMCFG_LPMACK | USB_OTG_GLPMCFG_ENBESL);
 
@@ -131,8 +131,8 @@ HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef * hpcd) {
  * @param  hpcd PCD handle
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_PCDEx_DeActivateLPM(PCD_HandleTypeDef * hpcd) {
-    USB_OTG_GlobalTypeDef * USBx = hpcd->Instance;
+HAL_StatusTypeDef HAL_PCDEx_DeActivateLPM(PCD_HandleTypeDef *hpcd) {
+    USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
 
     hpcd->lpm_active = 0U;
     USBx->GINTMSK &= ~USB_OTG_GINTMSK_LPMINTM;
@@ -147,9 +147,9 @@ HAL_StatusTypeDef HAL_PCDEx_DeActivateLPM(PCD_HandleTypeDef * hpcd) {
  * @param  hpcd PCD handle
  * @retval HAL status
  */
-void HAL_PCDEx_BCD_VBUSDetect(PCD_HandleTypeDef * hpcd) {
-    USB_OTG_GlobalTypeDef * USBx = hpcd->Instance;
-    uint32_t tickstart = HAL_GetTick();
+void HAL_PCDEx_BCD_VBUSDetect(PCD_HandleTypeDef *hpcd) {
+    USB_OTG_GlobalTypeDef *USBx      = hpcd->Instance;
+    uint32_t               tickstart = HAL_GetTick();
 
     /* Enable DCD : Data Contact Detect */
     USBx->GCCFG |= USB_OTG_GCCFG_DCDEN;
@@ -229,8 +229,8 @@ void HAL_PCDEx_BCD_VBUSDetect(PCD_HandleTypeDef * hpcd) {
  * @param  hpcd PCD handle
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_PCDEx_ActivateBCD(PCD_HandleTypeDef * hpcd) {
-    USB_OTG_GlobalTypeDef * USBx = hpcd->Instance;
+HAL_StatusTypeDef HAL_PCDEx_ActivateBCD(PCD_HandleTypeDef *hpcd) {
+    USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
 
     USBx->GCCFG &= ~(USB_OTG_GCCFG_PDEN);
     USBx->GCCFG &= ~(USB_OTG_GCCFG_SDEN);
@@ -251,8 +251,8 @@ HAL_StatusTypeDef HAL_PCDEx_ActivateBCD(PCD_HandleTypeDef * hpcd) {
  * @param  hpcd PCD handle
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_PCDEx_DeActivateBCD(PCD_HandleTypeDef * hpcd) {
-    USB_OTG_GlobalTypeDef * USBx = hpcd->Instance;
+HAL_StatusTypeDef HAL_PCDEx_DeActivateBCD(PCD_HandleTypeDef *hpcd) {
+    USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
 
     USBx->GCCFG &= ~(USB_OTG_GCCFG_SDEN);
     USBx->GCCFG &= ~(USB_OTG_GCCFG_PDEN);
@@ -273,7 +273,7 @@ HAL_StatusTypeDef HAL_PCDEx_DeActivateBCD(PCD_HandleTypeDef * hpcd) {
  * @param  msg LPM message
  * @retval HAL status
  */
-__weak void HAL_PCDEx_LPM_Callback(PCD_HandleTypeDef * hpcd, PCD_LPM_MsgTypeDef msg) {
+__weak void HAL_PCDEx_LPM_Callback(PCD_HandleTypeDef *hpcd, PCD_LPM_MsgTypeDef msg) {
     /* Prevent unused argument(s) compilation warning */
     UNUSED(hpcd);
     UNUSED(msg);
@@ -289,7 +289,7 @@ __weak void HAL_PCDEx_LPM_Callback(PCD_HandleTypeDef * hpcd, PCD_LPM_MsgTypeDef 
  * @param  msg LPM message
  * @retval HAL status
  */
-__weak void HAL_PCDEx_BCD_Callback(PCD_HandleTypeDef * hpcd, PCD_BCD_MsgTypeDef msg) {
+__weak void HAL_PCDEx_BCD_Callback(PCD_HandleTypeDef *hpcd, PCD_BCD_MsgTypeDef msg) {
     /* Prevent unused argument(s) compilation warning */
     UNUSED(hpcd);
     UNUSED(msg);

@@ -257,12 +257,12 @@
 
 /* --- DIGITAL MOTION PROCESSOR - REGISTERS ADDRESSES - READ/WRITE ----------------------------- */
 #define MPU_6050_REG_DMP_BANK_SEL (0x6D) // DMP Memory Bank Selection: activates a specific bank in the DMP
-#define MPU_6050_REG_DMP_RW_PNT                                                                                                                                                                                                                          \
-    (0x6E)                              // DMP Memory Start Address: set read/write pointer to a specific start address in
-                                        // specified DMP bank
-#define MPU_6050_REG_DMP_REG     (0x6F) // DMP Memory Read/Write: register in DMP from which to read or to which to write
-#define MPU_6050_REG_DMP_CONFIG1 (0x70) // DMP Configuration 1
-#define MPU_6050_REG_DMP_CONFIG2 (0x71) // DMP Configuration 2
+#define MPU_6050_REG_DMP_RW_PNT \
+    (0x6E)                               // DMP Memory Start Address: set read/write pointer to a specific start address in
+                                         // specified DMP bank
+#define MPU_6050_REG_DMP_REG     (0x6F)  // DMP Memory Read/Write: register in DMP from which to read or to which to write
+#define MPU_6050_REG_DMP_CONFIG1 (0x70)  // DMP Configuration 1
+#define MPU_6050_REG_DMP_CONFIG2 (0x71)  // DMP Configuration 2
 
 /* --- FIFO BUFFER - REGISTERS ADDRESSES - READ ONLY ------------------------------------------- */
 #define MPU_6050_REG_FIFO_COUNTH (0x72) // FIFO Count Register
@@ -279,6 +279,6 @@
 #define MPU6050_AUX_VAL_I2C_ADDR1 (0xD0) // First address for first MPU-6050 device
 #define MPU6050_AUX_VAL_I2C_ADDR2 (0xD1) // Second address for second MPU-6050 device
 
-#endif /* INC_MPU6050_DRIVER_REGISTER_MAP_H  */
+#endif                                   /* INC_MPU6050_DRIVER_REGISTER_MAP_H  */
 
 /* --- End of file ----------------------------------------------------------------------------- */

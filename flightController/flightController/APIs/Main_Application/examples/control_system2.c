@@ -78,10 +78,10 @@ if (false == ESC_isEnabled) {
             Kalman_CalculateAngle(&Kalman_predictionValue_pitchAngle, &Kalman_uncertaintyValue_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
 
             /* Read inputs from radio controller */
-            reference_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-            reference_rollValue = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
+            reference_throttle   = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+            reference_rollValue  = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
             reference_pitchValue = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
-            reference_yawValue = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
+            reference_yawValue   = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
 
             /* Adjust and limit throttle input */
             if (CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE < reference_throttle) {
@@ -89,11 +89,11 @@ if (false == ESC_isEnabled) {
             }
 
             /* Calculate desired angles by mapping radio controller values to angles */
-            reference_rollAngle = 0.03 * (reference_rollValue - 500);
+            reference_rollAngle  = 0.03 * (reference_rollValue - 500);
             reference_pitchAngle = 0.03 * (reference_pitchValue - 500);
 
             /* Calculate angles errors */
-            error_rollAngle = reference_rollAngle - Kalman_predictionValue_rollAngle;
+            error_rollAngle  = reference_rollAngle - Kalman_predictionValue_rollAngle;
             error_pitchAngle = reference_pitchAngle - Kalman_predictionValue_pitchAngle;
 
             /* Calculate PID for roll angle */
@@ -102,14 +102,14 @@ if (false == ESC_isEnabled) {
             CSM_CalculatePID(&pidOutput_pitchAngle, &previousIterm_pitchAngle, &previousErrorValue_pitchAngle, error_pitchAngle, KP_PITCH_ANGLE, KI_PITCH_ANGLE, KD_PITCH_ANGLE);
 
             /* Calculate desired rates */
-            desiredValue_rollRate = pidOutput_rollAngle;
+            desiredValue_rollRate  = pidOutput_rollAngle;
             desiredValue_pitchRate = pidOutput_pitchAngle;
-            desiredValue_yawRate = 0.03 * (reference_yawValue - 500);
+            desiredValue_yawRate   = 0.03 * (reference_yawValue - 500);
 
             /* Calculate rates errors */
-            error_rollRate = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
+            error_rollRate  = desiredValue_rollRate - GY87_gyroscopeValues.rotationRateRoll;
             error_pitchRate = desiredValue_pitchRate - GY87_gyroscopeValues.rotationRatePitch;
-            error_yawRate = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
+            error_yawRate   = desiredValue_yawRate - GY87_gyroscopeValues.rotationRateYaw;
 
             /* Calculate PID for roll rate */
             CSM_CalculatePID(&pidOutput_rollRate, &previousIterm_rollRate, &previousErrorValue_rollRate, error_rollRate, KP_ROLL_RATE, KI_ROLL_RATE, KD_ROLL_RATE);

@@ -90,12 +90,12 @@ typedef QueueHandle_t SemaphoreHandle_t;
  * \ingroup Semaphores
  */
 #if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
-#define vSemaphoreCreateBinary(xSemaphore)                                                                                                                                                                                                               \
-    {                                                                                                                                                                                                                                                    \
-        (xSemaphore) = xQueueGenericCreate((UBaseType_t)1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE);                                                                                                                            \
-        if ((xSemaphore) != NULL) {                                                                                                                                                                                                                      \
-            (void)xSemaphoreGive((xSemaphore));                                                                                                                                                                                                          \
-        }                                                                                                                                                                                                                                                \
+#define vSemaphoreCreateBinary(xSemaphore)                                                                                    \
+    {                                                                                                                         \
+        (xSemaphore) = xQueueGenericCreate((UBaseType_t)1, semSEMAPHORE_QUEUE_ITEM_LENGTH, queueQUEUE_TYPE_BINARY_SEMAPHORE); \
+        if ((xSemaphore) != NULL) {                                                                                           \
+            (void)xSemaphoreGive((xSemaphore));                                                                               \
+        }                                                                                                                     \
     }
 #endif
 
@@ -496,24 +496,24 @@ typedef QueueHandle_t SemaphoreHandle_t;
 
             // ...
             // For some reason due to the nature of the code further calls to
-            // xSemaphoreTakeRecursive() are made on the same mutex.  In real
-            // code these would not be just sequential calls as this would make
-            // no sense.  Instead the calls are likely to be buried inside
-            // a more complex call structure.
+                        // xSemaphoreTakeRecursive() are made on the same mutex.  In real
+                        // code these would not be just sequential calls as this would make
+                        // no sense.  Instead the calls are likely to be buried inside
+                        // a more complex call structure.
             xSemaphoreTakeRecursive( xMutex, ( TickType_t ) 10 );
             xSemaphoreTakeRecursive( xMutex, ( TickType_t ) 10 );
 
             // The mutex has now been 'taken' three times, so will not be
-            // available to another task until it has also been given back
-            // three times.  Again it is unlikely that real code would have
-            // these calls sequentially, it would be more likely that the calls
-            // to xSemaphoreGiveRecursive() would be called as a call stack
-            // unwound.  This is just for demonstrative purposes.
+                        // available to another task until it has also been given back
+                        // three times.  Again it is unlikely that real code would have
+                        // these calls sequentially, it would be more likely that the calls
+                        // to xSemaphoreGiveRecursive() would be called as a call stack
+                        // unwound.  This is just for demonstrative purposes.
             xSemaphoreGiveRecursive( xMutex );
-            xSemaphoreGiveRecursive( xMutex );
-            xSemaphoreGiveRecursive( xMutex );
+                        xSemaphoreGiveRecursive( xMutex );
+                        xSemaphoreGiveRecursive( xMutex );
 
-            // Now the mutex can be taken by other tasks.
+                        // Now the mutex can be taken by other tasks.
         }
         else
         {
@@ -581,7 +581,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
             // We have finished our task.  Return to the top of the loop where
             // we will block on the semaphore until it is time to execute
             // again.  Note when using the semaphore for synchronisation with an
-            // ISR in this manner there is no need to 'give' the semaphore back.
+                        // ISR in this manner there is no need to 'give' the semaphore back.
         }
     }
  }
@@ -597,7 +597,7 @@ typedef QueueHandle_t SemaphoreHandle_t;
     // ... Do other time functions.
 
     // Is it time for vATask () to run?
-    xHigherPriorityTaskWoken = pdFALSE;
+        xHigherPriorityTaskWoken = pdFALSE;
     ucLocalTickCount++;
     if( ucLocalTickCount >= TICKS_TO_WAIT )
     {

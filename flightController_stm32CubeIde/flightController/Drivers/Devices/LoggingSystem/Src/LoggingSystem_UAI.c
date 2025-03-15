@@ -48,10 +48,10 @@
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
-static uint8_t * informationTypeLabel = (uint8_t *)"LOG:INFO:    ";
-static uint8_t * debuggingTypeLabel = (uint8_t *)"LOG:DEBUG:   ";
-static uint8_t * warningTypeLabel = (uint8_t *)"LOG:WARNING: ";
-static uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
+static uint8_t *informationTypeLabel = (uint8_t *)"LOG:INFO:    ";
+static uint8_t *debuggingTypeLabel   = (uint8_t *)"LOG:DEBUG:   ";
+static uint8_t *warningTypeLabel     = (uint8_t *)"LOG:WARNING: ";
+static uint8_t *errorTypeLabel       = (uint8_t *)"LOG:ERROR:   ";
 
 /* --- Private function declarations ----------------------------------------------------------- */
 
@@ -62,7 +62,7 @@ static uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t LOG(uint8_t * message, LOGGING_TYPE_t logType) {
+bool_t LOG(uint8_t *message, LOGGING_TYPE_t logType) {
 
     /* Check parameters */
     if (NULL == message) {

@@ -36,10 +36,10 @@
 #define CONTROL_SYSTEM_SUPPORT_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include "main.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -74,9 +74,9 @@ typedef struct {
     /* IMU Calibration (Gyroscope) */
     bool_t gyroCalibration_calibrationDone;
     bool_t gyroCalibration_fixedCalibration_en;
-    float gyroCalibration_rotationRateRoll;
-    float gyroCalibration_rotationRatePitch;
-    float gyroCalibration_rotationRateYaw;
+    float  gyroCalibration_rotationRateRoll;
+    float  gyroCalibration_rotationRatePitch;
+    float  gyroCalibration_rotationRateYaw;
     /* IMU Measurements (Gyroscope) */
     float gyroMeasurement_rotationRateRoll;
     float gyroMeasurement_rotationRatePitch;
@@ -84,9 +84,9 @@ typedef struct {
     /* IMU Calibration (Accelerometer) */
     bool_t accCalibration_calibrationDone;
     bool_t accCalibration_fixedCalibration_en;
-    float accCalibration_linearAccelerationX;
-    float accCalibration_linearAccelerationY;
-    float accCalibration_linearAccelerationZ;
+    float  accCalibration_linearAccelerationX;
+    float  accCalibration_linearAccelerationY;
+    float  accCalibration_linearAccelerationZ;
     /* IMU Measurements (Accelerometer) */
     float accMeasurement_linearAccelerationX;
     float accMeasurement_linearAccelerationY;
@@ -156,7 +156,7 @@ typedef struct {
  * @param  TODO
  * @retval None
  */
-void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
+void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
 
 /*
  * @brief  Calculates the PID controller output.
@@ -169,7 +169,7 @@ void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float
  *         kD:                 Derivative gain.
  * @retval None
  */
-void CSM_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD);
+void CSM_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD);
 
 /*
  * @brief  Resets the PID controller errors and integral terms values.

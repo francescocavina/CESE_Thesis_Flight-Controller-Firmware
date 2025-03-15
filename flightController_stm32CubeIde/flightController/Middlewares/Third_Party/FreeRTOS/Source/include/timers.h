@@ -59,11 +59,11 @@ or interrupt version of the queue send function should be used. */
 #define tmrCOMMAND_CHANGE_PERIOD             ((BaseType_t)4)
 #define tmrCOMMAND_DELETE                    ((BaseType_t)5)
 
-#define tmrFIRST_FROM_ISR_COMMAND            ((BaseType_t)6)
-#define tmrCOMMAND_START_FROM_ISR            ((BaseType_t)6)
-#define tmrCOMMAND_RESET_FROM_ISR            ((BaseType_t)7)
-#define tmrCOMMAND_STOP_FROM_ISR             ((BaseType_t)8)
-#define tmrCOMMAND_CHANGE_PERIOD_FROM_ISR    ((BaseType_t)9)
+#define tmrFIRST_FROM_ISR_COMMAND         ((BaseType_t)6)
+#define tmrCOMMAND_START_FROM_ISR         ((BaseType_t)6)
+#define tmrCOMMAND_RESET_FROM_ISR         ((BaseType_t)7)
+#define tmrCOMMAND_STOP_FROM_ISR          ((BaseType_t)8)
+#define tmrCOMMAND_CHANGE_PERIOD_FROM_ISR ((BaseType_t)9)
 
 /**
  * Type by which software timers are referenced.  For example, a call to
@@ -72,7 +72,7 @@ or interrupt version of the queue send function should be used. */
  * (for example, xTimerStart(), xTimerReset(), etc.).
  */
 struct tmrTimerControl; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
-typedef struct tmrTimerControl * TimerHandle_t;
+typedef struct tmrTimerControl *TimerHandle_t;
 
 /*
  * Defines the prototype to which timer callback functions must conform.
@@ -223,8 +223,8 @@ typedef void (*PendedFunction_t)(void *, uint32_t);
  * @endverbatim
  */
 #if (configSUPPORT_DYNAMIC_ALLOCATION == 1)
-TimerHandle_t xTimerCreate(const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-                           const TickType_t xTimerPeriodInTicks, const UBaseType_t uxAutoReload, void * const pvTimerID, TimerCallbackFunction_t pxCallbackFunction) PRIVILEGED_FUNCTION;
+TimerHandle_t xTimerCreate(const char *const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                           const TickType_t xTimerPeriodInTicks, const UBaseType_t uxAutoReload, void *const pvTimerID, TimerCallbackFunction_t pxCallbackFunction) PRIVILEGED_FUNCTION;
 #endif
 
 /**
@@ -350,9 +350,9 @@ TimerHandle_t xTimerCreate(const char * const pcTimerName, /*lint !e971 Unqualif
  * @endverbatim
  */
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
-TimerHandle_t xTimerCreateStatic(const char * const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-                                 const TickType_t xTimerPeriodInTicks, const UBaseType_t uxAutoReload, void * const pvTimerID, TimerCallbackFunction_t pxCallbackFunction, StaticTimer_t * pxTimerBuffer) PRIVILEGED_FUNCTION;
-#endif /* configSUPPORT_STATIC_ALLOCATION */
+TimerHandle_t xTimerCreateStatic(const char *const pcTimerName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                                 const TickType_t xTimerPeriodInTicks, const UBaseType_t uxAutoReload, void *const pvTimerID, TimerCallbackFunction_t pxCallbackFunction, StaticTimer_t *pxTimerBuffer) PRIVILEGED_FUNCTION;
+#endif                                                          /* configSUPPORT_STATIC_ALLOCATION */
 
 /**
  * void *pvTimerGetTimerID( TimerHandle_t xTimer );
@@ -374,7 +374,7 @@ TimerHandle_t xTimerCreateStatic(const char * const pcTimerName, /*lint !e971 Un
  *
  * See the xTimerCreate() API function example usage scenario.
  */
-void * pvTimerGetTimerID(const TimerHandle_t xTimer) PRIVILEGED_FUNCTION;
+void *pvTimerGetTimerID(const TimerHandle_t xTimer) PRIVILEGED_FUNCTION;
 
 /**
  * void vTimerSetTimerID( TimerHandle_t xTimer, void *pvNewID );
@@ -395,7 +395,7 @@ void * pvTimerGetTimerID(const TimerHandle_t xTimer) PRIVILEGED_FUNCTION;
  *
  * See the xTimerCreate() API function example usage scenario.
  */
-void vTimerSetTimerID(TimerHandle_t xTimer, void * pvNewID) PRIVILEGED_FUNCTION;
+void vTimerSetTimerID(TimerHandle_t xTimer, void *pvNewID) PRIVILEGED_FUNCTION;
 
 /**
  * BaseType_t xTimerIsTimerActive( TimerHandle_t xTimer );
@@ -1174,7 +1174,7 @@ TaskHandle_t xTimerGetTimerDaemonTaskHandle(void) PRIVILEGED_FUNCTION;
  *	}
  * @endverbatim
  */
-BaseType_t xTimerPendFunctionCallFromISR(PendedFunction_t xFunctionToPend, void * pvParameter1, uint32_t ulParameter2, BaseType_t * pxHigherPriorityTaskWoken) PRIVILEGED_FUNCTION;
+BaseType_t xTimerPendFunctionCallFromISR(PendedFunction_t xFunctionToPend, void *pvParameter1, uint32_t ulParameter2, BaseType_t *pxHigherPriorityTaskWoken) PRIVILEGED_FUNCTION;
 
 /**
  * BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend,
@@ -1208,7 +1208,7 @@ BaseType_t xTimerPendFunctionCallFromISR(PendedFunction_t xFunctionToPend, void 
  * timer daemon task, otherwise pdFALSE is returned.
  *
  */
-BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend, void * pvParameter1, uint32_t ulParameter2, TickType_t xTicksToWait) PRIVILEGED_FUNCTION;
+BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend, void *pvParameter1, uint32_t ulParameter2, TickType_t xTicksToWait) PRIVILEGED_FUNCTION;
 
 /**
  * const char * const pcTimerGetName( TimerHandle_t xTimer );
@@ -1219,7 +1219,7 @@ BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend, void * pvPar
  *
  * @return The name assigned to the timer specified by the xTimer parameter.
  */
-const char * pcTimerGetName(TimerHandle_t xTimer) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+const char *pcTimerGetName(TimerHandle_t xTimer) PRIVILEGED_FUNCTION; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
 /**
  * void vTimerSetReloadMode( TimerHandle_t xTimer, const UBaseType_t uxAutoReload );
@@ -1283,10 +1283,10 @@ TickType_t xTimerGetExpiryTime(TimerHandle_t xTimer) PRIVILEGED_FUNCTION;
  * for use by the kernel only.
  */
 BaseType_t xTimerCreateTimerTask(void) PRIVILEGED_FUNCTION;
-BaseType_t xTimerGenericCommand(TimerHandle_t xTimer, const BaseType_t xCommandID, const TickType_t xOptionalValue, BaseType_t * const pxHigherPriorityTaskWoken, const TickType_t xTicksToWait) PRIVILEGED_FUNCTION;
+BaseType_t xTimerGenericCommand(TimerHandle_t xTimer, const BaseType_t xCommandID, const TickType_t xOptionalValue, BaseType_t *const pxHigherPriorityTaskWoken, const TickType_t xTicksToWait) PRIVILEGED_FUNCTION;
 
 #if (configUSE_TRACE_FACILITY == 1)
-void vTimerSetTimerNumber(TimerHandle_t xTimer, UBaseType_t uxTimerNumber) PRIVILEGED_FUNCTION;
+void        vTimerSetTimerNumber(TimerHandle_t xTimer, UBaseType_t uxTimerNumber) PRIVILEGED_FUNCTION;
 UBaseType_t uxTimerGetTimerNumber(TimerHandle_t xTimer) PRIVILEGED_FUNCTION;
 #endif
 

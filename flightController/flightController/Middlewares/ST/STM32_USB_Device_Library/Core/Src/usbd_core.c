@@ -84,7 +84,8 @@
  * @param  id: Low level core index
  * @retval status: USBD Status
  */
-USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef * pdev, USBD_DescriptorsTypeDef * pdesc, uint8_t id) {
+USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef      *pdev,
+                             USBD_DescriptorsTypeDef *pdesc, uint8_t id) {
     USBD_StatusTypeDef ret;
 
     /* Check whether the USB Host handle is valid */
@@ -99,17 +100,17 @@ USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef * pdev, USBD_DescriptorsTypeDef 
     /* Parse the table of classes in use */
     for (uint32_t i = 0; i < USBD_MAX_SUPPORTED_CLASS; i++) {
         /* Unlink previous class*/
-        pdev->pClass[i] = NULL;
+        pdev->pClass[i]    = NULL;
         pdev->pUserData[i] = NULL;
 
         /* Set class as inactive */
         pdev->tclasslist[i].Active = 0;
-        pdev->NumClasses = 0;
-        pdev->classId = 0;
+        pdev->NumClasses           = 0;
+        pdev->classId              = 0;
     }
 #else
     /* Unlink previous class*/
-    pdev->pClass[0] = NULL;
+    pdev->pClass[0]    = NULL;
     pdev->pUserData[0] = NULL;
 #endif /* USE_USBD_COMPOSITE */
 
@@ -122,7 +123,7 @@ USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef * pdev, USBD_DescriptorsTypeDef 
 
     /* Set Device initial State */
     pdev->dev_state = USBD_STATE_DEFAULT;
-    pdev->id = id;
+    pdev->id        = id;
 
     /* Initialize low level driver */
     ret = USBD_LL_Init(pdev);
@@ -136,7 +137,7 @@ USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef * pdev, USBD_DescriptorsTypeDef 
  * @param  pdev: device instance
  * @retval status: USBD Status
  */
-USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev) {
     USBD_StatusTypeDef ret;
 
     /* Disconnect the USB Device */
@@ -168,7 +169,7 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef * pdev) {
 #endif /* USE_USBD_COMPOSITE */
 
     /* Free Device descriptors resources */
-    pdev->pDesc = NULL;
+    pdev->pDesc     = NULL;
     pdev->pConfDesc = NULL;
 
     /* DeInitialize low level driver */
@@ -184,7 +185,7 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef * pdev) {
  * @param  pclass: Class handle
  * @retval USBD Status
  */
-USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef * pdev, USBD_ClassTypeDef * pclass) {
+USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass) {
     uint16_t len = 0U;
 
     if (pclass == NULL) {
@@ -224,15 +225,16 @@ USBD_StatusTypeDef USBD_RegisterClass(USBD_HandleTypeDef * pdev, USBD_ClassTypeD
  * @param  EpAddr: Endpoint Address handle
  * @retval USBD Status
  */
-USBD_StatusTypeDef USBD_RegisterClassComposite(USBD_HandleTypeDef * pdev, USBD_ClassTypeDef * pclass, USBD_CompositeClassTypeDef classtype, uint8_t * EpAddr) {
+USBD_StatusTypeDef USBD_RegisterClassComposite(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass,
+                                               USBD_CompositeClassTypeDef classtype, uint8_t *EpAddr) {
     USBD_StatusTypeDef ret = USBD_OK;
-    uint16_t len = 0U;
+    uint16_t           len = 0U;
 
     if ((pdev->classId < USBD_MAX_SUPPORTED_CLASS) && (pdev->NumClasses < USBD_MAX_SUPPORTED_CLASS)) {
         if ((uint32_t)pclass != 0U) {
             /* Link the class to the USB Device handle */
             pdev->pClass[pdev->classId] = pclass;
-            ret = USBD_OK;
+            ret                         = USBD_OK;
 
             pdev->tclasslist[pdev->classId].EpAdd = EpAddr;
 
@@ -268,10 +270,10 @@ USBD_StatusTypeDef USBD_RegisterClassComposite(USBD_HandleTypeDef * pdev, USBD_C
  * @param  pdev: Device Handle
  * @retval USBD Status
  */
-USBD_StatusTypeDef USBD_UnRegisterClassComposite(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_UnRegisterClassComposite(USBD_HandleTypeDef *pdev) {
     USBD_StatusTypeDef ret = USBD_FAIL;
-    uint8_t idx1;
-    uint8_t idx2;
+    uint8_t            idx1;
+    uint8_t            idx2;
 
     /* Unroll all activated classes */
     for (idx1 = 0; idx1 < pdev->NumClasses; idx1++) {
@@ -296,17 +298,17 @@ USBD_StatusTypeDef USBD_UnRegisterClassComposite(USBD_HandleTypeDef * pdev) {
             pdev->pClass[pdev->classId] = NULL;
 
             /* Free the class location in classes table and reset its parameters to zero */
-            pdev->tclasslist[pdev->classId].ClassType = CLASS_TYPE_NONE;
-            pdev->tclasslist[pdev->classId].ClassId = 0U;
-            pdev->tclasslist[pdev->classId].Active = 0U;
-            pdev->tclasslist[pdev->classId].NumEps = 0U;
-            pdev->tclasslist[pdev->classId].NumIf = 0U;
+            pdev->tclasslist[pdev->classId].ClassType   = CLASS_TYPE_NONE;
+            pdev->tclasslist[pdev->classId].ClassId     = 0U;
+            pdev->tclasslist[pdev->classId].Active      = 0U;
+            pdev->tclasslist[pdev->classId].NumEps      = 0U;
+            pdev->tclasslist[pdev->classId].NumIf       = 0U;
             pdev->tclasslist[pdev->classId].CurrPcktSze = 0U;
 
             for (idx2 = 0U; idx2 < USBD_MAX_CLASS_ENDPOINTS; idx2++) {
-                pdev->tclasslist[pdev->classId].Eps[idx2].add = 0U;
-                pdev->tclasslist[pdev->classId].Eps[idx2].type = 0U;
-                pdev->tclasslist[pdev->classId].Eps[idx2].size = 0U;
+                pdev->tclasslist[pdev->classId].Eps[idx2].add     = 0U;
+                pdev->tclasslist[pdev->classId].Eps[idx2].type    = 0U;
+                pdev->tclasslist[pdev->classId].Eps[idx2].size    = 0U;
                 pdev->tclasslist[pdev->classId].Eps[idx2].is_used = 0U;
             }
 
@@ -320,7 +322,7 @@ USBD_StatusTypeDef USBD_UnRegisterClassComposite(USBD_HandleTypeDef * pdev) {
     (void)USBD_CMPST_ClearConfDesc(pdev);
 
     /* Reset the class ID and number of classes */
-    pdev->classId = 0U;
+    pdev->classId    = 0U;
     pdev->NumClasses = 0U;
 
     return ret;
@@ -334,7 +336,7 @@ USBD_StatusTypeDef USBD_UnRegisterClassComposite(USBD_HandleTypeDef * pdev) {
  * @param  pUserCallback: User Callback
  * @retval USBD Status
  */
-USBD_StatusTypeDef USBD_RegisterDevStateCallback(USBD_HandleTypeDef * pdev, USBD_DevStateCallbackTypeDef pUserCallback) {
+USBD_StatusTypeDef USBD_RegisterDevStateCallback(USBD_HandleTypeDef *pdev, USBD_DevStateCallbackTypeDef pUserCallback) {
     pdev->DevStateCallback = pUserCallback;
 
     return USBD_OK;
@@ -347,7 +349,7 @@ USBD_StatusTypeDef USBD_RegisterDevStateCallback(USBD_HandleTypeDef * pdev, USBD
  * @param  pdev: Device Handle
  * @retval USBD Status
  */
-USBD_StatusTypeDef USBD_Start(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_Start(USBD_HandleTypeDef *pdev) {
 #ifdef USE_USBD_COMPOSITE
     pdev->classId = 0U;
 #endif /* USE_USBD_COMPOSITE */
@@ -362,7 +364,7 @@ USBD_StatusTypeDef USBD_Start(USBD_HandleTypeDef * pdev) {
  * @param  pdev: Device Handle
  * @retval USBD Status
  */
-USBD_StatusTypeDef USBD_Stop(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_Stop(USBD_HandleTypeDef *pdev) {
     /* Disconnect USB Device */
     (void)USBD_LL_Stop(pdev);
 
@@ -397,7 +399,7 @@ USBD_StatusTypeDef USBD_Stop(USBD_HandleTypeDef * pdev) {
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_RunTestMode(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_RunTestMode(USBD_HandleTypeDef *pdev) {
 #ifdef USBD_HS_TESTMODE_ENABLE
     USBD_StatusTypeDef ret;
 
@@ -421,7 +423,7 @@ USBD_StatusTypeDef USBD_RunTestMode(USBD_HandleTypeDef * pdev) {
  * @retval status
  */
 
-USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef * pdev, uint8_t cfgidx) {
+USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
     USBD_StatusTypeDef ret = USBD_OK;
 
 #ifdef USE_USBD_COMPOSITE
@@ -455,7 +457,7 @@ USBD_StatusTypeDef USBD_SetClassConfig(USBD_HandleTypeDef * pdev, uint8_t cfgidx
  * @param  cfgidx: configuration index
  * @retval status
  */
-USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef * pdev, uint8_t cfgidx) {
+USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
     USBD_StatusTypeDef ret = USBD_OK;
 
 #ifdef USE_USBD_COMPOSITE
@@ -489,7 +491,7 @@ USBD_StatusTypeDef USBD_ClrClassConfig(USBD_HandleTypeDef * pdev, uint8_t cfgidx
  * @param  psetup: setup packet buffer pointer
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_SetupStage(USBD_HandleTypeDef * pdev, uint8_t * psetup) {
+USBD_StatusTypeDef USBD_LL_SetupStage(USBD_HandleTypeDef *pdev, uint8_t *psetup) {
     USBD_StatusTypeDef ret;
 
     USBD_ParseSetupRequest(&pdev->request, psetup);
@@ -527,10 +529,11 @@ USBD_StatusTypeDef USBD_LL_SetupStage(USBD_HandleTypeDef * pdev, uint8_t * psetu
  * @param  pdata: data pointer
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef * pdev, uint8_t epnum, uint8_t * pdata) {
-    USBD_EndpointTypeDef * pep;
-    USBD_StatusTypeDef ret = USBD_OK;
-    uint8_t idx;
+USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef *pdev,
+                                        uint8_t epnum, uint8_t *pdata) {
+    USBD_EndpointTypeDef *pep;
+    USBD_StatusTypeDef    ret = USBD_OK;
+    uint8_t               idx;
 
     if (epnum == 0U) {
         pep = &pdev->ep_out[0];
@@ -585,7 +588,7 @@ USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef * pdev, uint8_t epnum
             if (pdev->dev_state == USBD_STATE_CONFIGURED) {
                 if (pdev->pClass[idx]->DataOut != NULL) {
                     pdev->classId = idx;
-                    ret = (USBD_StatusTypeDef)pdev->pClass[idx]->DataOut(pdev, epnum);
+                    ret           = (USBD_StatusTypeDef)pdev->pClass[idx]->DataOut(pdev, epnum);
                 }
             }
             if (ret != USBD_OK) {
@@ -605,10 +608,11 @@ USBD_StatusTypeDef USBD_LL_DataOutStage(USBD_HandleTypeDef * pdev, uint8_t epnum
  * @param  pdata: data pointer
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef * pdev, uint8_t epnum, uint8_t * pdata) {
-    USBD_EndpointTypeDef * pep;
-    USBD_StatusTypeDef ret;
-    uint8_t idx;
+USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef *pdev,
+                                       uint8_t epnum, uint8_t *pdata) {
+    USBD_EndpointTypeDef *pep;
+    USBD_StatusTypeDef    ret;
+    uint8_t               idx;
 
     if (epnum == 0U) {
         pep = &pdev->ep_in[0];
@@ -623,7 +627,9 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef * pdev, uint8_t epnum,
                 (void)USBD_LL_PrepareReceive(pdev, 0U, NULL, 0U);
             } else {
                 /* last packet is MPS multiple, so send ZLP packet */
-                if ((pep->maxpacket == pep->rem_length) && (pep->total_length >= pep->maxpacket) && (pep->total_length < pdev->ep0_data_len)) {
+                if ((pep->maxpacket == pep->rem_length) &&
+                    (pep->total_length >= pep->maxpacket) &&
+                    (pep->total_length < pdev->ep0_data_len)) {
                     (void)USBD_CtlContinueSendData(pdev, NULL, 0U);
                     pdev->ep0_data_len = 0U;
 
@@ -655,7 +661,7 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef * pdev, uint8_t epnum,
             if (pdev->dev_state == USBD_STATE_CONFIGURED) {
                 if (pdev->pClass[idx]->DataIn != NULL) {
                     pdev->classId = idx;
-                    ret = (USBD_StatusTypeDef)pdev->pClass[idx]->DataIn(pdev, epnum);
+                    ret           = (USBD_StatusTypeDef)pdev->pClass[idx]->DataIn(pdev, epnum);
 
                     if (ret != USBD_OK) {
                         return ret;
@@ -674,15 +680,15 @@ USBD_StatusTypeDef USBD_LL_DataInStage(USBD_HandleTypeDef * pdev, uint8_t epnum,
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_Reset(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_LL_Reset(USBD_HandleTypeDef *pdev) {
     USBD_StatusTypeDef ret = USBD_OK;
 
     /* Upon Reset call user call back */
-    pdev->dev_state = USBD_STATE_DEFAULT;
-    pdev->ep0_state = USBD_EP0_IDLE;
-    pdev->dev_config = 0U;
+    pdev->dev_state         = USBD_STATE_DEFAULT;
+    pdev->ep0_state         = USBD_EP0_IDLE;
+    pdev->dev_config        = 0U;
     pdev->dev_remote_wakeup = 0U;
-    pdev->dev_test_mode = 0U;
+    pdev->dev_test_mode     = 0U;
 
 #ifdef USE_USBD_COMPOSITE
     /* Parse the table of classes in use */
@@ -733,7 +739,8 @@ USBD_StatusTypeDef USBD_LL_Reset(USBD_HandleTypeDef * pdev) {
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_SetSpeed(USBD_HandleTypeDef * pdev, USBD_SpeedTypeDef speed) {
+USBD_StatusTypeDef USBD_LL_SetSpeed(USBD_HandleTypeDef *pdev,
+                                    USBD_SpeedTypeDef   speed) {
     pdev->dev_speed = speed;
 
     return USBD_OK;
@@ -745,7 +752,7 @@ USBD_StatusTypeDef USBD_LL_SetSpeed(USBD_HandleTypeDef * pdev, USBD_SpeedTypeDef
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef *pdev) {
     if (pdev->dev_state != USBD_STATE_SUSPENDED) {
         pdev->dev_old_state = pdev->dev_state;
     }
@@ -761,7 +768,7 @@ USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef * pdev) {
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_Resume(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_LL_Resume(USBD_HandleTypeDef *pdev) {
     if (pdev->dev_state == USBD_STATE_SUSPENDED) {
         pdev->dev_state = pdev->dev_old_state;
     }
@@ -775,7 +782,7 @@ USBD_StatusTypeDef USBD_LL_Resume(USBD_HandleTypeDef * pdev) {
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef *pdev) {
     /* The SOF event can be distributed for all classes that support it */
     if (pdev->dev_state == USBD_STATE_CONFIGURED) {
 #ifdef USE_USBD_COMPOSITE
@@ -810,7 +817,8 @@ USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef * pdev) {
  * @param  epnum: Endpoint number
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_IsoINIncomplete(USBD_HandleTypeDef * pdev, uint8_t epnum) {
+USBD_StatusTypeDef USBD_LL_IsoINIncomplete(USBD_HandleTypeDef *pdev,
+                                           uint8_t             epnum) {
     if (pdev->pClass[pdev->classId] == NULL) {
         return USBD_FAIL;
     }
@@ -831,7 +839,8 @@ USBD_StatusTypeDef USBD_LL_IsoINIncomplete(USBD_HandleTypeDef * pdev, uint8_t ep
  * @param  epnum: Endpoint number
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_IsoOUTIncomplete(USBD_HandleTypeDef * pdev, uint8_t epnum) {
+USBD_StatusTypeDef USBD_LL_IsoOUTIncomplete(USBD_HandleTypeDef *pdev,
+                                            uint8_t             epnum) {
     if (pdev->pClass[pdev->classId] == NULL) {
         return USBD_FAIL;
     }
@@ -851,7 +860,7 @@ USBD_StatusTypeDef USBD_LL_IsoOUTIncomplete(USBD_HandleTypeDef * pdev, uint8_t e
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_DevConnected(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_LL_DevConnected(USBD_HandleTypeDef *pdev) {
     /* Prevent unused argument compilation warning */
     UNUSED(pdev);
 
@@ -864,7 +873,7 @@ USBD_StatusTypeDef USBD_LL_DevConnected(USBD_HandleTypeDef * pdev) {
  * @param  pdev: device instance
  * @retval status
  */
-USBD_StatusTypeDef USBD_LL_DevDisconnected(USBD_HandleTypeDef * pdev) {
+USBD_StatusTypeDef USBD_LL_DevDisconnected(USBD_HandleTypeDef *pdev) {
     USBD_StatusTypeDef ret = USBD_OK;
 
     /* Free Class Resources */
@@ -902,7 +911,7 @@ USBD_StatusTypeDef USBD_LL_DevDisconnected(USBD_HandleTypeDef * pdev) {
  * @param  index : selected interface number
  * @retval index of the class using the selected interface number. OxFF if no class found.
  */
-uint8_t USBD_CoreFindIF(USBD_HandleTypeDef * pdev, uint8_t index) {
+uint8_t USBD_CoreFindIF(USBD_HandleTypeDef *pdev, uint8_t index) {
 #ifdef USE_USBD_COMPOSITE
     /* Parse the table of classes in use */
     for (uint32_t i = 0U; i < USBD_MAX_SUPPORTED_CLASS; i++) {
@@ -936,7 +945,7 @@ uint8_t USBD_CoreFindIF(USBD_HandleTypeDef * pdev, uint8_t index) {
  * @param  index : selected endpoint number
  * @retval index of the class using the selected endpoint number. 0xFF if no class found.
  */
-uint8_t USBD_CoreFindEP(USBD_HandleTypeDef * pdev, uint8_t index) {
+uint8_t USBD_CoreFindEP(USBD_HandleTypeDef *pdev, uint8_t index) {
 #ifdef USE_USBD_COMPOSITE
     /* Parse the table of classes in use */
     for (uint32_t i = 0U; i < USBD_MAX_SUPPORTED_CLASS; i++) {
@@ -973,12 +982,14 @@ uint8_t USBD_CoreFindEP(USBD_HandleTypeDef * pdev, uint8_t index) {
  * @param  ClassId: The Class ID
  * @retval Address of the selected endpoint or 0xFFU if no endpoint found.
  */
-uint8_t USBD_CoreGetEPAdd(USBD_HandleTypeDef * pdev, uint8_t ep_dir, uint8_t ep_type, uint8_t ClassId) {
+uint8_t USBD_CoreGetEPAdd(USBD_HandleTypeDef *pdev, uint8_t ep_dir, uint8_t ep_type, uint8_t ClassId) {
     uint8_t idx;
 
     /* Find the EP address in the selected class table */
     for (idx = 0; idx < pdev->tclasslist[ClassId].NumEps; idx++) {
-        if (((pdev->tclasslist[ClassId].Eps[idx].add & USBD_EP_IN) == ep_dir) && (pdev->tclasslist[ClassId].Eps[idx].type == ep_type) && (pdev->tclasslist[ClassId].Eps[idx].is_used != 0U)) {
+        if (((pdev->tclasslist[ClassId].Eps[idx].add & USBD_EP_IN) == ep_dir) &&
+            (pdev->tclasslist[ClassId].Eps[idx].type == ep_type) &&
+            (pdev->tclasslist[ClassId].Eps[idx].is_used != 0U)) {
             return (pdev->tclasslist[ClassId].Eps[idx].add);
         }
     }
@@ -996,11 +1007,11 @@ uint8_t USBD_CoreGetEPAdd(USBD_HandleTypeDef * pdev, uint8_t ep_dir, uint8_t ep_
  * @param  EpAddr:  endpoint address
  * @retval pointer to video endpoint descriptor
  */
-void * USBD_GetEpDesc(uint8_t * pConfDesc, uint8_t EpAddr) {
-    USBD_DescHeaderTypeDef * pdesc = (USBD_DescHeaderTypeDef *)(void *)pConfDesc;
-    USBD_ConfigDescTypeDef * desc = (USBD_ConfigDescTypeDef *)(void *)pConfDesc;
-    USBD_EpDescTypeDef * pEpDesc = NULL;
-    uint16_t ptr;
+void *USBD_GetEpDesc(uint8_t *pConfDesc, uint8_t EpAddr) {
+    USBD_DescHeaderTypeDef *pdesc   = (USBD_DescHeaderTypeDef *)(void *)pConfDesc;
+    USBD_ConfigDescTypeDef *desc    = (USBD_ConfigDescTypeDef *)(void *)pConfDesc;
+    USBD_EpDescTypeDef     *pEpDesc = NULL;
+    uint16_t                ptr;
 
     if (desc->wTotalLength > desc->bLength) {
         ptr = desc->bLength;
@@ -1030,8 +1041,8 @@ void * USBD_GetEpDesc(uint8_t * pConfDesc, uint8_t EpAddr) {
  * @param  ptr: data pointer inside the descriptor
  * @retval next header
  */
-USBD_DescHeaderTypeDef * USBD_GetNextDesc(uint8_t * pbuf, uint16_t * ptr) {
-    USBD_DescHeaderTypeDef * pnext = (USBD_DescHeaderTypeDef *)(void *)pbuf;
+USBD_DescHeaderTypeDef *USBD_GetNextDesc(uint8_t *pbuf, uint16_t *ptr) {
+    USBD_DescHeaderTypeDef *pnext = (USBD_DescHeaderTypeDef *)(void *)pbuf;
 
     *ptr += pnext->bLength;
     pnext = (USBD_DescHeaderTypeDef *)(void *)(pbuf + pnext->bLength);

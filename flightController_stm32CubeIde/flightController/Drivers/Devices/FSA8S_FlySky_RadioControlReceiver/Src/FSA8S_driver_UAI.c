@@ -42,8 +42,8 @@
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include "FSA8S_driver_calibration.h"
 #include "FSA8S_driver_UAI.h"
+#include "FSA8S_driver_calibration.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 #define USE_FREERTOS // Remove comment when using FreeRTOS
@@ -96,7 +96,7 @@ static void FSA8S_AmendData();
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t FSA8S_CheckFirstBytes(IBUS_HandleTypeDef_t * hibus) {
+static bool_t FSA8S_CheckFirstBytes(IBUS_HandleTypeDef_t *hibus) {
 
     /* Check parameter */
     if (NULL == hibus) {
@@ -113,7 +113,7 @@ static bool_t FSA8S_CheckFirstBytes(IBUS_HandleTypeDef_t * hibus) {
     }
 }
 
-static bool_t FSA8S_Checksum(IBUS_HandleTypeDef_t * hibus) {
+static bool_t FSA8S_Checksum(IBUS_HandleTypeDef_t *hibus) {
 
     /* Declare variable for checksum value in data received */
     uint16_t sentChecksum;
@@ -144,7 +144,7 @@ static bool_t FSA8S_Checksum(IBUS_HandleTypeDef_t * hibus) {
     }
 }
 
-static void FSA8S_AmendData(IBUS_HandleTypeDef_t * hibus) {
+static void FSA8S_AmendData(IBUS_HandleTypeDef_t *hibus) {
 
     /* Declare variable for channel value */
     uint16_t channelValue;
@@ -174,7 +174,7 @@ static void FSA8S_AmendData(IBUS_HandleTypeDef_t * hibus) {
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
-IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
+IBUS_HandleTypeDef_t *FSA8S_Init(UART_HandleTypeDef *huart) {
 
     /* Define variable to track number of initializations */
     static uint8_t alreadyInitialized = false;
@@ -192,22 +192,22 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
     /* Allocate dynamic memory for the IBUS_HandleTypeDef_t structure and for the buffer to receive
      * data */
 #ifdef USE_FREERTOS
-    IBUS_HandleTypeDef_t * hibus = (IBUS_HandleTypeDef_t *)pvPortMalloc(sizeof(IBUS_HandleTypeDef_t));
-    uint8_t * buffer = (uint8_t *)pvPortMalloc(sizeof(uint8_t) * IBUS_BUFFER_LENGTH);
-    uint16_t * data = (uint16_t *)pvPortMalloc(sizeof(uint16_t) * IBUS_CHANNELS);
+    IBUS_HandleTypeDef_t *hibus  = (IBUS_HandleTypeDef_t *)pvPortMalloc(sizeof(IBUS_HandleTypeDef_t));
+    uint8_t              *buffer = (uint8_t *)pvPortMalloc(sizeof(uint8_t) * IBUS_BUFFER_LENGTH);
+    uint16_t             *data   = (uint16_t *)pvPortMalloc(sizeof(uint16_t) * IBUS_CHANNELS);
 #else
-    IBUS_HandleTypeDef_t * hibus = (IBUS_HandleTypeDef_t *)malloc(sizeof(IBUS_HandleTypeDef_t));
-    uint8_t * buffer = (uint8_t *)malloc(sizeof(uint8_t) * IBUS_BUFFER_LENGTH);
-    uint16_t * data = (uint16_t *)malloc(sizeof(uint16_t) * IBUS_CHANNELS);
+    IBUS_HandleTypeDef_t *hibus  = (IBUS_HandleTypeDef_t *)malloc(sizeof(IBUS_HandleTypeDef_t));
+    uint8_t              *buffer = (uint8_t *)malloc(sizeof(uint8_t) * IBUS_BUFFER_LENGTH);
+    uint16_t             *data   = (uint16_t *)malloc(sizeof(uint16_t) * IBUS_CHANNELS);
 #endif
 
     /* Initialize iBus_HandleTypeDef structure */
     if (hibus) {
-        hibus->huart = huart;
-        hibus->buffer = buffer;
+        hibus->huart      = huart;
+        hibus->buffer     = buffer;
         hibus->bufferSize = IBUS_BUFFER_LENGTH;
-        hibus->data = data;
-        hibus->channels = IBUS_CHANNELS;
+        hibus->data       = data;
+        hibus->channels   = IBUS_CHANNELS;
     } else {
         /* Dynamic memory allocation was not successful */
 #ifdef USE_FREERTOS
@@ -244,7 +244,7 @@ IBUS_HandleTypeDef_t * FSA8S_Init(UART_HandleTypeDef * huart) {
     }
 }
 
-uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t * hibus, FSA8S_CHANNEL_t channel) {
+uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel) {
 
     /* Check parameter */
     if (NULL == hibus) {

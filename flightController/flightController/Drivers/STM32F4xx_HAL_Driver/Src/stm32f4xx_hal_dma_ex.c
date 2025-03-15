@@ -57,7 +57,7 @@
 /** @addtogroup DMAEx_Private_Functions
  * @{
  */
-static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef * hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength);
+static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength);
 /**
  * @}
  */
@@ -95,7 +95,7 @@ static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef * hdma, uint32_t SrcAddre
  * @param  DataLength The length of data to be transferred from source to destination
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart(DMA_HandleTypeDef * hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength) {
+HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength) {
     HAL_StatusTypeDef status = HAL_OK;
 
     /* Check the parameters */
@@ -104,7 +104,7 @@ HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart(DMA_HandleTypeDef * hdma, uint32_t 
     /* Memory-to-memory transfer not supported in double buffering mode */
     if (hdma->Init.Direction == DMA_MEMORY_TO_MEMORY) {
         hdma->ErrorCode = HAL_DMA_ERROR_NOT_SUPPORTED;
-        status = HAL_ERROR;
+        status          = HAL_ERROR;
     } else {
         /* Process Locked */
         __HAL_LOCK(hdma);
@@ -142,7 +142,7 @@ HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart(DMA_HandleTypeDef * hdma, uint32_t 
  * @param  DataLength The length of data to be transferred from source to destination
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart_IT(DMA_HandleTypeDef * hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength) {
+HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart_IT(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t SecondMemAddress, uint32_t DataLength) {
     HAL_StatusTypeDef status = HAL_OK;
 
     /* Check the parameters */
@@ -220,7 +220,7 @@ HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart_IT(DMA_HandleTypeDef * hdma, uint32
  *         transfer use MEMORY0.
  * @retval HAL status
  */
-HAL_StatusTypeDef HAL_DMAEx_ChangeMemory(DMA_HandleTypeDef * hdma, uint32_t Address, HAL_DMA_MemoryTypeDef memory) {
+HAL_StatusTypeDef HAL_DMAEx_ChangeMemory(DMA_HandleTypeDef *hdma, uint32_t Address, HAL_DMA_MemoryTypeDef memory) {
     if (memory == MEMORY0) {
         /* change the memory0 address */
         hdma->Instance->M0AR = Address;
@@ -253,7 +253,7 @@ HAL_StatusTypeDef HAL_DMAEx_ChangeMemory(DMA_HandleTypeDef * hdma, uint32_t Addr
  * @param  DataLength The length of data to be transferred from source to destination
  * @retval HAL status
  */
-static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef * hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength) {
+static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength) {
     /* Configure DMA Stream data length */
     hdma->Instance->NDTR = DataLength;
 

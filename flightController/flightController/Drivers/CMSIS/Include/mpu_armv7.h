@@ -23,7 +23,7 @@
  */
 
 #if defined(__ICCARM__)
-#pragma system_include /* treat file as system include file for MISRA check */
+#pragma system_include      /* treat file as system include file for MISRA check */
 #elif defined(__clang__)
 #pragma clang system_header /* treat file as system include file */
 #endif
@@ -60,19 +60,22 @@
 #define ARM_MPU_REGION_SIZE_2GB   ((uint8_t)0x1EU) ///!< MPU Region Size 2 GBytes
 #define ARM_MPU_REGION_SIZE_4GB   ((uint8_t)0x1FU) ///!< MPU Region Size 4 GBytes
 
-#define ARM_MPU_AP_NONE           0U ///!< MPU Access Permission no access
-#define ARM_MPU_AP_PRIV           1U ///!< MPU Access Permission privileged access only
-#define ARM_MPU_AP_URO            2U ///!< MPU Access Permission unprivileged access read-only
-#define ARM_MPU_AP_FULL           3U ///!< MPU Access Permission full access
-#define ARM_MPU_AP_PRO            5U ///!< MPU Access Permission privileged access read-only
-#define ARM_MPU_AP_RO             6U ///!< MPU Access Permission read-only access
+#define ARM_MPU_AP_NONE 0U                         ///!< MPU Access Permission no access
+#define ARM_MPU_AP_PRIV 1U                         ///!< MPU Access Permission privileged access only
+#define ARM_MPU_AP_URO  2U                         ///!< MPU Access Permission unprivileged access read-only
+#define ARM_MPU_AP_FULL 3U                         ///!< MPU Access Permission full access
+#define ARM_MPU_AP_PRO  5U                         ///!< MPU Access Permission privileged access read-only
+#define ARM_MPU_AP_RO   6U                         ///!< MPU Access Permission read-only access
 
 /** MPU Region Base Address Register Value
  *
  * \param Region The region to be configured, number 0 to 15.
  * \param BaseAddress The base address for the region.
  */
-#define ARM_MPU_RBAR(Region, BaseAddress) (((BaseAddress)&MPU_RBAR_ADDR_Msk) | ((Region)&MPU_RBAR_REGION_Msk) | (MPU_RBAR_VALID_Msk))
+#define ARM_MPU_RBAR(Region, BaseAddress) \
+    (((BaseAddress)&MPU_RBAR_ADDR_Msk) |  \
+     ((Region)&MPU_RBAR_REGION_Msk) |     \
+     (MPU_RBAR_VALID_Msk))
 
 /**
  * MPU Memory Access Attributes
@@ -82,8 +85,11 @@
  * \param IsCacheable       Region is cacheable, i.e. its value may be kept in cache.
  * \param IsBufferable      Region is bufferable, i.e. using write-back caching. Cacheable but non-bufferable regions use write-through policy.
  */
-#define ARM_MPU_ACCESS_(TypeExtField, IsShareable, IsCacheable, IsBufferable)                                                                                                                                                                            \
-    ((((TypeExtField) << MPU_RASR_TEX_Pos) & MPU_RASR_TEX_Msk) | (((IsShareable) << MPU_RASR_S_Pos) & MPU_RASR_S_Msk) | (((IsCacheable) << MPU_RASR_C_Pos) & MPU_RASR_C_Msk) | (((IsBufferable) << MPU_RASR_B_Pos) & MPU_RASR_B_Msk))
+#define ARM_MPU_ACCESS_(TypeExtField, IsShareable, IsCacheable, IsBufferable) \
+    ((((TypeExtField) << MPU_RASR_TEX_Pos) & MPU_RASR_TEX_Msk) |              \
+     (((IsShareable) << MPU_RASR_S_Pos) & MPU_RASR_S_Msk) |                   \
+     (((IsCacheable) << MPU_RASR_C_Pos) & MPU_RASR_C_Msk) |                   \
+     (((IsBufferable) << MPU_RASR_B_Pos) & MPU_RASR_B_Msk))
 
 /**
  * MPU Region Attribute and Size Register Value
@@ -94,9 +100,13 @@
  * \param SubRegionDisable  Sub-region disable field.
  * \param Size              Region size of the region to be configured, for example 4K, 8K.
  */
-#define ARM_MPU_RASR_EX(DisableExec, AccessPermission, AccessAttributes, SubRegionDisable, Size)                                                                                                                                                         \
-    ((((DisableExec) << MPU_RASR_XN_Pos) & MPU_RASR_XN_Msk) | (((AccessPermission) << MPU_RASR_AP_Pos) & MPU_RASR_AP_Msk) | (((AccessAttributes) & (MPU_RASR_TEX_Msk | MPU_RASR_S_Msk | MPU_RASR_C_Msk | MPU_RASR_B_Msk))) |                             \
-     (((SubRegionDisable) << MPU_RASR_SRD_Pos) & MPU_RASR_SRD_Msk) | (((Size) << MPU_RASR_SIZE_Pos) & MPU_RASR_SIZE_Msk) | (((MPU_RASR_ENABLE_Msk))))
+#define ARM_MPU_RASR_EX(DisableExec, AccessPermission, AccessAttributes, SubRegionDisable, Size)      \
+    ((((DisableExec) << MPU_RASR_XN_Pos) & MPU_RASR_XN_Msk) |                                         \
+     (((AccessPermission) << MPU_RASR_AP_Pos) & MPU_RASR_AP_Msk) |                                    \
+     (((AccessAttributes) & (MPU_RASR_TEX_Msk | MPU_RASR_S_Msk | MPU_RASR_C_Msk | MPU_RASR_B_Msk))) | \
+     (((SubRegionDisable) << MPU_RASR_SRD_Pos) & MPU_RASR_SRD_Msk) |                                  \
+     (((Size) << MPU_RASR_SIZE_Pos) & MPU_RASR_SIZE_Msk) |                                            \
+     (((MPU_RASR_ENABLE_Msk))))
 
 /**
  * MPU Region Attribute and Size Register Value
@@ -110,7 +120,7 @@
  * \param SubRegionDisable  Sub-region disable field.
  * \param Size              Region size of the region to be configured, for example 4K, 8K.
  */
-#define ARM_MPU_RASR(DisableExec, AccessPermission, TypeExtField, IsShareable, IsCacheable, IsBufferable, SubRegionDisable, Size)                                                                                                                        \
+#define ARM_MPU_RASR(DisableExec, AccessPermission, TypeExtField, IsShareable, IsCacheable, IsBufferable, SubRegionDisable, Size) \
     ARM_MPU_RASR_EX(DisableExec, AccessPermission, ARM_MPU_ACCESS_(TypeExtField, IsShareable, IsCacheable, IsBufferable), SubRegionDisable, Size)
 
 /**
@@ -203,7 +213,7 @@ __STATIC_INLINE void ARM_MPU_Disable(void) {
  * \param rnr Region number to be cleared.
  */
 __STATIC_INLINE void ARM_MPU_ClrRegion(uint32_t rnr) {
-    MPU->RNR = rnr;
+    MPU->RNR  = rnr;
     MPU->RASR = 0U;
 }
 
@@ -222,7 +232,7 @@ __STATIC_INLINE void ARM_MPU_SetRegion(uint32_t rbar, uint32_t rasr) {
  * \param rasr Value for RASR register.
  */
 __STATIC_INLINE void ARM_MPU_SetRegionEx(uint32_t rnr, uint32_t rbar, uint32_t rasr) {
-    MPU->RNR = rnr;
+    MPU->RNR  = rnr;
     MPU->RBAR = rbar;
     MPU->RASR = rasr;
 }
@@ -232,7 +242,7 @@ __STATIC_INLINE void ARM_MPU_SetRegionEx(uint32_t rnr, uint32_t rbar, uint32_t r
  * \param src Source data is copied from.
  * \param len Amount of data words to be copied.
  */
-__STATIC_INLINE void ARM_MPU_OrderedMemcpy(volatile uint32_t * dst, const uint32_t * __RESTRICT src, uint32_t len) {
+__STATIC_INLINE void ARM_MPU_OrderedMemcpy(volatile uint32_t *dst, const uint32_t *__RESTRICT src, uint32_t len) {
     uint32_t i;
     for (i = 0U; i < len; ++i) {
         dst[i] = src[i];
@@ -243,7 +253,7 @@ __STATIC_INLINE void ARM_MPU_OrderedMemcpy(volatile uint32_t * dst, const uint32
  * \param table Pointer to the MPU configuration table.
  * \param cnt Amount of regions to be configured.
  */
-__STATIC_INLINE void ARM_MPU_Load(ARM_MPU_Region_t const * table, uint32_t cnt) {
+__STATIC_INLINE void ARM_MPU_Load(ARM_MPU_Region_t const *table, uint32_t cnt) {
     const uint32_t rowWordSize = sizeof(ARM_MPU_Region_t) / 4U;
     while (cnt > MPU_TYPE_RALIASES) {
         ARM_MPU_OrderedMemcpy(&(MPU->RBAR), &(table->RBAR), MPU_TYPE_RALIASES * rowWordSize);

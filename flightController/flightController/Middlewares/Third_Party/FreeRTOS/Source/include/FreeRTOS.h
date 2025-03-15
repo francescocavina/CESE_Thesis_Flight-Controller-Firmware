@@ -1045,7 +1045,8 @@ the Secure Side only. */
  * |     |         |        | xTaskCreateRestrictedStatic |                                   |                  |           |
  * +-----+---------+--------+-----------------------------+-----------------------------------+------------------+-----------+
  */
-#define tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE (((portUSING_MPU_WRAPPERS == 0) && (configSUPPORT_DYNAMIC_ALLOCATION == 1) && (configSUPPORT_STATIC_ALLOCATION == 1)) || ((portUSING_MPU_WRAPPERS == 1) && (configSUPPORT_DYNAMIC_ALLOCATION == 1)))
+#define tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE (((portUSING_MPU_WRAPPERS == 0) && (configSUPPORT_DYNAMIC_ALLOCATION == 1) && (configSUPPORT_STATIC_ALLOCATION == 1)) || \
+                                                   ((portUSING_MPU_WRAPPERS == 1) && (configSUPPORT_DYNAMIC_ALLOCATION == 1)))
 
 /*
  * In line with software engineering best practice, FreeRTOS implements a strict
@@ -1062,7 +1063,7 @@ struct xSTATIC_LIST_ITEM {
     TickType_t xDummy1;
 #endif
     TickType_t xDummy2;
-    void * pvDummy3[4];
+    void      *pvDummy3[4];
 #if (configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1)
     TickType_t xDummy4;
 #endif
@@ -1075,7 +1076,7 @@ struct xSTATIC_MINI_LIST_ITEM {
     TickType_t xDummy1;
 #endif
     TickType_t xDummy2;
-    void * pvDummy3[2];
+    void      *pvDummy3[2];
 };
 typedef struct xSTATIC_MINI_LIST_ITEM StaticMiniListItem_t;
 
@@ -1084,8 +1085,8 @@ typedef struct xSTATIC_LIST {
 #if (configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1)
     TickType_t xDummy1;
 #endif
-    UBaseType_t uxDummy2;
-    void * pvDummy3;
+    UBaseType_t          uxDummy2;
+    void                *pvDummy3;
     StaticMiniListItem_t xDummy4;
 #if (configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES == 1)
     TickType_t xDummy5;
@@ -1106,16 +1107,16 @@ typedef struct xSTATIC_LIST {
  * recognise that it would be unwise to make direct use of the structure members.
  */
 typedef struct xSTATIC_TCB {
-    void * pxDummy1;
+    void *pxDummy1;
 #if (portUSING_MPU_WRAPPERS == 1)
     xMPU_SETTINGS xDummy2;
 #endif
     StaticListItem_t xDummy3[2];
-    UBaseType_t uxDummy5;
-    void * pxDummy6;
-    uint8_t ucDummy7[configMAX_TASK_NAME_LEN];
+    UBaseType_t      uxDummy5;
+    void            *pxDummy6;
+    uint8_t          ucDummy7[configMAX_TASK_NAME_LEN];
 #if ((portSTACK_GROWTH > 0) || (configRECORD_STACK_HIGH_ADDRESS == 1))
-    void * pxDummy8;
+    void *pxDummy8;
 #endif
 #if (portCRITICAL_NESTING_IN_TCB == 1)
     UBaseType_t uxDummy9;
@@ -1127,10 +1128,10 @@ typedef struct xSTATIC_TCB {
     UBaseType_t uxDummy12[2];
 #endif
 #if (configUSE_APPLICATION_TASK_TAG == 1)
-    void * pxDummy14;
+    void *pxDummy14;
 #endif
 #if (configNUM_THREAD_LOCAL_STORAGE_POINTERS > 0)
-    void * pvDummy15[configNUM_THREAD_LOCAL_STORAGE_POINTERS];
+    void *pvDummy15[configNUM_THREAD_LOCAL_STORAGE_POINTERS];
 #endif
 #if (configGENERATE_RUN_TIME_STATS == 1)
     uint32_t ulDummy16;
@@ -1140,7 +1141,7 @@ typedef struct xSTATIC_TCB {
 #endif
 #if (configUSE_TASK_NOTIFICATIONS == 1)
     uint32_t ulDummy18;
-    uint8_t ucDummy19;
+    uint8_t  ucDummy19;
 #endif
 #if (tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE != 0)
     uint8_t uxDummy20;
@@ -1169,28 +1170,28 @@ typedef struct xSTATIC_TCB {
  * structure members.
  */
 typedef struct xSTATIC_QUEUE {
-    void * pvDummy1[3];
+    void *pvDummy1[3];
 
     union {
-        void * pvDummy2;
+        void       *pvDummy2;
         UBaseType_t uxDummy2;
     } u;
 
     StaticList_t xDummy3[2];
-    UBaseType_t uxDummy4[3];
-    uint8_t ucDummy5[2];
+    UBaseType_t  uxDummy4[3];
+    uint8_t      ucDummy5[2];
 
 #if ((configSUPPORT_STATIC_ALLOCATION == 1) && (configSUPPORT_DYNAMIC_ALLOCATION == 1))
     uint8_t ucDummy6;
 #endif
 
 #if (configUSE_QUEUE_SETS == 1)
-    void * pvDummy7;
+    void *pvDummy7;
 #endif
 
 #if (configUSE_TRACE_FACILITY == 1)
     UBaseType_t uxDummy8;
-    uint8_t ucDummy9;
+    uint8_t     ucDummy9;
 #endif
 
 } StaticQueue_t;
@@ -1211,7 +1212,7 @@ typedef StaticQueue_t StaticSemaphore_t;
  * direct use of the structure members.
  */
 typedef struct xSTATIC_EVENT_GROUP {
-    TickType_t xDummy1;
+    TickType_t   xDummy1;
     StaticList_t xDummy2;
 
 #if (configUSE_TRACE_FACILITY == 1)
@@ -1239,11 +1240,11 @@ typedef struct xSTATIC_EVENT_GROUP {
  * the structure members.
  */
 typedef struct xSTATIC_TIMER {
-    void * pvDummy1;
+    void            *pvDummy1;
     StaticListItem_t xDummy2;
-    TickType_t xDummy3;
-    void * pvDummy5;
-    TaskFunction_t pvDummy6;
+    TickType_t       xDummy3;
+    void            *pvDummy5;
+    TaskFunction_t   pvDummy6;
 #if (configUSE_TRACE_FACILITY == 1)
     UBaseType_t uxDummy7;
 #endif
@@ -1266,8 +1267,8 @@ typedef struct xSTATIC_TIMER {
  * direct use of the structure members.
  */
 typedef struct xSTATIC_STREAM_BUFFER {
-    size_t uxDummy1[4];
-    void * pvDummy2[3];
+    size_t  uxDummy1[4];
+    void   *pvDummy2[3];
     uint8_t ucDummy3;
 #if (configUSE_TRACE_FACILITY == 1)
     UBaseType_t uxDummy4;

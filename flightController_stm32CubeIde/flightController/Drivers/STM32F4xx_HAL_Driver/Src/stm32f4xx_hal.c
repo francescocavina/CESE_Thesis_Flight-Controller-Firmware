@@ -58,7 +58,7 @@
 #define __STM32F4xx_HAL_VERSION_RC   (0x00U) /*!< [7:0]  release candidate */
 #define __STM32F4xx_HAL_VERSION      ((__STM32F4xx_HAL_VERSION_MAIN << 24U) | (__STM32F4xx_HAL_VERSION_SUB1 << 16U) | (__STM32F4xx_HAL_VERSION_SUB2 << 8U) | (__STM32F4xx_HAL_VERSION_RC))
 
-#define IDCODE_DEVID_MASK            0x00000FFFU
+#define IDCODE_DEVID_MASK 0x00000FFFU
 
 /* ------------ RCC registers bit address in the alias region ----------- */
 #define SYSCFG_OFFSET (SYSCFG_BASE - PERIPH_BASE)
@@ -88,9 +88,9 @@
 /** @addtogroup HAL_Private_Variables
  * @{
  */
-__IO uint32_t uwTick;
-uint32_t uwTickPrio = (1UL << __NVIC_PRIO_BITS);        /* Invalid PRIO */
-HAL_TickFreqTypeDef uwTickFreq = HAL_TICK_FREQ_DEFAULT; /* 1KHz */
+__IO uint32_t       uwTick;
+uint32_t            uwTickPrio = (1UL << __NVIC_PRIO_BITS); /* Invalid PRIO */
+HAL_TickFreqTypeDef uwTickFreq = HAL_TICK_FREQ_DEFAULT;     /* 1KHz */
 /**
  * @}
  */
@@ -324,7 +324,7 @@ uint32_t HAL_GetTickPrio(void) {
  * @retval Status
  */
 HAL_StatusTypeDef HAL_SetTickFreq(HAL_TickFreqTypeDef Freq) {
-    HAL_StatusTypeDef status = HAL_OK;
+    HAL_StatusTypeDef   status = HAL_OK;
     HAL_TickFreqTypeDef prevTickFreq;
 
     assert_param(IS_TICKFREQ(Freq));
@@ -369,7 +369,7 @@ HAL_TickFreqTypeDef HAL_GetTickFreq(void) {
  */
 __weak void HAL_Delay(uint32_t Delay) {
     uint32_t tickstart = HAL_GetTick();
-    uint32_t wait = Delay;
+    uint32_t wait      = Delay;
 
     /* Add a freq to guarantee minimum wait */
     if (wait < HAL_MAX_DELAY) {

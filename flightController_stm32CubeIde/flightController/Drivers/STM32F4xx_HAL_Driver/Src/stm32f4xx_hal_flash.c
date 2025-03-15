@@ -216,7 +216,7 @@ HAL_StatusTypeDef HAL_FLASH_Program_IT(uint32_t TypeProgram, uint32_t Address, u
     __HAL_FLASH_ENABLE_IT(FLASH_IT_ERR);
 
     pFlash.ProcedureOnGoing = FLASH_PROC_PROGRAM;
-    pFlash.Address = Address;
+    pFlash.Address          = Address;
 
     if (TypeProgram == FLASH_TYPEPROGRAM_BYTE) {
         /*Program byte (8-bit) at a specified address.*/
@@ -251,7 +251,7 @@ void HAL_FLASH_IRQHandler(void) {
     {
         if (pFlash.ProcedureOnGoing == FLASH_PROC_SECTERASE) {
             /*return the faulty sector*/
-            addresstmp = pFlash.Sector;
+            addresstmp    = pFlash.Sector;
             pFlash.Sector = 0xFFFFFFFFU;
         } else if (pFlash.ProcedureOnGoing == FLASH_PROC_MASSERASE) {
             /*return the faulty bank*/
@@ -294,7 +294,7 @@ void HAL_FLASH_IRQHandler(void) {
                 /*No more sectors to Erase, user callback can be called.*/
                 /*Reset Sector and stop Erase sectors procedure*/
                 pFlash.Sector = addresstmp = 0xFFFFFFFFU;
-                pFlash.ProcedureOnGoing = FLASH_PROC_NONE;
+                pFlash.ProcedureOnGoing    = FLASH_PROC_NONE;
 
                 /* Flush the caches to be sure of the data consistency */
                 FLASH_FlushCaches();

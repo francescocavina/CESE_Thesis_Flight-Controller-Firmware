@@ -25,15 +25,15 @@
  * 1 tab == 4 spaces!
  */
 
-#include <stdlib.h>
-#include "FreeRTOS.h"
 #include "list.h"
+#include "FreeRTOS.h"
+#include <stdlib.h>
 
 /*-----------------------------------------------------------
  * PUBLIC LIST API documented in list.h
  *----------------------------------------------------------*/
 
-void vListInitialise(List_t * const pxList) {
+void vListInitialise(List_t *const pxList) {
     /* The list structure contains a list item which is used to mark the
     end of the list.  To initialise the list the list end is inserted
     as the only list entry. */
@@ -45,7 +45,7 @@ void vListInitialise(List_t * const pxList) {
 
     /* The list end next and previous pointers point to itself so we know
     when the list is empty. */
-    pxList->xListEnd.pxNext = (ListItem_t *)&(pxList->xListEnd);     /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
+    pxList->xListEnd.pxNext     = (ListItem_t *)&(pxList->xListEnd); /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
     pxList->xListEnd.pxPrevious = (ListItem_t *)&(pxList->xListEnd); /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */
 
     pxList->uxNumberOfItems = (UBaseType_t)0U;
@@ -57,7 +57,7 @@ void vListInitialise(List_t * const pxList) {
 }
 /*-----------------------------------------------------------*/
 
-void vListInitialiseItem(ListItem_t * const pxItem) {
+void vListInitialiseItem(ListItem_t *const pxItem) {
     /* Make sure the list item is not recorded as being on a list. */
     pxItem->pxContainer = NULL;
 
@@ -68,8 +68,8 @@ void vListInitialiseItem(ListItem_t * const pxItem) {
 }
 /*-----------------------------------------------------------*/
 
-void vListInsertEnd(List_t * const pxList, ListItem_t * const pxNewListItem) {
-    ListItem_t * const pxIndex = pxList->pxIndex;
+void vListInsertEnd(List_t *const pxList, ListItem_t *const pxNewListItem) {
+    ListItem_t *const pxIndex = pxList->pxIndex;
 
     /* Only effective when configASSERT() is also defined, these tests may catch
     the list data structures being overwritten in memory.  They will not catch
@@ -80,14 +80,14 @@ void vListInsertEnd(List_t * const pxList, ListItem_t * const pxNewListItem) {
     /* Insert a new list item into pxList, but rather than sort the list,
     makes the new list item the last item to be removed by a call to
     listGET_OWNER_OF_NEXT_ENTRY(). */
-    pxNewListItem->pxNext = pxIndex;
+    pxNewListItem->pxNext     = pxIndex;
     pxNewListItem->pxPrevious = pxIndex->pxPrevious;
 
     /* Only used during decision coverage testing. */
     mtCOVERAGE_TEST_DELAY();
 
     pxIndex->pxPrevious->pxNext = pxNewListItem;
-    pxIndex->pxPrevious = pxNewListItem;
+    pxIndex->pxPrevious         = pxNewListItem;
 
     /* Remember which list the item is in. */
     pxNewListItem->pxContainer = pxList;
@@ -96,8 +96,8 @@ void vListInsertEnd(List_t * const pxList, ListItem_t * const pxNewListItem) {
 }
 /*-----------------------------------------------------------*/
 
-void vListInsert(List_t * const pxList, ListItem_t * const pxNewListItem) {
-    ListItem_t * pxIterator;
+void vListInsert(List_t *const pxList, ListItem_t *const pxNewListItem) {
+    ListItem_t      *pxIterator;
     const TickType_t xValueOfInsertion = pxNewListItem->xItemValue;
 
     /* Only effective when configASSERT() is also defined, these tests may catch
@@ -123,34 +123,33 @@ void vListInsert(List_t * const pxList, ListItem_t * const pxNewListItem) {
         more tips, and ensure configASSERT() is defined!
         https://www.freertos.org/a00110.html#configASSERT
 
-            1) Stack overflow -
-               see https://www.freertos.org/Stacks-and-stack-overflow-checking.html
-            2) Incorrect interrupt priority assignment, especially on Cortex-M
-               parts where numerically high priority values denote low actual
-               interrupt priorities, which can seem counter intuitive.  See
-               https://www.freertos.org/RTOS-Cortex-M3-M4.html and the definition
-               of configMAX_SYSCALL_INTERRUPT_PRIORITY on
-               https://www.freertos.org/a00110.html
-            3) Calling an API function from within a critical section or when
-               the scheduler is suspended, or calling an API function that does
-               not end in "FromISR" from an interrupt.
-            4) Using a queue or semaphore before it has been initialised or
-               before the scheduler has been started (are interrupts firing
-               before vTaskStartScheduler() has been called?).
+                1) Stack overflow -
+                   see https://www.freertos.org/Stacks-and-stack-overflow-checking.html
+                2) Incorrect interrupt priority assignment, especially on Cortex-M
+                   parts where numerically high priority values denote low actual
+                   interrupt priorities, which can seem counter intuitive.  See
+                   https://www.freertos.org/RTOS-Cortex-M3-M4.html and the definition
+                   of configMAX_SYSCALL_INTERRUPT_PRIORITY on
+                   https://www.freertos.org/a00110.html
+                3) Calling an API function from within a critical section or when
+                   the scheduler is suspended, or calling an API function that does
+                   not end in "FromISR" from an interrupt.
+                4) Using a queue or semaphore before it has been initialised or
+                   before the scheduler has been started (are interrupts firing
+                   before vTaskStartScheduler() has been called?).
         **********************************************************************/
 
-        for (pxIterator = (ListItem_t *)&(pxList->xListEnd); pxIterator->pxNext->xItemValue <= xValueOfInsertion;
-             pxIterator = pxIterator->pxNext) /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */ /*lint !e440 The iterator moves to a different value, not xValueOfInsertion. */
+        for (pxIterator = (ListItem_t *)&(pxList->xListEnd); pxIterator->pxNext->xItemValue <= xValueOfInsertion; pxIterator = pxIterator->pxNext) /*lint !e826 !e740 !e9087 The mini list structure is used as the list end to save RAM.  This is checked and valid. */ /*lint !e440 The iterator moves to a different value, not xValueOfInsertion. */
         {
             /* There is nothing to do here, just iterating to the wanted
             insertion position. */
         }
     }
 
-    pxNewListItem->pxNext = pxIterator->pxNext;
+    pxNewListItem->pxNext             = pxIterator->pxNext;
     pxNewListItem->pxNext->pxPrevious = pxNewListItem;
-    pxNewListItem->pxPrevious = pxIterator;
-    pxIterator->pxNext = pxNewListItem;
+    pxNewListItem->pxPrevious         = pxIterator;
+    pxIterator->pxNext                = pxNewListItem;
 
     /* Remember which list the item is in.  This allows fast removal of the
     item later. */
@@ -160,10 +159,10 @@ void vListInsert(List_t * const pxList, ListItem_t * const pxNewListItem) {
 }
 /*-----------------------------------------------------------*/
 
-UBaseType_t uxListRemove(ListItem_t * const pxItemToRemove) {
+UBaseType_t uxListRemove(ListItem_t *const pxItemToRemove) {
     /* The list item knows which list it is in.  Obtain the list from the list
     item. */
-    List_t * const pxList = pxItemToRemove->pxContainer;
+    List_t *const pxList = pxItemToRemove->pxContainer;
 
     pxItemToRemove->pxNext->pxPrevious = pxItemToRemove->pxPrevious;
     pxItemToRemove->pxPrevious->pxNext = pxItemToRemove->pxNext;

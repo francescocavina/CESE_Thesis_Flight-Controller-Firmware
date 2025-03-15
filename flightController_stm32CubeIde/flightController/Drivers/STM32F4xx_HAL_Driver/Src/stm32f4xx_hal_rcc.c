@@ -215,7 +215,7 @@ __weak HAL_StatusTypeDef HAL_RCC_DeInit(void) {
  *         first and then HSE On or HSE Bypass.
  * @retval HAL status
  */
-__weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef * RCC_OscInitStruct) {
+__weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef *RCC_OscInitStruct) {
     uint32_t tickstart, pll_config;
 
     /* Check Null pointer */
@@ -512,7 +512,7 @@ __weak HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef * RCC_OscInitStruc
  *         (for more details refer to section above "Initialization/de-initialization functions")
  * @retval None
  */
-HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef * RCC_ClkInitStruct, uint32_t FLatency) {
+HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef *RCC_ClkInitStruct, uint32_t FLatency) {
     uint32_t tickstart;
 
     /* Check Null pointer */
@@ -688,10 +688,10 @@ void HAL_RCC_MCOConfig(uint32_t RCC_MCOx, uint32_t RCC_MCOSource, uint32_t RCC_M
         __MCO1_CLK_ENABLE();
 
         /* Configure the MCO1 pin in alternate function mode */
-        GPIO_InitStruct.Pin = MCO1_PIN;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        GPIO_InitStruct.Pin       = MCO1_PIN;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.Pull      = GPIO_NOPULL;
         GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
         HAL_GPIO_Init(MCO1_GPIO_PORT, &GPIO_InitStruct);
 
@@ -711,10 +711,10 @@ void HAL_RCC_MCOConfig(uint32_t RCC_MCOx, uint32_t RCC_MCOSource, uint32_t RCC_M
         __MCO2_CLK_ENABLE();
 
         /* Configure the MCO2 pin in alternate function mode */
-        GPIO_InitStruct.Pin = MCO2_PIN;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        GPIO_InitStruct.Pin       = MCO2_PIN;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.Pull      = GPIO_NOPULL;
         GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
         HAL_GPIO_Init(MCO2_GPIO_PORT, &GPIO_InitStruct);
 
@@ -863,7 +863,7 @@ uint32_t HAL_RCC_GetPCLK2Freq(void) {
  * will be configured.
  * @retval None
  */
-__weak void HAL_RCC_GetOscConfig(RCC_OscInitTypeDef * RCC_OscInitStruct) {
+__weak void HAL_RCC_GetOscConfig(RCC_OscInitTypeDef *RCC_OscInitStruct) {
     /* Set all possible values for the Oscillator type parameter ---------------*/
     RCC_OscInitStruct->OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_LSI;
 
@@ -908,10 +908,10 @@ __weak void HAL_RCC_GetOscConfig(RCC_OscInitTypeDef * RCC_OscInitStruct) {
         RCC_OscInitStruct->PLL.PLLState = RCC_PLL_OFF;
     }
     RCC_OscInitStruct->PLL.PLLSource = (uint32_t)(RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC);
-    RCC_OscInitStruct->PLL.PLLM = (uint32_t)(RCC->PLLCFGR & RCC_PLLCFGR_PLLM);
-    RCC_OscInitStruct->PLL.PLLN = (uint32_t)((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> RCC_PLLCFGR_PLLN_Pos);
-    RCC_OscInitStruct->PLL.PLLP = (uint32_t)((((RCC->PLLCFGR & RCC_PLLCFGR_PLLP) + RCC_PLLCFGR_PLLP_0) << 1U) >> RCC_PLLCFGR_PLLP_Pos);
-    RCC_OscInitStruct->PLL.PLLQ = (uint32_t)((RCC->PLLCFGR & RCC_PLLCFGR_PLLQ) >> RCC_PLLCFGR_PLLQ_Pos);
+    RCC_OscInitStruct->PLL.PLLM      = (uint32_t)(RCC->PLLCFGR & RCC_PLLCFGR_PLLM);
+    RCC_OscInitStruct->PLL.PLLN      = (uint32_t)((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> RCC_PLLCFGR_PLLN_Pos);
+    RCC_OscInitStruct->PLL.PLLP      = (uint32_t)((((RCC->PLLCFGR & RCC_PLLCFGR_PLLP) + RCC_PLLCFGR_PLLP_0) << 1U) >> RCC_PLLCFGR_PLLP_Pos);
+    RCC_OscInitStruct->PLL.PLLQ      = (uint32_t)((RCC->PLLCFGR & RCC_PLLCFGR_PLLQ) >> RCC_PLLCFGR_PLLQ_Pos);
 }
 
 /**
@@ -922,7 +922,7 @@ __weak void HAL_RCC_GetOscConfig(RCC_OscInitTypeDef * RCC_OscInitStruct) {
  * @param  pFLatency Pointer on the Flash Latency.
  * @retval None
  */
-void HAL_RCC_GetClockConfig(RCC_ClkInitTypeDef * RCC_ClkInitStruct, uint32_t * pFLatency) {
+void HAL_RCC_GetClockConfig(RCC_ClkInitTypeDef *RCC_ClkInitStruct, uint32_t *pFLatency) {
     /* Set all possible values for the Clock type parameter --------------------*/
     RCC_ClkInitStruct->ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 

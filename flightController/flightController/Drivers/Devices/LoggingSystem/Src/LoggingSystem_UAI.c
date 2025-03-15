@@ -48,10 +48,10 @@
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
-static const uint8_t * informationTypeLabel = (uint8_t *)"LOG:INFO:    ";
-static const uint8_t * debuggingTypeLabel = (uint8_t *)"LOG:DEBUG:   ";
-static const uint8_t * warningTypeLabel = (uint8_t *)"LOG:WARNING: ";
-static const uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
+static const uint8_t *informationTypeLabel = (uint8_t *)"LOG:INFO:    ";
+static const uint8_t *debuggingTypeLabel   = (uint8_t *)"LOG:DEBUG:   ";
+static const uint8_t *warningTypeLabel     = (uint8_t *)"LOG:WARNING: ";
+static const uint8_t *errorTypeLabel       = (uint8_t *)"LOG:ERROR:   ";
 
 /* --- Private function declarations ----------------------------------------------------------- */
 
@@ -62,7 +62,7 @@ static const uint8_t * errorTypeLabel = (uint8_t *)"LOG:ERROR:   ";
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t LOG(const uint8_t * message, LOGGING_TYPE_t logType) {
+bool_t LOG(const uint8_t *message, LOGGING_TYPE_t logType) {
 
     /* Check parameters */
     if (NULL == message) {
@@ -74,11 +74,11 @@ bool_t LOG(const uint8_t * message, LOGGING_TYPE_t logType) {
 
     /* Build log message */
     uint8_t logMessage[LOG_MESSAGE_MAX_LENGTH] = {0};
-    int written_chars = 0;
+    int     written_chars                      = 0;
 
     /* Add prefix based on log type */
     if (logType != LOG_RAW) {
-        const uint8_t * prefix = NULL;
+        const uint8_t *prefix = NULL;
 
         if (LOG_INFORMATION == logType) {
             prefix = informationTypeLabel;

@@ -42,8 +42,8 @@
 #define USE_FREERTOS // Remove comment when using FreeRTOS
 // #define ESC_USE_LOGGING                 // Remove comment to allow driver info logging
 
-#define MIN_ESC_SPEED                   (MAX_PWM_VALUE * 0.05) // 1ms
-#define MAX_ESC_SPEED                   (MAX_PWM_VALUE * 0.10) // 2ms
+#define MIN_ESC_SPEED (MAX_PWM_VALUE * 0.05)   // 1ms
+#define MAX_ESC_SPEED (MAX_PWM_VALUE * 0.10)   // 2ms
 
 #define ESC_AUTOCALIBRATION_WAIT_TIME_1 (2000) // Time to wait after ESC was set to maximum throttle
 #define ESC_AUTOCALIBRATION_WAIT_TIME_2 (1000) // Time to wait after ESC was set to minimum throttle
@@ -60,7 +60,7 @@
  * @retval true:     If PWM value could be calculated.
  *         false:    If PWM value couldn't be calculated.
  */
-static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t * pwmValue);
+static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t *pwmValue);
 
 /**
  * @brief  Auto-calibrates ESC. This is necessary after powering on the ESC device.
@@ -70,14 +70,14 @@ static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t * pwmValue);
  * @retval true:    If ESC device could be calibrated.
  *         false:   If ESC device couldn't be calibrated.
  */
-static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc);
+static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t *hesc);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t * pwmValue) {
+static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t *pwmValue) {
 
     /* Check parameters */
     if (0 > speed || 100 < speed) {
@@ -90,7 +90,7 @@ static bool_t ESC_CalculatePWMDutyCycle(float speed, uint32_t * pwmValue) {
     return true;
 }
 
-static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc) {
+static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t *hesc) {
 
     /* Check parameters */
     if (NULL == hesc) {
@@ -137,7 +137,7 @@ static bool_t ESC_AutoCalibrate(ESC_HandleTypeDef_t * hesc) {
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
-ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
+ESC_HandleTypeDef_t *ESC_Init(TIM_HandleTypeDef *htim) {
 
     /* Check parameters */
     if (NULL == htim) {
@@ -150,9 +150,9 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
 
     /* Allocate dynamic memory for the ESC_HandleTypeDef_t structure */
 #ifdef USE_FREERTOS
-    ESC_HandleTypeDef_t * hesc = pvPortMalloc(sizeof(ESC_HandleTypeDef_t));
+    ESC_HandleTypeDef_t *hesc = pvPortMalloc(sizeof(ESC_HandleTypeDef_t));
 #else
-    ESC_HandleTypeDef_t * hesc = malloc(sizeof(ESC_HandleTypeDef_t));
+    ESC_HandleTypeDef_t *hesc = malloc(sizeof(ESC_HandleTypeDef_t));
 #endif
 
     /* Initialize ESC_HandleTypeDef structure */
@@ -211,7 +211,7 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim) {
     return hesc;
 }
 
-bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc) {
+bool_t ESC_Deinit(ESC_HandleTypeDef_t *hesc) {
 
     /* Check parameters */
     if (NULL == hesc->htim) {
@@ -233,7 +233,7 @@ bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc) {
     return true;
 }
 
-bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint8_t channel, float speed) {
+bool_t ESC_SetSpeed(ESC_HandleTypeDef_t *hesc, uint8_t channel, float speed) {
 
     uint32_t pwmValue;
 

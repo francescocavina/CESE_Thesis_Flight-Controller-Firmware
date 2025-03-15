@@ -55,9 +55,9 @@
 #define INC_FSA8S_DRIVER_HWI_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 /* BEGIN MODIFY 1 */
 #include "stm32f4xx_hal.h"
@@ -78,13 +78,13 @@ extern "C" {
  */
 typedef struct {
     /* BEGIN MODIFY 2 */
-    UART_HandleTypeDef * huart; /* Pointer to a UART_HandleTypeDef structure */
+    UART_HandleTypeDef *huart; /* Pointer to a UART_HandleTypeDef structure */
     /* END MODIFY 2 */
 
-    uint8_t * buffer;   /* Buffer in which UART DMA will put the received data */
-    uint8_t bufferSize; /* Buffer size */
-    uint16_t * data;    /* Channels data */
-    uint8_t channels;   /* Number of channels */
+    uint8_t  *buffer;     /* Buffer in which UART DMA will put the received data */
+    uint8_t   bufferSize; /* Buffer size */
+    uint16_t *data;       /* Channels data */
+    uint8_t   channels;   /* Number of channels */
 } IBUS_HandleTypeDef_t;
 
 /**
@@ -102,14 +102,14 @@ typedef bool bool_t;
  * @retval true:  If communication could be initialized
  *         false: If communication couldn't be initialized
  */
-bool_t IBUS_Init(IBUS_HandleTypeDef_t * hibus);
+bool_t IBUS_Init(IBUS_HandleTypeDef_t *hibus);
 
 /**
  * @brief  Checks DMA status and resets it if necessary
  * @param  hibus: Pointer to IBUS handle
  * @retval true if DMA was reset, false otherwise
  */
-bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t * hibus);
+bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t *hibus);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

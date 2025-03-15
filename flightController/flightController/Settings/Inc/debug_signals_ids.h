@@ -122,7 +122,7 @@ typedef enum {
     ESC_3 = 74,                                       /* 6; ESCs; ESC; Motor 3; [-] */
     ESC_4 = 75,                                       /* 6; ESCs; ESC; Motor 4; [-] */
 
-    TASK_STACK_WATERMARK_ONOFFBUTTON      = 6,        /* 7; System Stack; Stack High Watermark; Task: OnOffButton      ; [words] */
+    TASK_STACK_WATERMARK_ONOFFBUTTON      = 76,       /* 7; System Stack; Stack High Watermark; Task: OnOffButton      ; [words] */
     TASK_STACK_WATERMARK_CONTROLSYSTEM    = 77,       /* 7; System Stack; Stack High Watermark; Task: ControlSystem    ; [words] */
     TASK_STACK_WATERMARK_USBCOMMUNICATION = 78,       /* 7; System Stack; Stack High Watermark; Task: USB_Communication; [words] */
     TASK_STACK_WATERMARK_DEBUGGING        = 79,       /* 7; System Stack; Stack High Watermark; Task: Debugging        ; [words] */

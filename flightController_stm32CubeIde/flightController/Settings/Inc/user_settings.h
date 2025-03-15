@@ -48,13 +48,13 @@ extern "C" {
 #define GY87_CALIBRATION_EN (0)
 
 /* --- POWER ON/OFF DRIVER --------------------------------------------------------------------- */
-#define PW_ON_OFF_DRIVER_TIME                                                                                                                                                                                                                            \
+#define PW_ON_OFF_DRIVER_TIME \
     (3000) // Time in [ms] that the on-board power on/off button needs
            // to be pressed in order to turn on/off the flight
            // controller.
 
 /* --- BATTERY ALARM --------------------------------------------------------------------------- */
-#define BATTERY_ALARM_THRESHOLD                                                                                                                                                                                                                          \
+#define BATTERY_ALARM_THRESHOLD \
     (9.5) // Voltage level in [V] at which the battery alarm starts
           // beeping, indicating that the flight controller has low
           // battery.

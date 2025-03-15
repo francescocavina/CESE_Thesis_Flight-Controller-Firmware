@@ -160,11 +160,11 @@
  *         the configuration information for the specified GPIO peripheral.
  * @retval None
  */
-void HAL_GPIO_Init(GPIO_TypeDef * GPIOx, GPIO_InitTypeDef * GPIO_Init) {
+void HAL_GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_InitTypeDef *GPIO_Init) {
     uint32_t position;
     uint32_t ioposition = 0x00U;
-    uint32_t iocurrent = 0x00U;
-    uint32_t temp = 0x00U;
+    uint32_t iocurrent  = 0x00U;
+    uint32_t temp       = 0x00U;
 
     /* Check the parameters */
     assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
@@ -278,11 +278,11 @@ void HAL_GPIO_Init(GPIO_TypeDef * GPIOx, GPIO_InitTypeDef * GPIO_Init) {
  *          This parameter can be one of GPIO_PIN_x where x can be (0..15).
  * @retval None
  */
-void HAL_GPIO_DeInit(GPIO_TypeDef * GPIOx, uint32_t GPIO_Pin) {
+void HAL_GPIO_DeInit(GPIO_TypeDef *GPIOx, uint32_t GPIO_Pin) {
     uint32_t position;
     uint32_t ioposition = 0x00U;
-    uint32_t iocurrent = 0x00U;
-    uint32_t tmp = 0x00U;
+    uint32_t iocurrent  = 0x00U;
+    uint32_t tmp        = 0x00U;
 
     /* Check the parameters */
     assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
@@ -355,7 +355,7 @@ void HAL_GPIO_DeInit(GPIO_TypeDef * GPIOx, uint32_t GPIO_Pin) {
  *         This parameter can be GPIO_PIN_x where x can be (0..15).
  * @retval The input port pin value.
  */
-GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef * GPIOx, uint16_t GPIO_Pin) {
+GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
     GPIO_PinState bitstatus;
 
     /* Check the parameters */
@@ -386,7 +386,7 @@ GPIO_PinState HAL_GPIO_ReadPin(GPIO_TypeDef * GPIOx, uint16_t GPIO_Pin) {
  *            @arg GPIO_PIN_SET: to set the port pin
  * @retval None
  */
-void HAL_GPIO_WritePin(GPIO_TypeDef * GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState) {
+void HAL_GPIO_WritePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState) {
     /* Check the parameters */
     assert_param(IS_GPIO_PIN(GPIO_Pin));
     assert_param(IS_GPIO_PIN_ACTION(PinState));
@@ -405,7 +405,7 @@ void HAL_GPIO_WritePin(GPIO_TypeDef * GPIOx, uint16_t GPIO_Pin, GPIO_PinState Pi
  * @param  GPIO_Pin Specifies the pins to be toggled.
  * @retval None
  */
-void HAL_GPIO_TogglePin(GPIO_TypeDef * GPIOx, uint16_t GPIO_Pin) {
+void HAL_GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
     uint32_t odr;
 
     /* Check the parameters */
@@ -429,7 +429,7 @@ void HAL_GPIO_TogglePin(GPIO_TypeDef * GPIOx, uint16_t GPIO_Pin) {
  *         This parameter can be any combination of GPIO_PIN_x where x can be (0..15).
  * @retval None
  */
-HAL_StatusTypeDef HAL_GPIO_LockPin(GPIO_TypeDef * GPIOx, uint16_t GPIO_Pin) {
+HAL_StatusTypeDef HAL_GPIO_LockPin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
     __IO uint32_t tmp = GPIO_LCKR_LCKK;
 
     /* Check the parameters */

@@ -27,12 +27,12 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "main.h"
 #include "stm32f4xx.h"
 #include "stm32f4xx_hal.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* USER CODE BEGIN INCLUDE */
 
@@ -108,8 +108,8 @@ extern "C" {
 /* DEBUG macros */
 
 #if (USBD_DEBUG_LEVEL > 0)
-#define USBD_UsrLog(...)                                                                                                                                                                                                                                 \
-    printf(__VA_ARGS__);                                                                                                                                                                                                                                 \
+#define USBD_UsrLog(...) \
+    printf(__VA_ARGS__); \
     printf("\n");
 #else
 #define USBD_UsrLog(...)
@@ -117,18 +117,18 @@ extern "C" {
 
 #if (USBD_DEBUG_LEVEL > 1)
 
-#define USBD_ErrLog(...)                                                                                                                                                                                                                                 \
-    printf("ERROR: ");                                                                                                                                                                                                                                   \
-    printf(__VA_ARGS__);                                                                                                                                                                                                                                 \
+#define USBD_ErrLog(...) \
+    printf("ERROR: ");   \
+    printf(__VA_ARGS__); \
     printf("\n");
 #else
 #define USBD_ErrLog(...)
 #endif /* (USBD_DEBUG_LEVEL > 1U) */
 
 #if (USBD_DEBUG_LEVEL > 2)
-#define USBD_DbgLog(...)                                                                                                                                                                                                                                 \
-    printf("DEBUG : ");                                                                                                                                                                                                                                  \
-    printf(__VA_ARGS__);                                                                                                                                                                                                                                 \
+#define USBD_DbgLog(...) \
+    printf("DEBUG : ");  \
+    printf(__VA_ARGS__); \
     printf("\n");
 #else
 #define USBD_DbgLog(...)
@@ -153,8 +153,8 @@ extern "C" {
  */
 
 /* Exported functions -------------------------------------------------------*/
-void * USBD_static_malloc(uint32_t size);
-void USBD_static_free(void * p);
+void *USBD_static_malloc(uint32_t size);
+void  USBD_static_free(void *p);
 
 /**
  * @}

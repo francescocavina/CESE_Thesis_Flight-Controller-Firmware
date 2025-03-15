@@ -107,7 +107,7 @@ void HAL_PWR_DeInit(void) {
 void HAL_PWR_EnableBkUpAccess(void) {
     __IO uint32_t dummyread;
     *(__IO uint32_t *)CR_DBP_BB = (uint32_t)ENABLE;
-    dummyread = PWR->CR;
+    dummyread                   = PWR->CR;
     UNUSED(dummyread);
 }
 
@@ -126,7 +126,7 @@ void HAL_PWR_EnableBkUpAccess(void) {
 void HAL_PWR_DisableBkUpAccess(void) {
     __IO uint32_t dummyread;
     *(__IO uint32_t *)CR_DBP_BB = (uint32_t)DISABLE;
-    dummyread = PWR->CR;
+    dummyread                   = PWR->CR;
     UNUSED(dummyread);
 }
 
@@ -260,7 +260,7 @@ void HAL_PWR_DisableBkUpAccess(void) {
  *         detection level.
  * @retval None
  */
-void HAL_PWR_ConfigPVD(PWR_PVDTypeDef * sConfigPVD) {
+void HAL_PWR_ConfigPVD(PWR_PVDTypeDef *sConfigPVD) {
     /* Check the parameters */
     assert_param(IS_PWR_PVD_LEVEL(sConfigPVD->PVDLevel));
     assert_param(IS_PWR_PVD_MODE(sConfigPVD->Mode));

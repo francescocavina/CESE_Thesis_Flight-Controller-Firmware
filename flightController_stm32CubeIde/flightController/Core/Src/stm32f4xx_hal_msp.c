@@ -60,7 +60,7 @@ extern DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE END 0 */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef * htim);
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 /**
  * Initializes the Global MSP.
  */
@@ -87,7 +87,7 @@ void HAL_MspInit(void) {
  * @param hadc: ADC handle pointer
  * @retval None
  */
-void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc) {
+void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     if (hadc->Instance == ADC1) {
         /* USER CODE BEGIN ADC1_MspInit 0 */
@@ -100,7 +100,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc) {
         /**ADC1 GPIO Configuration
         PA0-WKUP     ------> ADC1_IN0
         */
-        GPIO_InitStruct.Pin = GPIO_PIN_0;
+        GPIO_InitStruct.Pin  = GPIO_PIN_0;
         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -117,7 +117,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc) {
  * @param hadc: ADC handle pointer
  * @retval None
  */
-void HAL_ADC_MspDeInit(ADC_HandleTypeDef * hadc) {
+void HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc) {
     if (hadc->Instance == ADC1) {
         /* USER CODE BEGIN ADC1_MspDeInit 0 */
 
@@ -142,7 +142,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef * hadc) {
  * @param hi2c: I2C handle pointer
  * @retval None
  */
-void HAL_I2C_MspInit(I2C_HandleTypeDef * hi2c) {
+void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     if (hi2c->Instance == I2C1) {
         /* USER CODE BEGIN I2C1_MspInit 0 */
@@ -154,10 +154,10 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef * hi2c) {
         PB6     ------> I2C1_SCL
         PB7     ------> I2C1_SDA
         */
-        GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.Pin       = GPIO_PIN_6 | GPIO_PIN_7;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_OD;
+        GPIO_InitStruct.Pull      = GPIO_NOPULL;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
         GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
         HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -175,7 +175,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef * hi2c) {
  * @param hi2c: I2C handle pointer
  * @retval None
  */
-void HAL_I2C_MspDeInit(I2C_HandleTypeDef * hi2c) {
+void HAL_I2C_MspDeInit(I2C_HandleTypeDef *hi2c) {
     if (hi2c->Instance == I2C1) {
         /* USER CODE BEGIN I2C1_MspDeInit 0 */
 
@@ -203,7 +203,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef * hi2c) {
  * @param htim_pwm: TIM_PWM handle pointer
  * @retval None
  */
-void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef * htim_pwm) {
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim_pwm) {
     if (htim_pwm->Instance == TIM3) {
         /* USER CODE BEGIN TIM3_MspInit 0 */
 
@@ -216,7 +216,7 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef * htim_pwm) {
     }
 }
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef * htim) {
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     if (htim->Instance == TIM3) {
         /* USER CODE BEGIN TIM3_MspPostInit 0 */
@@ -231,17 +231,17 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef * htim) {
         PB0     ------> TIM3_CH3
         PB1     ------> TIM3_CH4
         */
-        GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+        GPIO_InitStruct.Pin       = GPIO_PIN_6 | GPIO_PIN_7;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull      = GPIO_NOPULL;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
         GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-        GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+        GPIO_InitStruct.Pin       = GPIO_PIN_0 | GPIO_PIN_1;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull      = GPIO_NOPULL;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_LOW;
         GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
         HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -256,7 +256,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef * htim) {
  * @param htim_pwm: TIM_PWM handle pointer
  * @retval None
  */
-void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef * htim_pwm) {
+void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef *htim_pwm) {
     if (htim_pwm->Instance == TIM3) {
         /* USER CODE BEGIN TIM3_MspDeInit 0 */
 
@@ -275,7 +275,7 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef * htim_pwm) {
  * @param huart: UART handle pointer
  * @retval None
  */
-void HAL_UART_MspInit(UART_HandleTypeDef * huart) {
+void HAL_UART_MspInit(UART_HandleTypeDef *huart) {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     if (huart->Instance == USART2) {
         /* USER CODE BEGIN USART2_MspInit 0 */
@@ -289,25 +289,25 @@ void HAL_UART_MspInit(UART_HandleTypeDef * huart) {
         PA2     ------> USART2_TX
         PA3     ------> USART2_RX
         */
-        GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
-        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-        GPIO_InitStruct.Pull = GPIO_NOPULL;
-        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.Pin       = GPIO_PIN_2 | GPIO_PIN_3;
+        GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull      = GPIO_NOPULL;
+        GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
         GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
         /* USART2 DMA Init */
         /* USART2_RX Init */
-        hdma_usart2_rx.Instance = DMA1_Stream5;
-        hdma_usart2_rx.Init.Channel = DMA_CHANNEL_4;
-        hdma_usart2_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
-        hdma_usart2_rx.Init.PeriphInc = DMA_PINC_DISABLE;
-        hdma_usart2_rx.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_usart2_rx.Instance                 = DMA1_Stream5;
+        hdma_usart2_rx.Init.Channel             = DMA_CHANNEL_4;
+        hdma_usart2_rx.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+        hdma_usart2_rx.Init.PeriphInc           = DMA_PINC_DISABLE;
+        hdma_usart2_rx.Init.MemInc              = DMA_MINC_ENABLE;
         hdma_usart2_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-        hdma_usart2_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-        hdma_usart2_rx.Init.Mode = DMA_CIRCULAR;
-        hdma_usart2_rx.Init.Priority = DMA_PRIORITY_VERY_HIGH;
-        hdma_usart2_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+        hdma_usart2_rx.Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+        hdma_usart2_rx.Init.Mode                = DMA_CIRCULAR;
+        hdma_usart2_rx.Init.Priority            = DMA_PRIORITY_VERY_HIGH;
+        hdma_usart2_rx.Init.FIFOMode            = DMA_FIFOMODE_DISABLE;
         if (HAL_DMA_Init(&hdma_usart2_rx) != HAL_OK) {
             Error_Handler();
         }
@@ -326,7 +326,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef * huart) {
  * @param huart: UART handle pointer
  * @retval None
  */
-void HAL_UART_MspDeInit(UART_HandleTypeDef * huart) {
+void HAL_UART_MspDeInit(UART_HandleTypeDef *huart) {
     if (huart->Instance == USART2) {
         /* USER CODE BEGIN USART2_MspDeInit 0 */
 

@@ -61,27 +61,27 @@
 #define MAIN_APP_LOGGING_DEBUGGING                               (1)
 #define MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE                   (1000)
 #define MAIN_APP_DEBUGGING_FSA8S_MAIN                            (1)
-#define MAIN_APP_DEBUGGING_FSA8S_AUX                             (1)
-#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES     (1)
-#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES                 (1)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES (1)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES             (1)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (1)
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (1) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (1) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (1) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_ESCS                                  (1)
-#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES        (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES        (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES           (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS           (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID_OUTPUT       (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE          (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS            (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT        (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS           (1)
-#define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK             (1)
+#define MAIN_APP_DEBUGGING_FSA8S_AUX                             (0)
+#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES     (0)
+#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES                 (0)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES (0)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES             (0)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (0)
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (0) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (0) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (0) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_ESCS                                  (0)
+#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES        (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES        (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES           (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS           (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID_OUTPUT       (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE          (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS            (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT        (0)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS           (0)
+#define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK             (0)
 /* Drivers Settings */
 #define USB_COMMUNICATION_INFO_QUEUE_SIZE  (32)
 #define USB_COMMUNICATION_DEBUG_QUEUE_SIZE (1)
@@ -127,10 +127,12 @@ static bool_t   Timer_Flag_OnOffButton           = false;
 static uint16_t Timer_AutoReloadTime_OnOffButton = PW_ON_OFF_DRIVER_TIME;
 
 /* Control System Variables Debugging */
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
 static ControlSystemValues_t  controlSystemValues_A;
 static ControlSystemValues_t  controlSystemValues_B;
 static ControlSystemValues_t *controlSystemActiveValues_TaskControlSystem = &controlSystemValues_A; // Task_ControlSystem writes here
 static ControlSystemValues_t *controlSystemActiveValues_TaskDebugging     = &controlSystemValues_B; // Task_Debugging reads from here
+#endif
 
 /* Flight Lights Commands */
 static uint16_t  FlightLights_Buffer_A[3]                   = {0};
@@ -139,6 +141,7 @@ static uint16_t *FlightLightsActiveBuffer_TaskControlSystem = FlightLights_Buffe
 static uint16_t *FlightLightsActiveBuffer_TaskFlightLights  = FlightLights_Buffer_B; // Task_FlightLights reads from here here
 
 /* Stack High Watermarks Variables */
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
 static UBaseType_t Task_StackHighWatermark_OnOffButton       = 0;
 static UBaseType_t Task_StackHighWatermark_ControlSystem     = 0;
 static UBaseType_t Task_StackHighWatermark_USB_Communication = 0;
@@ -147,8 +150,10 @@ static UBaseType_t Task_StackHighWatermark_BatteryLevel      = 0;
 static UBaseType_t Task_StackHighWatermark_BatteryAlarm      = 0;
 static UBaseType_t Task_StackHighWatermark_HeartbeatLight    = 0;
 static UBaseType_t Task_StackHighWatermark_FlightLights      = 0;
+#endif
 
 /* Debugging Variables */
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
 static uint8_t  debuggingStr_A[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
 static uint8_t  debuggingStr_B[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
 static uint8_t *debuggingActiveBuffer_TaskDebugging                  = debuggingStr_A; // Task_Debugging writes here
@@ -175,6 +180,7 @@ static uint8_t  debuggingStr_ControlSystem_RatesPID[40]              = {0};
 static uint8_t  debuggingStr_motorsSpeeds[40]                        = {0};
 static uint8_t  debuggingStr_ESCs[40]                                = {0}; // Size checked
 static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0}; // Size checked
+#endif
 
 /* FS-A8S Radio Controller Variables */
 static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS]            = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
@@ -191,7 +197,7 @@ static GY87_magnetometerValues_t             GY87_magnetometerValues;
 static float                                 GY87_magnetometerHeadingValue = 0;
 static float                                 GY87_temperature              = 0;
 
-/* Control System Mode 1 */
+/* Control System Mode */
 float KalmanPrediction_rollAngle   = 0;
 float KalmanPrediction_pitchAngle  = 0;
 float KalmanUncertainty_rollAngle  = 2 * 2;
@@ -382,6 +388,7 @@ bool_t FreeRTOS_CreateQueues(void) {
 
 bool_t FreeRTOS_CreateSemaphores(void) {
 
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
     /* Semaphore 1: Control System Values */
     Semaphore_Handle_controlSystemValuesSwap = xSemaphoreCreateBinary();
     if (Semaphore_Handle_controlSystemValuesSwap == NULL) {
@@ -397,6 +404,7 @@ bool_t FreeRTOS_CreateSemaphores(void) {
     }
     /* Initialize the semaphore given */
     xSemaphoreGive(Semaphore_Handle_debuggingBufferSwap);
+#endif
 
     /* Semaphore 3: Flight Lights Commands */
     Semaphore_Handle_flightLightsBufferSwap = xSemaphoreCreateBinary();
@@ -412,7 +420,7 @@ bool_t FreeRTOS_CreateSemaphores(void) {
 bool_t FreeRTOS_CreateTasks(void) {
 
     /* Task 1: ControlSystem */
-    xTaskCreate(Task_ControlSystem, "Task_ControlSystem", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_CONTROLSYSTEM_PRIORITY), &Task_Handle_ControlSystem);
+    xTaskCreate(Task_ControlSystem, "Task_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_CONTROLSYSTEM_PRIORITY), &Task_Handle_ControlSystem);
     if (Task_Handle_ControlSystem == NULL) {
         return false;
     }
@@ -513,7 +521,7 @@ void Task_ControlSystem(void *ptr) {
             GY87_temperature = GY87_ReadTemperatureSensor(hgy87);
 #endif
 
-            /* Calculate Kalman angles */
+            // /* Calculate Kalman angles */
             Kalman_CalculateAngle(&KalmanPrediction_rollAngle, &KalmanUncertainty_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
             Kalman_CalculateAngle(&KalmanPrediction_pitchAngle, &KalmanUncertainty_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
 
@@ -641,7 +649,7 @@ void Task_ControlSystem(void *ptr) {
             xQueueSend(Queue_Handle_FlightLights_Commands, &FlightLightsActiveBuffer_TaskFlightLights, 0);
         }
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_ControlSystem = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -684,7 +692,7 @@ void Task_USB_Communication(void *ptr) {
             }
         }
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_USB_Communication = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -697,6 +705,7 @@ void Task_USB_Communication(void *ptr) {
 void Task_Debugging(void *ptr) {
     (void)ptr;
 
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(10);
     /* Get initial tick count */
@@ -939,13 +948,12 @@ void Task_Debugging(void *ptr) {
             uint8_t *tempBuffer                        = debuggingActiveBuffer_TaskUSBCommunication;
             debuggingActiveBuffer_TaskUSBCommunication = debuggingActiveBuffer_TaskDebugging;
             debuggingActiveBuffer_TaskDebugging        = tempBuffer;
-
             /* Signal Task_USB_Communication */
             uint8_t *logDebuggingString = debuggingActiveBuffer_TaskUSBCommunication;
             xQueueSend(Queue_Handle_USB_Communication_Debug, &logDebuggingString, 0);
         }
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_Debugging = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -953,6 +961,7 @@ void Task_Debugging(void *ptr) {
         /* Set task time delay */
         vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
     }
+#endif
 }
 
 void Task_OnOffButton(void *ptr) {
@@ -975,7 +984,7 @@ void Task_OnOffButton(void *ptr) {
             }
         }
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_OnOffButton = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1019,7 +1028,7 @@ void Task_BatteryLevel(void *ptr) {
         /* Send to queue, overwriting old value */
         xQueueOverwrite(Queue_Handle_BatteryLevel, &FlightController_batteryLevel);
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_BatteryLevel = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1076,7 +1085,7 @@ void Task_BatteryAlarm(void *ptr) {
             }
         }
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_BatteryAlarm = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1106,7 +1115,7 @@ void Task_HeartbeatLight(void *ptr) {
             HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
         }
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_HeartbeatLight = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1228,7 +1237,7 @@ void Task_FlightLights(void *ptr) {
             xSequenceLastWakeTime = xTaskGetTickCount();
         }
 
-#if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_FlightLights = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1345,10 +1354,12 @@ void FlightController_Init(void) {
     }
 
     /* Initialize buffer structures */
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
     memset(&controlSystemValues_A, 0, sizeof(ControlSystemValues_t));
     memset(&controlSystemValues_B, 0, sizeof(ControlSystemValues_t));
     memset(debuggingStr_A, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
     memset(debuggingStr_B, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
+#endif
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

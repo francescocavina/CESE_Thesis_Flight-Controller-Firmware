@@ -65,7 +65,7 @@ extern "C" {
 #define LL_PWR_CSR_PVDO PWR_CSR_PVDO   /*!< Power voltage detector output flag */
 #define LL_PWR_CSR_VOS  PWR_CSR_VOSRDY /*!< Voltage scaling select flag */
 #if defined(PWR_CSR_EWUP)
-#define LL_PWR_CSR_EWUP1 PWR_CSR_EWUP /*!< Enable WKUP pin */
+#define LL_PWR_CSR_EWUP1 PWR_CSR_EWUP  /*!< Enable WKUP pin */
 #elif defined(PWR_CSR_EWUP1)
 #define LL_PWR_CSR_EWUP1 PWR_CSR_EWUP1 /*!< Enable WKUP pin 1 */
 #endif                                 /* PWR_CSR_EWUP */
@@ -97,8 +97,8 @@ extern "C" {
 /** @defgroup PWR_LL_EC_MODE_PWR Mode Power
  * @{
  */
-#define LL_PWR_MODE_STOP_MAINREGU 0x00000000U   /*!< Enter Stop mode when the CPU enters deepsleep */
-#define LL_PWR_MODE_STOP_LPREGU   (PWR_CR_LPDS) /*!< Enter Stop mode (with low power Regulator ON) when the CPU enters deepsleep */
+#define LL_PWR_MODE_STOP_MAINREGU 0x00000000U                                           /*!< Enter Stop mode when the CPU enters deepsleep */
+#define LL_PWR_MODE_STOP_LPREGU   (PWR_CR_LPDS)                                         /*!< Enter Stop mode (with low power Regulator ON) when the CPU enters deepsleep */
 #if defined(PWR_CR_MRUDS) && defined(PWR_CR_LPUDS) && defined(PWR_CR_FPDS)
 #define LL_PWR_MODE_STOP_MAINREGU_UNDERDRIVE (PWR_CR_MRUDS | PWR_CR_FPDS)               /*!< Enter Stop mode (with main Regulator in under-drive mode) when the CPU enters deepsleep */
 #define LL_PWR_MODE_STOP_LPREGU_UNDERDRIVE   (PWR_CR_LPDS | PWR_CR_LPUDS | PWR_CR_FPDS) /*!< Enter Stop mode (with low power Regulator in under-drive mode) when the CPU enters deepsleep */
@@ -139,8 +139,8 @@ extern "C" {
  * @{
  */
 #if defined(PWR_CSR_EWUP)
-#define LL_PWR_WAKEUP_PIN1 (PWR_CSR_EWUP) /*!< WKUP pin : PA0 */
-#endif                                    /* PWR_CSR_EWUP */
+#define LL_PWR_WAKEUP_PIN1 (PWR_CSR_EWUP)  /*!< WKUP pin : PA0 */
+#endif                                     /* PWR_CSR_EWUP */
 #if defined(PWR_CSR_EWUP1)
 #define LL_PWR_WAKEUP_PIN1 (PWR_CSR_EWUP1) /*!< WKUP pin 1 : PA0 */
 #endif                                     /* PWR_CSR_EWUP1 */

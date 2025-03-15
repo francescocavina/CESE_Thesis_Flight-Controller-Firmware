@@ -52,8 +52,8 @@ extern "C" {
 #define portBASE_TYPE  long
 
 typedef portSTACK_TYPE StackType_t;
-typedef long BaseType_t;
-typedef unsigned long UBaseType_t;
+typedef long           BaseType_t;
+typedef unsigned long  UBaseType_t;
 
 #if (configUSE_16_BIT_TICKS == 1)
 typedef uint16_t TickType_t;
@@ -75,21 +75,22 @@ not need to be guarded with a critical section. */
 /*-----------------------------------------------------------*/
 
 /* Scheduler utilities. */
-#define portYIELD()                                                                                                                                                                                                                                      \
-    {                                                                                                                                                                                                                                                    \
-        /* Set a PendSV to request a context switch. */                                                                                                                                                                                                  \
-        portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;                                                                                                                                                                                                  \
-                                                                                                                                                                                                                                                         \
-        /* Barriers are normally not required but do ensure the code is completely                                                                                                                                                                       \
-        within the specified behaviour for the architecture. */                                                                                                                                                                                          \
-        __asm volatile("dsb" ::: "memory");                                                                                                                                                                                                              \
-        __asm volatile("isb");                                                                                                                                                                                                                           \
+#define portYIELD()                                                                \
+    {                                                                              \
+        /* Set a PendSV to request a context switch. */                            \
+        portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;                            \
+                                                                                   \
+        /* Barriers are normally not required but do ensure the code is completely \
+        within the specified behaviour for the architecture. */                    \
+        __asm volatile("dsb" ::                                                    \
+                           : "memory");                                            \
+        __asm volatile("isb");                                                     \
     }
 
 #define portNVIC_INT_CTRL_REG  (*((volatile uint32_t *)0xe000ed04))
 #define portNVIC_PENDSVSET_BIT (1UL << 28UL)
-#define portEND_SWITCHING_ISR(xSwitchRequired)                                                                                                                                                                                                           \
-    if (xSwitchRequired != pdFALSE)                                                                                                                                                                                                                      \
+#define portEND_SWITCHING_ISR(xSwitchRequired) \
+    if (xSwitchRequired != pdFALSE)            \
     portYIELD()
 #define portYIELD_FROM_ISR(x) portEND_SWITCHING_ISR(x)
 /*-----------------------------------------------------------*/
@@ -109,8 +110,8 @@ extern void vPortExitCritical(void);
 /* Task function macros as described on the FreeRTOS.org WEB site.  These are
 not necessary for to use this port.  They are defined so the common demo files
 (which build with all the ports) will build. */
-#define portTASK_FUNCTION_PROTO(vFunction, pvParameters) void vFunction(void * pvParameters)
-#define portTASK_FUNCTION(vFunction, pvParameters)       void vFunction(void * pvParameters)
+#define portTASK_FUNCTION_PROTO(vFunction, pvParameters) void vFunction(void *pvParameters)
+#define portTASK_FUNCTION(vFunction, pvParameters)       void vFunction(void *pvParameters)
 /*-----------------------------------------------------------*/
 
 /* Tickless idle/low power functionality. */
@@ -131,7 +132,10 @@ extern void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime);
 __attribute__((always_inline)) static inline uint8_t ucPortCountLeadingZeros(uint32_t ulBitmap) {
     uint8_t ucReturn;
 
-    __asm volatile("clz %0, %1" : "=r"(ucReturn) : "r"(ulBitmap) : "memory");
+    __asm volatile("clz %0, %1"
+                   : "=r"(ucReturn)
+                   : "r"(ulBitmap)
+                   : "memory");
     return ucReturn;
 }
 
@@ -167,11 +171,12 @@ void vPortValidateInterruptPriority(void);
 #endif
 
 portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt(void) {
-    uint32_t ulCurrentInterrupt;
+    uint32_t   ulCurrentInterrupt;
     BaseType_t xReturn;
 
     /* Obtain the number of the currently executing interrupt. */
-    __asm volatile("mrs %0, ipsr" : "=r"(ulCurrentInterrupt)::"memory");
+    __asm volatile("mrs %0, ipsr"
+                   : "=r"(ulCurrentInterrupt)::"memory");
 
     if (ulCurrentInterrupt == 0) {
         xReturn = pdFALSE;
@@ -217,11 +222,13 @@ portFORCE_INLINE static uint32_t ulPortRaiseBASEPRI(void) {
 /*-----------------------------------------------------------*/
 
 portFORCE_INLINE static void vPortSetBASEPRI(uint32_t ulNewMaskValue) {
-    __asm volatile("	msr basepri, %0	" ::"r"(ulNewMaskValue) : "memory");
+    __asm volatile("	msr basepri, %0	" ::"r"(ulNewMaskValue)
+                   : "memory");
 }
 /*-----------------------------------------------------------*/
 
-#define portMEMORY_BARRIER() __asm volatile("" ::: "memory")
+#define portMEMORY_BARRIER() __asm volatile("" :: \
+                                                : "memory")
 
 #ifdef __cplusplus
 }

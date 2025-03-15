@@ -285,7 +285,7 @@ void HAL_MPU_Enable(uint32_t MPU_Control) {
  *                the initialization and configuration information.
  * @retval None
  */
-void HAL_MPU_ConfigRegion(MPU_Region_InitTypeDef * MPU_Init) {
+void HAL_MPU_ConfigRegion(MPU_Region_InitTypeDef *MPU_Init) {
     /* Check the parameters */
     assert_param(IS_MPU_REGION_NUMBER(MPU_Init->Number));
     assert_param(IS_MPU_REGION_ENABLE(MPU_Init->Enable));
@@ -345,7 +345,7 @@ uint32_t HAL_NVIC_GetPriorityGrouping(void) {
  * @param  pSubPriority Pointer on the Subpriority value (starting from 0).
  * @retval None
  */
-void HAL_NVIC_GetPriority(IRQn_Type IRQn, uint32_t PriorityGroup, uint32_t * pPreemptPriority, uint32_t * pSubPriority) {
+void HAL_NVIC_GetPriority(IRQn_Type IRQn, uint32_t PriorityGroup, uint32_t *pPreemptPriority, uint32_t *pSubPriority) {
     /* Check the parameters */
     assert_param(IS_NVIC_PRIORITY_GROUP(PriorityGroup));
     /* Get priority for Cortex-M system or device specific interrupts */

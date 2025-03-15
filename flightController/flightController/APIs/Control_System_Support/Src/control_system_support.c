@@ -51,7 +51,7 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
+void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
 
     // float kalmanGain;
 
@@ -65,7 +65,7 @@ void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float
     const float processNoise = 16.0f; // 4^2
     /* Measurement noise variance (R) - how much we trust the accelerometer */
     const float measurementNoise = 9.0f; // 3^2
-    float kalmanGain;
+    float       kalmanGain;
 
     /* Prediction step - Project the state ahead using gyro data */
     *kalmanState = *kalmanState + CONTROL_SYSTEM_LOOP_PERIOD_S * kalmanInput;
@@ -94,7 +94,7 @@ void Kalman_CalculateAngle(float * kalmanState, float * kalmanUncertainty, float
     *kalmanUncertainty = (1.0f - kalmanGain) * *kalmanUncertainty;
 }
 
-void CSM_CalculatePID(float * PID_Output, float * previousIterm, float * previousErrorValue, float errorValue, float kP, float kI, float kD) {
+void CSM_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD) {
 
     float Pterm;
     float Iterm;
@@ -126,9 +126,9 @@ void CSM_CalculatePID(float * PID_Output, float * previousIterm, float * previou
     }
 
     /* Return values */
-    *PID_Output = pidOutputValue;
+    *PID_Output         = pidOutputValue;
     *previousErrorValue = errorValue;
-    *previousIterm = Iterm;
+    *previousIterm      = Iterm;
 }
 
 void CSM_ResetPID(void) {

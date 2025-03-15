@@ -67,7 +67,7 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t I2C_Init(GY87_HandleTypeDef_t * hgy87) {
+bool_t I2C_Init(GY87_HandleTypeDef_t *hgy87) {
 
     uint8_t who_am_I_value;
 
@@ -89,7 +89,7 @@ bool_t I2C_Init(GY87_HandleTypeDef_t * hgy87) {
     }
 }
 
-bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
+bool_t I2C_Read(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data, uint8_t dataSize) {
 
     /* Check parameters */
     if (NULL == hi2c) {
@@ -111,7 +111,7 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
     }
 }
 
-bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data) {
+bool_t I2C_Write(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data) {
 
     /* Check parameters */
     if (NULL == hi2c) {

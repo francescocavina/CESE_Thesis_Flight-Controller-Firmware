@@ -41,9 +41,9 @@
 #define INC_LOGGING_SYSTEM_HWI_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 /* BEGIN MODIFY 1 */
 #include "stm32f4xx_hal.h"
 #include "usb_device.h"
@@ -74,7 +74,7 @@ typedef bool bool_t;
  *         - USB is busy
  *         - string is NULL
  */
-bool_t USB_Write(const uint8_t * string);
+bool_t USB_Write(const uint8_t *string);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

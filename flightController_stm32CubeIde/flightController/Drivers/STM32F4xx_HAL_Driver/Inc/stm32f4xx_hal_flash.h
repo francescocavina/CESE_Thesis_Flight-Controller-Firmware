@@ -42,7 +42,10 @@ extern "C" {
 /**
  * @brief  FLASH Procedure structure definition
  */
-typedef enum { FLASH_PROC_NONE = 0U, FLASH_PROC_SECTERASE, FLASH_PROC_MASSERASE, FLASH_PROC_PROGRAM } FLASH_ProcedureTypeDef;
+typedef enum { FLASH_PROC_NONE = 0U,
+               FLASH_PROC_SECTERASE,
+               FLASH_PROC_MASSERASE,
+               FLASH_PROC_PROGRAM } FLASH_ProcedureTypeDef;
 
 /**
  * @brief  FLASH handle Structure definition
@@ -50,19 +53,19 @@ typedef enum { FLASH_PROC_NONE = 0U, FLASH_PROC_SECTERASE, FLASH_PROC_MASSERASE,
 typedef struct {
     __IO FLASH_ProcedureTypeDef ProcedureOnGoing; /*Internal variable to indicate which procedure is ongoing or not in IT context*/
 
-    __IO uint32_t NbSectorsToErase; /*Internal variable to save the remaining sectors to erase in IT context*/
+    __IO uint32_t NbSectorsToErase;               /*Internal variable to save the remaining sectors to erase in IT context*/
 
-    __IO uint8_t VoltageForErase; /*Internal variable to provide voltage range selected by user in IT context*/
+    __IO uint8_t VoltageForErase;                 /*Internal variable to provide voltage range selected by user in IT context*/
 
-    __IO uint32_t Sector; /*Internal variable to define the current sector which is erasing*/
+    __IO uint32_t Sector;                         /*Internal variable to define the current sector which is erasing*/
 
-    __IO uint32_t Bank; /*Internal variable to save current bank selected during mass erase*/
+    __IO uint32_t Bank;                           /*Internal variable to save current bank selected during mass erase*/
 
-    __IO uint32_t Address; /*Internal variable to save address selected for program*/
+    __IO uint32_t Address;                        /*Internal variable to save address selected for program*/
 
-    HAL_LockTypeDef Lock; /* FLASH locking object                */
+    HAL_LockTypeDef Lock;                         /* FLASH locking object                */
 
-    __IO uint32_t ErrorCode; /* FLASH error code                    */
+    __IO uint32_t ErrorCode;                      /* FLASH error code                    */
 
 } FLASH_ProcessTypeDef;
 
@@ -111,9 +114,9 @@ typedef struct {
 #define FLASH_FLAG_PGPERR FLASH_SR_PGPERR /*!< FLASH Programming Parallelism error flag  */
 #define FLASH_FLAG_PGSERR FLASH_SR_PGSERR /*!< FLASH Programming Sequence error flag     */
 #if defined(FLASH_SR_RDERR)
-#define FLASH_FLAG_RDERR FLASH_SR_RDERR /*!< Read Protection error flag (PCROP)        */
-#endif                                  /* FLASH_SR_RDERR */
-#define FLASH_FLAG_BSY FLASH_SR_BSY     /*!< FLASH Busy flag                           */
+#define FLASH_FLAG_RDERR FLASH_SR_RDERR   /*!< Read Protection error flag (PCROP)        */
+#endif                                    /* FLASH_SR_RDERR */
+#define FLASH_FLAG_BSY FLASH_SR_BSY       /*!< FLASH Busy flag                           */
 /**
  * @}
  */
@@ -216,10 +219,10 @@ typedef struct {
  * @note   This function must be used only when the Instruction Cache is disabled.
  * @retval None
  */
-#define __HAL_FLASH_INSTRUCTION_CACHE_RESET()                                                                                                                                                                                                            \
-    do {                                                                                                                                                                                                                                                 \
-        FLASH->ACR |= FLASH_ACR_ICRST;                                                                                                                                                                                                                   \
-        FLASH->ACR &= ~FLASH_ACR_ICRST;                                                                                                                                                                                                                  \
+#define __HAL_FLASH_INSTRUCTION_CACHE_RESET() \
+    do {                                      \
+        FLASH->ACR |= FLASH_ACR_ICRST;        \
+        FLASH->ACR &= ~FLASH_ACR_ICRST;       \
     } while (0U)
 
 /**
@@ -227,10 +230,10 @@ typedef struct {
  * @note   This function must be used only when the data Cache is disabled.
  * @retval None
  */
-#define __HAL_FLASH_DATA_CACHE_RESET()                                                                                                                                                                                                                   \
-    do {                                                                                                                                                                                                                                                 \
-        FLASH->ACR |= FLASH_ACR_DCRST;                                                                                                                                                                                                                   \
-        FLASH->ACR &= ~FLASH_ACR_DCRST;                                                                                                                                                                                                                  \
+#define __HAL_FLASH_DATA_CACHE_RESET()  \
+    do {                                \
+        FLASH->ACR |= FLASH_ACR_DCRST;  \
+        FLASH->ACR &= ~FLASH_ACR_DCRST; \
     } while (0U)
 /**
  * @brief  Enable the specified FLASH interrupt.
@@ -329,7 +332,7 @@ HAL_StatusTypeDef HAL_FLASH_OB_Launch(void);
  * @{
  */
 /* Peripheral State functions  ************************************************/
-uint32_t HAL_FLASH_GetError(void);
+uint32_t          HAL_FLASH_GetError(void);
 HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout);
 /**
  * @}

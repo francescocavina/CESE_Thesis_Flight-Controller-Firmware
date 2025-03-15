@@ -23,7 +23,7 @@
  */
 
 #if defined(__ICCARM__)
-#pragma system_include /* treat file as system include file for MISRA check */
+#pragma system_include      /* treat file as system include file for MISRA check */
 #elif defined(__clang__)
 #pragma clang system_header /* treat file as system include file */
 #endif
@@ -107,10 +107,10 @@ __STATIC_FORCEINLINE void SCB_InvalidateICache(void) {
   \param[in]   addr    address
   \param[in]   isize   size of memory block (in number of bytes)
 */
-__STATIC_FORCEINLINE void SCB_InvalidateICache_by_Addr(volatile void * addr, int32_t isize) {
+__STATIC_FORCEINLINE void SCB_InvalidateICache_by_Addr(volatile void *addr, int32_t isize) {
 #if defined(__ICACHE_PRESENT) && (__ICACHE_PRESENT == 1U)
     if (isize > 0) {
-        int32_t op_size = isize + (((uint32_t)addr) & (__SCB_ICACHE_LINE_SIZE - 1U));
+        int32_t  op_size = isize + (((uint32_t)addr) & (__SCB_ICACHE_LINE_SIZE - 1U));
         uint32_t op_addr = (uint32_t)addr /* & ~(__SCB_ICACHE_LINE_SIZE - 1U) */;
 
         __DSB();
@@ -138,7 +138,7 @@ __STATIC_FORCEINLINE void SCB_EnableDCache(void) {
     uint32_t ways;
 
     if (SCB->CCR & SCB_CCR_DC_Msk)
-        return; /* return if DCache is already enabled */
+        return;       /* return if DCache is already enabled */
 
     SCB->CSSELR = 0U; /* select Level 1 data cache */
     __DSB();
@@ -150,7 +150,8 @@ __STATIC_FORCEINLINE void SCB_EnableDCache(void) {
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
-            SCB->DCISW = (((sets << SCB_DCISW_SET_Pos) & SCB_DCISW_SET_Msk) | ((ways << SCB_DCISW_WAY_Pos) & SCB_DCISW_WAY_Msk));
+            SCB->DCISW = (((sets << SCB_DCISW_SET_Pos) & SCB_DCISW_SET_Msk) |
+                          ((ways << SCB_DCISW_WAY_Pos) & SCB_DCISW_WAY_Msk));
 #if defined(__CC_ARM)
             __schedule_barrier();
 #endif
@@ -188,7 +189,8 @@ __STATIC_FORCEINLINE void SCB_DisableDCache(void) {
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
-            SCB->DCCISW = (((sets << SCB_DCCISW_SET_Pos) & SCB_DCCISW_SET_Msk) | ((ways << SCB_DCCISW_WAY_Pos) & SCB_DCCISW_WAY_Msk));
+            SCB->DCCISW = (((sets << SCB_DCCISW_SET_Pos) & SCB_DCCISW_SET_Msk) |
+                           ((ways << SCB_DCCISW_WAY_Pos) & SCB_DCCISW_WAY_Msk));
 #if defined(__CC_ARM)
             __schedule_barrier();
 #endif
@@ -220,7 +222,8 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache(void) {
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
-            SCB->DCISW = (((sets << SCB_DCISW_SET_Pos) & SCB_DCISW_SET_Msk) | ((ways << SCB_DCISW_WAY_Pos) & SCB_DCISW_WAY_Msk));
+            SCB->DCISW = (((sets << SCB_DCISW_SET_Pos) & SCB_DCISW_SET_Msk) |
+                          ((ways << SCB_DCISW_WAY_Pos) & SCB_DCISW_WAY_Msk));
 #if defined(__CC_ARM)
             __schedule_barrier();
 #endif
@@ -252,7 +255,8 @@ __STATIC_FORCEINLINE void SCB_CleanDCache(void) {
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
-            SCB->DCCSW = (((sets << SCB_DCCSW_SET_Pos) & SCB_DCCSW_SET_Msk) | ((ways << SCB_DCCSW_WAY_Pos) & SCB_DCCSW_WAY_Msk));
+            SCB->DCCSW = (((sets << SCB_DCCSW_SET_Pos) & SCB_DCCSW_SET_Msk) |
+                          ((ways << SCB_DCCSW_WAY_Pos) & SCB_DCCSW_WAY_Msk));
 #if defined(__CC_ARM)
             __schedule_barrier();
 #endif
@@ -284,7 +288,8 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache(void) {
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
-            SCB->DCCISW = (((sets << SCB_DCCISW_SET_Pos) & SCB_DCCISW_SET_Msk) | ((ways << SCB_DCCISW_WAY_Pos) & SCB_DCCISW_WAY_Msk));
+            SCB->DCCISW = (((sets << SCB_DCCISW_SET_Pos) & SCB_DCCISW_SET_Msk) |
+                           ((ways << SCB_DCCISW_WAY_Pos) & SCB_DCCISW_WAY_Msk));
 #if defined(__CC_ARM)
             __schedule_barrier();
 #endif
@@ -304,10 +309,10 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache(void) {
   \param[in]   addr    address
   \param[in]   dsize   size of memory block (in number of bytes)
 */
-__STATIC_FORCEINLINE void SCB_InvalidateDCache_by_Addr(volatile void * addr, int32_t dsize) {
+__STATIC_FORCEINLINE void SCB_InvalidateDCache_by_Addr(volatile void *addr, int32_t dsize) {
 #if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
     if (dsize > 0) {
-        int32_t op_size = dsize + (((uint32_t)addr) & (__SCB_DCACHE_LINE_SIZE - 1U));
+        int32_t  op_size = dsize + (((uint32_t)addr) & (__SCB_DCACHE_LINE_SIZE - 1U));
         uint32_t op_addr = (uint32_t)addr /* & ~(__SCB_DCACHE_LINE_SIZE - 1U) */;
 
         __DSB();
@@ -332,10 +337,10 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache_by_Addr(volatile void * addr, int
   \param[in]   addr    address
   \param[in]   dsize   size of memory block (in number of bytes)
 */
-__STATIC_FORCEINLINE void SCB_CleanDCache_by_Addr(volatile void * addr, int32_t dsize) {
+__STATIC_FORCEINLINE void SCB_CleanDCache_by_Addr(volatile void *addr, int32_t dsize) {
 #if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
     if (dsize > 0) {
-        int32_t op_size = dsize + (((uint32_t)addr) & (__SCB_DCACHE_LINE_SIZE - 1U));
+        int32_t  op_size = dsize + (((uint32_t)addr) & (__SCB_DCACHE_LINE_SIZE - 1U));
         uint32_t op_addr = (uint32_t)addr /* & ~(__SCB_DCACHE_LINE_SIZE - 1U) */;
 
         __DSB();
@@ -360,10 +365,10 @@ __STATIC_FORCEINLINE void SCB_CleanDCache_by_Addr(volatile void * addr, int32_t 
   \param[in]   addr    address (aligned to 32-byte boundary)
   \param[in]   dsize   size of memory block (in number of bytes)
 */
-__STATIC_FORCEINLINE void SCB_CleanInvalidateDCache_by_Addr(volatile void * addr, int32_t dsize) {
+__STATIC_FORCEINLINE void SCB_CleanInvalidateDCache_by_Addr(volatile void *addr, int32_t dsize) {
 #if defined(__DCACHE_PRESENT) && (__DCACHE_PRESENT == 1U)
     if (dsize > 0) {
-        int32_t op_size = dsize + (((uint32_t)addr) & (__SCB_DCACHE_LINE_SIZE - 1U));
+        int32_t  op_size = dsize + (((uint32_t)addr) & (__SCB_DCACHE_LINE_SIZE - 1U));
         uint32_t op_addr = (uint32_t)addr /* & ~(__SCB_DCACHE_LINE_SIZE - 1U) */;
 
         __DSB();

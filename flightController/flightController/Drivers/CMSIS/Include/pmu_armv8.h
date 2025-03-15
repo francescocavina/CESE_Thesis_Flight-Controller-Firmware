@@ -23,7 +23,7 @@
  */
 
 #if defined(__ICCARM__)
-#pragma system_include /* treat file as system include file for MISRA check */
+#pragma system_include      /* treat file as system include file for MISRA check */
 #elif defined(__clang__)
 #pragma clang system_header /* treat file as system include file */
 #endif
@@ -185,7 +185,7 @@ __STATIC_INLINE uint32_t ARM_PMU_Get_CCNTR(void);
 __STATIC_INLINE uint32_t ARM_PMU_Get_EVCNTR(uint32_t num);
 
 __STATIC_INLINE uint32_t ARM_PMU_Get_CNTR_OVS(void);
-__STATIC_INLINE void ARM_PMU_Set_CNTR_OVS(uint32_t mask);
+__STATIC_INLINE void     ARM_PMU_Set_CNTR_OVS(uint32_t mask);
 
 __STATIC_INLINE void ARM_PMU_Set_CNTR_IRQ_Enable(uint32_t mask);
 __STATIC_INLINE void ARM_PMU_Set_CNTR_IRQ_Disable(uint32_t mask);

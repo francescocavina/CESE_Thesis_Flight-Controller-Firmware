@@ -53,7 +53,7 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-bool_t PWM_Init(ESC_HandleTypeDef_t * hesc) {
+bool_t PWM_Init(ESC_HandleTypeDef_t *hesc) {
 
     /* Check first parameter */
     if (NULL == hesc) {
@@ -85,7 +85,7 @@ bool_t PWM_Init(ESC_HandleTypeDef_t * hesc) {
     return true;
 }
 
-bool_t PWM_Deinit(ESC_HandleTypeDef_t * hesc) {
+bool_t PWM_Deinit(ESC_HandleTypeDef_t *hesc) {
 
     /* Check parameters */
     if (NULL == hesc) {
@@ -124,7 +124,7 @@ bool_t PWM_Deinit(ESC_HandleTypeDef_t * hesc) {
     return true;
 }
 
-bool_t PWM_SetDutyCycle(ESC_HandleTypeDef_t * hesc, uint8_t channel, uint32_t dutyCycle) {
+bool_t PWM_SetDutyCycle(ESC_HandleTypeDef_t *hesc, uint8_t channel, uint32_t dutyCycle) {
 
     /* Check parameters */
     if (NULL == hesc) {

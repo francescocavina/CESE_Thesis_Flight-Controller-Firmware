@@ -72,7 +72,8 @@ static const uint8_t aRCC_PLLSAIDIVRPrescTable[4] = {2, 4, 8, 16};
 /**
  * @brief  RCC Clocks Frequency Structure
  */
-typedef struct {
+typedef struct
+{
     uint32_t SYSCLK_Frequency; /*!< SYSCLK clock frequency */
     uint32_t HCLK_Frequency;   /*!< HCLK clock frequency */
     uint32_t PCLK1_Frequency;  /*!< PCLK1 clock frequency */
@@ -126,11 +127,11 @@ typedef struct {
  * @brief    Flags defines which can be used with LL_RCC_WriteReg function
  * @{
  */
-#define LL_RCC_CIR_LSIRDYC RCC_CIR_LSIRDYC /*!< LSI Ready Interrupt Clear */
-#define LL_RCC_CIR_LSERDYC RCC_CIR_LSERDYC /*!< LSE Ready Interrupt Clear */
-#define LL_RCC_CIR_HSIRDYC RCC_CIR_HSIRDYC /*!< HSI Ready Interrupt Clear */
-#define LL_RCC_CIR_HSERDYC RCC_CIR_HSERDYC /*!< HSE Ready Interrupt Clear */
-#define LL_RCC_CIR_PLLRDYC RCC_CIR_PLLRDYC /*!< PLL Ready Interrupt Clear */
+#define LL_RCC_CIR_LSIRDYC RCC_CIR_LSIRDYC       /*!< LSI Ready Interrupt Clear */
+#define LL_RCC_CIR_LSERDYC RCC_CIR_LSERDYC       /*!< LSE Ready Interrupt Clear */
+#define LL_RCC_CIR_HSIRDYC RCC_CIR_HSIRDYC       /*!< HSI Ready Interrupt Clear */
+#define LL_RCC_CIR_HSERDYC RCC_CIR_HSERDYC       /*!< HSE Ready Interrupt Clear */
+#define LL_RCC_CIR_PLLRDYC RCC_CIR_PLLRDYC       /*!< PLL Ready Interrupt Clear */
 #if defined(RCC_PLLI2S_SUPPORT)
 #define LL_RCC_CIR_PLLI2SRDYC RCC_CIR_PLLI2SRDYC /*!< PLLI2S Ready Interrupt Clear */
 #endif                                           /* RCC_PLLI2S_SUPPORT */
@@ -146,11 +147,11 @@ typedef struct {
  * @brief    Flags defines which can be used with LL_RCC_ReadReg function
  * @{
  */
-#define LL_RCC_CIR_LSIRDYF RCC_CIR_LSIRDYF /*!< LSI Ready Interrupt flag */
-#define LL_RCC_CIR_LSERDYF RCC_CIR_LSERDYF /*!< LSE Ready Interrupt flag */
-#define LL_RCC_CIR_HSIRDYF RCC_CIR_HSIRDYF /*!< HSI Ready Interrupt flag */
-#define LL_RCC_CIR_HSERDYF RCC_CIR_HSERDYF /*!< HSE Ready Interrupt flag */
-#define LL_RCC_CIR_PLLRDYF RCC_CIR_PLLRDYF /*!< PLL Ready Interrupt flag */
+#define LL_RCC_CIR_LSIRDYF RCC_CIR_LSIRDYF       /*!< LSI Ready Interrupt flag */
+#define LL_RCC_CIR_LSERDYF RCC_CIR_LSERDYF       /*!< LSE Ready Interrupt flag */
+#define LL_RCC_CIR_HSIRDYF RCC_CIR_HSIRDYF       /*!< HSI Ready Interrupt flag */
+#define LL_RCC_CIR_HSERDYF RCC_CIR_HSERDYF       /*!< HSE Ready Interrupt flag */
+#define LL_RCC_CIR_PLLRDYF RCC_CIR_PLLRDYF       /*!< PLL Ready Interrupt flag */
 #if defined(RCC_PLLI2S_SUPPORT)
 #define LL_RCC_CIR_PLLI2SRDYF RCC_CIR_PLLI2SRDYF /*!< PLLI2S Ready Interrupt flag */
 #endif                                           /* RCC_PLLI2S_SUPPORT */
@@ -165,8 +166,8 @@ typedef struct {
 #define LL_RCC_CSR_IWDGRSTF RCC_CSR_IWDGRSTF     /*!< Independent Watchdog reset flag */
 #define LL_RCC_CSR_WWDGRSTF RCC_CSR_WWDGRSTF     /*!< Window watchdog reset flag */
 #if defined(RCC_CSR_BORRSTF)
-#define LL_RCC_CSR_BORRSTF RCC_CSR_BORRSTF /*!< BOR reset flag */
-#endif                                     /* RCC_CSR_BORRSTF */
+#define LL_RCC_CSR_BORRSTF RCC_CSR_BORRSTF       /*!< BOR reset flag */
+#endif                                           /* RCC_CSR_BORRSTF */
 /**
  * @}
  */
@@ -175,11 +176,11 @@ typedef struct {
  * @brief    IT defines which can be used with LL_RCC_ReadReg and  LL_RCC_WriteReg functions
  * @{
  */
-#define LL_RCC_CIR_LSIRDYIE RCC_CIR_LSIRDYIE /*!< LSI Ready Interrupt Enable */
-#define LL_RCC_CIR_LSERDYIE RCC_CIR_LSERDYIE /*!< LSE Ready Interrupt Enable */
-#define LL_RCC_CIR_HSIRDYIE RCC_CIR_HSIRDYIE /*!< HSI Ready Interrupt Enable */
-#define LL_RCC_CIR_HSERDYIE RCC_CIR_HSERDYIE /*!< HSE Ready Interrupt Enable */
-#define LL_RCC_CIR_PLLRDYIE RCC_CIR_PLLRDYIE /*!< PLL Ready Interrupt Enable */
+#define LL_RCC_CIR_LSIRDYIE RCC_CIR_LSIRDYIE       /*!< LSI Ready Interrupt Enable */
+#define LL_RCC_CIR_LSERDYIE RCC_CIR_LSERDYIE       /*!< LSE Ready Interrupt Enable */
+#define LL_RCC_CIR_HSIRDYIE RCC_CIR_HSIRDYIE       /*!< HSI Ready Interrupt Enable */
+#define LL_RCC_CIR_HSERDYIE RCC_CIR_HSERDYIE       /*!< HSE Ready Interrupt Enable */
+#define LL_RCC_CIR_PLLRDYIE RCC_CIR_PLLRDYIE       /*!< PLL Ready Interrupt Enable */
 #if defined(RCC_PLLI2S_SUPPORT)
 #define LL_RCC_CIR_PLLI2SRDYIE RCC_CIR_PLLI2SRDYIE /*!< PLLI2S Ready Interrupt Enable */
 #endif                                             /* RCC_PLLI2S_SUPPORT */
@@ -193,9 +194,9 @@ typedef struct {
 /** @defgroup RCC_LL_EC_SYS_CLKSOURCE  System clock switch
  * @{
  */
-#define LL_RCC_SYS_CLKSOURCE_HSI RCC_CFGR_SW_HSI /*!< HSI selection as system clock */
-#define LL_RCC_SYS_CLKSOURCE_HSE RCC_CFGR_SW_HSE /*!< HSE selection as system clock */
-#define LL_RCC_SYS_CLKSOURCE_PLL RCC_CFGR_SW_PLL /*!< PLL selection as system clock */
+#define LL_RCC_SYS_CLKSOURCE_HSI RCC_CFGR_SW_HSI   /*!< HSI selection as system clock */
+#define LL_RCC_SYS_CLKSOURCE_HSE RCC_CFGR_SW_HSE   /*!< HSE selection as system clock */
+#define LL_RCC_SYS_CLKSOURCE_PLL RCC_CFGR_SW_PLL   /*!< PLL selection as system clock */
 #if defined(RCC_CFGR_SW_PLLR)
 #define LL_RCC_SYS_CLKSOURCE_PLLR RCC_CFGR_SW_PLLR /*!< PLLR selection as system clock */
 #endif                                             /* RCC_CFGR_SW_PLLR */
@@ -206,9 +207,9 @@ typedef struct {
 /** @defgroup RCC_LL_EC_SYS_CLKSOURCE_STATUS  System clock switch status
  * @{
  */
-#define LL_RCC_SYS_CLKSOURCE_STATUS_HSI RCC_CFGR_SWS_HSI /*!< HSI used as system clock */
-#define LL_RCC_SYS_CLKSOURCE_STATUS_HSE RCC_CFGR_SWS_HSE /*!< HSE used as system clock */
-#define LL_RCC_SYS_CLKSOURCE_STATUS_PLL RCC_CFGR_SWS_PLL /*!< PLL used as system clock */
+#define LL_RCC_SYS_CLKSOURCE_STATUS_HSI RCC_CFGR_SWS_HSI   /*!< HSI used as system clock */
+#define LL_RCC_SYS_CLKSOURCE_STATUS_HSE RCC_CFGR_SWS_HSE   /*!< HSE used as system clock */
+#define LL_RCC_SYS_CLKSOURCE_STATUS_PLL RCC_CFGR_SWS_PLL   /*!< PLL used as system clock */
 #if defined(RCC_PLLR_SYSCLK_SUPPORT)
 #define LL_RCC_SYS_CLKSOURCE_STATUS_PLLR RCC_CFGR_SWS_PLLR /*!< PLLR used as system clock */
 #endif                                                     /* RCC_PLLR_SYSCLK_SUPPORT */
@@ -415,9 +416,9 @@ typedef struct {
 /** @defgroup RCC_LL_EC_SDIOx_CLKSOURCE  Peripheral SDIO clock source selection
  * @{
  */
-#define LL_RCC_SDIO_CLKSOURCE_PLL48CLK 0x00000000U /*!< PLL 48M domain clock used as SDIO clock */
+#define LL_RCC_SDIO_CLKSOURCE_PLL48CLK 0x00000000U        /*!< PLL 48M domain clock used as SDIO clock */
 #if defined(RCC_DCKCFGR_SDIOSEL)
-#define LL_RCC_SDIO_CLKSOURCE_SYSCLK RCC_DCKCFGR_SDIOSEL /*!< System clock clock used as SDIO clock */
+#define LL_RCC_SDIO_CLKSOURCE_SYSCLK RCC_DCKCFGR_SDIOSEL  /*!< System clock clock used as SDIO clock */
 #else
 #define LL_RCC_SDIO_CLKSOURCE_SYSCLK RCC_DCKCFGR2_SDIOSEL /*!< System clock clock used as SDIO clock */
 #endif                                                    /* RCC_DCKCFGR_SDIOSEL */
@@ -452,14 +453,14 @@ typedef struct {
  * @{
  */
 #if defined(RCC_CFGR_I2SSRC)
-#define LL_RCC_I2S1_CLKSOURCE_PLLI2S 0x00000000U     /*!< I2S oscillator clock used as I2S1 clock */
-#define LL_RCC_I2S1_CLKSOURCE_PIN    RCC_CFGR_I2SSRC /*!< External pin clock used as I2S1 clock */
-#endif                                               /* RCC_CFGR_I2SSRC */
+#define LL_RCC_I2S1_CLKSOURCE_PLLI2S 0x00000000U                                                     /*!< I2S oscillator clock used as I2S1 clock */
+#define LL_RCC_I2S1_CLKSOURCE_PIN    RCC_CFGR_I2SSRC                                                 /*!< External pin clock used as I2S1 clock */
+#endif                                                                                               /* RCC_CFGR_I2SSRC */
 #if defined(RCC_DCKCFGR_I2SSRC)
-#define LL_RCC_I2S1_CLKSOURCE_PLL    (uint32_t)(RCC_DCKCFGR_I2SSRC | 0x00000000U)                  /*!< PLL clock used as I2S1 clock source */
-#define LL_RCC_I2S1_CLKSOURCE_PIN    (uint32_t)(RCC_DCKCFGR_I2SSRC | (RCC_DCKCFGR_I2SSRC_0 >> 16)) /*!< External pin used as I2S1 clock source */
-#define LL_RCC_I2S1_CLKSOURCE_PLLSRC (uint32_t)(RCC_DCKCFGR_I2SSRC | (RCC_DCKCFGR_I2SSRC_1 >> 16)) /*!< PLL Main clock used as I2S1 clock source */
-#endif                                                                                             /* RCC_DCKCFGR_I2SSRC */
+#define LL_RCC_I2S1_CLKSOURCE_PLL    (uint32_t)(RCC_DCKCFGR_I2SSRC | 0x00000000U)                    /*!< PLL clock used as I2S1 clock source */
+#define LL_RCC_I2S1_CLKSOURCE_PIN    (uint32_t)(RCC_DCKCFGR_I2SSRC | (RCC_DCKCFGR_I2SSRC_0 >> 16))   /*!< External pin used as I2S1 clock source */
+#define LL_RCC_I2S1_CLKSOURCE_PLLSRC (uint32_t)(RCC_DCKCFGR_I2SSRC | (RCC_DCKCFGR_I2SSRC_1 >> 16))   /*!< PLL Main clock used as I2S1 clock source */
+#endif                                                                                               /* RCC_DCKCFGR_I2SSRC */
 #if defined(RCC_DCKCFGR_I2S1SRC)
 #define LL_RCC_I2S1_CLKSOURCE_PLLI2S (uint32_t)(RCC_DCKCFGR_I2S1SRC | 0x00000000U)                   /*!< PLLI2S clock used as I2S1 clock source */
 #define LL_RCC_I2S1_CLKSOURCE_PIN    (uint32_t)(RCC_DCKCFGR_I2S1SRC | (RCC_DCKCFGR_I2S1SRC_0 >> 16)) /*!< External pin used as I2S1 clock source */
@@ -481,11 +482,11 @@ typedef struct {
  * @{
  */
 #if defined(RCC_DCKCFGR_CK48MSEL)
-#define LL_RCC_CK48M_CLKSOURCE_PLL    0x00000000U          /*!< PLL oscillator clock used as 48Mhz domain clock */
-#define LL_RCC_CK48M_CLKSOURCE_PLLSAI RCC_DCKCFGR_CK48MSEL /*!< PLLSAI oscillator clock used as 48Mhz domain clock */
-#endif                                                     /* RCC_DCKCFGR_CK48MSEL */
+#define LL_RCC_CK48M_CLKSOURCE_PLL    0x00000000U           /*!< PLL oscillator clock used as 48Mhz domain clock */
+#define LL_RCC_CK48M_CLKSOURCE_PLLSAI RCC_DCKCFGR_CK48MSEL  /*!< PLLSAI oscillator clock used as 48Mhz domain clock */
+#endif                                                      /* RCC_DCKCFGR_CK48MSEL */
 #if defined(RCC_DCKCFGR2_CK48MSEL)
-#define LL_RCC_CK48M_CLKSOURCE_PLL 0x00000000U /*!< PLL oscillator clock used as 48Mhz domain clock */
+#define LL_RCC_CK48M_CLKSOURCE_PLL 0x00000000U              /*!< PLL oscillator clock used as 48Mhz domain clock */
 #if defined(RCC_PLLSAI_SUPPORT)
 #define LL_RCC_CK48M_CLKSOURCE_PLLSAI RCC_DCKCFGR2_CK48MSEL /*!< PLLSAI oscillator clock used as 48Mhz domain clock */
 #endif                                                      /* RCC_PLLSAI_SUPPORT */
@@ -501,7 +502,7 @@ typedef struct {
 /** @defgroup RCC_LL_EC_RNG_CLKSOURCE  Peripheral RNG clock source selection
  * @{
  */
-#define LL_RCC_RNG_CLKSOURCE_PLL LL_RCC_CK48M_CLKSOURCE_PLL /*!< PLL clock used as RNG clock source */
+#define LL_RCC_RNG_CLKSOURCE_PLL LL_RCC_CK48M_CLKSOURCE_PLL       /*!< PLL clock used as RNG clock source */
 #if defined(RCC_PLLSAI_SUPPORT)
 #define LL_RCC_RNG_CLKSOURCE_PLLSAI LL_RCC_CK48M_CLKSOURCE_PLLSAI /*!< PLLSAI clock used as RNG clock source */
 #endif                                                            /* RCC_PLLSAI_SUPPORT */
@@ -517,7 +518,7 @@ typedef struct {
 /** @defgroup RCC_LL_EC_USB_CLKSOURCE  Peripheral USB clock source selection
  * @{
  */
-#define LL_RCC_USB_CLKSOURCE_PLL LL_RCC_CK48M_CLKSOURCE_PLL /*!< PLL clock used as USB clock source */
+#define LL_RCC_USB_CLKSOURCE_PLL LL_RCC_CK48M_CLKSOURCE_PLL       /*!< PLL clock used as USB clock source */
 #if defined(RCC_PLLSAI_SUPPORT)
 #define LL_RCC_USB_CLKSOURCE_PLLSAI LL_RCC_CK48M_CLKSOURCE_PLLSAI /*!< PLLSAI clock used as USB clock source */
 #endif                                                            /* RCC_PLLSAI_SUPPORT */
@@ -601,11 +602,11 @@ typedef struct {
 #define LL_RCC_SAI1_B_CLKSOURCE RCC_DCKCFGR_SAI1BSRC /*!< SAI1 block B Clock source selection */
 #endif                                               /* RCC_DCKCFGR_SAI1BSRC */
 #if defined(RCC_DCKCFGR_SAI1SRC)
-#define LL_RCC_SAI1_CLKSOURCE RCC_DCKCFGR_SAI1SRC /*!< SAI1 Clock source selection */
-#endif                                            /* RCC_DCKCFGR_SAI1SRC */
+#define LL_RCC_SAI1_CLKSOURCE RCC_DCKCFGR_SAI1SRC    /*!< SAI1 Clock source selection */
+#endif                                               /* RCC_DCKCFGR_SAI1SRC */
 #if defined(RCC_DCKCFGR_SAI2SRC)
-#define LL_RCC_SAI2_CLKSOURCE RCC_DCKCFGR_SAI2SRC /*!< SAI2 Clock source selection */
-#endif                                            /* RCC_DCKCFGR_SAI2SRC */
+#define LL_RCC_SAI2_CLKSOURCE RCC_DCKCFGR_SAI2SRC    /*!< SAI2 Clock source selection */
+#endif                                               /* RCC_DCKCFGR_SAI2SRC */
 /**
  * @}
  */
@@ -616,12 +617,12 @@ typedef struct {
  * @{
  */
 #if defined(RCC_DCKCFGR_SDIOSEL)
-#define LL_RCC_SDIO_CLKSOURCE RCC_DCKCFGR_SDIOSEL /*!< SDIO Clock source selection */
+#define LL_RCC_SDIO_CLKSOURCE RCC_DCKCFGR_SDIOSEL  /*!< SDIO Clock source selection */
 #elif defined(RCC_DCKCFGR2_SDIOSEL)
 #define LL_RCC_SDIO_CLKSOURCE RCC_DCKCFGR2_SDIOSEL /*!< SDIO Clock source selection */
 #else
-#define LL_RCC_SDIO_CLKSOURCE RCC_PLLCFGR_PLLQ /*!< SDIO Clock source selection */
-#endif                                         /* RCC_DCKCFGR_SDIOSEL */
+#define LL_RCC_SDIO_CLKSOURCE RCC_PLLCFGR_PLLQ     /*!< SDIO Clock source selection */
+#endif                                             /* RCC_DCKCFGR_SDIOSEL */
 /**
  * @}
  */
@@ -632,8 +633,8 @@ typedef struct {
  * @{
  */
 #if defined(RCC_DCKCFGR_CK48MSEL)
-#define LL_RCC_CK48M_CLKSOURCE RCC_DCKCFGR_CK48MSEL /*!< CK48M Domain clock source selection */
-#endif                                              /* RCC_DCKCFGR_CK48MSEL */
+#define LL_RCC_CK48M_CLKSOURCE RCC_DCKCFGR_CK48MSEL  /*!< CK48M Domain clock source selection */
+#endif                                               /* RCC_DCKCFGR_CK48MSEL */
 #if defined(RCC_DCKCFGR2_CK48MSEL)
 #define LL_RCC_CK48M_CLKSOURCE RCC_DCKCFGR2_CK48MSEL /*!< CK48M Domain clock source selection */
 #endif                                               /* RCC_DCKCFGR_CK48MSEL */
@@ -649,8 +650,8 @@ typedef struct {
 #if defined(RCC_DCKCFGR_CK48MSEL) || defined(RCC_DCKCFGR2_CK48MSEL)
 #define LL_RCC_RNG_CLKSOURCE LL_RCC_CK48M_CLKSOURCE /*!< RNG Clock source selection */
 #else
-#define LL_RCC_RNG_CLKSOURCE RCC_PLLCFGR_PLLQ /*!< RNG Clock source selection */
-#endif                                        /* RCC_DCKCFGR_CK48MSEL || RCC_DCKCFGR2_CK48MSEL */
+#define LL_RCC_RNG_CLKSOURCE RCC_PLLCFGR_PLLQ       /*!< RNG Clock source selection */
+#endif                                              /* RCC_DCKCFGR_CK48MSEL || RCC_DCKCFGR2_CK48MSEL */
 /**
  * @}
  */
@@ -663,8 +664,8 @@ typedef struct {
 #if defined(RCC_DCKCFGR_CK48MSEL) || defined(RCC_DCKCFGR2_CK48MSEL)
 #define LL_RCC_USB_CLKSOURCE LL_RCC_CK48M_CLKSOURCE /*!< USB Clock source selection */
 #else
-#define LL_RCC_USB_CLKSOURCE RCC_PLLCFGR_PLLQ /*!< USB Clock source selection */
-#endif                                        /* RCC_DCKCFGR_CK48MSEL || RCC_DCKCFGR2_CK48MSEL */
+#define LL_RCC_USB_CLKSOURCE RCC_PLLCFGR_PLLQ       /*!< USB Clock source selection */
+#endif                                              /* RCC_DCKCFGR_CK48MSEL || RCC_DCKCFGR2_CK48MSEL */
 /**
  * @}
  */
@@ -684,11 +685,11 @@ typedef struct {
  * @{
  */
 #if defined(RCC_CFGR_I2SSRC)
-#define LL_RCC_I2S1_CLKSOURCE RCC_CFGR_I2SSRC /*!< I2S1 Clock source selection */
-#endif                                        /* RCC_CFGR_I2SSRC */
+#define LL_RCC_I2S1_CLKSOURCE RCC_CFGR_I2SSRC     /*!< I2S1 Clock source selection */
+#endif                                            /* RCC_CFGR_I2SSRC */
 #if defined(RCC_DCKCFGR_I2SSRC)
-#define LL_RCC_I2S1_CLKSOURCE RCC_DCKCFGR_I2SSRC /*!< I2S1 Clock source selection */
-#endif                                           /* RCC_DCKCFGR_I2SSRC */
+#define LL_RCC_I2S1_CLKSOURCE RCC_DCKCFGR_I2SSRC  /*!< I2S1 Clock source selection */
+#endif                                            /* RCC_DCKCFGR_I2SSRC */
 #if defined(RCC_DCKCFGR_I2S1SRC)
 #define LL_RCC_I2S1_CLKSOURCE RCC_DCKCFGR_I2S1SRC /*!< I2S1 Clock source selection */
 #endif                                            /* RCC_DCKCFGR_I2S1SRC */
@@ -778,8 +779,8 @@ typedef struct {
 /** @defgroup RCC_LL_EC_PLLSOURCE  PLL, PLLI2S and PLLSAI entry clock source
  * @{
  */
-#define LL_RCC_PLLSOURCE_HSI RCC_PLLCFGR_PLLSRC_HSI /*!< HSI16 clock selected as PLL entry clock source */
-#define LL_RCC_PLLSOURCE_HSE RCC_PLLCFGR_PLLSRC_HSE /*!< HSE clock selected as PLL entry clock source */
+#define LL_RCC_PLLSOURCE_HSI RCC_PLLCFGR_PLLSRC_HSI                /*!< HSI16 clock selected as PLL entry clock source */
+#define LL_RCC_PLLSOURCE_HSE RCC_PLLCFGR_PLLSRC_HSE                /*!< HSE clock selected as PLL entry clock source */
 #if defined(RCC_PLLI2SCFGR_PLLI2SSRC)
 #define LL_RCC_PLLI2SSOURCE_PIN (RCC_PLLI2SCFGR_PLLI2SSRC | 0x80U) /*!< I2S External pin input clock selected as PLLI2S entry clock source */
 #endif                                                             /* RCC_PLLI2SCFGR_PLLI2SSRC */
@@ -1020,69 +1021,69 @@ typedef struct {
 #define LL_RCC_PLLI2SM_DIV_62 (RCC_PLLI2SCFGR_PLLI2SM_5 | RCC_PLLI2SCFGR_PLLI2SM_4 | RCC_PLLI2SCFGR_PLLI2SM_3 | RCC_PLLI2SCFGR_PLLI2SM_2 | RCC_PLLI2SCFGR_PLLI2SM_1)                            /*!< PLLI2S division factor for PLLI2SM output by 62 */
 #define LL_RCC_PLLI2SM_DIV_63 (RCC_PLLI2SCFGR_PLLI2SM_5 | RCC_PLLI2SCFGR_PLLI2SM_4 | RCC_PLLI2SCFGR_PLLI2SM_3 | RCC_PLLI2SCFGR_PLLI2SM_2 | RCC_PLLI2SCFGR_PLLI2SM_1 | RCC_PLLI2SCFGR_PLLI2SM_0) /*!< PLLI2S division factor for PLLI2SM output by 63 */
 #else
-#define LL_RCC_PLLI2SM_DIV_2  LL_RCC_PLLM_DIV_2  /*!< PLLI2S division factor for PLLI2SM output by 2 */
-#define LL_RCC_PLLI2SM_DIV_3  LL_RCC_PLLM_DIV_3  /*!< PLLI2S division factor for PLLI2SM output by 3 */
-#define LL_RCC_PLLI2SM_DIV_4  LL_RCC_PLLM_DIV_4  /*!< PLLI2S division factor for PLLI2SM output by 4 */
-#define LL_RCC_PLLI2SM_DIV_5  LL_RCC_PLLM_DIV_5  /*!< PLLI2S division factor for PLLI2SM output by 5 */
-#define LL_RCC_PLLI2SM_DIV_6  LL_RCC_PLLM_DIV_6  /*!< PLLI2S division factor for PLLI2SM output by 6 */
-#define LL_RCC_PLLI2SM_DIV_7  LL_RCC_PLLM_DIV_7  /*!< PLLI2S division factor for PLLI2SM output by 7 */
-#define LL_RCC_PLLI2SM_DIV_8  LL_RCC_PLLM_DIV_8  /*!< PLLI2S division factor for PLLI2SM output by 8 */
-#define LL_RCC_PLLI2SM_DIV_9  LL_RCC_PLLM_DIV_9  /*!< PLLI2S division factor for PLLI2SM output by 9 */
-#define LL_RCC_PLLI2SM_DIV_10 LL_RCC_PLLM_DIV_10 /*!< PLLI2S division factor for PLLI2SM output by 10 */
-#define LL_RCC_PLLI2SM_DIV_11 LL_RCC_PLLM_DIV_11 /*!< PLLI2S division factor for PLLI2SM output by 11 */
-#define LL_RCC_PLLI2SM_DIV_12 LL_RCC_PLLM_DIV_12 /*!< PLLI2S division factor for PLLI2SM output by 12 */
-#define LL_RCC_PLLI2SM_DIV_13 LL_RCC_PLLM_DIV_13 /*!< PLLI2S division factor for PLLI2SM output by 13 */
-#define LL_RCC_PLLI2SM_DIV_14 LL_RCC_PLLM_DIV_14 /*!< PLLI2S division factor for PLLI2SM output by 14 */
-#define LL_RCC_PLLI2SM_DIV_15 LL_RCC_PLLM_DIV_15 /*!< PLLI2S division factor for PLLI2SM output by 15 */
-#define LL_RCC_PLLI2SM_DIV_16 LL_RCC_PLLM_DIV_16 /*!< PLLI2S division factor for PLLI2SM output by 16 */
-#define LL_RCC_PLLI2SM_DIV_17 LL_RCC_PLLM_DIV_17 /*!< PLLI2S division factor for PLLI2SM output by 17 */
-#define LL_RCC_PLLI2SM_DIV_18 LL_RCC_PLLM_DIV_18 /*!< PLLI2S division factor for PLLI2SM output by 18 */
-#define LL_RCC_PLLI2SM_DIV_19 LL_RCC_PLLM_DIV_19 /*!< PLLI2S division factor for PLLI2SM output by 19 */
-#define LL_RCC_PLLI2SM_DIV_20 LL_RCC_PLLM_DIV_20 /*!< PLLI2S division factor for PLLI2SM output by 20 */
-#define LL_RCC_PLLI2SM_DIV_21 LL_RCC_PLLM_DIV_21 /*!< PLLI2S division factor for PLLI2SM output by 21 */
-#define LL_RCC_PLLI2SM_DIV_22 LL_RCC_PLLM_DIV_22 /*!< PLLI2S division factor for PLLI2SM output by 22 */
-#define LL_RCC_PLLI2SM_DIV_23 LL_RCC_PLLM_DIV_23 /*!< PLLI2S division factor for PLLI2SM output by 23 */
-#define LL_RCC_PLLI2SM_DIV_24 LL_RCC_PLLM_DIV_24 /*!< PLLI2S division factor for PLLI2SM output by 24 */
-#define LL_RCC_PLLI2SM_DIV_25 LL_RCC_PLLM_DIV_25 /*!< PLLI2S division factor for PLLI2SM output by 25 */
-#define LL_RCC_PLLI2SM_DIV_26 LL_RCC_PLLM_DIV_26 /*!< PLLI2S division factor for PLLI2SM output by 26 */
-#define LL_RCC_PLLI2SM_DIV_27 LL_RCC_PLLM_DIV_27 /*!< PLLI2S division factor for PLLI2SM output by 27 */
-#define LL_RCC_PLLI2SM_DIV_28 LL_RCC_PLLM_DIV_28 /*!< PLLI2S division factor for PLLI2SM output by 28 */
-#define LL_RCC_PLLI2SM_DIV_29 LL_RCC_PLLM_DIV_29 /*!< PLLI2S division factor for PLLI2SM output by 29 */
-#define LL_RCC_PLLI2SM_DIV_30 LL_RCC_PLLM_DIV_30 /*!< PLLI2S division factor for PLLI2SM output by 30 */
-#define LL_RCC_PLLI2SM_DIV_31 LL_RCC_PLLM_DIV_31 /*!< PLLI2S division factor for PLLI2SM output by 31 */
-#define LL_RCC_PLLI2SM_DIV_32 LL_RCC_PLLM_DIV_32 /*!< PLLI2S division factor for PLLI2SM output by 32 */
-#define LL_RCC_PLLI2SM_DIV_33 LL_RCC_PLLM_DIV_33 /*!< PLLI2S division factor for PLLI2SM output by 33 */
-#define LL_RCC_PLLI2SM_DIV_34 LL_RCC_PLLM_DIV_34 /*!< PLLI2S division factor for PLLI2SM output by 34 */
-#define LL_RCC_PLLI2SM_DIV_35 LL_RCC_PLLM_DIV_35 /*!< PLLI2S division factor for PLLI2SM output by 35 */
-#define LL_RCC_PLLI2SM_DIV_36 LL_RCC_PLLM_DIV_36 /*!< PLLI2S division factor for PLLI2SM output by 36 */
-#define LL_RCC_PLLI2SM_DIV_37 LL_RCC_PLLM_DIV_37 /*!< PLLI2S division factor for PLLI2SM output by 37 */
-#define LL_RCC_PLLI2SM_DIV_38 LL_RCC_PLLM_DIV_38 /*!< PLLI2S division factor for PLLI2SM output by 38 */
-#define LL_RCC_PLLI2SM_DIV_39 LL_RCC_PLLM_DIV_39 /*!< PLLI2S division factor for PLLI2SM output by 39 */
-#define LL_RCC_PLLI2SM_DIV_40 LL_RCC_PLLM_DIV_40 /*!< PLLI2S division factor for PLLI2SM output by 40 */
-#define LL_RCC_PLLI2SM_DIV_41 LL_RCC_PLLM_DIV_41 /*!< PLLI2S division factor for PLLI2SM output by 41 */
-#define LL_RCC_PLLI2SM_DIV_42 LL_RCC_PLLM_DIV_42 /*!< PLLI2S division factor for PLLI2SM output by 42 */
-#define LL_RCC_PLLI2SM_DIV_43 LL_RCC_PLLM_DIV_43 /*!< PLLI2S division factor for PLLI2SM output by 43 */
-#define LL_RCC_PLLI2SM_DIV_44 LL_RCC_PLLM_DIV_44 /*!< PLLI2S division factor for PLLI2SM output by 44 */
-#define LL_RCC_PLLI2SM_DIV_45 LL_RCC_PLLM_DIV_45 /*!< PLLI2S division factor for PLLI2SM output by 45 */
-#define LL_RCC_PLLI2SM_DIV_46 LL_RCC_PLLM_DIV_46 /*!< PLLI2S division factor for PLLI2SM output by 46 */
-#define LL_RCC_PLLI2SM_DIV_47 LL_RCC_PLLM_DIV_47 /*!< PLLI2S division factor for PLLI2SM output by 47 */
-#define LL_RCC_PLLI2SM_DIV_48 LL_RCC_PLLM_DIV_48 /*!< PLLI2S division factor for PLLI2SM output by 48 */
-#define LL_RCC_PLLI2SM_DIV_49 LL_RCC_PLLM_DIV_49 /*!< PLLI2S division factor for PLLI2SM output by 49 */
-#define LL_RCC_PLLI2SM_DIV_50 LL_RCC_PLLM_DIV_50 /*!< PLLI2S division factor for PLLI2SM output by 50 */
-#define LL_RCC_PLLI2SM_DIV_51 LL_RCC_PLLM_DIV_51 /*!< PLLI2S division factor for PLLI2SM output by 51 */
-#define LL_RCC_PLLI2SM_DIV_52 LL_RCC_PLLM_DIV_52 /*!< PLLI2S division factor for PLLI2SM output by 52 */
-#define LL_RCC_PLLI2SM_DIV_53 LL_RCC_PLLM_DIV_53 /*!< PLLI2S division factor for PLLI2SM output by 53 */
-#define LL_RCC_PLLI2SM_DIV_54 LL_RCC_PLLM_DIV_54 /*!< PLLI2S division factor for PLLI2SM output by 54 */
-#define LL_RCC_PLLI2SM_DIV_55 LL_RCC_PLLM_DIV_55 /*!< PLLI2S division factor for PLLI2SM output by 55 */
-#define LL_RCC_PLLI2SM_DIV_56 LL_RCC_PLLM_DIV_56 /*!< PLLI2S division factor for PLLI2SM output by 56 */
-#define LL_RCC_PLLI2SM_DIV_57 LL_RCC_PLLM_DIV_57 /*!< PLLI2S division factor for PLLI2SM output by 57 */
-#define LL_RCC_PLLI2SM_DIV_58 LL_RCC_PLLM_DIV_58 /*!< PLLI2S division factor for PLLI2SM output by 58 */
-#define LL_RCC_PLLI2SM_DIV_59 LL_RCC_PLLM_DIV_59 /*!< PLLI2S division factor for PLLI2SM output by 59 */
-#define LL_RCC_PLLI2SM_DIV_60 LL_RCC_PLLM_DIV_60 /*!< PLLI2S division factor for PLLI2SM output by 60 */
-#define LL_RCC_PLLI2SM_DIV_61 LL_RCC_PLLM_DIV_61 /*!< PLLI2S division factor for PLLI2SM output by 61 */
-#define LL_RCC_PLLI2SM_DIV_62 LL_RCC_PLLM_DIV_62 /*!< PLLI2S division factor for PLLI2SM output by 62 */
-#define LL_RCC_PLLI2SM_DIV_63 LL_RCC_PLLM_DIV_63 /*!< PLLI2S division factor for PLLI2SM output by 63 */
-#endif                                           /* RCC_PLLI2SCFGR_PLLI2SM */
+#define LL_RCC_PLLI2SM_DIV_2  LL_RCC_PLLM_DIV_2                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 2 */
+#define LL_RCC_PLLI2SM_DIV_3  LL_RCC_PLLM_DIV_3                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 3 */
+#define LL_RCC_PLLI2SM_DIV_4  LL_RCC_PLLM_DIV_4                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 4 */
+#define LL_RCC_PLLI2SM_DIV_5  LL_RCC_PLLM_DIV_5                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 5 */
+#define LL_RCC_PLLI2SM_DIV_6  LL_RCC_PLLM_DIV_6                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 6 */
+#define LL_RCC_PLLI2SM_DIV_7  LL_RCC_PLLM_DIV_7                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 7 */
+#define LL_RCC_PLLI2SM_DIV_8  LL_RCC_PLLM_DIV_8                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 8 */
+#define LL_RCC_PLLI2SM_DIV_9  LL_RCC_PLLM_DIV_9                                                                                                                                                 /*!< PLLI2S division factor for PLLI2SM output by 9 */
+#define LL_RCC_PLLI2SM_DIV_10 LL_RCC_PLLM_DIV_10                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 10 */
+#define LL_RCC_PLLI2SM_DIV_11 LL_RCC_PLLM_DIV_11                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 11 */
+#define LL_RCC_PLLI2SM_DIV_12 LL_RCC_PLLM_DIV_12                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 12 */
+#define LL_RCC_PLLI2SM_DIV_13 LL_RCC_PLLM_DIV_13                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 13 */
+#define LL_RCC_PLLI2SM_DIV_14 LL_RCC_PLLM_DIV_14                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 14 */
+#define LL_RCC_PLLI2SM_DIV_15 LL_RCC_PLLM_DIV_15                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 15 */
+#define LL_RCC_PLLI2SM_DIV_16 LL_RCC_PLLM_DIV_16                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 16 */
+#define LL_RCC_PLLI2SM_DIV_17 LL_RCC_PLLM_DIV_17                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 17 */
+#define LL_RCC_PLLI2SM_DIV_18 LL_RCC_PLLM_DIV_18                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 18 */
+#define LL_RCC_PLLI2SM_DIV_19 LL_RCC_PLLM_DIV_19                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 19 */
+#define LL_RCC_PLLI2SM_DIV_20 LL_RCC_PLLM_DIV_20                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 20 */
+#define LL_RCC_PLLI2SM_DIV_21 LL_RCC_PLLM_DIV_21                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 21 */
+#define LL_RCC_PLLI2SM_DIV_22 LL_RCC_PLLM_DIV_22                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 22 */
+#define LL_RCC_PLLI2SM_DIV_23 LL_RCC_PLLM_DIV_23                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 23 */
+#define LL_RCC_PLLI2SM_DIV_24 LL_RCC_PLLM_DIV_24                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 24 */
+#define LL_RCC_PLLI2SM_DIV_25 LL_RCC_PLLM_DIV_25                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 25 */
+#define LL_RCC_PLLI2SM_DIV_26 LL_RCC_PLLM_DIV_26                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 26 */
+#define LL_RCC_PLLI2SM_DIV_27 LL_RCC_PLLM_DIV_27                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 27 */
+#define LL_RCC_PLLI2SM_DIV_28 LL_RCC_PLLM_DIV_28                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 28 */
+#define LL_RCC_PLLI2SM_DIV_29 LL_RCC_PLLM_DIV_29                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 29 */
+#define LL_RCC_PLLI2SM_DIV_30 LL_RCC_PLLM_DIV_30                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 30 */
+#define LL_RCC_PLLI2SM_DIV_31 LL_RCC_PLLM_DIV_31                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 31 */
+#define LL_RCC_PLLI2SM_DIV_32 LL_RCC_PLLM_DIV_32                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 32 */
+#define LL_RCC_PLLI2SM_DIV_33 LL_RCC_PLLM_DIV_33                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 33 */
+#define LL_RCC_PLLI2SM_DIV_34 LL_RCC_PLLM_DIV_34                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 34 */
+#define LL_RCC_PLLI2SM_DIV_35 LL_RCC_PLLM_DIV_35                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 35 */
+#define LL_RCC_PLLI2SM_DIV_36 LL_RCC_PLLM_DIV_36                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 36 */
+#define LL_RCC_PLLI2SM_DIV_37 LL_RCC_PLLM_DIV_37                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 37 */
+#define LL_RCC_PLLI2SM_DIV_38 LL_RCC_PLLM_DIV_38                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 38 */
+#define LL_RCC_PLLI2SM_DIV_39 LL_RCC_PLLM_DIV_39                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 39 */
+#define LL_RCC_PLLI2SM_DIV_40 LL_RCC_PLLM_DIV_40                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 40 */
+#define LL_RCC_PLLI2SM_DIV_41 LL_RCC_PLLM_DIV_41                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 41 */
+#define LL_RCC_PLLI2SM_DIV_42 LL_RCC_PLLM_DIV_42                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 42 */
+#define LL_RCC_PLLI2SM_DIV_43 LL_RCC_PLLM_DIV_43                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 43 */
+#define LL_RCC_PLLI2SM_DIV_44 LL_RCC_PLLM_DIV_44                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 44 */
+#define LL_RCC_PLLI2SM_DIV_45 LL_RCC_PLLM_DIV_45                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 45 */
+#define LL_RCC_PLLI2SM_DIV_46 LL_RCC_PLLM_DIV_46                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 46 */
+#define LL_RCC_PLLI2SM_DIV_47 LL_RCC_PLLM_DIV_47                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 47 */
+#define LL_RCC_PLLI2SM_DIV_48 LL_RCC_PLLM_DIV_48                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 48 */
+#define LL_RCC_PLLI2SM_DIV_49 LL_RCC_PLLM_DIV_49                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 49 */
+#define LL_RCC_PLLI2SM_DIV_50 LL_RCC_PLLM_DIV_50                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 50 */
+#define LL_RCC_PLLI2SM_DIV_51 LL_RCC_PLLM_DIV_51                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 51 */
+#define LL_RCC_PLLI2SM_DIV_52 LL_RCC_PLLM_DIV_52                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 52 */
+#define LL_RCC_PLLI2SM_DIV_53 LL_RCC_PLLM_DIV_53                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 53 */
+#define LL_RCC_PLLI2SM_DIV_54 LL_RCC_PLLM_DIV_54                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 54 */
+#define LL_RCC_PLLI2SM_DIV_55 LL_RCC_PLLM_DIV_55                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 55 */
+#define LL_RCC_PLLI2SM_DIV_56 LL_RCC_PLLM_DIV_56                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 56 */
+#define LL_RCC_PLLI2SM_DIV_57 LL_RCC_PLLM_DIV_57                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 57 */
+#define LL_RCC_PLLI2SM_DIV_58 LL_RCC_PLLM_DIV_58                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 58 */
+#define LL_RCC_PLLI2SM_DIV_59 LL_RCC_PLLM_DIV_59                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 59 */
+#define LL_RCC_PLLI2SM_DIV_60 LL_RCC_PLLM_DIV_60                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 60 */
+#define LL_RCC_PLLI2SM_DIV_61 LL_RCC_PLLM_DIV_61                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 61 */
+#define LL_RCC_PLLI2SM_DIV_62 LL_RCC_PLLM_DIV_62                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 62 */
+#define LL_RCC_PLLI2SM_DIV_63 LL_RCC_PLLM_DIV_63                                                                                                                                                /*!< PLLI2S division factor for PLLI2SM output by 63 */
+#endif                                                                                                                                                                                          /* RCC_PLLI2SCFGR_PLLI2SM */
 /**
  * @}
  */
@@ -1286,69 +1287,69 @@ typedef struct {
 #define LL_RCC_PLLSAIM_DIV_62 (RCC_PLLSAICFGR_PLLSAIM_5 | RCC_PLLSAICFGR_PLLSAIM_4 | RCC_PLLSAICFGR_PLLSAIM_3 | RCC_PLLSAICFGR_PLLSAIM_2 | RCC_PLLSAICFGR_PLLSAIM_1)                            /*!< PLLSAI division factor for PLLSAIM output by 62 */
 #define LL_RCC_PLLSAIM_DIV_63 (RCC_PLLSAICFGR_PLLSAIM_5 | RCC_PLLSAICFGR_PLLSAIM_4 | RCC_PLLSAICFGR_PLLSAIM_3 | RCC_PLLSAICFGR_PLLSAIM_2 | RCC_PLLSAICFGR_PLLSAIM_1 | RCC_PLLSAICFGR_PLLSAIM_0) /*!< PLLSAI division factor for PLLSAIM output by 63 */
 #else
-#define LL_RCC_PLLSAIM_DIV_2  LL_RCC_PLLM_DIV_2  /*!< PLLSAI division factor for PLLSAIM output by 2 */
-#define LL_RCC_PLLSAIM_DIV_3  LL_RCC_PLLM_DIV_3  /*!< PLLSAI division factor for PLLSAIM output by 3 */
-#define LL_RCC_PLLSAIM_DIV_4  LL_RCC_PLLM_DIV_4  /*!< PLLSAI division factor for PLLSAIM output by 4 */
-#define LL_RCC_PLLSAIM_DIV_5  LL_RCC_PLLM_DIV_5  /*!< PLLSAI division factor for PLLSAIM output by 5 */
-#define LL_RCC_PLLSAIM_DIV_6  LL_RCC_PLLM_DIV_6  /*!< PLLSAI division factor for PLLSAIM output by 6 */
-#define LL_RCC_PLLSAIM_DIV_7  LL_RCC_PLLM_DIV_7  /*!< PLLSAI division factor for PLLSAIM output by 7 */
-#define LL_RCC_PLLSAIM_DIV_8  LL_RCC_PLLM_DIV_8  /*!< PLLSAI division factor for PLLSAIM output by 8 */
-#define LL_RCC_PLLSAIM_DIV_9  LL_RCC_PLLM_DIV_9  /*!< PLLSAI division factor for PLLSAIM output by 9 */
-#define LL_RCC_PLLSAIM_DIV_10 LL_RCC_PLLM_DIV_10 /*!< PLLSAI division factor for PLLSAIM output by 10 */
-#define LL_RCC_PLLSAIM_DIV_11 LL_RCC_PLLM_DIV_11 /*!< PLLSAI division factor for PLLSAIM output by 11 */
-#define LL_RCC_PLLSAIM_DIV_12 LL_RCC_PLLM_DIV_12 /*!< PLLSAI division factor for PLLSAIM output by 12 */
-#define LL_RCC_PLLSAIM_DIV_13 LL_RCC_PLLM_DIV_13 /*!< PLLSAI division factor for PLLSAIM output by 13 */
-#define LL_RCC_PLLSAIM_DIV_14 LL_RCC_PLLM_DIV_14 /*!< PLLSAI division factor for PLLSAIM output by 14 */
-#define LL_RCC_PLLSAIM_DIV_15 LL_RCC_PLLM_DIV_15 /*!< PLLSAI division factor for PLLSAIM output by 15 */
-#define LL_RCC_PLLSAIM_DIV_16 LL_RCC_PLLM_DIV_16 /*!< PLLSAI division factor for PLLSAIM output by 16 */
-#define LL_RCC_PLLSAIM_DIV_17 LL_RCC_PLLM_DIV_17 /*!< PLLSAI division factor for PLLSAIM output by 17 */
-#define LL_RCC_PLLSAIM_DIV_18 LL_RCC_PLLM_DIV_18 /*!< PLLSAI division factor for PLLSAIM output by 18 */
-#define LL_RCC_PLLSAIM_DIV_19 LL_RCC_PLLM_DIV_19 /*!< PLLSAI division factor for PLLSAIM output by 19 */
-#define LL_RCC_PLLSAIM_DIV_20 LL_RCC_PLLM_DIV_20 /*!< PLLSAI division factor for PLLSAIM output by 20 */
-#define LL_RCC_PLLSAIM_DIV_21 LL_RCC_PLLM_DIV_21 /*!< PLLSAI division factor for PLLSAIM output by 21 */
-#define LL_RCC_PLLSAIM_DIV_22 LL_RCC_PLLM_DIV_22 /*!< PLLSAI division factor for PLLSAIM output by 22 */
-#define LL_RCC_PLLSAIM_DIV_23 LL_RCC_PLLM_DIV_23 /*!< PLLSAI division factor for PLLSAIM output by 23 */
-#define LL_RCC_PLLSAIM_DIV_24 LL_RCC_PLLM_DIV_24 /*!< PLLSAI division factor for PLLSAIM output by 24 */
-#define LL_RCC_PLLSAIM_DIV_25 LL_RCC_PLLM_DIV_25 /*!< PLLSAI division factor for PLLSAIM output by 25 */
-#define LL_RCC_PLLSAIM_DIV_26 LL_RCC_PLLM_DIV_26 /*!< PLLSAI division factor for PLLSAIM output by 26 */
-#define LL_RCC_PLLSAIM_DIV_27 LL_RCC_PLLM_DIV_27 /*!< PLLSAI division factor for PLLSAIM output by 27 */
-#define LL_RCC_PLLSAIM_DIV_28 LL_RCC_PLLM_DIV_28 /*!< PLLSAI division factor for PLLSAIM output by 28 */
-#define LL_RCC_PLLSAIM_DIV_29 LL_RCC_PLLM_DIV_29 /*!< PLLSAI division factor for PLLSAIM output by 29 */
-#define LL_RCC_PLLSAIM_DIV_30 LL_RCC_PLLM_DIV_30 /*!< PLLSAI division factor for PLLSAIM output by 30 */
-#define LL_RCC_PLLSAIM_DIV_31 LL_RCC_PLLM_DIV_31 /*!< PLLSAI division factor for PLLSAIM output by 31 */
-#define LL_RCC_PLLSAIM_DIV_32 LL_RCC_PLLM_DIV_32 /*!< PLLSAI division factor for PLLSAIM output by 32 */
-#define LL_RCC_PLLSAIM_DIV_33 LL_RCC_PLLM_DIV_33 /*!< PLLSAI division factor for PLLSAIM output by 33 */
-#define LL_RCC_PLLSAIM_DIV_34 LL_RCC_PLLM_DIV_34 /*!< PLLSAI division factor for PLLSAIM output by 34 */
-#define LL_RCC_PLLSAIM_DIV_35 LL_RCC_PLLM_DIV_35 /*!< PLLSAI division factor for PLLSAIM output by 35 */
-#define LL_RCC_PLLSAIM_DIV_36 LL_RCC_PLLM_DIV_36 /*!< PLLSAI division factor for PLLSAIM output by 36 */
-#define LL_RCC_PLLSAIM_DIV_37 LL_RCC_PLLM_DIV_37 /*!< PLLSAI division factor for PLLSAIM output by 37 */
-#define LL_RCC_PLLSAIM_DIV_38 LL_RCC_PLLM_DIV_38 /*!< PLLSAI division factor for PLLSAIM output by 38 */
-#define LL_RCC_PLLSAIM_DIV_39 LL_RCC_PLLM_DIV_39 /*!< PLLSAI division factor for PLLSAIM output by 39 */
-#define LL_RCC_PLLSAIM_DIV_40 LL_RCC_PLLM_DIV_40 /*!< PLLSAI division factor for PLLSAIM output by 40 */
-#define LL_RCC_PLLSAIM_DIV_41 LL_RCC_PLLM_DIV_41 /*!< PLLSAI division factor for PLLSAIM output by 41 */
-#define LL_RCC_PLLSAIM_DIV_42 LL_RCC_PLLM_DIV_42 /*!< PLLSAI division factor for PLLSAIM output by 42 */
-#define LL_RCC_PLLSAIM_DIV_43 LL_RCC_PLLM_DIV_43 /*!< PLLSAI division factor for PLLSAIM output by 43 */
-#define LL_RCC_PLLSAIM_DIV_44 LL_RCC_PLLM_DIV_44 /*!< PLLSAI division factor for PLLSAIM output by 44 */
-#define LL_RCC_PLLSAIM_DIV_45 LL_RCC_PLLM_DIV_45 /*!< PLLSAI division factor for PLLSAIM output by 45 */
-#define LL_RCC_PLLSAIM_DIV_46 LL_RCC_PLLM_DIV_46 /*!< PLLSAI division factor for PLLSAIM output by 46 */
-#define LL_RCC_PLLSAIM_DIV_47 LL_RCC_PLLM_DIV_47 /*!< PLLSAI division factor for PLLSAIM output by 47 */
-#define LL_RCC_PLLSAIM_DIV_48 LL_RCC_PLLM_DIV_48 /*!< PLLSAI division factor for PLLSAIM output by 48 */
-#define LL_RCC_PLLSAIM_DIV_49 LL_RCC_PLLM_DIV_49 /*!< PLLSAI division factor for PLLSAIM output by 49 */
-#define LL_RCC_PLLSAIM_DIV_50 LL_RCC_PLLM_DIV_50 /*!< PLLSAI division factor for PLLSAIM output by 50 */
-#define LL_RCC_PLLSAIM_DIV_51 LL_RCC_PLLM_DIV_51 /*!< PLLSAI division factor for PLLSAIM output by 51 */
-#define LL_RCC_PLLSAIM_DIV_52 LL_RCC_PLLM_DIV_52 /*!< PLLSAI division factor for PLLSAIM output by 52 */
-#define LL_RCC_PLLSAIM_DIV_53 LL_RCC_PLLM_DIV_53 /*!< PLLSAI division factor for PLLSAIM output by 53 */
-#define LL_RCC_PLLSAIM_DIV_54 LL_RCC_PLLM_DIV_54 /*!< PLLSAI division factor for PLLSAIM output by 54 */
-#define LL_RCC_PLLSAIM_DIV_55 LL_RCC_PLLM_DIV_55 /*!< PLLSAI division factor for PLLSAIM output by 55 */
-#define LL_RCC_PLLSAIM_DIV_56 LL_RCC_PLLM_DIV_56 /*!< PLLSAI division factor for PLLSAIM output by 56 */
-#define LL_RCC_PLLSAIM_DIV_57 LL_RCC_PLLM_DIV_57 /*!< PLLSAI division factor for PLLSAIM output by 57 */
-#define LL_RCC_PLLSAIM_DIV_58 LL_RCC_PLLM_DIV_58 /*!< PLLSAI division factor for PLLSAIM output by 58 */
-#define LL_RCC_PLLSAIM_DIV_59 LL_RCC_PLLM_DIV_59 /*!< PLLSAI division factor for PLLSAIM output by 59 */
-#define LL_RCC_PLLSAIM_DIV_60 LL_RCC_PLLM_DIV_60 /*!< PLLSAI division factor for PLLSAIM output by 60 */
-#define LL_RCC_PLLSAIM_DIV_61 LL_RCC_PLLM_DIV_61 /*!< PLLSAI division factor for PLLSAIM output by 61 */
-#define LL_RCC_PLLSAIM_DIV_62 LL_RCC_PLLM_DIV_62 /*!< PLLSAI division factor for PLLSAIM output by 62 */
-#define LL_RCC_PLLSAIM_DIV_63 LL_RCC_PLLM_DIV_63 /*!< PLLSAI division factor for PLLSAIM output by 63 */
-#endif                                           /* RCC_PLLSAICFGR_PLLSAIM */
+#define LL_RCC_PLLSAIM_DIV_2  LL_RCC_PLLM_DIV_2                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 2 */
+#define LL_RCC_PLLSAIM_DIV_3  LL_RCC_PLLM_DIV_3                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 3 */
+#define LL_RCC_PLLSAIM_DIV_4  LL_RCC_PLLM_DIV_4                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 4 */
+#define LL_RCC_PLLSAIM_DIV_5  LL_RCC_PLLM_DIV_5                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 5 */
+#define LL_RCC_PLLSAIM_DIV_6  LL_RCC_PLLM_DIV_6                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 6 */
+#define LL_RCC_PLLSAIM_DIV_7  LL_RCC_PLLM_DIV_7                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 7 */
+#define LL_RCC_PLLSAIM_DIV_8  LL_RCC_PLLM_DIV_8                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 8 */
+#define LL_RCC_PLLSAIM_DIV_9  LL_RCC_PLLM_DIV_9                                                                                                                                                 /*!< PLLSAI division factor for PLLSAIM output by 9 */
+#define LL_RCC_PLLSAIM_DIV_10 LL_RCC_PLLM_DIV_10                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 10 */
+#define LL_RCC_PLLSAIM_DIV_11 LL_RCC_PLLM_DIV_11                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 11 */
+#define LL_RCC_PLLSAIM_DIV_12 LL_RCC_PLLM_DIV_12                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 12 */
+#define LL_RCC_PLLSAIM_DIV_13 LL_RCC_PLLM_DIV_13                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 13 */
+#define LL_RCC_PLLSAIM_DIV_14 LL_RCC_PLLM_DIV_14                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 14 */
+#define LL_RCC_PLLSAIM_DIV_15 LL_RCC_PLLM_DIV_15                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 15 */
+#define LL_RCC_PLLSAIM_DIV_16 LL_RCC_PLLM_DIV_16                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 16 */
+#define LL_RCC_PLLSAIM_DIV_17 LL_RCC_PLLM_DIV_17                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 17 */
+#define LL_RCC_PLLSAIM_DIV_18 LL_RCC_PLLM_DIV_18                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 18 */
+#define LL_RCC_PLLSAIM_DIV_19 LL_RCC_PLLM_DIV_19                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 19 */
+#define LL_RCC_PLLSAIM_DIV_20 LL_RCC_PLLM_DIV_20                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 20 */
+#define LL_RCC_PLLSAIM_DIV_21 LL_RCC_PLLM_DIV_21                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 21 */
+#define LL_RCC_PLLSAIM_DIV_22 LL_RCC_PLLM_DIV_22                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 22 */
+#define LL_RCC_PLLSAIM_DIV_23 LL_RCC_PLLM_DIV_23                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 23 */
+#define LL_RCC_PLLSAIM_DIV_24 LL_RCC_PLLM_DIV_24                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 24 */
+#define LL_RCC_PLLSAIM_DIV_25 LL_RCC_PLLM_DIV_25                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 25 */
+#define LL_RCC_PLLSAIM_DIV_26 LL_RCC_PLLM_DIV_26                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 26 */
+#define LL_RCC_PLLSAIM_DIV_27 LL_RCC_PLLM_DIV_27                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 27 */
+#define LL_RCC_PLLSAIM_DIV_28 LL_RCC_PLLM_DIV_28                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 28 */
+#define LL_RCC_PLLSAIM_DIV_29 LL_RCC_PLLM_DIV_29                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 29 */
+#define LL_RCC_PLLSAIM_DIV_30 LL_RCC_PLLM_DIV_30                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 30 */
+#define LL_RCC_PLLSAIM_DIV_31 LL_RCC_PLLM_DIV_31                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 31 */
+#define LL_RCC_PLLSAIM_DIV_32 LL_RCC_PLLM_DIV_32                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 32 */
+#define LL_RCC_PLLSAIM_DIV_33 LL_RCC_PLLM_DIV_33                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 33 */
+#define LL_RCC_PLLSAIM_DIV_34 LL_RCC_PLLM_DIV_34                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 34 */
+#define LL_RCC_PLLSAIM_DIV_35 LL_RCC_PLLM_DIV_35                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 35 */
+#define LL_RCC_PLLSAIM_DIV_36 LL_RCC_PLLM_DIV_36                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 36 */
+#define LL_RCC_PLLSAIM_DIV_37 LL_RCC_PLLM_DIV_37                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 37 */
+#define LL_RCC_PLLSAIM_DIV_38 LL_RCC_PLLM_DIV_38                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 38 */
+#define LL_RCC_PLLSAIM_DIV_39 LL_RCC_PLLM_DIV_39                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 39 */
+#define LL_RCC_PLLSAIM_DIV_40 LL_RCC_PLLM_DIV_40                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 40 */
+#define LL_RCC_PLLSAIM_DIV_41 LL_RCC_PLLM_DIV_41                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 41 */
+#define LL_RCC_PLLSAIM_DIV_42 LL_RCC_PLLM_DIV_42                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 42 */
+#define LL_RCC_PLLSAIM_DIV_43 LL_RCC_PLLM_DIV_43                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 43 */
+#define LL_RCC_PLLSAIM_DIV_44 LL_RCC_PLLM_DIV_44                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 44 */
+#define LL_RCC_PLLSAIM_DIV_45 LL_RCC_PLLM_DIV_45                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 45 */
+#define LL_RCC_PLLSAIM_DIV_46 LL_RCC_PLLM_DIV_46                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 46 */
+#define LL_RCC_PLLSAIM_DIV_47 LL_RCC_PLLM_DIV_47                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 47 */
+#define LL_RCC_PLLSAIM_DIV_48 LL_RCC_PLLM_DIV_48                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 48 */
+#define LL_RCC_PLLSAIM_DIV_49 LL_RCC_PLLM_DIV_49                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 49 */
+#define LL_RCC_PLLSAIM_DIV_50 LL_RCC_PLLM_DIV_50                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 50 */
+#define LL_RCC_PLLSAIM_DIV_51 LL_RCC_PLLM_DIV_51                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 51 */
+#define LL_RCC_PLLSAIM_DIV_52 LL_RCC_PLLM_DIV_52                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 52 */
+#define LL_RCC_PLLSAIM_DIV_53 LL_RCC_PLLM_DIV_53                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 53 */
+#define LL_RCC_PLLSAIM_DIV_54 LL_RCC_PLLM_DIV_54                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 54 */
+#define LL_RCC_PLLSAIM_DIV_55 LL_RCC_PLLM_DIV_55                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 55 */
+#define LL_RCC_PLLSAIM_DIV_56 LL_RCC_PLLM_DIV_56                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 56 */
+#define LL_RCC_PLLSAIM_DIV_57 LL_RCC_PLLM_DIV_57                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 57 */
+#define LL_RCC_PLLSAIM_DIV_58 LL_RCC_PLLM_DIV_58                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 58 */
+#define LL_RCC_PLLSAIM_DIV_59 LL_RCC_PLLM_DIV_59                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 59 */
+#define LL_RCC_PLLSAIM_DIV_60 LL_RCC_PLLM_DIV_60                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 60 */
+#define LL_RCC_PLLSAIM_DIV_61 LL_RCC_PLLM_DIV_61                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 61 */
+#define LL_RCC_PLLSAIM_DIV_62 LL_RCC_PLLM_DIV_62                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 62 */
+#define LL_RCC_PLLSAIM_DIV_63 LL_RCC_PLLM_DIV_63                                                                                                                                                /*!< PLLSAI division factor for PLLSAIM output by 63 */
+#endif                                                                                                                                                                                          /* RCC_PLLSAICFGR_PLLSAIM */
 /**
  * @}
  */
@@ -1569,7 +1570,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLP_DIV_8
  * @retval PLL clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLCLK_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLP__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((((__PLLP__) >> RCC_PLLCFGR_PLLP_Pos) + 1U) * 2U))
+#define __LL_RCC_CALC_PLLCLK_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLP__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                ((((__PLLP__) >> RCC_PLLCFGR_PLLP_Pos) + 1U) * 2U))
 
 #if defined(RCC_PLLR_SYSCLK_SUPPORT)
 /**
@@ -1650,7 +1652,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLR_DIV_7
  * @retval PLL clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLRCLK_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
+#define __LL_RCC_CALC_PLLRCLK_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                 ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
 
 #endif /* RCC_PLLR_SYSCLK_SUPPORT */
 
@@ -1742,7 +1745,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLQ_DIV_15
  * @retval PLL clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLCLK_48M_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLQ__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((__PLLQ__) >> RCC_PLLCFGR_PLLQ_Pos))
+#define __LL_RCC_CALC_PLLCLK_48M_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLQ__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                    ((__PLLQ__) >> RCC_PLLCFGR_PLLQ_Pos))
 
 #if defined(DSI)
 /**
@@ -1823,7 +1827,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLR_DIV_7
  * @retval PLL clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLCLK_DSI_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
+#define __LL_RCC_CALC_PLLCLK_DSI_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                    ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
 #endif /* DSI */
 
 #if defined(RCC_PLLR_I2S_CLKSOURCE_SUPPORT)
@@ -1905,7 +1910,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLR_DIV_7
  * @retval PLL clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLCLK_I2S_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
+#define __LL_RCC_CALC_PLLCLK_I2S_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                    ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
 #endif /* RCC_PLLR_I2S_CLKSOURCE_SUPPORT */
 
 #if defined(SPDIFRX)
@@ -1987,7 +1993,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLR_DIV_7
  * @retval PLL clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLCLK_SPDIFRX_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
+#define __LL_RCC_CALC_PLLCLK_SPDIFRX_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                        ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
 #endif /* SPDIFRX */
 
 #if defined(RCC_PLLCFGR_PLLR)
@@ -2105,9 +2112,12 @@ typedef struct {
  * @retval PLL clock frequency (in Hz)
  */
 #if defined(RCC_DCKCFGR_PLLDIVR)
-#define __LL_RCC_CALC_PLLCLK_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__, __PLLDIVR__) (((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos)) / ((__PLLDIVR__) >> RCC_DCKCFGR_PLLDIVR_Pos))
+#define __LL_RCC_CALC_PLLCLK_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__, __PLLDIVR__) (((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                                  ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos)) /     \
+                                                                                                 ((__PLLDIVR__) >> RCC_DCKCFGR_PLLDIVR_Pos))
 #else
-#define __LL_RCC_CALC_PLLCLK_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
+#define __LL_RCC_CALC_PLLCLK_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLN__, __PLLR__) ((__INPUTFREQ__) / (__PLLM__) * (__PLLN__) / \
+                                                                                    ((__PLLR__) >> RCC_PLLCFGR_PLLR_Pos))
 #endif /* RCC_DCKCFGR_PLLDIVR */
 #endif /* SAI1 */
 #endif /* RCC_PLLCFGR_PLLR */
@@ -2234,8 +2244,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLSAIDIVQ_DIV_32
  * @retval PLLSAI clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLSAI_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLSAIN__, __PLLSAIQ__, __PLLSAIDIVQ__)                                                                                                                                                 \
-    (((__INPUTFREQ__) / (__PLLM__)) * (__PLLSAIN__) / (((__PLLSAIQ__) >> RCC_PLLSAICFGR_PLLSAIQ_Pos) * (((__PLLSAIDIVQ__) >> RCC_DCKCFGR_PLLSAIDIVQ_Pos) + 1U)))
+#define __LL_RCC_CALC_PLLSAI_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLSAIN__, __PLLSAIQ__, __PLLSAIDIVQ__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLSAIN__) / \
+                                                                                                          (((__PLLSAIQ__) >> RCC_PLLSAICFGR_PLLSAIQ_Pos) * (((__PLLSAIDIVQ__) >> RCC_DCKCFGR_PLLSAIDIVQ_Pos) + 1U)))
 
 #if defined(RCC_PLLSAICFGR_PLLSAIP)
 /**
@@ -2314,7 +2324,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLSAIP_DIV_8
  * @retval PLLSAI clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLSAI_48M_FREQ(__INPUTFREQ__, __PLLM__, __PLLSAIN__, __PLLSAIP__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLSAIN__) / ((((__PLLSAIP__) >> RCC_PLLSAICFGR_PLLSAIP_Pos) + 1U) * 2U))
+#define __LL_RCC_CALC_PLLSAI_48M_FREQ(__INPUTFREQ__, __PLLM__, __PLLSAIN__, __PLLSAIP__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLSAIN__) / \
+                                                                                          ((((__PLLSAIP__) >> RCC_PLLSAICFGR_PLLSAIP_Pos) + 1U) * 2U))
 #endif /* RCC_PLLSAICFGR_PLLSAIP */
 
 #if defined(LTDC)
@@ -2403,8 +2414,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLSAIDIVR_DIV_16
  * @retval PLLSAI clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLSAI_LTDC_FREQ(__INPUTFREQ__, __PLLM__, __PLLSAIN__, __PLLSAIR__, __PLLSAIDIVR__)                                                                                                                                                \
-    (((__INPUTFREQ__) / (__PLLM__)) * (__PLLSAIN__) / (((__PLLSAIR__) >> RCC_PLLSAICFGR_PLLSAIR_Pos) * (aRCC_PLLSAIDIVRPrescTable[(__PLLSAIDIVR__) >> RCC_DCKCFGR_PLLSAIDIVR_Pos])))
+#define __LL_RCC_CALC_PLLSAI_LTDC_FREQ(__INPUTFREQ__, __PLLM__, __PLLSAIN__, __PLLSAIR__, __PLLSAIDIVR__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLSAIN__) / \
+                                                                                                           (((__PLLSAIR__) >> RCC_PLLSAICFGR_PLLSAIR_Pos) * (aRCC_PLLSAIDIVRPrescTable[(__PLLSAIDIVR__) >> RCC_DCKCFGR_PLLSAIDIVR_Pos])))
 #endif /* LTDC */
 #endif /* RCC_PLLSAI_SUPPORT */
 
@@ -2573,11 +2584,11 @@ typedef struct {
  * @retval PLLI2S clock frequency (in Hz)
  */
 #if defined(RCC_DCKCFGR_PLLI2SDIVQ)
-#define __LL_RCC_CALC_PLLI2S_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SQ_R__, __PLLI2SDIVQ_R__)                                                                                                                                             \
-    (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / (((__PLLI2SQ_R__) >> RCC_PLLI2SCFGR_PLLI2SQ_Pos) * (((__PLLI2SDIVQ_R__) >> RCC_DCKCFGR_PLLI2SDIVQ_Pos) + 1U)))
+#define __LL_RCC_CALC_PLLI2S_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SQ_R__, __PLLI2SDIVQ_R__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / \
+                                                                                                              (((__PLLI2SQ_R__) >> RCC_PLLI2SCFGR_PLLI2SQ_Pos) * (((__PLLI2SDIVQ_R__) >> RCC_DCKCFGR_PLLI2SDIVQ_Pos) + 1U)))
 #else
-#define __LL_RCC_CALC_PLLI2S_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SQ_R__, __PLLI2SDIVQ_R__)                                                                                                                                             \
-    (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / (((__PLLI2SQ_R__) >> RCC_PLLI2SCFGR_PLLI2SR_Pos) * ((__PLLI2SDIVQ_R__) >> RCC_DCKCFGR_PLLI2SDIVR_Pos)))
+#define __LL_RCC_CALC_PLLI2S_SAI_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SQ_R__, __PLLI2SDIVQ_R__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / \
+                                                                                                              (((__PLLI2SQ_R__) >> RCC_PLLI2SCFGR_PLLI2SR_Pos) * ((__PLLI2SDIVQ_R__) >> RCC_DCKCFGR_PLLI2SDIVR_Pos)))
 
 #endif /* RCC_DCKCFGR_PLLI2SDIVQ */
 #endif /* RCC_DCKCFGR_PLLI2SDIVQ || RCC_DCKCFGR_PLLI2SDIVR */
@@ -2659,7 +2670,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLI2SP_DIV_8
  * @retval PLLI2S clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLI2S_SPDIFRX_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SP__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / ((((__PLLI2SP__) >> RCC_PLLI2SCFGR_PLLI2SP_Pos) + 1U) * 2U))
+#define __LL_RCC_CALC_PLLI2S_SPDIFRX_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SP__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / \
+                                                                                              ((((__PLLI2SP__) >> RCC_PLLI2SCFGR_PLLI2SP_Pos) + 1U) * 2U))
 
 #endif /* SPDIFRX */
 
@@ -2743,7 +2755,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLI2SR_DIV_7
  * @retval PLLI2S clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLI2S_I2S_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SR__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / ((__PLLI2SR__) >> RCC_PLLI2SCFGR_PLLI2SR_Pos))
+#define __LL_RCC_CALC_PLLI2S_I2S_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SR__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / \
+                                                                                          ((__PLLI2SR__) >> RCC_PLLI2SCFGR_PLLI2SR_Pos))
 
 #if defined(RCC_PLLI2SCFGR_PLLI2SQ) && !defined(RCC_DCKCFGR_PLLI2SDIVQ)
 /**
@@ -2832,7 +2845,8 @@ typedef struct {
  *         @arg @ref LL_RCC_PLLI2SQ_DIV_15
  * @retval PLLI2S clock frequency (in Hz)
  */
-#define __LL_RCC_CALC_PLLI2S_48M_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SQ__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / ((__PLLI2SQ__) >> RCC_PLLI2SCFGR_PLLI2SQ_Pos))
+#define __LL_RCC_CALC_PLLI2S_48M_FREQ(__INPUTFREQ__, __PLLM__, __PLLI2SN__, __PLLI2SQ__) (((__INPUTFREQ__) / (__PLLM__)) * (__PLLI2SN__) / \
+                                                                                          ((__PLLI2SQ__) >> RCC_PLLI2SCFGR_PLLI2SQ_Pos))
 
 #endif /* RCC_PLLI2SCFGR_PLLI2SQ && !RCC_DCKCFGR_PLLI2SDIVQ */
 #endif /* RCC_PLLI2S_SUPPORT */
@@ -4213,7 +4227,8 @@ __STATIC_INLINE uint32_t LL_RCC_PLL_IsReady(void) {
  * @retval None
  */
 __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_SYS(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLP_R) {
-    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN, Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos);
+    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN,
+               Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos);
     MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLP, PLLP_R);
 #if defined(RCC_PLLR_SYSCLK_SUPPORT)
     MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLR, PLLP_R);
@@ -4317,7 +4332,8 @@ __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_SYS(uint32_t Source, uint32_t PLLM,
  * @retval None
  */
 __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_48M(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLQ) {
-    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLQ, Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLQ);
+    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLQ,
+               Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLQ);
 }
 
 #if defined(DSI)
@@ -4408,7 +4424,8 @@ __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_48M(uint32_t Source, uint32_t PLLM,
  * @retval None
  */
 __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_DSI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR) {
-    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR, Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
+    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR,
+               Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
 }
 #endif /* DSI */
 
@@ -4500,7 +4517,8 @@ __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_DSI(uint32_t Source, uint32_t PLLM,
  * @retval None
  */
 __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_I2S(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR) {
-    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR, Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
+    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR,
+               Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
 }
 #endif /* RCC_PLLR_I2S_CLKSOURCE_SUPPORT */
 
@@ -4592,7 +4610,8 @@ __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_I2S(uint32_t Source, uint32_t PLLM,
  * @retval None
  */
 __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_SPDIFRX(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR) {
-    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR, Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
+    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR,
+               Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
 }
 #endif /* SPDIFRX */
 
@@ -4720,12 +4739,14 @@ __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_SPDIFRX(uint32_t Source, uint32_t P
  * @retval None
  */
 #if defined(RCC_DCKCFGR_PLLDIVR)
-__STATIC_INLINE void LL_RCC_PLL_ConfigDomain_SAI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR, uint32_t PLLDIVR)
+__STATIC_INLINE void LL_RCC_PLL_ConfigDomain_SAI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR,
+                                                 uint32_t PLLDIVR)
 #else
 __STATIC_INLINE void LL_RCC_PLL_ConfigDomain_SAI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR)
 #endif /* RCC_DCKCFGR_PLLDIVR */
 {
-    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR, Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
+    MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM | RCC_PLLCFGR_PLLN | RCC_PLLCFGR_PLLR,
+               Source | PLLM | PLLN << RCC_PLLCFGR_PLLN_Pos | PLLR);
 #if defined(RCC_DCKCFGR_PLLDIVR)
     MODIFY_REG(RCC->DCKCFGR, RCC_DCKCFGR_PLLDIVR, PLLDIVR);
 #endif /* RCC_DCKCFGR_PLLDIVR */
@@ -5217,8 +5238,9 @@ __STATIC_INLINE uint32_t LL_RCC_PLLI2S_IsReady(void) {
  *         (*) value not defined in all devices.
  * @retval None
  */
-__STATIC_INLINE void LL_RCC_PLLI2S_ConfigDomain_SAI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLQ_R, uint32_t PLLDIVQ_R) {
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&RCC->PLLCFGR) + (Source & 0x80U)));
+__STATIC_INLINE void LL_RCC_PLLI2S_ConfigDomain_SAI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLQ_R,
+                                                    uint32_t PLLDIVQ_R) {
+    __IO uint32_t *pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&RCC->PLLCFGR) + (Source & 0x80U)));
     MODIFY_REG(*pReg, RCC_PLLCFGR_PLLSRC, (Source & (~0x80U)));
 #if defined(RCC_PLLI2SCFGR_PLLI2SM)
     MODIFY_REG(RCC->PLLI2SCFGR, RCC_PLLI2SCFGR_PLLI2SM, PLLM);
@@ -5337,7 +5359,7 @@ __STATIC_INLINE void LL_RCC_PLLI2S_ConfigDomain_SAI(uint32_t Source, uint32_t PL
  * @retval None
  */
 __STATIC_INLINE void LL_RCC_PLLI2S_ConfigDomain_48M(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLQ) {
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&RCC->PLLCFGR) + (Source & 0x80U)));
+    __IO uint32_t *pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&RCC->PLLCFGR) + (Source & 0x80U)));
     MODIFY_REG(*pReg, RCC_PLLCFGR_PLLSRC, (Source & (~0x80U)));
 #if defined(RCC_PLLI2SCFGR_PLLI2SM)
     MODIFY_REG(RCC->PLLI2SCFGR, RCC_PLLI2SCFGR_PLLI2SM, PLLM);
@@ -5539,7 +5561,7 @@ __STATIC_INLINE void LL_RCC_PLLI2S_ConfigDomain_SPDIFRX(uint32_t Source, uint32_
  * @retval None
  */
 __STATIC_INLINE void LL_RCC_PLLI2S_ConfigDomain_I2S(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR) {
-    __IO uint32_t * pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&RCC->PLLCFGR) + (Source & 0x80U)));
+    __IO uint32_t *pReg = (__IO uint32_t *)((uint32_t)((uint32_t)(&RCC->PLLCFGR) + (Source & 0x80U)));
     MODIFY_REG(*pReg, RCC_PLLCFGR_PLLSRC, (Source & (~0x80U)));
 #if defined(RCC_PLLI2SCFGR_PLLI2SM)
     MODIFY_REG(RCC->PLLI2SCFGR, RCC_PLLI2SCFGR_PLLI2SM, PLLM);
@@ -5793,7 +5815,7 @@ __STATIC_INLINE uint32_t LL_RCC_PLLI2S_GetDivider(void) {
  */
 __STATIC_INLINE uint32_t LL_RCC_PLLI2S_GetMainSource(void) {
 #if defined(RCC_PLLI2SCFGR_PLLI2SSRC)
-    uint32_t pllsrc = READ_BIT(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC);
+    uint32_t pllsrc      = READ_BIT(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC);
     uint32_t plli2sssrc0 = READ_BIT(RCC->PLLI2SCFGR, RCC_PLLI2SCFGR_PLLI2SSRC);
     uint32_t plli2sssrc1 = READ_BIT(RCC->PLLI2SCFGR, RCC_PLLI2SCFGR_PLLI2SSRC) >> 15U;
     return (uint32_t)(pllsrc | plli2sssrc0 | plli2sssrc1);
@@ -5970,7 +5992,8 @@ __STATIC_INLINE uint32_t LL_RCC_PLLSAI_IsReady(void) {
  *         @arg @ref LL_RCC_PLLSAIDIVQ_DIV_32
  * @retval None
  */
-__STATIC_INLINE void LL_RCC_PLLSAI_ConfigDomain_SAI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLQ, uint32_t PLLDIVQ) {
+__STATIC_INLINE void LL_RCC_PLLSAI_ConfigDomain_SAI(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLQ,
+                                                    uint32_t PLLDIVQ) {
     MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC, Source);
 #if defined(RCC_PLLSAICFGR_PLLSAIM)
     MODIFY_REG(RCC->PLLSAICFGR, RCC_PLLSAICFGR_PLLSAIM, PLLM);
@@ -6173,7 +6196,8 @@ __STATIC_INLINE void LL_RCC_PLLSAI_ConfigDomain_48M(uint32_t Source, uint32_t PL
  *         @arg @ref LL_RCC_PLLSAIDIVR_DIV_16
  * @retval None
  */
-__STATIC_INLINE void LL_RCC_PLLSAI_ConfigDomain_LTDC(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR, uint32_t PLLDIVR) {
+__STATIC_INLINE void LL_RCC_PLLSAI_ConfigDomain_LTDC(uint32_t Source, uint32_t PLLM, uint32_t PLLN, uint32_t PLLR,
+                                                     uint32_t PLLDIVR) {
     MODIFY_REG(RCC->PLLCFGR, RCC_PLLCFGR_PLLSRC | RCC_PLLCFGR_PLLM, Source | PLLM);
     MODIFY_REG(RCC->PLLSAICFGR, RCC_PLLSAICFGR_PLLSAIN | RCC_PLLSAICFGR_PLLSAIR, PLLN << RCC_PLLSAICFGR_PLLSAIN_Pos | PLLR);
     MODIFY_REG(RCC->DCKCFGR, RCC_DCKCFGR_PLLSAIDIVR, PLLDIVR);
@@ -6846,7 +6870,7 @@ ErrorStatus LL_RCC_DeInit(void);
 /** @defgroup RCC_LL_EF_Get_Freq Get system and peripherals clocks frequency functions
  * @{
  */
-void LL_RCC_GetSystemClocksFreq(LL_RCC_ClocksTypeDef * RCC_Clocks);
+void LL_RCC_GetSystemClocksFreq(LL_RCC_ClocksTypeDef *RCC_Clocks);
 #if defined(FMPI2C1)
 uint32_t LL_RCC_GetFMPI2CClockFreq(uint32_t FMPI2CxSource);
 #endif /* FMPI2C1 */

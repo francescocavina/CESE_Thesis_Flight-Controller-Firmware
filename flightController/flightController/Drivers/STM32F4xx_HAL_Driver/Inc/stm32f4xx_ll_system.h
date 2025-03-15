@@ -74,11 +74,11 @@ extern "C" {
 /** @defgroup SYSTEM_LL_EC_REMAP SYSCFG REMAP
  * @{
  */
-#define LL_SYSCFG_REMAP_FLASH       (uint32_t)0x00000000     /*!< Main Flash memory mapped at 0x00000000              */
-#define LL_SYSCFG_REMAP_SYSTEMFLASH SYSCFG_MEMRMP_MEM_MODE_0 /*!< System Flash memory mapped at 0x00000000            */
+#define LL_SYSCFG_REMAP_FLASH       (uint32_t)0x00000000                           /*!< Main Flash memory mapped at 0x00000000              */
+#define LL_SYSCFG_REMAP_SYSTEMFLASH SYSCFG_MEMRMP_MEM_MODE_0                       /*!< System Flash memory mapped at 0x00000000            */
 #if defined(FSMC_Bank1)
-#define LL_SYSCFG_REMAP_FSMC SYSCFG_MEMRMP_MEM_MODE_1 /*!< FSMC(NOR/PSRAM 1 and 2) mapped at 0x00000000        */
-#endif                                                /* FSMC_Bank1 */
+#define LL_SYSCFG_REMAP_FSMC SYSCFG_MEMRMP_MEM_MODE_1                              /*!< FSMC(NOR/PSRAM 1 and 2) mapped at 0x00000000        */
+#endif                                                                             /* FSMC_Bank1 */
 #if defined(FMC_Bank1)
 #define LL_SYSCFG_REMAP_FMC   SYSCFG_MEMRMP_MEM_MODE_1                             /*!< FMC(NOR/PSRAM 1 and 2) mapped at 0x00000000         */
 #define LL_SYSCFG_REMAP_SDRAM SYSCFG_MEMRMP_MEM_MODE_2                             /*!< FMC/SDRAM mapped at 0x00000000                      */
@@ -105,12 +105,10 @@ extern "C" {
 /** @defgroup SYSTEM_LL_EC_BANKMODE SYSCFG BANK MODE
  * @{
  */
-#define LL_SYSCFG_BANKMODE_BANK1                                                                                                                                                                                                                         \
-    (uint32_t)0x00000000 /*!< Flash Bank 1 base address mapped at 0x0800 0000 (AXI) and 0x0020 0000 (TCM)                                                                                                                                                \
-                          and Flash Bank 2 base address mapped at 0x0810 0000 (AXI) and 0x0030 0000 (TCM)*/
-#define LL_SYSCFG_BANKMODE_BANK2                                                                                                                                                                                                                         \
-    SYSCFG_MEMRMP_UFB_MODE /*!< Flash Bank 2 base address mapped at 0x0800 0000 (AXI) and 0x0020 0000(TCM)                                                                                                                                               \
-                            and Flash Bank 1 base address mapped at 0x0810 0000 (AXI) and 0x0030 0000(TCM) */
+#define LL_SYSCFG_BANKMODE_BANK1 (uint32_t)0x00000000   /*!< Flash Bank 1 base address mapped at 0x0800 0000 (AXI) and 0x0020 0000 (TCM) \
+                                                         and Flash Bank 2 base address mapped at 0x0810 0000 (AXI) and 0x0030 0000 (TCM)*/
+#define LL_SYSCFG_BANKMODE_BANK2 SYSCFG_MEMRMP_UFB_MODE /*!< Flash Bank 2 base address mapped at 0x0800 0000 (AXI) and 0x0020 0000(TCM) \
+                                                         and Flash Bank 1 base address mapped at 0x0810 0000 (AXI) and 0x0030 0000(TCM) */
 /**
  * @}
  */
@@ -129,24 +127,24 @@ extern "C" {
 /** @defgroup SYSTEM_LL_EC_EXTI_PORT SYSCFG EXTI PORT
  * @{
  */
-#define LL_SYSCFG_EXTI_PORTA (uint32_t)0 /*!< EXTI PORT A                        */
-#define LL_SYSCFG_EXTI_PORTB (uint32_t)1 /*!< EXTI PORT B                        */
-#define LL_SYSCFG_EXTI_PORTC (uint32_t)2 /*!< EXTI PORT C                        */
-#define LL_SYSCFG_EXTI_PORTD (uint32_t)3 /*!< EXTI PORT D                        */
-#define LL_SYSCFG_EXTI_PORTE (uint32_t)4 /*!< EXTI PORT E                        */
+#define LL_SYSCFG_EXTI_PORTA (uint32_t)0  /*!< EXTI PORT A                        */
+#define LL_SYSCFG_EXTI_PORTB (uint32_t)1  /*!< EXTI PORT B                        */
+#define LL_SYSCFG_EXTI_PORTC (uint32_t)2  /*!< EXTI PORT C                        */
+#define LL_SYSCFG_EXTI_PORTD (uint32_t)3  /*!< EXTI PORT D                        */
+#define LL_SYSCFG_EXTI_PORTE (uint32_t)4  /*!< EXTI PORT E                        */
 #if defined(GPIOF)
-#define LL_SYSCFG_EXTI_PORTF (uint32_t)5 /*!< EXTI PORT F                        */
-#endif                                   /* GPIOF */
+#define LL_SYSCFG_EXTI_PORTF (uint32_t)5  /*!< EXTI PORT F                        */
+#endif                                    /* GPIOF */
 #if defined(GPIOG)
-#define LL_SYSCFG_EXTI_PORTG (uint32_t)6 /*!< EXTI PORT G                        */
-#endif                                   /* GPIOG */
-#define LL_SYSCFG_EXTI_PORTH (uint32_t)7 /*!< EXTI PORT H                        */
+#define LL_SYSCFG_EXTI_PORTG (uint32_t)6  /*!< EXTI PORT G                        */
+#endif                                    /* GPIOG */
+#define LL_SYSCFG_EXTI_PORTH (uint32_t)7  /*!< EXTI PORT H                        */
 #if defined(GPIOI)
-#define LL_SYSCFG_EXTI_PORTI (uint32_t)8 /*!< EXTI PORT I                        */
-#endif                                   /* GPIOI */
+#define LL_SYSCFG_EXTI_PORTI (uint32_t)8  /*!< EXTI PORT I                        */
+#endif                                    /* GPIOI */
 #if defined(GPIOJ)
-#define LL_SYSCFG_EXTI_PORTJ (uint32_t)9 /*!< EXTI PORT J                        */
-#endif                                   /* GPIOJ */
+#define LL_SYSCFG_EXTI_PORTJ (uint32_t)9  /*!< EXTI PORT J                        */
+#endif                                    /* GPIOJ */
 #if defined(GPIOK)
 #define LL_SYSCFG_EXTI_PORTK (uint32_t)10 /*!< EXTI PORT k                        */
 #endif                                    /* GPIOK */
@@ -181,13 +179,11 @@ extern "C" {
  * @{
  */
 #if defined(SYSCFG_CFGR2_LOCKUP_LOCK)
-#define LL_SYSCFG_TIMBREAK_LOCKUP                                                                                                                                                                                                                        \
-    SYSCFG_CFGR2_LOCKUP_LOCK /*!< Enables and locks the LOCKUP output of CortexM4                                                                                                                                                                        \
-                             with Break Input of TIM1/8                                    */
-#define LL_SYSCFG_TIMBREAK_PVD                                                                                                                                                                                                                           \
-    SYSCFG_CFGR2_PVD_LOCK /*!< Enables and locks the PVD connection with TIM1/8 Break Input                                                                                                                                                              \
-                          and also the PVDE and PLS bits of the Power Control Interface  */
-#endif                    /* SYSCFG_CFGR2_CLL */
+#define LL_SYSCFG_TIMBREAK_LOCKUP SYSCFG_CFGR2_LOCKUP_LOCK /*!< Enables and locks the LOCKUP output of CortexM4 \
+                                                           with Break Input of TIM1/8                                    */
+#define LL_SYSCFG_TIMBREAK_PVD SYSCFG_CFGR2_PVD_LOCK       /*!< Enables and locks the PVD connection with TIM1/8 Break Input \
+                                                           and also the PVDE and PLS bits of the Power Control Interface  */
+#endif                                                     /* SYSCFG_CFGR2_CLL */
 /**
  * @}
  */
@@ -212,8 +208,8 @@ extern "C" {
 /** @defgroup SYSTEM_LL_DFSDM_DataIn0_Source       SYSCFG MCHDLY DFSDMD0SEL
  * @{
  */
-#define LL_SYSCFG_DFSDM1_DataIn0     SYSCFG_MCHDLYCR_DFSDM1D0SEL
-#define LL_SYSCFG_DFSDM2_DataIn0     SYSCFG_MCHDLYCR_DFSDM2D0SEL
+#define LL_SYSCFG_DFSDM1_DataIn0 SYSCFG_MCHDLYCR_DFSDM1D0SEL
+#define LL_SYSCFG_DFSDM2_DataIn0 SYSCFG_MCHDLYCR_DFSDM2D0SEL
 
 #define LL_SYSCFG_DFSDM1_DataIn0_PAD (uint32_t)((SYSCFG_MCHDLYCR_DFSDM1D0SEL << 16) | 0x00000000)
 #define LL_SYSCFG_DFSDM1_DataIn0_DM  (uint32_t)((SYSCFG_MCHDLYCR_DFSDM1D0SEL << 16) | SYSCFG_MCHDLYCR_DFSDM1D0SEL)
@@ -225,8 +221,8 @@ extern "C" {
 /** @defgroup SYSTEM_LL_DFSDM_DataIn2_Source       SYSCFG MCHDLY DFSDMD2SEL
  * @{
  */
-#define LL_SYSCFG_DFSDM1_DataIn2     SYSCFG_MCHDLYCR_DFSDM1D2SEL
-#define LL_SYSCFG_DFSDM2_DataIn2     SYSCFG_MCHDLYCR_DFSDM2D2SEL
+#define LL_SYSCFG_DFSDM1_DataIn2 SYSCFG_MCHDLYCR_DFSDM1D2SEL
+#define LL_SYSCFG_DFSDM2_DataIn2 SYSCFG_MCHDLYCR_DFSDM2D2SEL
 
 #define LL_SYSCFG_DFSDM1_DataIn2_PAD (uint32_t)((SYSCFG_MCHDLYCR_DFSDM1D2SEL << 16) | 0x00000000)
 #define LL_SYSCFG_DFSDM1_DataIn2_DM  (uint32_t)((SYSCFG_MCHDLYCR_DFSDM1D2SEL << 16) | SYSCFG_MCHDLYCR_DFSDM1D2SEL)
@@ -350,30 +346,30 @@ extern "C" {
  * @{
  */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM2_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM2_STOP DBGMCU_APB1_FZ_DBG_TIM2_STOP /*!< TIM2 counter stopped when core is halted */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_TIM2_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM2_STOP DBGMCU_APB1_FZ_DBG_TIM2_STOP          /*!< TIM2 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM2_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM3_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM3_STOP DBGMCU_APB1_FZ_DBG_TIM3_STOP /*!< TIM3 counter stopped when core is halted */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_TIM3_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM3_STOP DBGMCU_APB1_FZ_DBG_TIM3_STOP          /*!< TIM3 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM3_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM4_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM4_STOP DBGMCU_APB1_FZ_DBG_TIM4_STOP /*!< TIM4 counter stopped when core is halted */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_TIM4_STOP */
-#define LL_DBGMCU_APB1_GRP1_TIM5_STOP DBGMCU_APB1_FZ_DBG_TIM5_STOP /*!< TIM5 counter stopped when core is halted */
+#define LL_DBGMCU_APB1_GRP1_TIM4_STOP DBGMCU_APB1_FZ_DBG_TIM4_STOP          /*!< TIM4 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM4_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM5_STOP DBGMCU_APB1_FZ_DBG_TIM5_STOP          /*!< TIM5 counter stopped when core is halted */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM6_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM6_STOP DBGMCU_APB1_FZ_DBG_TIM6_STOP /*!< TIM6 counter stopped when core is halted */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_TIM6_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM6_STOP DBGMCU_APB1_FZ_DBG_TIM6_STOP          /*!< TIM6 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM6_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM7_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM7_STOP DBGMCU_APB1_FZ_DBG_TIM7_STOP /*!< TIM7 counter stopped when core is halted */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_TIM7_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM7_STOP DBGMCU_APB1_FZ_DBG_TIM7_STOP          /*!< TIM7 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM7_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM12_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM12_STOP DBGMCU_APB1_FZ_DBG_TIM12_STOP /*!< TIM12 counter stopped when core is halted */
-#endif                                                               /* DBGMCU_APB1_FZ_DBG_TIM12_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM12_STOP DBGMCU_APB1_FZ_DBG_TIM12_STOP        /*!< TIM12 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM12_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM13_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM13_STOP DBGMCU_APB1_FZ_DBG_TIM13_STOP /*!< TIM13 counter stopped when core is halted */
-#endif                                                               /* DBGMCU_APB1_FZ_DBG_TIM13_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM13_STOP DBGMCU_APB1_FZ_DBG_TIM13_STOP        /*!< TIM13 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM13_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_TIM14_STOP)
-#define LL_DBGMCU_APB1_GRP1_TIM14_STOP DBGMCU_APB1_FZ_DBG_TIM14_STOP /*!< TIM14 counter stopped when core is halted */
-#endif                                                               /* DBGMCU_APB1_FZ_DBG_TIM14_STOP */
+#define LL_DBGMCU_APB1_GRP1_TIM14_STOP DBGMCU_APB1_FZ_DBG_TIM14_STOP        /*!< TIM14 counter stopped when core is halted */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_TIM14_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_LPTIM_STOP)
 #define LL_DBGMCU_APB1_GRP1_LPTIM_STOP DBGMCU_APB1_FZ_DBG_LPTIM_STOP        /*!< LPTIM counter stopped when core is halted */
 #endif                                                                      /* DBGMCU_APB1_FZ_DBG_LPTIM_STOP */
@@ -389,14 +385,14 @@ extern "C" {
 #define LL_DBGMCU_APB1_GRP1_I2C4_STOP DBGMCU_APB1_FZ_DBG_I2C4_SMBUS_TIMEOUT /*!< I2C4 SMBUS timeout mode stopped when Core is halted */
 #endif                                                                      /* DBGMCU_APB1_FZ_DBG_I2C4_SMBUS_TIMEOUT */
 #if defined(DBGMCU_APB1_FZ_DBG_CAN1_STOP)
-#define LL_DBGMCU_APB1_GRP1_CAN1_STOP DBGMCU_APB1_FZ_DBG_CAN1_STOP /*!< CAN1 debug stopped when Core is halted  */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_CAN1_STOP */
+#define LL_DBGMCU_APB1_GRP1_CAN1_STOP DBGMCU_APB1_FZ_DBG_CAN1_STOP          /*!< CAN1 debug stopped when Core is halted  */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_CAN1_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_CAN2_STOP)
-#define LL_DBGMCU_APB1_GRP1_CAN2_STOP DBGMCU_APB1_FZ_DBG_CAN2_STOP /*!< CAN2 debug stopped when Core is halted  */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_CAN2_STOP */
+#define LL_DBGMCU_APB1_GRP1_CAN2_STOP DBGMCU_APB1_FZ_DBG_CAN2_STOP          /*!< CAN2 debug stopped when Core is halted  */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_CAN2_STOP */
 #if defined(DBGMCU_APB1_FZ_DBG_CAN3_STOP)
-#define LL_DBGMCU_APB1_GRP1_CAN3_STOP DBGMCU_APB1_FZ_DBG_CAN3_STOP /*!< CAN3 debug stopped when Core is halted  */
-#endif                                                             /* DBGMCU_APB1_FZ_DBG_CAN3_STOP */
+#define LL_DBGMCU_APB1_GRP1_CAN3_STOP DBGMCU_APB1_FZ_DBG_CAN3_STOP          /*!< CAN3 debug stopped when Core is halted  */
+#endif                                                                      /* DBGMCU_APB1_FZ_DBG_CAN3_STOP */
 /**
  * @}
  */
@@ -404,11 +400,11 @@ extern "C" {
 /** @defgroup SYSTEM_LL_EC_APB2_GRP1_STOP_IP DBGMCU APB2 GRP1 STOP IP
  * @{
  */
-#define LL_DBGMCU_APB2_GRP1_TIM1_STOP DBGMCU_APB2_FZ_DBG_TIM1_STOP /*!< TIM1 counter stopped when core is halted */
+#define LL_DBGMCU_APB2_GRP1_TIM1_STOP DBGMCU_APB2_FZ_DBG_TIM1_STOP   /*!< TIM1 counter stopped when core is halted */
 #if defined(DBGMCU_APB2_FZ_DBG_TIM8_STOP)
-#define LL_DBGMCU_APB2_GRP1_TIM8_STOP DBGMCU_APB2_FZ_DBG_TIM8_STOP /*!< TIM8 counter stopped when core is halted */
-#endif                                                             /* DBGMCU_APB2_FZ_DBG_TIM8_STOP */
-#define LL_DBGMCU_APB2_GRP1_TIM9_STOP DBGMCU_APB2_FZ_DBG_TIM9_STOP /*!< TIM9 counter stopped when core is halted */
+#define LL_DBGMCU_APB2_GRP1_TIM8_STOP DBGMCU_APB2_FZ_DBG_TIM8_STOP   /*!< TIM8 counter stopped when core is halted */
+#endif                                                               /* DBGMCU_APB2_FZ_DBG_TIM8_STOP */
+#define LL_DBGMCU_APB2_GRP1_TIM9_STOP DBGMCU_APB2_FZ_DBG_TIM9_STOP   /*!< TIM9 counter stopped when core is halted */
 #if defined(DBGMCU_APB2_FZ_DBG_TIM10_STOP)
 #define LL_DBGMCU_APB2_GRP1_TIM10_STOP DBGMCU_APB2_FZ_DBG_TIM10_STOP /*!< TIM10 counter stopped when core is halted */
 #endif                                                               /* DBGMCU_APB2_FZ_DBG_TIM10_STOP */

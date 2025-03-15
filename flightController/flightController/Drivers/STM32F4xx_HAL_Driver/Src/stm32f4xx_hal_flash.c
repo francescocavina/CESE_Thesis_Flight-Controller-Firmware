@@ -213,7 +213,7 @@ HAL_StatusTypeDef HAL_FLASH_Program_IT(uint32_t TypeProgram, uint32_t Address, u
     __HAL_FLASH_ENABLE_IT(FLASH_IT_ERR);
 
     pFlash.ProcedureOnGoing = FLASH_PROC_PROGRAM;
-    pFlash.Address = Address;
+    pFlash.Address          = Address;
 
     if (TypeProgram == FLASH_TYPEPROGRAM_BYTE) {
         /*Program byte (8-bit) at a specified address.*/
@@ -241,14 +241,16 @@ void HAL_FLASH_IRQHandler(void) {
 
     /* Check FLASH operation error flags */
 #if defined(FLASH_SR_RDERR)
-    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
+    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR |
+                              FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
 #else
-    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
+    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR |
+                              FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
 #endif /* FLASH_SR_RDERR */
     {
         if (pFlash.ProcedureOnGoing == FLASH_PROC_SECTERASE) {
             /*return the faulty sector*/
-            addresstmp = pFlash.Sector;
+            addresstmp    = pFlash.Sector;
             pFlash.Sector = 0xFFFFFFFFU;
         } else if (pFlash.ProcedureOnGoing == FLASH_PROC_MASSERASE) {
             /*return the faulty bank*/
@@ -291,7 +293,7 @@ void HAL_FLASH_IRQHandler(void) {
                 /*No more sectors to Erase, user callback can be called.*/
                 /*Reset Sector and stop Erase sectors procedure*/
                 pFlash.Sector = addresstmp = 0xFFFFFFFFU;
-                pFlash.ProcedureOnGoing = FLASH_PROC_NONE;
+                pFlash.ProcedureOnGoing    = FLASH_PROC_NONE;
 
                 /* Flush the caches to be sure of the data consistency */
                 FLASH_FlushCaches();
@@ -518,9 +520,11 @@ HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout) {
         __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP);
     }
 #if defined(FLASH_SR_RDERR)
-    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
+    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR |
+                              FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR | FLASH_FLAG_RDERR)) != RESET)
 #else
-    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
+    if (__HAL_FLASH_GET_FLAG((FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR | FLASH_FLAG_PGAERR |
+                              FLASH_FLAG_PGPERR | FLASH_FLAG_PGSERR)) != RESET)
 #endif /* FLASH_SR_RDERR */
     {
         /*Save the error code*/

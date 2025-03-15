@@ -70,9 +70,9 @@
 /* --- Private variable declarations ----------------------------------------------------------- */
 static uint8_t instancesNumber = 0;
 /* Gyroscope calibration values */
-static float gyroscopeCalibrationRoll = 0;
+static float gyroscopeCalibrationRoll  = 0;
 static float gyroscopeCalibrationPitch = 0;
-static float gyroscopeCalibrationYaw = 0;
+static float gyroscopeCalibrationYaw   = 0;
 /* Accelerometer calibration values */
 static float accelerometerCalibrationX = 0;
 static float accelerometerCalibrationY = 0;
@@ -86,7 +86,7 @@ static float accelerometerCalibrationZ = 0;
  * @retval Pointer to a GY87_HandleTypeDef_t structure that contains the configuration
  *         information for the GY87 device.
  */
-static GY87_HandleTypeDef_t * GY87_InstanceInit(I2C_HandleTypeDef * hi2c);
+static GY87_HandleTypeDef_t *GY87_InstanceInit(I2C_HandleTypeDef *hi2c);
 
 /*
  * @brief  Wakes up MPU6050 device.
@@ -94,7 +94,7 @@ static GY87_HandleTypeDef_t * GY87_InstanceInit(I2C_HandleTypeDef * hi2c);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_WakeUpDevice(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_WakeUpDevice(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Sets clock source.
@@ -102,7 +102,7 @@ static void MPU6050_WakeUpDevice(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_SetClockSource(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_SetClockSource(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Sets sample divider.
@@ -110,7 +110,7 @@ static void MPU6050_SetClockSource(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_SetSampleDivider(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_SetSampleDivider(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Enables the digital low pass filter.
@@ -118,7 +118,7 @@ static void MPU6050_SetSampleDivider(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Sets gyroscope range.
@@ -126,7 +126,7 @@ static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_SetGyroscopeRange(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_SetGyroscopeRange(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Sets accelerometer range.
@@ -134,7 +134,7 @@ static void MPU6050_SetGyroscopeRange(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_SetAccelerometerRange(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_SetAccelerometerRange(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Enbales I2C master mode.
@@ -142,7 +142,7 @@ static void MPU6050_SetAccelerometerRange(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_EnableI2CMasterMode(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_EnableI2CMasterMode(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Disables I2C master mode.
@@ -150,7 +150,7 @@ static void MPU6050_EnableI2CMasterMode(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_DisableI2CMasterMode(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_DisableI2CMasterMode(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Enables bypass mode.
@@ -158,7 +158,7 @@ static void MPU6050_DisableI2CMasterMode(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_EnableBypassMode(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_EnableBypassMode(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Disables bypass mode.
@@ -166,7 +166,7 @@ static void MPU6050_EnableBypassMode(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_DisableBypassMode(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_DisableBypassMode(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Sets master's clock.
@@ -174,7 +174,7 @@ static void MPU6050_DisableBypassMode(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_SetMasterClock(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_SetMasterClock(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Configures slave QMC5883L magnetometer in MPU6050 device.
@@ -182,7 +182,7 @@ static void MPU6050_SetMasterClock(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void MPU6050_Configure_QMC5883l(GY87_HandleTypeDef_t * hgy87);
+static void MPU6050_Configure_QMC5883l(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Reads IMU register.
@@ -194,7 +194,7 @@ static void MPU6050_Configure_QMC5883l(GY87_HandleTypeDef_t * hgy87);
  *         dataSize: Size of the data that will be read.
  * @retval None
  */
-static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize);
+static void MPU6050_ReadRegister(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data, uint8_t dataSize);
 
 /*
  * @brief  Writes IMU register. It is a destructive operation
@@ -205,7 +205,7 @@ static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint
  *         data:    Pointer to variable that holds the data to be written into the specified register.
  * @retval None
  */
-static void MPU6050_WriteRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data);
+static void MPU6050_WriteRegister(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data);
 
 /*
  * @brief  Writers IMU register. It is a non-destructive operation.
@@ -218,7 +218,7 @@ static void MPU6050_WriteRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uin
  *                  MPU6050_SET_BIT: Write specified bits.
  * @retval None
  */
-static void MPU6050_WriteRegisterBitmasked(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t set);
+static void MPU6050_WriteRegisterBitmasked(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data, uint8_t set);
 
 /*
  * @brief  Configures GY87 device at initialization.
@@ -227,7 +227,7 @@ static void MPU6050_WriteRegisterBitmasked(I2C_HandleTypeDef * hi2c, uint8_t add
  * @retval true:  GY87 could be configured.
  *         false: GY87 couldn't be configured.
  */
-static bool_t GY87_Configure(GY87_HandleTypeDef_t * hgy87);
+static bool_t GY87_Configure(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Tests if QMC5883L magnetometer was detected.
@@ -236,7 +236,7 @@ static bool_t GY87_Configure(GY87_HandleTypeDef_t * hgy87);
  * @retval true:  QMC5883L magnetometer was detected.
  *         false: QMC5883L magnetometer was not detected.
  */
-static bool_t QMC5883L_TestConnection(GY87_HandleTypeDef_t * hgy87);
+static bool_t QMC5883L_TestConnection(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Configures QMC5883L magnetometer directly as if MPU6050 was not
@@ -245,27 +245,27 @@ static bool_t QMC5883L_TestConnection(GY87_HandleTypeDef_t * hgy87);
  *                the configuration information for the GY87 device.
  * @retval None
  */
-static void QMC5883L_Configure(GY87_HandleTypeDef_t * hgy87);
+static void QMC5883L_Configure(GY87_HandleTypeDef_t *hgy87);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
-static GY87_HandleTypeDef_t * GY87_InstanceInit(I2C_HandleTypeDef * hi2c) {
+static GY87_HandleTypeDef_t *GY87_InstanceInit(I2C_HandleTypeDef *hi2c) {
 
 #ifdef USE_FREERTOS
     /* Allocate dynamic memory for the GY87_HandleTypeDef_t structure */
-    GY87_HandleTypeDef_t * hgy87 = pvPortMalloc(sizeof(GY87_HandleTypeDef_t));
+    GY87_HandleTypeDef_t *hgy87 = pvPortMalloc(sizeof(GY87_HandleTypeDef_t));
 
     /* Allocate dynamic memory for data buffer */
-    uint8_t * buffer = pvPortMalloc(sizeof(1));
+    uint8_t *buffer = pvPortMalloc(sizeof(1));
 #else
     /* Allocate dynamic memory for the GY87_HandleTypeDef_t structure */
-    GY87_HandleTypeDef_t * hgy87 = malloc(sizeof(GY87_HandleTypeDef_t));
+    GY87_HandleTypeDef_t *hgy87 = malloc(sizeof(GY87_HandleTypeDef_t));
 
     /* Allocate dynamic memory for data buffer */
-    uint8_t * buffer = malloc(sizeof(1));
+    uint8_t *buffer = malloc(sizeof(1));
 #endif
 
     /* Check if dynamic memory allocation was successful */
@@ -291,12 +291,12 @@ static GY87_HandleTypeDef_t * GY87_InstanceInit(I2C_HandleTypeDef * hi2c) {
         /* Initialize GY87_HandleTypeDef_t structure */
         if (instancesNumber == 0) {
             hgy87->instance = 1;
-            hgy87->address = MPU6050_AUX_VAL_I2C_ADDR1;
+            hgy87->address  = MPU6050_AUX_VAL_I2C_ADDR1;
         } else if (instancesNumber == 1) {
             hgy87->instance = 2;
-            hgy87->address = MPU6050_AUX_VAL_I2C_ADDR2;
+            hgy87->address  = MPU6050_AUX_VAL_I2C_ADDR2;
         }
-        hgy87->hi2c = hi2c;
+        hgy87->hi2c   = hi2c;
         hgy87->buffer = buffer;
     }
 
@@ -304,7 +304,7 @@ static GY87_HandleTypeDef_t * GY87_InstanceInit(I2C_HandleTypeDef * hi2c) {
     return hgy87;
 }
 
-static void MPU6050_WakeUpDevice(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_WakeUpDevice(GY87_HandleTypeDef_t *hgy87) {
 
     /* Wake up device */
     uint8_t regData;
@@ -313,7 +313,7 @@ static void MPU6050_WakeUpDevice(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_PWR_MGMT_1, &regData, MPU6050_CLEAR_BIT);
 }
 
-static void MPU6050_SetClockSource(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_SetClockSource(GY87_HandleTypeDef_t *hgy87) {
 
     /* Set clock source */
     uint8_t regData;
@@ -322,7 +322,7 @@ static void MPU6050_SetClockSource(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_PWR_MGMT_1, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_SetSampleDivider(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_SetSampleDivider(GY87_HandleTypeDef_t *hgy87) {
 
     /* Set sample rate divider */
     uint8_t regData;
@@ -331,7 +331,7 @@ static void MPU6050_SetSampleDivider(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_SMPLRT_DIV, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t *hgy87) {
 
     /* Enable digital low pass filter */
     uint8_t regData;
@@ -340,7 +340,7 @@ static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_CONFIG, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_SetGyroscopeRange(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_SetGyroscopeRange(GY87_HandleTypeDef_t *hgy87) {
 
     /* Set gyroscope range */
     uint8_t regData;
@@ -349,7 +349,7 @@ static void MPU6050_SetGyroscopeRange(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_CONFIG, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_SetAccelerometerRange(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_SetAccelerometerRange(GY87_HandleTypeDef_t *hgy87) {
 
     /* Set accelerometer range */
     uint8_t regData;
@@ -358,7 +358,7 @@ static void MPU6050_SetAccelerometerRange(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_ACCEL_CONFIG, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_EnableI2CMasterMode(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_EnableI2CMasterMode(GY87_HandleTypeDef_t *hgy87) {
 
     /* Enable I2C Master mode */
     uint8_t regData;
@@ -367,7 +367,7 @@ static void MPU6050_EnableI2CMasterMode(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_USER_CTRL, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_DisableI2CMasterMode(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_DisableI2CMasterMode(GY87_HandleTypeDef_t *hgy87) {
 
     /* Disable I2C Master mode */
     uint8_t regData;
@@ -376,7 +376,7 @@ static void MPU6050_DisableI2CMasterMode(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_USER_CTRL, &regData, MPU6050_CLEAR_BIT);
 }
 
-static void MPU6050_EnableBypassMode(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_EnableBypassMode(GY87_HandleTypeDef_t *hgy87) {
 
     /* Enable Bypass mode */
     uint8_t regData;
@@ -385,7 +385,7 @@ static void MPU6050_EnableBypassMode(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_INT_PIN_CFG, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_DisableBypassMode(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_DisableBypassMode(GY87_HandleTypeDef_t *hgy87) {
 
     /* Disable Bypass mode */
     uint8_t regData;
@@ -394,7 +394,7 @@ static void MPU6050_DisableBypassMode(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_INT_PIN_CFG, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_SetMasterClock(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_SetMasterClock(GY87_HandleTypeDef_t *hgy87) {
 
     /* Set Master Clock */
     uint8_t regData;
@@ -403,7 +403,7 @@ static void MPU6050_SetMasterClock(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_MST_CTRL, &regData, MPU6050_SET_BIT);
 }
 
-static void MPU6050_Configure_QMC5883l(GY87_HandleTypeDef_t * hgy87) {
+static void MPU6050_Configure_QMC5883l(GY87_HandleTypeDef_t *hgy87) {
 
     /* Configure slave QMC5883L magnetometer in MPU6050 */
     uint8_t regData;
@@ -421,7 +421,7 @@ static void MPU6050_Configure_QMC5883l(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_I2C_SLV0_CTRL, &regData, MPU6050_SET_BIT);
 }
 
-static bool_t GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
+static bool_t GY87_Configure(GY87_HandleTypeDef_t *hgy87) {
 
     /* Configure MPU6050 device */
 
@@ -479,7 +479,7 @@ static bool_t GY87_Configure(GY87_HandleTypeDef_t * hgy87) {
     return true;
 }
 
-static bool_t QMC5883L_TestConnection(GY87_HandleTypeDef_t * hgy87) {
+static bool_t QMC5883L_TestConnection(GY87_HandleTypeDef_t *hgy87) {
 
     /* Test QMC5883L magnetometer connection */
     uint8_t regData;
@@ -493,7 +493,7 @@ static bool_t QMC5883L_TestConnection(GY87_HandleTypeDef_t * hgy87) {
     }
 }
 
-static void QMC5883L_Configure(GY87_HandleTypeDef_t * hgy87) {
+static void QMC5883L_Configure(GY87_HandleTypeDef_t *hgy87) {
 
     /* Configure QMC5883L magnetometer */
     uint8_t regData;
@@ -511,19 +511,19 @@ static void QMC5883L_Configure(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, QMC5883L_AUX_VAL_I2C_ADDR << 1, QMC5883L_REG_CONFIG2, &regData, QMC5883L_SET_BIT);
 }
 
-static void MPU6050_ReadRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize) {
+static void MPU6050_ReadRegister(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data, uint8_t dataSize) {
 
     /* Read register */
     I2C_Read(hi2c, address, reg, data, dataSize);
 }
 
-static void MPU6050_WriteRegister(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data) {
+static void MPU6050_WriteRegister(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data) {
 
     /* Write register - ¡Destructive operation! */
     I2C_Write(hi2c, address, reg, data);
 }
 
-static void MPU6050_WriteRegisterBitmasked(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t set) {
+static void MPU6050_WriteRegisterBitmasked(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data, uint8_t set) {
 
     /* Declare variable for original data read from register */
     uint8_t originalData;
@@ -546,7 +546,7 @@ static void MPU6050_WriteRegisterBitmasked(I2C_HandleTypeDef * hi2c, uint8_t add
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
-GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c) {
+GY87_HandleTypeDef_t *GY87_Init(I2C_HandleTypeDef *hi2c) {
 
     /* Check parameter */
     if (NULL == hi2c) {
@@ -559,7 +559,7 @@ GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c) {
     }
 
     /* Create an instance of the MPU6050_IMU device */
-    GY87_HandleTypeDef_t * hgy87 = GY87_InstanceInit(hi2c);
+    GY87_HandleTypeDef_t *hgy87 = GY87_InstanceInit(hi2c);
 
     /* Check if instance was successfully created */
     if (NULL != hgy87) {
@@ -611,7 +611,7 @@ GY87_HandleTypeDef_t * GY87_Init(I2C_HandleTypeDef * hi2c) {
     }
 }
 
-void GY87_Reset(GY87_HandleTypeDef_t * hgy87) {
+void GY87_Reset(GY87_HandleTypeDef_t *hgy87) {
 
     /* Declare variable for data to write into register */
     uint8_t regData;
@@ -627,24 +627,24 @@ void GY87_Reset(GY87_HandleTypeDef_t * hgy87) {
     }
 }
 
-void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues, bool_t fixedCalibration_en) {
+void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues, bool_t fixedCalibration_en) {
 
     /* Declare structure to read the gyroscope values */
     GY87_gyroscopeValues_t gyroscopeValues;
 
     /* Declare variables to accumulate measurements */
-    float ratesRoll = 0;
+    float ratesRoll  = 0;
     float ratesPitch = 0;
-    float ratesYaw = 0;
+    float ratesYaw   = 0;
 
     /* Check parameter and calculate calibration value */
     if (NULL != hgy87 && NULL != gyroscopeCalibrationValues) {
         if (true == fixedCalibration_en) {
-            gyroscopeCalibrationValues->calibrationDone = true;
-            gyroscopeCalibrationValues->fixedCalibration_en = true;
-            gyroscopeCalibrationValues->calibrationRateRoll = 0;
+            gyroscopeCalibrationValues->calibrationDone      = true;
+            gyroscopeCalibrationValues->fixedCalibration_en  = true;
+            gyroscopeCalibrationValues->calibrationRateRoll  = 0;
             gyroscopeCalibrationValues->calibrationRatePitch = 0;
-            gyroscopeCalibrationValues->calibrationRateYaw = 0;
+            gyroscopeCalibrationValues->calibrationRateYaw   = 0;
         } else {
             /* Define chunk size for yielding */
             const uint16_t YIELD_CHUNK = 200;
@@ -668,11 +668,11 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeCalibra
                 }
             }
 
-            gyroscopeCalibrationValues->calibrationDone = true;
-            gyroscopeCalibrationValues->fixedCalibration_en = false;
-            gyroscopeCalibrationValues->calibrationRateRoll = ratesRoll / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationDone      = true;
+            gyroscopeCalibrationValues->fixedCalibration_en  = false;
+            gyroscopeCalibrationValues->calibrationRateRoll  = ratesRoll / GY87_CALIBRATION_ITERATIONS;
             gyroscopeCalibrationValues->calibrationRatePitch = ratesPitch / GY87_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationValues->calibrationRateYaw = ratesYaw / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationRateYaw   = ratesYaw / GY87_CALIBRATION_ITERATIONS;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
@@ -682,15 +682,15 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeCalibra
         }
 
     } else {
-        gyroscopeCalibrationValues->calibrationDone = false;
-        gyroscopeCalibrationValues->fixedCalibration_en = true;
-        gyroscopeCalibrationValues->calibrationRateRoll = 0;
+        gyroscopeCalibrationValues->calibrationDone      = false;
+        gyroscopeCalibrationValues->fixedCalibration_en  = true;
+        gyroscopeCalibrationValues->calibrationRateRoll  = 0;
         gyroscopeCalibrationValues->calibrationRatePitch = 0;
-        gyroscopeCalibrationValues->calibrationRateYaw = 0;
+        gyroscopeCalibrationValues->calibrationRateYaw   = 0;
     }
 }
 
-void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * gyroscopeValues, GY87_gyroscopeCalibrationValues_t * gyroscopeCalibrationValues) {
+void GY87_ReadGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeValues_t *gyroscopeValues, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues) {
 
     /* Declare variable for raw data */
     uint8_t gyroscopeRawData[2];
@@ -722,16 +722,16 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t * hgy87, GY87_gyroscopeValues_t * g
     } else {
 
         /* Wrong parameters */
-        gyroscopeValues->rawValueX = 0;
-        gyroscopeValues->rawValueY = 0;
-        gyroscopeValues->rawValueZ = 0;
-        gyroscopeValues->rotationRateRoll = 0;
+        gyroscopeValues->rawValueX         = 0;
+        gyroscopeValues->rawValueY         = 0;
+        gyroscopeValues->rawValueZ         = 0;
+        gyroscopeValues->rotationRateRoll  = 0;
         gyroscopeValues->rotationRatePitch = 0;
-        gyroscopeValues->rotationRateYaw = 0;
+        gyroscopeValues->rotationRateYaw   = 0;
     }
 }
 
-void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues, bool_t fixedCalibration_en) {
+void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues, bool_t fixedCalibration_en) {
 
     /* Declare structure to read the accelerometer values */
     GY87_accelerometerValues_t accelerometerValues;
@@ -744,8 +744,8 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_acceleromete
     /* Check parameter and calculate calibration value */
     if (NULL != hgy87 && NULL != accelerometerCalibrationValues) {
         if (true == fixedCalibration_en) {
-            accelerometerCalibrationValues->calibrationDone = true;
-            accelerometerCalibrationValues->fixedCalibration_en = true;
+            accelerometerCalibrationValues->calibrationDone                = true;
+            accelerometerCalibrationValues->fixedCalibration_en            = true;
             accelerometerCalibrationValues->calibrationLinearAccelerationX = 0;
             accelerometerCalibrationValues->calibrationLinearAccelerationY = 0;
             accelerometerCalibrationValues->calibrationLinearAccelerationZ = 0;
@@ -772,8 +772,8 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_acceleromete
                 }
             }
 
-            accelerometerCalibrationValues->calibrationDone = true;
-            accelerometerCalibrationValues->fixedCalibration_en = false;
+            accelerometerCalibrationValues->calibrationDone                = true;
+            accelerometerCalibrationValues->fixedCalibration_en            = false;
             accelerometerCalibrationValues->calibrationLinearAccelerationX = linearAccelerationsX / GY87_CALIBRATION_ITERATIONS;
             accelerometerCalibrationValues->calibrationLinearAccelerationY = linearAccelerationsY / GY87_CALIBRATION_ITERATIONS;
             accelerometerCalibrationValues->calibrationLinearAccelerationZ = linearAccelerationsZ / GY87_CALIBRATION_ITERATIONS;
@@ -786,15 +786,15 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_acceleromete
         }
 
     } else {
-        accelerometerCalibrationValues->calibrationDone = false;
-        accelerometerCalibrationValues->fixedCalibration_en = true;
+        accelerometerCalibrationValues->calibrationDone                = false;
+        accelerometerCalibrationValues->fixedCalibration_en            = true;
         accelerometerCalibrationValues->calibrationLinearAccelerationX = 0;
         accelerometerCalibrationValues->calibrationLinearAccelerationY = 0;
         accelerometerCalibrationValues->calibrationLinearAccelerationZ = 0;
     }
 }
 
-void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValues_t * accelerometerValues, GY87_accelerometerCalibrationValues_t * accelerometerCalibrationValues) {
+void GY87_ReadAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerValues_t *accelerometerValues, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues) {
 
     /* Declare variable for raw data */
     uint8_t accelerometerRawData[2];
@@ -827,7 +827,7 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
         accZ = accelerometerValues->linearAccelerationZ = ((float)accelerometerValues->rawValueZ / scaleFactor) - accelerometerCalibrationValues->calibrationLinearAccelerationZ;
 
         /* Calculate roll and pitch angles using an approximation with linear accelerations */
-        denomRoll = sqrt(accX * accX + accZ * accZ);
+        denomRoll  = sqrt(accX * accX + accZ * accZ);
         denomPitch = sqrt(accY * accY + accZ * accZ);
 
         /* Prevent division by zero */
@@ -845,23 +845,23 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t * hgy87, GY87_accelerometerValu
 
     } else {
         /* Wrong parameters */
-        accelerometerValues->rawValueX = 0;
-        accelerometerValues->rawValueY = 0;
-        accelerometerValues->rawValueZ = 0;
+        accelerometerValues->rawValueX           = 0;
+        accelerometerValues->rawValueY           = 0;
+        accelerometerValues->rawValueZ           = 0;
         accelerometerValues->linearAccelerationX = 0;
         accelerometerValues->linearAccelerationY = 0;
         accelerometerValues->linearAccelerationZ = 0;
-        accelerometerValues->angleRoll = 0;
-        accelerometerValues->anglePitch = 0;
+        accelerometerValues->angleRoll           = 0;
+        accelerometerValues->anglePitch          = 0;
     }
 }
 
-float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87) {
+float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t *hgy87) {
 
     /* Declare variable for raw data */
     uint8_t temperatureSensorRawData[2];
     int16_t rawTemperature;
-    float temperature;
+    float   temperature;
 
     /* Check parameter */
     if (NULL == hgy87) {
@@ -872,7 +872,7 @@ float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87) {
     MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_TEMP_OUT_H, temperatureSensorRawData, sizeof(uint16_t));
 
     rawTemperature = (int16_t)((((int16_t)temperatureSensorRawData[0]) << 8) | ((int16_t)temperatureSensorRawData[1]));
-    temperature = ((float)rawTemperature / (float)MPU_6050_AUX_VAL_TEMP_SF) + (float)MPU_6050_AUX_VAL_TEMP_OFS;
+    temperature    = ((float)rawTemperature / (float)MPU_6050_AUX_VAL_TEMP_SF) + (float)MPU_6050_AUX_VAL_TEMP_OFS;
 
     /* Sanity check - typical environmental temperature range */
     if (temperature < -5.0f || temperature > 60.0f) {
@@ -882,7 +882,7 @@ float GY87_ReadTemperatureSensor(GY87_HandleTypeDef_t * hgy87) {
     }
 }
 
-void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues_t * magnetometerValues) {
+void GY87_ReadMagnetometer(GY87_HandleTypeDef_t *hgy87, GY87_magnetometerValues_t *magnetometerValues) {
 
     /* Declare variable for raw data */
     uint8_t magnetometerRawData[2];
@@ -919,7 +919,7 @@ void GY87_ReadMagnetometer(GY87_HandleTypeDef_t * hgy87, GY87_magnetometerValues
     }
 }
 
-float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t * hgy87) {
+float GY87_ReadMagnetometerHeading(GY87_HandleTypeDef_t *hgy87) {
 
     /* Declare structure to read the magnetometer values */
     GY87_magnetometerValues_t magnetometerValues;

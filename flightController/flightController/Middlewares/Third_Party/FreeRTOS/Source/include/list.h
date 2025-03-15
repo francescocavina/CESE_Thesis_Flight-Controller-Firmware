@@ -138,20 +138,20 @@ contain its expected value. */
 struct xLIST;
 struct xLIST_ITEM {
     listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE           /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-        configLIST_VOLATILE TickType_t xItemValue;      /*< The value being listed.  In most cases this is used to sort the list in descending order. */
-    struct xLIST_ITEM * configLIST_VOLATILE pxNext;     /*< Pointer to the next ListItem_t in the list. */
-    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious; /*< Pointer to the previous ListItem_t in the list. */
-    void * pvOwner;                                     /*< Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
-    struct xLIST * configLIST_VOLATILE pxContainer;     /*< Pointer to the list in which this list item is placed (if any). */
+        configLIST_VOLATILE TickType_t     xItemValue;  /*< The value being listed.  In most cases this is used to sort the list in descending order. */
+    struct xLIST_ITEM *configLIST_VOLATILE pxNext;      /*< Pointer to the next ListItem_t in the list. */
+    struct xLIST_ITEM *configLIST_VOLATILE pxPrevious;  /*< Pointer to the previous ListItem_t in the list. */
+    void                                  *pvOwner;     /*< Pointer to the object (normally a TCB) that contains the list item.  There is therefore a two way link between the object containing the list item and the list item itself. */
+    struct xLIST *configLIST_VOLATILE      pxContainer; /*< Pointer to the list in which this list item is placed (if any). */
     listSECOND_LIST_ITEM_INTEGRITY_CHECK_VALUE          /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 };
-typedef struct xLIST_ITEM ListItem_t; /* For some reason lint wants this as two separate definitions. */
+typedef struct xLIST_ITEM ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
 
 struct xMINI_LIST_ITEM {
     listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-        configLIST_VOLATILE TickType_t xItemValue;
-    struct xLIST_ITEM * configLIST_VOLATILE pxNext;
-    struct xLIST_ITEM * configLIST_VOLATILE pxPrevious;
+        configLIST_VOLATILE TickType_t     xItemValue;
+    struct xLIST_ITEM *configLIST_VOLATILE pxNext;
+    struct xLIST_ITEM *configLIST_VOLATILE pxPrevious;
 };
 typedef struct xMINI_LIST_ITEM MiniListItem_t;
 
@@ -159,10 +159,10 @@ typedef struct xMINI_LIST_ITEM MiniListItem_t;
  * Definition of the type of queue used by the scheduler.
  */
 typedef struct xLIST {
-    listFIRST_LIST_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
-        volatile UBaseType_t uxNumberOfItems;
-    ListItem_t * configLIST_VOLATILE pxIndex; /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
-    MiniListItem_t xListEnd;                  /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
+    listFIRST_LIST_INTEGRITY_CHECK_VALUE      /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+        volatile UBaseType_t        uxNumberOfItems;
+    ListItem_t *configLIST_VOLATILE pxIndex;  /*< Used to walk through the list.  Points to the last item returned by a call to listGET_OWNER_OF_NEXT_ENTRY (). */
+    MiniListItem_t                  xListEnd; /*< List item that contains the maximum possible item value meaning it is always at the end of the list and is therefore used as a marker. */
     listSECOND_LIST_INTEGRITY_CHECK_VALUE     /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
 } List_t;
 
@@ -270,16 +270,16 @@ typedef struct xLIST {
  * \page listGET_OWNER_OF_NEXT_ENTRY listGET_OWNER_OF_NEXT_ENTRY
  * \ingroup LinkedList
  */
-#define listGET_OWNER_OF_NEXT_ENTRY(pxTCB, pxList)                                                                                                                                                                                                       \
-    {                                                                                                                                                                                                                                                    \
-        List_t * const pxConstList = (pxList);                                                                                                                                                                                                           \
-        /* Increment the index to the next item and return the item, ensuring */                                                                                                                                                                         \
-        /* we don't return the marker used at the end of the list.  */                                                                                                                                                                                   \
-        (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;                                                                                                                                                                                         \
-        if ((void *)(pxConstList)->pxIndex == (void *)&((pxConstList)->xListEnd)) {                                                                                                                                                                      \
-            (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;                                                                                                                                                                                     \
-        }                                                                                                                                                                                                                                                \
-        (pxTCB) = (pxConstList)->pxIndex->pvOwner;                                                                                                                                                                                                       \
+#define listGET_OWNER_OF_NEXT_ENTRY(pxTCB, pxList)                                  \
+    {                                                                               \
+        List_t *const pxConstList = (pxList);                                       \
+        /* Increment the index to the next item and return the item, ensuring */    \
+        /* we don't return the marker used at the end of the list.  */              \
+        (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;                    \
+        if ((void *)(pxConstList)->pxIndex == (void *)&((pxConstList)->xListEnd)) { \
+            (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;                \
+        }                                                                           \
+        (pxTCB) = (pxConstList)->pxIndex->pvOwner;                                  \
     }
 
 /*
@@ -336,7 +336,7 @@ typedef struct xLIST {
  * \page vListInitialise vListInitialise
  * \ingroup LinkedList
  */
-void vListInitialise(List_t * const pxList) PRIVILEGED_FUNCTION;
+void vListInitialise(List_t *const pxList) PRIVILEGED_FUNCTION;
 
 /*
  * Must be called before a list item is used.  This sets the list container to
@@ -347,7 +347,7 @@ void vListInitialise(List_t * const pxList) PRIVILEGED_FUNCTION;
  * \page vListInitialiseItem vListInitialiseItem
  * \ingroup LinkedList
  */
-void vListInitialiseItem(ListItem_t * const pxItem) PRIVILEGED_FUNCTION;
+void vListInitialiseItem(ListItem_t *const pxItem) PRIVILEGED_FUNCTION;
 
 /*
  * Insert a list item into a list.  The item will be inserted into the list in
@@ -360,7 +360,7 @@ void vListInitialiseItem(ListItem_t * const pxItem) PRIVILEGED_FUNCTION;
  * \page vListInsert vListInsert
  * \ingroup LinkedList
  */
-void vListInsert(List_t * const pxList, ListItem_t * const pxNewListItem) PRIVILEGED_FUNCTION;
+void vListInsert(List_t *const pxList, ListItem_t *const pxNewListItem) PRIVILEGED_FUNCTION;
 
 /*
  * Insert a list item into a list.  The item will be inserted in a position
@@ -381,7 +381,7 @@ void vListInsert(List_t * const pxList, ListItem_t * const pxNewListItem) PRIVIL
  * \page vListInsertEnd vListInsertEnd
  * \ingroup LinkedList
  */
-void vListInsertEnd(List_t * const pxList, ListItem_t * const pxNewListItem) PRIVILEGED_FUNCTION;
+void vListInsertEnd(List_t *const pxList, ListItem_t *const pxNewListItem) PRIVILEGED_FUNCTION;
 
 /*
  * Remove an item from a list.  The list item has a pointer to the list that
@@ -396,7 +396,7 @@ void vListInsertEnd(List_t * const pxList, ListItem_t * const pxNewListItem) PRI
  * \page uxListRemove uxListRemove
  * \ingroup LinkedList
  */
-UBaseType_t uxListRemove(ListItem_t * const pxItemToRemove) PRIVILEGED_FUNCTION;
+UBaseType_t uxListRemove(ListItem_t *const pxItemToRemove) PRIVILEGED_FUNCTION;
 
 #ifdef __cplusplus
 }

@@ -30,7 +30,8 @@
 #endif
 
 /* CMSIS compiler control architecture macros */
-#if ((defined(__TARGET_ARCH_6_M) && (__TARGET_ARCH_6_M == 1)) || (defined(__TARGET_ARCH_6S_M) && (__TARGET_ARCH_6S_M == 1)))
+#if ((defined(__TARGET_ARCH_6_M) && (__TARGET_ARCH_6_M == 1)) || \
+     (defined(__TARGET_ARCH_6S_M) && (__TARGET_ARCH_6S_M == 1)))
 #define __ARM_ARCH_6M__ 1
 #endif
 
@@ -198,7 +199,8 @@
  */
 #ifndef __NO_EMBEDDED_ASM
 __attribute__((section(".rev16_text"))) __STATIC_INLINE __ASM uint32_t __REV16(uint32_t value) {
-    rev16 r0, r0 bx lr
+    rev16            r0, r0
+                  bx lr
 }
 #endif
 
@@ -210,7 +212,8 @@ __attribute__((section(".rev16_text"))) __STATIC_INLINE __ASM uint32_t __REV16(u
  */
 #ifndef __NO_EMBEDDED_ASM
 __attribute__((section(".revsh_text"))) __STATIC_INLINE __ASM int16_t __REVSH(int16_t value) {
-    revsh r0, r0 bx lr
+    revsh            r0, r0
+                  bx lr
 }
 #endif
 
@@ -238,14 +241,15 @@ __attribute__((section(".revsh_text"))) __STATIC_INLINE __ASM int16_t __REVSH(in
   \param [in]    value  Value to reverse
   \return               Reversed value
  */
-#if ((defined(__ARM_ARCH_7M__) && (__ARM_ARCH_7M__ == 1)) || (defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
+#if ((defined(__ARM_ARCH_7M__) && (__ARM_ARCH_7M__ == 1)) || \
+     (defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
 #define __RBIT __rbit
 #else
 __attribute__((always_inline)) __STATIC_INLINE uint32_t __RBIT(uint32_t value) {
     uint32_t result;
     uint32_t s = (4U /*sizeof(v)*/ * 8U) - 1U; /* extra shift needed at end */
 
-    result = value; /* r will be reversed bits of v; first get LSB of v */
+    result = value;                            /* r will be reversed bits of v; first get LSB of v */
     for (value >>= 1U; value != 0U; value >>= 1U) {
         result <<= 1U;
         result |= value & 1U;
@@ -264,7 +268,8 @@ __attribute__((always_inline)) __STATIC_INLINE uint32_t __RBIT(uint32_t value) {
  */
 #define __CLZ __clz
 
-#if ((defined(__ARM_ARCH_7M__) && (__ARM_ARCH_7M__ == 1)) || (defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
+#if ((defined(__ARM_ARCH_7M__) && (__ARM_ARCH_7M__ == 1)) || \
+     (defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
 
 /**
   \brief   LDR Exclusive (8 bit)
@@ -377,7 +382,8 @@ __attribute__((always_inline)) __STATIC_INLINE uint32_t __RBIT(uint32_t value) {
  */
 #ifndef __NO_EMBEDDED_ASM
 __attribute__((section(".rrx_text"))) __STATIC_INLINE __ASM uint32_t __RRX(uint32_t value) {
-    rrx r0, r0 bx lr
+    rrx            r0, r0
+                bx lr
 }
 #endif
 
@@ -429,8 +435,8 @@ __attribute__((section(".rrx_text"))) __STATIC_INLINE __ASM uint32_t __RRX(uint3
  */
 #define __STRT(value, ptr) __strt(value, ptr)
 
-#else /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) ||                                                                                                                                                                                     \
-          (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
+#else  /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) || \
+           (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
 
 /**
   \brief   Signed Saturate
@@ -471,7 +477,7 @@ __attribute__((always_inline)) __STATIC_INLINE uint32_t __USAT(int32_t val, uint
     return (uint32_t)val;
 }
 
-#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) ||                                                                                                                                                                                    \
+#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) || \
            (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
 
 /*@}*/ /* end of group CMSIS_Core_InstructionInterface */
@@ -607,7 +613,8 @@ __STATIC_INLINE void __set_PRIMASK(uint32_t priMask) {
     __regPriMask = (priMask);
 }
 
-#if ((defined(__ARM_ARCH_7M__) && (__ARM_ARCH_7M__ == 1)) || (defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
+#if ((defined(__ARM_ARCH_7M__) && (__ARM_ARCH_7M__ == 1)) || \
+     (defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
 
 /**
   \brief   Enable FIQ
@@ -674,7 +681,7 @@ __STATIC_INLINE void __set_FAULTMASK(uint32_t faultMask) {
     __regFaultMask = (faultMask & (uint32_t)1U);
 }
 
-#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) ||                                                                                                                                                                                    \
+#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) || \
            (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
 
 /**
@@ -683,7 +690,8 @@ __STATIC_INLINE void __set_FAULTMASK(uint32_t faultMask) {
   \return               Floating Point Status/Control register value
  */
 __STATIC_INLINE uint32_t __get_FPSCR(void) {
-#if ((defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && (defined(__FPU_USED) && (__FPU_USED == 1U)))
+#if ((defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
+     (defined(__FPU_USED) && (__FPU_USED == 1U)))
     register uint32_t __regfpscr __ASM("fpscr");
     return (__regfpscr);
 #else
@@ -697,7 +705,8 @@ __STATIC_INLINE uint32_t __get_FPSCR(void) {
   \param [in]    fpscr  Floating Point Status/Control value to set
  */
 __STATIC_INLINE void __set_FPSCR(uint32_t fpscr) {
-#if ((defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && (defined(__FPU_USED) && (__FPU_USED == 1U)))
+#if ((defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)) && \
+     (defined(__FPU_USED) && (__FPU_USED == 1U)))
     register uint32_t __regfpscr __ASM("fpscr");
     __regfpscr = (fpscr);
 #else
@@ -715,73 +724,77 @@ __STATIC_INLINE void __set_FPSCR(uint32_t fpscr) {
 
 #if ((defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
 
-#define __SADD8                          __sadd8
-#define __QADD8                          __qadd8
-#define __SHADD8                         __shadd8
-#define __UADD8                          __uadd8
-#define __UQADD8                         __uqadd8
-#define __UHADD8                         __uhadd8
-#define __SSUB8                          __ssub8
-#define __QSUB8                          __qsub8
-#define __SHSUB8                         __shsub8
-#define __USUB8                          __usub8
-#define __UQSUB8                         __uqsub8
-#define __UHSUB8                         __uhsub8
-#define __SADD16                         __sadd16
-#define __QADD16                         __qadd16
-#define __SHADD16                        __shadd16
-#define __UADD16                         __uadd16
-#define __UQADD16                        __uqadd16
-#define __UHADD16                        __uhadd16
-#define __SSUB16                         __ssub16
-#define __QSUB16                         __qsub16
-#define __SHSUB16                        __shsub16
-#define __USUB16                         __usub16
-#define __UQSUB16                        __uqsub16
-#define __UHSUB16                        __uhsub16
-#define __SASX                           __sasx
-#define __QASX                           __qasx
-#define __SHASX                          __shasx
-#define __UASX                           __uasx
-#define __UQASX                          __uqasx
-#define __UHASX                          __uhasx
-#define __SSAX                           __ssax
-#define __QSAX                           __qsax
-#define __SHSAX                          __shsax
-#define __USAX                           __usax
-#define __UQSAX                          __uqsax
-#define __UHSAX                          __uhsax
-#define __USAD8                          __usad8
-#define __USADA8                         __usada8
-#define __SSAT16                         __ssat16
-#define __USAT16                         __usat16
-#define __UXTB16                         __uxtb16
-#define __UXTAB16                        __uxtab16
-#define __SXTB16                         __sxtb16
-#define __SXTAB16                        __sxtab16
-#define __SMUAD                          __smuad
-#define __SMUADX                         __smuadx
-#define __SMLAD                          __smlad
-#define __SMLADX                         __smladx
-#define __SMLALD                         __smlald
-#define __SMLALDX                        __smlaldx
-#define __SMUSD                          __smusd
-#define __SMUSDX                         __smusdx
-#define __SMLSD                          __smlsd
-#define __SMLSDX                         __smlsdx
-#define __SMLSLD                         __smlsld
-#define __SMLSLDX                        __smlsldx
-#define __SEL                            __sel
-#define __QADD                           __qadd
-#define __QSUB                           __qsub
+#define __SADD8   __sadd8
+#define __QADD8   __qadd8
+#define __SHADD8  __shadd8
+#define __UADD8   __uadd8
+#define __UQADD8  __uqadd8
+#define __UHADD8  __uhadd8
+#define __SSUB8   __ssub8
+#define __QSUB8   __qsub8
+#define __SHSUB8  __shsub8
+#define __USUB8   __usub8
+#define __UQSUB8  __uqsub8
+#define __UHSUB8  __uhsub8
+#define __SADD16  __sadd16
+#define __QADD16  __qadd16
+#define __SHADD16 __shadd16
+#define __UADD16  __uadd16
+#define __UQADD16 __uqadd16
+#define __UHADD16 __uhadd16
+#define __SSUB16  __ssub16
+#define __QSUB16  __qsub16
+#define __SHSUB16 __shsub16
+#define __USUB16  __usub16
+#define __UQSUB16 __uqsub16
+#define __UHSUB16 __uhsub16
+#define __SASX    __sasx
+#define __QASX    __qasx
+#define __SHASX   __shasx
+#define __UASX    __uasx
+#define __UQASX   __uqasx
+#define __UHASX   __uhasx
+#define __SSAX    __ssax
+#define __QSAX    __qsax
+#define __SHSAX   __shsax
+#define __USAX    __usax
+#define __UQSAX   __uqsax
+#define __UHSAX   __uhsax
+#define __USAD8   __usad8
+#define __USADA8  __usada8
+#define __SSAT16  __ssat16
+#define __USAT16  __usat16
+#define __UXTB16  __uxtb16
+#define __UXTAB16 __uxtab16
+#define __SXTB16  __sxtb16
+#define __SXTAB16 __sxtab16
+#define __SMUAD   __smuad
+#define __SMUADX  __smuadx
+#define __SMLAD   __smlad
+#define __SMLADX  __smladx
+#define __SMLALD  __smlald
+#define __SMLALDX __smlaldx
+#define __SMUSD   __smusd
+#define __SMUSDX  __smusdx
+#define __SMLSD   __smlsd
+#define __SMLSDX  __smlsdx
+#define __SMLSLD  __smlsld
+#define __SMLSLDX __smlsldx
+#define __SEL     __sel
+#define __QADD    __qadd
+#define __QSUB    __qsub
 
-#define __PKHBT(ARG1, ARG2, ARG3)        (((((uint32_t)(ARG1))) & 0x0000FFFFUL) | ((((uint32_t)(ARG2)) << (ARG3)) & 0xFFFF0000UL))
+#define __PKHBT(ARG1, ARG2, ARG3) (((((uint32_t)(ARG1))) & 0x0000FFFFUL) | \
+                                   ((((uint32_t)(ARG2)) << (ARG3)) & 0xFFFF0000UL))
 
-#define __PKHTB(ARG1, ARG2, ARG3)        (((((uint32_t)(ARG1))) & 0xFFFF0000UL) | ((((uint32_t)(ARG2)) >> (ARG3)) & 0x0000FFFFUL))
+#define __PKHTB(ARG1, ARG2, ARG3) (((((uint32_t)(ARG1))) & 0xFFFF0000UL) | \
+                                   ((((uint32_t)(ARG2)) >> (ARG3)) & 0x0000FFFFUL))
 
-#define __SMMLA(ARG1, ARG2, ARG3)        ((int32_t)((((int64_t)(ARG1) * (ARG2)) + ((int64_t)(ARG3) << 32U)) >> 32U))
+#define __SMMLA(ARG1, ARG2, ARG3) ((int32_t)((((int64_t)(ARG1) * (ARG2)) + \
+                                              ((int64_t)(ARG3) << 32U)) >> \
+                                             32U))
 
-#define __SXTB16_RORn(ARG1, ARG2)        __SXTB16(__ROR(ARG1, ARG2))
+#define __SXTB16_RORn(ARG1, ARG2) __SXTB16(__ROR(ARG1, ARG2))
 
 #define __SXTAB16_RORn(ARG1, ARG2, ARG3) __SXTAB16(ARG1, __ROR(ARG2, ARG3))
 

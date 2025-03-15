@@ -47,8 +47,8 @@ typedef struct {
     uint32_t PVDLevel; /*!< PVDLevel: Specifies the PVD detection level.
                             This parameter can be a value of @ref PWR_PVD_detection_level */
 
-    uint32_t Mode; /*!< Mode: Specifies the operating mode for the selected pins.
-                        This parameter can be a value of @ref PWR_PVD_Mode */
+    uint32_t Mode;     /*!< Mode: Specifies the operating mode for the selected pins.
+                            This parameter can be a value of @ref PWR_PVD_Mode */
 } PWR_PVDTypeDef;
 
 /**
@@ -78,8 +78,8 @@ typedef struct {
 #define PWR_PVDLEVEL_4 PWR_CR_PLS_LEV4
 #define PWR_PVDLEVEL_5 PWR_CR_PLS_LEV5
 #define PWR_PVDLEVEL_6 PWR_CR_PLS_LEV6
-#define PWR_PVDLEVEL_7                                                                                                                                                                                                                                   \
-    PWR_CR_PLS_LEV7 /* External input analog voltage                                                                                                                                                                                                     \
+#define PWR_PVDLEVEL_7                               \
+    PWR_CR_PLS_LEV7 /* External input analog voltage \
                        (Compare internally to VREFINT) */
 /**
  * @}
@@ -230,10 +230,10 @@ typedef struct {
  * @brief  PVD EXTI line configuration: set rising & falling edge trigger.
  * @retval None.
  */
-#define __HAL_PWR_PVD_EXTI_ENABLE_RISING_FALLING_EDGE()                                                                                                                                                                                                  \
-    do {                                                                                                                                                                                                                                                 \
-        __HAL_PWR_PVD_EXTI_ENABLE_RISING_EDGE();                                                                                                                                                                                                         \
-        __HAL_PWR_PVD_EXTI_ENABLE_FALLING_EDGE();                                                                                                                                                                                                        \
+#define __HAL_PWR_PVD_EXTI_ENABLE_RISING_FALLING_EDGE() \
+    do {                                                \
+        __HAL_PWR_PVD_EXTI_ENABLE_RISING_EDGE();        \
+        __HAL_PWR_PVD_EXTI_ENABLE_FALLING_EDGE();       \
     } while (0U)
 
 /**
@@ -241,10 +241,10 @@ typedef struct {
  * This parameter can be:
  * @retval None.
  */
-#define __HAL_PWR_PVD_EXTI_DISABLE_RISING_FALLING_EDGE()                                                                                                                                                                                                 \
-    do {                                                                                                                                                                                                                                                 \
-        __HAL_PWR_PVD_EXTI_DISABLE_RISING_EDGE();                                                                                                                                                                                                        \
-        __HAL_PWR_PVD_EXTI_DISABLE_FALLING_EDGE();                                                                                                                                                                                                       \
+#define __HAL_PWR_PVD_EXTI_DISABLE_RISING_FALLING_EDGE() \
+    do {                                                 \
+        __HAL_PWR_PVD_EXTI_DISABLE_RISING_EDGE();        \
+        __HAL_PWR_PVD_EXTI_DISABLE_FALLING_EDGE();       \
     } while (0U)
 
 /**
@@ -293,7 +293,7 @@ void HAL_PWR_DisableBkUpAccess(void);
  */
 /* Peripheral Control functions  **********************************************/
 /* PVD configuration */
-void HAL_PWR_ConfigPVD(PWR_PVDTypeDef * sConfigPVD);
+void HAL_PWR_ConfigPVD(PWR_PVDTypeDef *sConfigPVD);
 void HAL_PWR_EnablePVD(void);
 void HAL_PWR_DisablePVD(void);
 
@@ -392,10 +392,10 @@ void HAL_PWR_DisableSEVOnPend(void);
 /** @defgroup PWR_IS_PWR_Definitions PWR Private macros to check input parameters
  * @{
  */
-#define IS_PWR_PVD_LEVEL(LEVEL)                                                                                                                                                                                                                          \
+#define IS_PWR_PVD_LEVEL(LEVEL) \
     (((LEVEL) == PWR_PVDLEVEL_0) || ((LEVEL) == PWR_PVDLEVEL_1) || ((LEVEL) == PWR_PVDLEVEL_2) || ((LEVEL) == PWR_PVDLEVEL_3) || ((LEVEL) == PWR_PVDLEVEL_4) || ((LEVEL) == PWR_PVDLEVEL_5) || ((LEVEL) == PWR_PVDLEVEL_6) || ((LEVEL) == PWR_PVDLEVEL_7))
-#define IS_PWR_PVD_MODE(MODE)                                                                                                                                                                                                                            \
-    (((MODE) == PWR_PVD_MODE_IT_RISING) || ((MODE) == PWR_PVD_MODE_IT_FALLING) || ((MODE) == PWR_PVD_MODE_IT_RISING_FALLING) || ((MODE) == PWR_PVD_MODE_EVENT_RISING) || ((MODE) == PWR_PVD_MODE_EVENT_FALLING) ||                                       \
+#define IS_PWR_PVD_MODE(MODE)                                                                                                                                                                                      \
+    (((MODE) == PWR_PVD_MODE_IT_RISING) || ((MODE) == PWR_PVD_MODE_IT_FALLING) || ((MODE) == PWR_PVD_MODE_IT_RISING_FALLING) || ((MODE) == PWR_PVD_MODE_EVENT_RISING) || ((MODE) == PWR_PVD_MODE_EVENT_FALLING) || \
      ((MODE) == PWR_PVD_MODE_EVENT_RISING_FALLING) || ((MODE) == PWR_PVD_MODE_NORMAL))
 #define IS_PWR_REGULATOR(REGULATOR) (((REGULATOR) == PWR_MAINREGULATOR_ON) || ((REGULATOR) == PWR_LOWPOWERREGULATOR_ON))
 #define IS_PWR_SLEEP_ENTRY(ENTRY)   (((ENTRY) == PWR_SLEEPENTRY_WFI) || ((ENTRY) == PWR_SLEEPENTRY_WFE))

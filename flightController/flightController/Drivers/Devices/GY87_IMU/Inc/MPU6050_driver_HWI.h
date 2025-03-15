@@ -45,13 +45,13 @@
 #define INC_MPU6050_DRIVER_HWI_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 /* BEGIN MODIFY 1 */
-#include "stm32f4xx_hal.h"
 #include "cmsis_os.h"
+#include "stm32f4xx_hal.h"
 /* END MODIFY 1 */
 #include "LoggingSystem_UAI.h"
 
@@ -68,11 +68,11 @@ extern "C" {
  * @brief MPU6050 handle structure definition
  */
 typedef struct {
-    uint8_t instance;
-    I2C_HandleTypeDef * hi2c;
-    uint8_t address;
-    uint8_t * buffer;
-    uint8_t bufferSize;
+    uint8_t            instance;
+    I2C_HandleTypeDef *hi2c;
+    uint8_t            address;
+    uint8_t           *buffer;
+    uint8_t            bufferSize;
 } GY87_HandleTypeDef_t;
 
 /**
@@ -90,7 +90,7 @@ typedef bool bool_t;
  * @retval true:  If communication could be initialized.
  *         false: If communication couldn't be initialized.
  */
-bool_t I2C_Init(GY87_HandleTypeDef_t * hgy87);
+bool_t I2C_Init(GY87_HandleTypeDef_t *hgy87);
 
 /*
  * @brief  Reads I2C device registers.
@@ -103,7 +103,7 @@ bool_t I2C_Init(GY87_HandleTypeDef_t * hgy87);
  * @retval true:     I2C device register could be read.
  *         false:    I2C device register couldn't be read.
  */
-bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data, uint8_t dataSize);
+bool_t I2C_Read(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data, uint8_t dataSize);
 
 /*
  * @brief  Writes to I2C device register.
@@ -115,7 +115,7 @@ bool_t I2C_Read(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t 
  * @retval true:    I2C device register could be written.
  *         false:   I2C device register couldn't be written.
  */
-bool_t I2C_Write(I2C_HandleTypeDef * hi2c, uint8_t address, uint8_t reg, uint8_t * data);
+bool_t I2C_Write(I2C_HandleTypeDef *hi2c, uint8_t address, uint8_t reg, uint8_t *data);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

@@ -85,10 +85,10 @@ those files. */
 #define ulTaskNotifyValueClear             MPU_ulTaskNotifyValueClear
 #define xTaskCatchUpTicks                  MPU_xTaskCatchUpTicks
 
-#define xTaskGetCurrentTaskHandle          MPU_xTaskGetCurrentTaskHandle
-#define vTaskSetTimeOutState               MPU_vTaskSetTimeOutState
-#define xTaskCheckForTimeOut               MPU_xTaskCheckForTimeOut
-#define xTaskGetSchedulerState             MPU_xTaskGetSchedulerState
+#define xTaskGetCurrentTaskHandle MPU_xTaskGetCurrentTaskHandle
+#define vTaskSetTimeOutState      MPU_vTaskSetTimeOutState
+#define xTaskCheckForTimeOut      MPU_xTaskCheckForTimeOut
+#define xTaskGetSchedulerState    MPU_xTaskGetSchedulerState
 
 /* Map standard queue.h API functions to the MPU equivalents. */
 #define xQueueGenericSend                   MPU_xQueueGenericSend
@@ -174,7 +174,7 @@ macro so applications can place data in privileged access sections
 
 #endif /* MPU_WRAPPERS_INCLUDED_FROM_API_FILE */
 
-#else /* portUSING_MPU_WRAPPERS */
+#else  /* portUSING_MPU_WRAPPERS */
 
 #define PRIVILEGED_FUNCTION
 #define PRIVILEGED_DATA

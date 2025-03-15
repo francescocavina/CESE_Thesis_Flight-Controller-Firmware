@@ -60,7 +60,7 @@ extern "C" {
  * @retval hesc:  Pointer to a ESC_HandleTypeDef_t structure that contains the configuration
  * 			      information for the communication with the ESC device.
  */
-ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim);
+ESC_HandleTypeDef_t *ESC_Init(TIM_HandleTypeDef *htim);
 
 /**
  * @brief  Deinitializes the ESC device.
@@ -69,7 +69,7 @@ ESC_HandleTypeDef_t * ESC_Init(TIM_HandleTypeDef * htim);
  * @retval true:  If ESC device could be deinitialized.
  *         false: If ESC device couldn't be deinitialized.
  */
-bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc);
+bool_t ESC_Deinit(ESC_HandleTypeDef_t *hesc);
 
 /**
  * @brief  Sets the speed to a certain ESC device.
@@ -80,7 +80,7 @@ bool_t ESC_Deinit(ESC_HandleTypeDef_t * hesc);
  * @retval true:    Speed could be set.
  *         false:   Speed couldn't be set.
  */
-bool_t ESC_SetSpeed(ESC_HandleTypeDef_t * hesc, uint8_t channel, float speed);
+bool_t ESC_SetSpeed(ESC_HandleTypeDef_t *hesc, uint8_t channel, float speed);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

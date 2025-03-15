@@ -36,8 +36,8 @@
 #define ERROR_LED_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
-#include <stdint.h>
 #include "main.h"
+#include <stdint.h>
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus

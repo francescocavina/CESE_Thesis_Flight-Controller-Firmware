@@ -48,93 +48,78 @@
 
 /* Check of parameters for configuration of ADC hierarchical scope:           */
 /* common to several ADC instances.                                           */
-#define IS_LL_ADC_COMMON_CLOCK(__CLOCK__) (((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV2) || ((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV4) || ((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV6) || ((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV8))
+#define IS_LL_ADC_COMMON_CLOCK(__CLOCK__) \
+    (((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV2) || ((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV4) || ((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV6) || ((__CLOCK__) == LL_ADC_CLOCK_SYNC_PCLK_DIV8))
 
 /* Check of parameters for configuration of ADC hierarchical scope:           */
 /* ADC instance.                                                              */
-#define IS_LL_ADC_RESOLUTION(__RESOLUTION__)         (((__RESOLUTION__) == LL_ADC_RESOLUTION_12B) || ((__RESOLUTION__) == LL_ADC_RESOLUTION_10B) || ((__RESOLUTION__) == LL_ADC_RESOLUTION_8B) || ((__RESOLUTION__) == LL_ADC_RESOLUTION_6B))
+#define IS_LL_ADC_RESOLUTION(__RESOLUTION__) \
+    (((__RESOLUTION__) == LL_ADC_RESOLUTION_12B) || ((__RESOLUTION__) == LL_ADC_RESOLUTION_10B) || ((__RESOLUTION__) == LL_ADC_RESOLUTION_8B) || ((__RESOLUTION__) == LL_ADC_RESOLUTION_6B))
 
-#define IS_LL_ADC_DATA_ALIGN(__DATA_ALIGN__)         (((__DATA_ALIGN__) == LL_ADC_DATA_ALIGN_RIGHT) || ((__DATA_ALIGN__) == LL_ADC_DATA_ALIGN_LEFT))
+#define IS_LL_ADC_DATA_ALIGN(__DATA_ALIGN__) \
+    (((__DATA_ALIGN__) == LL_ADC_DATA_ALIGN_RIGHT) || ((__DATA_ALIGN__) == LL_ADC_DATA_ALIGN_LEFT))
 
-#define IS_LL_ADC_SCAN_SELECTION(__SCAN_SELECTION__) (((__SCAN_SELECTION__) == LL_ADC_SEQ_SCAN_DISABLE) || ((__SCAN_SELECTION__) == LL_ADC_SEQ_SCAN_ENABLE))
+#define IS_LL_ADC_SCAN_SELECTION(__SCAN_SELECTION__) \
+    (((__SCAN_SELECTION__) == LL_ADC_SEQ_SCAN_DISABLE) || ((__SCAN_SELECTION__) == LL_ADC_SEQ_SCAN_ENABLE))
 
-#define IS_LL_ADC_SEQ_SCAN_MODE(__SEQ_SCAN_MODE__)   (((__SCAN_MODE__) == LL_ADC_SEQ_SCAN_DISABLE) || ((__SCAN_MODE__) == LL_ADC_SEQ_SCAN_ENABLE))
+#define IS_LL_ADC_SEQ_SCAN_MODE(__SEQ_SCAN_MODE__) \
+    (((__SCAN_MODE__) == LL_ADC_SEQ_SCAN_DISABLE) || ((__SCAN_MODE__) == LL_ADC_SEQ_SCAN_ENABLE))
 
 /* Check of parameters for configuration of ADC hierarchical scope:           */
 /* ADC group regular                                                          */
-#define IS_LL_ADC_REG_TRIG_SOURCE(__REG_TRIG_SOURCE__)                                                                                                                                                                                                   \
-    (((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_SOFTWARE) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM1_CH1) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM1_CH2) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM1_CH3) ||             \
-     ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_CH2) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_CH3) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_CH4) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_TRGO) ||        \
-     ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM3_CH1) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM3_TRGO) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM4_CH4) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM5_CH1) ||        \
-     ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM5_CH2) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM5_CH3) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM8_CH1) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM8_TRGO) ||        \
-     ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_EXTI_LINE11))
-#define IS_LL_ADC_REG_CONTINUOUS_MODE(__REG_CONTINUOUS_MODE__)       (((__REG_CONTINUOUS_MODE__) == LL_ADC_REG_CONV_SINGLE) || ((__REG_CONTINUOUS_MODE__) == LL_ADC_REG_CONV_CONTINUOUS))
+#define IS_LL_ADC_REG_TRIG_SOURCE(__REG_TRIG_SOURCE__) \
+    (((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_SOFTWARE) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM1_CH1) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM1_CH2) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM1_CH3) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_CH2) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_CH3) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_CH4) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM2_TRGO) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM3_CH1) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM3_TRGO) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM4_CH4) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM5_CH1) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM5_CH2) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM5_CH3) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM8_CH1) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_TIM8_TRGO) || ((__REG_TRIG_SOURCE__) == LL_ADC_REG_TRIG_EXT_EXTI_LINE11))
+#define IS_LL_ADC_REG_CONTINUOUS_MODE(__REG_CONTINUOUS_MODE__) \
+    (((__REG_CONTINUOUS_MODE__) == LL_ADC_REG_CONV_SINGLE) || ((__REG_CONTINUOUS_MODE__) == LL_ADC_REG_CONV_CONTINUOUS))
 
-#define IS_LL_ADC_REG_DMA_TRANSFER(__REG_DMA_TRANSFER__)             (((__REG_DMA_TRANSFER__) == LL_ADC_REG_DMA_TRANSFER_NONE) || ((__REG_DMA_TRANSFER__) == LL_ADC_REG_DMA_TRANSFER_LIMITED) || ((__REG_DMA_TRANSFER__) == LL_ADC_REG_DMA_TRANSFER_UNLIMITED))
+#define IS_LL_ADC_REG_DMA_TRANSFER(__REG_DMA_TRANSFER__) \
+    (((__REG_DMA_TRANSFER__) == LL_ADC_REG_DMA_TRANSFER_NONE) || ((__REG_DMA_TRANSFER__) == LL_ADC_REG_DMA_TRANSFER_LIMITED) || ((__REG_DMA_TRANSFER__) == LL_ADC_REG_DMA_TRANSFER_UNLIMITED))
 
-#define IS_LL_ADC_REG_FLAG_EOC_SELECTION(__REG_FLAG_EOC_SELECTION__) (((__REG_FLAG_EOC_SELECTION__) == LL_ADC_REG_FLAG_EOC_SEQUENCE_CONV) || ((__REG_FLAG_EOC_SELECTION__) == LL_ADC_REG_FLAG_EOC_UNITARY_CONV))
+#define IS_LL_ADC_REG_FLAG_EOC_SELECTION(__REG_FLAG_EOC_SELECTION__) \
+    (((__REG_FLAG_EOC_SELECTION__) == LL_ADC_REG_FLAG_EOC_SEQUENCE_CONV) || ((__REG_FLAG_EOC_SELECTION__) == LL_ADC_REG_FLAG_EOC_UNITARY_CONV))
 
-#define IS_LL_ADC_REG_SEQ_SCAN_LENGTH(__REG_SEQ_SCAN_LENGTH__)                                                                                                                                                                                           \
-    (((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_DISABLE) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_3RANKS) ||                                               \
-     ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_4RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_5RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_6RANKS) ||                                         \
-     ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_7RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_8RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_9RANKS) ||                                         \
-     ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_10RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_11RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_12RANKS) ||                                      \
-     ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_13RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_14RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_15RANKS) ||                                      \
-     ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_16RANKS))
+#define IS_LL_ADC_REG_SEQ_SCAN_LENGTH(__REG_SEQ_SCAN_LENGTH__) \
+    (((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_DISABLE) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_2RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_3RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_4RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_5RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_6RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_7RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_8RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_9RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_10RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_11RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_12RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_13RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_14RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_15RANKS) || ((__REG_SEQ_SCAN_LENGTH__) == LL_ADC_REG_SEQ_SCAN_ENABLE_16RANKS))
 
-#define IS_LL_ADC_REG_SEQ_SCAN_DISCONT_MODE(__REG_SEQ_DISCONT_MODE__)                                                                                                                                                                                    \
-    (((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_DISABLE) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_1RANK) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_2RANKS) ||                                                  \
-     ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_3RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_4RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_5RANKS) ||                                                  \
-     ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_6RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_7RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_8RANKS))
+#define IS_LL_ADC_REG_SEQ_SCAN_DISCONT_MODE(__REG_SEQ_DISCONT_MODE__) \
+    (((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_DISABLE) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_1RANK) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_2RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_3RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_4RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_5RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_6RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_7RANKS) || ((__REG_SEQ_DISCONT_MODE__) == LL_ADC_REG_SEQ_DISCONT_8RANKS))
 
 /* Check of parameters for configuration of ADC hierarchical scope:           */
 /* ADC group injected                                                         */
-#define IS_LL_ADC_INJ_TRIG_SOURCE(__INJ_TRIG_SOURCE__)                                                                                                                                                                                                   \
-    (((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_SOFTWARE) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM1_CH4) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM1_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM2_CH1) ||            \
-     ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM2_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM3_CH2) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM3_CH4) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_CH1) ||        \
-     ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_CH2) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_CH3) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM5_CH4) ||        \
-     ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM5_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM8_CH2) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM8_CH3) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM8_CH4) ||        \
-     ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_EXTI_LINE15))
+#define IS_LL_ADC_INJ_TRIG_SOURCE(__INJ_TRIG_SOURCE__) \
+    (((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_SOFTWARE) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM1_CH4) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM1_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM2_CH1) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM2_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM3_CH2) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM3_CH4) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_CH1) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_CH2) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_CH3) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM4_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM5_CH4) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM5_TRGO) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM8_CH2) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM8_CH3) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_TIM8_CH4) || ((__INJ_TRIG_SOURCE__) == LL_ADC_INJ_TRIG_EXT_EXTI_LINE15))
 
-#define IS_LL_ADC_INJ_TRIG_EXT_EDGE(__INJ_TRIG_EXT_EDGE__) (((__INJ_TRIG_EXT_EDGE__) == LL_ADC_INJ_TRIG_EXT_RISING) || ((__INJ_TRIG_EXT_EDGE__) == LL_ADC_INJ_TRIG_EXT_FALLING) || ((__INJ_TRIG_EXT_EDGE__) == LL_ADC_INJ_TRIG_EXT_RISINGFALLING))
+#define IS_LL_ADC_INJ_TRIG_EXT_EDGE(__INJ_TRIG_EXT_EDGE__) \
+    (((__INJ_TRIG_EXT_EDGE__) == LL_ADC_INJ_TRIG_EXT_RISING) || ((__INJ_TRIG_EXT_EDGE__) == LL_ADC_INJ_TRIG_EXT_FALLING) || ((__INJ_TRIG_EXT_EDGE__) == LL_ADC_INJ_TRIG_EXT_RISINGFALLING))
 
-#define IS_LL_ADC_INJ_TRIG_AUTO(__INJ_TRIG_AUTO__)         (((__INJ_TRIG_AUTO__) == LL_ADC_INJ_TRIG_INDEPENDENT) || ((__INJ_TRIG_AUTO__) == LL_ADC_INJ_TRIG_FROM_GRP_REGULAR))
+#define IS_LL_ADC_INJ_TRIG_AUTO(__INJ_TRIG_AUTO__) \
+    (((__INJ_TRIG_AUTO__) == LL_ADC_INJ_TRIG_INDEPENDENT) || ((__INJ_TRIG_AUTO__) == LL_ADC_INJ_TRIG_FROM_GRP_REGULAR))
 
-#define IS_LL_ADC_INJ_SEQ_SCAN_LENGTH(__INJ_SEQ_SCAN_LENGTH__)                                                                                                                                                                                           \
-    (((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_DISABLE) || ((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_ENABLE_2RANKS) || ((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_ENABLE_3RANKS) ||                                               \
-     ((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_ENABLE_4RANKS))
+#define IS_LL_ADC_INJ_SEQ_SCAN_LENGTH(__INJ_SEQ_SCAN_LENGTH__) \
+    (((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_DISABLE) || ((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_ENABLE_2RANKS) || ((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_ENABLE_3RANKS) || ((__INJ_SEQ_SCAN_LENGTH__) == LL_ADC_INJ_SEQ_SCAN_ENABLE_4RANKS))
 
-#define IS_LL_ADC_INJ_SEQ_SCAN_DISCONT_MODE(__INJ_SEQ_DISCONT_MODE__) (((__INJ_SEQ_DISCONT_MODE__) == LL_ADC_INJ_SEQ_DISCONT_DISABLE) || ((__INJ_SEQ_DISCONT_MODE__) == LL_ADC_INJ_SEQ_DISCONT_1RANK))
+#define IS_LL_ADC_INJ_SEQ_SCAN_DISCONT_MODE(__INJ_SEQ_DISCONT_MODE__) \
+    (((__INJ_SEQ_DISCONT_MODE__) == LL_ADC_INJ_SEQ_DISCONT_DISABLE) || ((__INJ_SEQ_DISCONT_MODE__) == LL_ADC_INJ_SEQ_DISCONT_1RANK))
 
 #if defined(ADC_MULTIMODE_SUPPORT)
 /* Check of parameters for configuration of ADC hierarchical scope:           */
 /* multimode.                                                                 */
 #if defined(ADC3)
-#define IS_LL_ADC_MULTI_MODE(__MULTI_MODE__)                                                                                                                                                                                                             \
-    (((__MULTI_MODE__) == LL_ADC_MULTI_INDEPENDENT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INTERL) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_SIMULT) ||                                 \
-     ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_ALTERN) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_SIM) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_ALT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INT_INJ_SIM) ||              \
-     ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_SIM_INJ_SIM) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_SIM_INJ_ALT) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_INJ_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_SIMULT) ||           \
-     ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_INTERL) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_INJ_ALTERN))
+#define IS_LL_ADC_MULTI_MODE(__MULTI_MODE__) \
+    (((__MULTI_MODE__) == LL_ADC_MULTI_INDEPENDENT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INTERL) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_ALTERN) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_SIM) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_ALT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INT_INJ_SIM) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_SIM_INJ_SIM) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_SIM_INJ_ALT) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_INJ_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_REG_INTERL) || ((__MULTI_MODE__) == LL_ADC_MULTI_TRIPLE_INJ_ALTERN))
 #else
-#define IS_LL_ADC_MULTI_MODE(__MULTI_MODE__)                                                                                                                                                                                                             \
-    (((__MULTI_MODE__) == LL_ADC_MULTI_INDEPENDENT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INTERL) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_SIMULT) ||                                 \
-     ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_ALTERN) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_SIM) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_ALT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INT_INJ_SIM))
+#define IS_LL_ADC_MULTI_MODE(__MULTI_MODE__) \
+    (((__MULTI_MODE__) == LL_ADC_MULTI_INDEPENDENT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INTERL) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_SIMULT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_INJ_ALTERN) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_SIM) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_SIM_INJ_ALT) || ((__MULTI_MODE__) == LL_ADC_MULTI_DUAL_REG_INT_INJ_SIM))
 #endif
 
-#define IS_LL_ADC_MULTI_DMA_TRANSFER(__MULTI_DMA_TRANSFER__)                                                                                                                                                                                             \
-    (((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_EACH_ADC) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_LIMIT_1) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_LIMIT_2) ||                                                          \
-     ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_LIMIT_3) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_UNLMT_1) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_UNLMT_2) ||                                                           \
-     ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_UNLMT_3))
+#define IS_LL_ADC_MULTI_DMA_TRANSFER(__MULTI_DMA_TRANSFER__) \
+    (((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_EACH_ADC) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_LIMIT_1) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_LIMIT_2) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_LIMIT_3) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_UNLMT_1) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_UNLMT_2) || ((__MULTI_DMA_TRANSFER__) == LL_ADC_MULTI_REG_DMA_UNLMT_3))
 
-#define IS_LL_ADC_MULTI_TWOSMP_DELAY(__MULTI_TWOSMP_DELAY__)                                                                                                                                                                                             \
-    (((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_5CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_6CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_7CYCLES) ||                                            \
-     ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_8CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_9CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_10CYCLES) ||                                           \
-     ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_11CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_12CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_13CYCLES) ||                                         \
-     ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_14CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_15CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_16CYCLES) ||                                         \
-     ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_17CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_18CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_19CYCLES) ||                                         \
-     ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_20CYCLES))
+#define IS_LL_ADC_MULTI_TWOSMP_DELAY(__MULTI_TWOSMP_DELAY__) \
+    (((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_5CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_6CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_7CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_8CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_9CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_10CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_11CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_12CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_13CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_14CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_15CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_16CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_17CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_18CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_19CYCLES) || ((__MULTI_TWOSMP_DELAY__) == LL_ADC_MULTI_TWOSMP_DELAY_20CYCLES))
 
-#define IS_LL_ADC_MULTI_MASTER_SLAVE(__MULTI_MASTER_SLAVE__) (((__MULTI_MASTER_SLAVE__) == LL_ADC_MULTI_MASTER) || ((__MULTI_MASTER_SLAVE__) == LL_ADC_MULTI_SLAVE) || ((__MULTI_MASTER_SLAVE__) == LL_ADC_MULTI_MASTER_SLAVE))
+#define IS_LL_ADC_MULTI_MASTER_SLAVE(__MULTI_MASTER_SLAVE__) \
+    (((__MULTI_MASTER_SLAVE__) == LL_ADC_MULTI_MASTER) || ((__MULTI_MASTER_SLAVE__) == LL_ADC_MULTI_SLAVE) || ((__MULTI_MASTER_SLAVE__) == LL_ADC_MULTI_MASTER_SLAVE))
 
 #endif /* ADC_MULTIMODE_SUPPORT */
 /**
@@ -161,7 +146,7 @@
  *          - SUCCESS: ADC common registers are de-initialized
  *          - ERROR: not applicable
  */
-ErrorStatus LL_ADC_CommonDeInit(ADC_Common_TypeDef * ADCxy_COMMON) {
+ErrorStatus LL_ADC_CommonDeInit(ADC_Common_TypeDef *ADCxy_COMMON) {
     /* Check the parameters */
     assert_param(IS_ADC_COMMON_INSTANCE(ADCxy_COMMON));
 
@@ -189,7 +174,7 @@ ErrorStatus LL_ADC_CommonDeInit(ADC_Common_TypeDef * ADCxy_COMMON) {
  *          - SUCCESS: ADC common registers are initialized
  *          - ERROR: ADC common registers are not initialized
  */
-ErrorStatus LL_ADC_CommonInit(ADC_Common_TypeDef * ADCxy_COMMON, LL_ADC_CommonInitTypeDef * ADC_CommonInitStruct) {
+ErrorStatus LL_ADC_CommonInit(ADC_Common_TypeDef *ADCxy_COMMON, LL_ADC_CommonInitTypeDef *ADC_CommonInitStruct) {
     ErrorStatus status = SUCCESS;
 
     /* Check the parameters */
@@ -221,10 +206,13 @@ ErrorStatus LL_ADC_CommonInit(ADC_Common_TypeDef * ADCxy_COMMON, LL_ADC_CommonIn
         /*    - Set ADC multimode: delay between 2 sampling phases                */
 #if defined(ADC_MULTIMODE_SUPPORT)
         if (ADC_CommonInitStruct->Multimode != LL_ADC_MULTI_INDEPENDENT) {
-            MODIFY_REG(ADCxy_COMMON->CCR, ADC_CCR_ADCPRE | ADC_CCR_MULTI | ADC_CCR_DMA | ADC_CCR_DDS | ADC_CCR_DELAY,
+            MODIFY_REG(ADCxy_COMMON->CCR,
+                       ADC_CCR_ADCPRE | ADC_CCR_MULTI | ADC_CCR_DMA | ADC_CCR_DDS | ADC_CCR_DELAY,
                        ADC_CommonInitStruct->CommonClock | ADC_CommonInitStruct->Multimode | ADC_CommonInitStruct->MultiDMATransfer | ADC_CommonInitStruct->MultiTwoSamplingDelay);
         } else {
-            MODIFY_REG(ADCxy_COMMON->CCR, ADC_CCR_ADCPRE | ADC_CCR_MULTI | ADC_CCR_DMA | ADC_CCR_DDS | ADC_CCR_DELAY, ADC_CommonInitStruct->CommonClock | LL_ADC_MULTI_INDEPENDENT);
+            MODIFY_REG(ADCxy_COMMON->CCR,
+                       ADC_CCR_ADCPRE | ADC_CCR_MULTI | ADC_CCR_DMA | ADC_CCR_DDS | ADC_CCR_DELAY,
+                       ADC_CommonInitStruct->CommonClock | LL_ADC_MULTI_INDEPENDENT);
         }
 #else
         LL_ADC_SetCommonClock(ADCxy_COMMON, ADC_CommonInitStruct->CommonClock);
@@ -244,7 +232,7 @@ ErrorStatus LL_ADC_CommonInit(ADC_Common_TypeDef * ADCxy_COMMON, LL_ADC_CommonIn
  *                              whose fields will be set to default values.
  * @retval None
  */
-void LL_ADC_CommonStructInit(LL_ADC_CommonInitTypeDef * ADC_CommonInitStruct) {
+void LL_ADC_CommonStructInit(LL_ADC_CommonInitTypeDef *ADC_CommonInitStruct) {
     /* Set ADC_CommonInitStruct fields to default values */
     /* Set fields of ADC common */
     /* (all ADC instances belonging to the same ADC common instance) */
@@ -252,8 +240,8 @@ void LL_ADC_CommonStructInit(LL_ADC_CommonInitTypeDef * ADC_CommonInitStruct) {
 
 #if defined(ADC_MULTIMODE_SUPPORT)
     /* Set fields of ADC multimode */
-    ADC_CommonInitStruct->Multimode = LL_ADC_MULTI_INDEPENDENT;
-    ADC_CommonInitStruct->MultiDMATransfer = LL_ADC_MULTI_REG_DMA_EACH_ADC;
+    ADC_CommonInitStruct->Multimode             = LL_ADC_MULTI_INDEPENDENT;
+    ADC_CommonInitStruct->MultiDMATransfer      = LL_ADC_MULTI_REG_DMA_EACH_ADC;
     ADC_CommonInitStruct->MultiTwoSamplingDelay = LL_ADC_MULTI_TWOSMP_DELAY_5CYCLES;
 #endif /* ADC_MULTIMODE_SUPPORT */
 }
@@ -268,7 +256,7 @@ void LL_ADC_CommonStructInit(LL_ADC_CommonInitTypeDef * ADC_CommonInitStruct) {
  *          - SUCCESS: ADC registers are de-initialized
  *          - ERROR: ADC registers are not de-initialized
  */
-ErrorStatus LL_ADC_DeInit(ADC_TypeDef * ADCx) {
+ErrorStatus LL_ADC_DeInit(ADC_TypeDef *ADCx) {
     ErrorStatus status = SUCCESS;
 
     /* Check the parameters */
@@ -295,20 +283,24 @@ ErrorStatus LL_ADC_DeInit(ADC_TypeDef * ADCx) {
     if (READ_BIT(ADCx->CR2, ADC_CR2_ADON) == 0UL) {
         /* ========== Reset ADC registers ========== */
         /* Reset register SR */
-        CLEAR_BIT(ADCx->SR, (LL_ADC_FLAG_STRT | LL_ADC_FLAG_JSTRT | LL_ADC_FLAG_EOCS | LL_ADC_FLAG_OVR | LL_ADC_FLAG_JEOS | LL_ADC_FLAG_AWD1));
+        CLEAR_BIT(ADCx->SR,
+                  (LL_ADC_FLAG_STRT | LL_ADC_FLAG_JSTRT | LL_ADC_FLAG_EOCS | LL_ADC_FLAG_OVR | LL_ADC_FLAG_JEOS | LL_ADC_FLAG_AWD1));
 
         /* Reset register CR1 */
         CLEAR_BIT(ADCx->CR1,
                   (ADC_CR1_OVRIE | ADC_CR1_RES | ADC_CR1_AWDEN | ADC_CR1_JAWDEN | ADC_CR1_DISCNUM | ADC_CR1_JDISCEN | ADC_CR1_DISCEN | ADC_CR1_JAUTO | ADC_CR1_AWDSGL | ADC_CR1_SCAN | ADC_CR1_JEOCIE | ADC_CR1_AWDIE | ADC_CR1_EOCIE | ADC_CR1_AWDCH));
 
         /* Reset register CR2 */
-        CLEAR_BIT(ADCx->CR2, (ADC_CR2_SWSTART | ADC_CR2_EXTEN | ADC_CR2_EXTSEL | ADC_CR2_JSWSTART | ADC_CR2_JEXTEN | ADC_CR2_JEXTSEL | ADC_CR2_ALIGN | ADC_CR2_EOCS | ADC_CR2_DDS | ADC_CR2_DMA | ADC_CR2_CONT | ADC_CR2_ADON));
+        CLEAR_BIT(ADCx->CR2,
+                  (ADC_CR2_SWSTART | ADC_CR2_EXTEN | ADC_CR2_EXTSEL | ADC_CR2_JSWSTART | ADC_CR2_JEXTEN | ADC_CR2_JEXTSEL | ADC_CR2_ALIGN | ADC_CR2_EOCS | ADC_CR2_DDS | ADC_CR2_DMA | ADC_CR2_CONT | ADC_CR2_ADON));
 
         /* Reset register SMPR1 */
-        CLEAR_BIT(ADCx->SMPR1, (ADC_SMPR1_SMP18 | ADC_SMPR1_SMP17 | ADC_SMPR1_SMP16 | ADC_SMPR1_SMP15 | ADC_SMPR1_SMP14 | ADC_SMPR1_SMP13 | ADC_SMPR1_SMP12 | ADC_SMPR1_SMP11 | ADC_SMPR1_SMP10));
+        CLEAR_BIT(ADCx->SMPR1,
+                  (ADC_SMPR1_SMP18 | ADC_SMPR1_SMP17 | ADC_SMPR1_SMP16 | ADC_SMPR1_SMP15 | ADC_SMPR1_SMP14 | ADC_SMPR1_SMP13 | ADC_SMPR1_SMP12 | ADC_SMPR1_SMP11 | ADC_SMPR1_SMP10));
 
         /* Reset register SMPR2 */
-        CLEAR_BIT(ADCx->SMPR2, (ADC_SMPR2_SMP9 | ADC_SMPR2_SMP8 | ADC_SMPR2_SMP7 | ADC_SMPR2_SMP6 | ADC_SMPR2_SMP5 | ADC_SMPR2_SMP4 | ADC_SMPR2_SMP3 | ADC_SMPR2_SMP2 | ADC_SMPR2_SMP1 | ADC_SMPR2_SMP0));
+        CLEAR_BIT(ADCx->SMPR2,
+                  (ADC_SMPR2_SMP9 | ADC_SMPR2_SMP8 | ADC_SMPR2_SMP7 | ADC_SMPR2_SMP6 | ADC_SMPR2_SMP5 | ADC_SMPR2_SMP4 | ADC_SMPR2_SMP3 | ADC_SMPR2_SMP2 | ADC_SMPR2_SMP1 | ADC_SMPR2_SMP0));
 
         /* Reset register JOFR1 */
         CLEAR_BIT(ADCx->JOFR1, ADC_JOFR1_JOFFSET1);
@@ -325,16 +317,20 @@ ErrorStatus LL_ADC_DeInit(ADC_TypeDef * ADCx) {
         CLEAR_BIT(ADCx->LTR, ADC_LTR_LT);
 
         /* Reset register SQR1 */
-        CLEAR_BIT(ADCx->SQR1, (ADC_SQR1_L | ADC_SQR1_SQ16 | ADC_SQR1_SQ15 | ADC_SQR1_SQ14 | ADC_SQR1_SQ13));
+        CLEAR_BIT(ADCx->SQR1,
+                  (ADC_SQR1_L | ADC_SQR1_SQ16 | ADC_SQR1_SQ15 | ADC_SQR1_SQ14 | ADC_SQR1_SQ13));
 
         /* Reset register SQR2 */
-        CLEAR_BIT(ADCx->SQR2, (ADC_SQR2_SQ12 | ADC_SQR2_SQ11 | ADC_SQR2_SQ10 | ADC_SQR2_SQ9 | ADC_SQR2_SQ8 | ADC_SQR2_SQ7));
+        CLEAR_BIT(ADCx->SQR2,
+                  (ADC_SQR2_SQ12 | ADC_SQR2_SQ11 | ADC_SQR2_SQ10 | ADC_SQR2_SQ9 | ADC_SQR2_SQ8 | ADC_SQR2_SQ7));
 
         /* Reset register SQR3 */
-        CLEAR_BIT(ADCx->SQR3, (ADC_SQR3_SQ6 | ADC_SQR3_SQ5 | ADC_SQR3_SQ4 | ADC_SQR3_SQ3 | ADC_SQR3_SQ2 | ADC_SQR3_SQ1));
+        CLEAR_BIT(ADCx->SQR3,
+                  (ADC_SQR3_SQ6 | ADC_SQR3_SQ5 | ADC_SQR3_SQ4 | ADC_SQR3_SQ3 | ADC_SQR3_SQ2 | ADC_SQR3_SQ1));
 
         /* Reset register JSQR */
-        CLEAR_BIT(ADCx->JSQR, (ADC_JSQR_JL | ADC_JSQR_JSQ4 | ADC_JSQR_JSQ3 | ADC_JSQR_JSQ2 | ADC_JSQR_JSQ1));
+        CLEAR_BIT(ADCx->JSQR,
+                  (ADC_JSQR_JL | ADC_JSQR_JSQ4 | ADC_JSQR_JSQ3 | ADC_JSQR_JSQ2 | ADC_JSQR_JSQ1));
 
         /* Reset register DR */
         /* bits in access mode read only, no direct reset applicable */
@@ -382,7 +378,7 @@ ErrorStatus LL_ADC_DeInit(ADC_TypeDef * ADCx) {
  *          - SUCCESS: ADC registers are initialized
  *          - ERROR: ADC registers are not initialized
  */
-ErrorStatus LL_ADC_Init(ADC_TypeDef * ADCx, LL_ADC_InitTypeDef * ADC_InitStruct) {
+ErrorStatus LL_ADC_Init(ADC_TypeDef *ADCx, LL_ADC_InitTypeDef *ADC_InitStruct) {
     ErrorStatus status = SUCCESS;
 
     /* Check the parameters */
@@ -399,9 +395,13 @@ ErrorStatus LL_ADC_Init(ADC_TypeDef * ADCx, LL_ADC_InitTypeDef * ADC_InitStruct)
         /*  - ADC instance                                                        */
         /*    - Set ADC data resolution                                           */
         /*    - Set ADC conversion data alignment                                 */
-        MODIFY_REG(ADCx->CR1, ADC_CR1_RES | ADC_CR1_SCAN, ADC_InitStruct->Resolution | ADC_InitStruct->SequencersScanMode);
+        MODIFY_REG(ADCx->CR1,
+                   ADC_CR1_RES | ADC_CR1_SCAN,
+                   ADC_InitStruct->Resolution | ADC_InitStruct->SequencersScanMode);
 
-        MODIFY_REG(ADCx->CR2, ADC_CR2_ALIGN, ADC_InitStruct->DataAlignment);
+        MODIFY_REG(ADCx->CR2,
+                   ADC_CR2_ALIGN,
+                   ADC_InitStruct->DataAlignment);
 
     } else {
         /* Initialization error: ADC instance is not disabled. */
@@ -416,10 +416,10 @@ ErrorStatus LL_ADC_Init(ADC_TypeDef * ADCx, LL_ADC_InitTypeDef * ADC_InitStruct)
  *                        whose fields will be set to default values.
  * @retval None
  */
-void LL_ADC_StructInit(LL_ADC_InitTypeDef * ADC_InitStruct) {
+void LL_ADC_StructInit(LL_ADC_InitTypeDef *ADC_InitStruct) {
     /* Set ADC_InitStruct fields to default values */
     /* Set fields of ADC instance */
-    ADC_InitStruct->Resolution = LL_ADC_RESOLUTION_12B;
+    ADC_InitStruct->Resolution    = LL_ADC_RESOLUTION_12B;
     ADC_InitStruct->DataAlignment = LL_ADC_DATA_ALIGN_RIGHT;
 
     /* Enable scan mode to have a generic behavior with ADC of other            */
@@ -461,7 +461,7 @@ void LL_ADC_StructInit(LL_ADC_InitTypeDef * ADC_InitStruct) {
  *          - SUCCESS: ADC registers are initialized
  *          - ERROR: ADC registers are not initialized
  */
-ErrorStatus LL_ADC_REG_Init(ADC_TypeDef * ADCx, LL_ADC_REG_InitTypeDef * ADC_REG_InitStruct) {
+ErrorStatus LL_ADC_REG_Init(ADC_TypeDef *ADCx, LL_ADC_REG_InitTypeDef *ADC_REG_InitStruct) {
     ErrorStatus status = SUCCESS;
 
     /* Check the parameters */
@@ -493,12 +493,18 @@ ErrorStatus LL_ADC_REG_Init(ADC_TypeDef * ADCx, LL_ADC_REG_InitTypeDef * ADC_REG
         /*       ADC conversion.                                                  */
         /*       Refer to function @ref LL_ADC_REG_StartConversionExtTrig().      */
         if (ADC_REG_InitStruct->SequencerLength != LL_ADC_REG_SEQ_SCAN_DISABLE) {
-            MODIFY_REG(ADCx->CR1, ADC_CR1_DISCEN | ADC_CR1_DISCNUM, ADC_REG_InitStruct->SequencerDiscont);
+            MODIFY_REG(ADCx->CR1,
+                       ADC_CR1_DISCEN | ADC_CR1_DISCNUM,
+                       ADC_REG_InitStruct->SequencerDiscont);
         } else {
-            MODIFY_REG(ADCx->CR1, ADC_CR1_DISCEN | ADC_CR1_DISCNUM, LL_ADC_REG_SEQ_DISCONT_DISABLE);
+            MODIFY_REG(ADCx->CR1,
+                       ADC_CR1_DISCEN | ADC_CR1_DISCNUM,
+                       LL_ADC_REG_SEQ_DISCONT_DISABLE);
         }
 
-        MODIFY_REG(ADCx->CR2, ADC_CR2_EXTSEL | ADC_CR2_EXTEN | ADC_CR2_CONT | ADC_CR2_DMA | ADC_CR2_DDS, (ADC_REG_InitStruct->TriggerSource & ADC_CR2_EXTSEL) | ADC_REG_InitStruct->ContinuousMode | ADC_REG_InitStruct->DMATransfer);
+        MODIFY_REG(ADCx->CR2,
+                   ADC_CR2_EXTSEL | ADC_CR2_EXTEN | ADC_CR2_CONT | ADC_CR2_DMA | ADC_CR2_DDS,
+                   (ADC_REG_InitStruct->TriggerSource & ADC_CR2_EXTSEL) | ADC_REG_InitStruct->ContinuousMode | ADC_REG_InitStruct->DMATransfer);
 
         /* Set ADC group regular sequencer length and scan direction */
         /* Note: Hardware constraint (refer to description of this function):     */
@@ -521,17 +527,17 @@ ErrorStatus LL_ADC_REG_Init(ADC_TypeDef * ADCx, LL_ADC_REG_InitTypeDef * ADC_REG
  *                            whose fields will be set to default values.
  * @retval None
  */
-void LL_ADC_REG_StructInit(LL_ADC_REG_InitTypeDef * ADC_REG_InitStruct) {
+void LL_ADC_REG_StructInit(LL_ADC_REG_InitTypeDef *ADC_REG_InitStruct) {
     /* Set ADC_REG_InitStruct fields to default values */
     /* Set fields of ADC group regular */
     /* Note: On this STM32 series, ADC trigger edge is set when starting        */
     /*       ADC conversion.                                                    */
     /*       Refer to function @ref LL_ADC_REG_StartConversionExtTrig().        */
-    ADC_REG_InitStruct->TriggerSource = LL_ADC_REG_TRIG_SOFTWARE;
-    ADC_REG_InitStruct->SequencerLength = LL_ADC_REG_SEQ_SCAN_DISABLE;
+    ADC_REG_InitStruct->TriggerSource    = LL_ADC_REG_TRIG_SOFTWARE;
+    ADC_REG_InitStruct->SequencerLength  = LL_ADC_REG_SEQ_SCAN_DISABLE;
     ADC_REG_InitStruct->SequencerDiscont = LL_ADC_REG_SEQ_DISCONT_DISABLE;
-    ADC_REG_InitStruct->ContinuousMode = LL_ADC_REG_CONV_SINGLE;
-    ADC_REG_InitStruct->DMATransfer = LL_ADC_REG_DMA_TRANSFER_NONE;
+    ADC_REG_InitStruct->ContinuousMode   = LL_ADC_REG_CONV_SINGLE;
+    ADC_REG_InitStruct->DMATransfer      = LL_ADC_REG_DMA_TRANSFER_NONE;
 }
 
 /**
@@ -566,7 +572,7 @@ void LL_ADC_REG_StructInit(LL_ADC_REG_InitTypeDef * ADC_REG_InitStruct) {
  *          - SUCCESS: ADC registers are initialized
  *          - ERROR: ADC registers are not initialized
  */
-ErrorStatus LL_ADC_INJ_Init(ADC_TypeDef * ADCx, LL_ADC_INJ_InitTypeDef * ADC_INJ_InitStruct) {
+ErrorStatus LL_ADC_INJ_Init(ADC_TypeDef *ADCx, LL_ADC_INJ_InitTypeDef *ADC_INJ_InitStruct) {
     ErrorStatus status = SUCCESS;
 
     /* Check the parameters */
@@ -592,12 +598,18 @@ ErrorStatus LL_ADC_INJ_Init(ADC_TypeDef * ADCx, LL_ADC_INJ_InitTypeDef * ADC_INJ
         /*       ADC conversion.                                                  */
         /*       Refer to function @ref LL_ADC_INJ_StartConversionExtTrig().      */
         if (ADC_INJ_InitStruct->SequencerLength != LL_ADC_REG_SEQ_SCAN_DISABLE) {
-            MODIFY_REG(ADCx->CR1, ADC_CR1_JDISCEN | ADC_CR1_JAUTO, ADC_INJ_InitStruct->SequencerDiscont | ADC_INJ_InitStruct->TrigAuto);
+            MODIFY_REG(ADCx->CR1,
+                       ADC_CR1_JDISCEN | ADC_CR1_JAUTO,
+                       ADC_INJ_InitStruct->SequencerDiscont | ADC_INJ_InitStruct->TrigAuto);
         } else {
-            MODIFY_REG(ADCx->CR1, ADC_CR1_JDISCEN | ADC_CR1_JAUTO, LL_ADC_REG_SEQ_DISCONT_DISABLE | ADC_INJ_InitStruct->TrigAuto);
+            MODIFY_REG(ADCx->CR1,
+                       ADC_CR1_JDISCEN | ADC_CR1_JAUTO,
+                       LL_ADC_REG_SEQ_DISCONT_DISABLE | ADC_INJ_InitStruct->TrigAuto);
         }
 
-        MODIFY_REG(ADCx->CR2, ADC_CR2_JEXTSEL | ADC_CR2_JEXTEN, (ADC_INJ_InitStruct->TriggerSource & ADC_CR2_JEXTSEL));
+        MODIFY_REG(ADCx->CR2,
+                   ADC_CR2_JEXTSEL | ADC_CR2_JEXTEN,
+                   (ADC_INJ_InitStruct->TriggerSource & ADC_CR2_JEXTSEL));
 
         /* Note: Hardware constraint (refer to description of this function):     */
         /* Note: If ADC instance feature scan mode is disabled                    */
@@ -619,13 +631,13 @@ ErrorStatus LL_ADC_INJ_Init(ADC_TypeDef * ADCx, LL_ADC_INJ_InitTypeDef * ADC_INJ
  *                            whose fields will be set to default values.
  * @retval None
  */
-void LL_ADC_INJ_StructInit(LL_ADC_INJ_InitTypeDef * ADC_INJ_InitStruct) {
+void LL_ADC_INJ_StructInit(LL_ADC_INJ_InitTypeDef *ADC_INJ_InitStruct) {
     /* Set ADC_INJ_InitStruct fields to default values */
     /* Set fields of ADC group injected */
-    ADC_INJ_InitStruct->TriggerSource = LL_ADC_INJ_TRIG_SOFTWARE;
-    ADC_INJ_InitStruct->SequencerLength = LL_ADC_INJ_SEQ_SCAN_DISABLE;
+    ADC_INJ_InitStruct->TriggerSource    = LL_ADC_INJ_TRIG_SOFTWARE;
+    ADC_INJ_InitStruct->SequencerLength  = LL_ADC_INJ_SEQ_SCAN_DISABLE;
     ADC_INJ_InitStruct->SequencerDiscont = LL_ADC_INJ_SEQ_DISCONT_DISABLE;
-    ADC_INJ_InitStruct->TrigAuto = LL_ADC_INJ_TRIG_INDEPENDENT;
+    ADC_INJ_InitStruct->TrigAuto         = LL_ADC_INJ_TRIG_INDEPENDENT;
 }
 
 /**

@@ -39,12 +39,12 @@ projects should not use them. */
 
 #ifdef OPEN_WATCOM_INDUSTRIAL_PC_PORT
 #include "..\..\Source\portable\owatcom\16bitdos\pc\portmacro.h"
-typedef void(__interrupt __far * pxISR)();
+typedef void(__interrupt __far *pxISR)();
 #endif
 
 #ifdef OPEN_WATCOM_FLASH_LITE_186_PORT
 #include "..\..\Source\portable\owatcom\16bitdos\flsh186\portmacro.h"
-typedef void(__interrupt __far * pxISR)();
+typedef void(__interrupt __far *pxISR)();
 #endif
 
 #ifdef GCC_MEGA_AVR
@@ -210,17 +210,17 @@ typedef void(__interrupt __far * pxISR)();
 #ifdef BCC_INDUSTRIAL_PC_PORT
 /* A short file name has to be used in place of the normal
 FreeRTOSConfig.h when using the Borland compiler. */
-#include "frconfig.h"
 #include "..\portable\BCC\16BitDOS\PC\prtmacro.h"
-typedef void(__interrupt __far * pxISR)();
+#include "frconfig.h"
+typedef void(__interrupt __far *pxISR)();
 #endif
 
 #ifdef BCC_FLASH_LITE_186_PORT
 /* A short file name has to be used in place of the normal
 FreeRTOSConfig.h when using the Borland compiler. */
-#include "frconfig.h"
 #include "..\portable\BCC\16BitDOS\flsh186\prtmacro.h"
-typedef void(__interrupt __far * pxISR)();
+#include "frconfig.h"
+typedef void(__interrupt __far *pxISR)();
 #endif
 
 #ifdef __GNUC__

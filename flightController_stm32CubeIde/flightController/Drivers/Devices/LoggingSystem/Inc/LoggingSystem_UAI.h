@@ -56,9 +56,9 @@ extern "C" {
  */
 typedef enum {
     LOG_INFORMATION = 0,
-    LOG_DEBUGGING = 1,
-    LOG_WARNING = 2,
-    LOG_ERROR = 3,
+    LOG_DEBUGGING   = 1,
+    LOG_WARNING     = 2,
+    LOG_ERROR       = 3,
 } LOGGING_TYPE_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
@@ -71,7 +71,7 @@ typedef enum {
  * @retval true:    message was successfully sent to the USB buffer.
  *         false:   message couldn't be sent to the USB buffer.
  */
-bool_t LOG(uint8_t * message, LOGGING_TYPE_t logType);
+bool_t LOG(uint8_t *message, LOGGING_TYPE_t logType);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

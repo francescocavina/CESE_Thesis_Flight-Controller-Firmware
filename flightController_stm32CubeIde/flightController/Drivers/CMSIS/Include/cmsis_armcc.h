@@ -295,7 +295,7 @@ __STATIC_INLINE void __set_FAULTMASK(uint32_t faultMask) {
     __regFaultMask = (faultMask & (uint32_t)1U);
 }
 
-#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) ||                                                                                                                                                                                    \
+#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) || \
            (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
 
 /**
@@ -365,11 +365,11 @@ __STATIC_INLINE void __set_FPSCR(uint32_t fpscr) {
            so that all instructions following the ISB are fetched from cache or memory,
            after the instruction has been completed.
  */
-#define __ISB()                                                                                                                                                                                                                                          \
-    do {                                                                                                                                                                                                                                                 \
-        __schedule_barrier();                                                                                                                                                                                                                            \
-        __isb(0xF);                                                                                                                                                                                                                                      \
-        __schedule_barrier();                                                                                                                                                                                                                            \
+#define __ISB()               \
+    do {                      \
+        __schedule_barrier(); \
+        __isb(0xF);           \
+        __schedule_barrier(); \
     } while (0U)
 
 /**
@@ -377,11 +377,11 @@ __STATIC_INLINE void __set_FPSCR(uint32_t fpscr) {
   \details Acts as a special kind of Data Memory Barrier.
            It completes when all explicit memory accesses before this instruction complete.
  */
-#define __DSB()                                                                                                                                                                                                                                          \
-    do {                                                                                                                                                                                                                                                 \
-        __schedule_barrier();                                                                                                                                                                                                                            \
-        __dsb(0xF);                                                                                                                                                                                                                                      \
-        __schedule_barrier();                                                                                                                                                                                                                            \
+#define __DSB()               \
+    do {                      \
+        __schedule_barrier(); \
+        __dsb(0xF);           \
+        __schedule_barrier(); \
     } while (0U)
 
 /**
@@ -389,11 +389,11 @@ __STATIC_INLINE void __set_FPSCR(uint32_t fpscr) {
   \details Ensures the apparent order of the explicit memory operations before
            and after the instruction, without ensuring their completion.
  */
-#define __DMB()                                                                                                                                                                                                                                          \
-    do {                                                                                                                                                                                                                                                 \
-        __schedule_barrier();                                                                                                                                                                                                                            \
-        __dmb(0xF);                                                                                                                                                                                                                                      \
-        __schedule_barrier();                                                                                                                                                                                                                            \
+#define __DMB()               \
+    do {                      \
+        __schedule_barrier(); \
+        __dmb(0xF);           \
+        __schedule_barrier(); \
     } while (0U)
 
 /**
@@ -459,7 +459,7 @@ __attribute__((always_inline)) __STATIC_INLINE uint32_t __RBIT(uint32_t value) {
     uint32_t result;
     uint32_t s = (4U /*sizeof(v)*/ * 8U) - 1U; /* extra shift needed at end */
 
-    result = value; /* r will be reversed bits of v; first get LSB of v */
+    result = value;                            /* r will be reversed bits of v; first get LSB of v */
     for (value >>= 1U; value != 0U; value >>= 1U) {
         result <<= 1U;
         result |= value & 1U;
@@ -643,8 +643,8 @@ __attribute__((section(".rrx_text"))) __STATIC_INLINE __ASM uint32_t __RRX(uint3
  */
 #define __STRT(value, ptr) __strt(value, ptr)
 
-#else /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) ||                                                                                                                                                                                     \
-          (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
+#else  /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) || \
+           (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
 
 /**
   \brief   Signed Saturate
@@ -685,7 +685,7 @@ __attribute__((always_inline)) __STATIC_INLINE uint32_t __USAT(int32_t val, uint
     return (uint32_t)val;
 }
 
-#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) ||                                                                                                                                                                                    \
+#endif /* ((defined (__ARM_ARCH_7M__ ) && (__ARM_ARCH_7M__  == 1)) || \
            (defined (__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1))     ) */
 
 /*@}*/ /* end of group CMSIS_Core_InstructionInterface */
@@ -698,65 +698,65 @@ __attribute__((always_inline)) __STATIC_INLINE uint32_t __USAT(int32_t val, uint
 
 #if ((defined(__ARM_ARCH_7EM__) && (__ARM_ARCH_7EM__ == 1)))
 
-#define __SADD8                   __sadd8
-#define __QADD8                   __qadd8
-#define __SHADD8                  __shadd8
-#define __UADD8                   __uadd8
-#define __UQADD8                  __uqadd8
-#define __UHADD8                  __uhadd8
-#define __SSUB8                   __ssub8
-#define __QSUB8                   __qsub8
-#define __SHSUB8                  __shsub8
-#define __USUB8                   __usub8
-#define __UQSUB8                  __uqsub8
-#define __UHSUB8                  __uhsub8
-#define __SADD16                  __sadd16
-#define __QADD16                  __qadd16
-#define __SHADD16                 __shadd16
-#define __UADD16                  __uadd16
-#define __UQADD16                 __uqadd16
-#define __UHADD16                 __uhadd16
-#define __SSUB16                  __ssub16
-#define __QSUB16                  __qsub16
-#define __SHSUB16                 __shsub16
-#define __USUB16                  __usub16
-#define __UQSUB16                 __uqsub16
-#define __UHSUB16                 __uhsub16
-#define __SASX                    __sasx
-#define __QASX                    __qasx
-#define __SHASX                   __shasx
-#define __UASX                    __uasx
-#define __UQASX                   __uqasx
-#define __UHASX                   __uhasx
-#define __SSAX                    __ssax
-#define __QSAX                    __qsax
-#define __SHSAX                   __shsax
-#define __USAX                    __usax
-#define __UQSAX                   __uqsax
-#define __UHSAX                   __uhsax
-#define __USAD8                   __usad8
-#define __USADA8                  __usada8
-#define __SSAT16                  __ssat16
-#define __USAT16                  __usat16
-#define __UXTB16                  __uxtb16
-#define __UXTAB16                 __uxtab16
-#define __SXTB16                  __sxtb16
-#define __SXTAB16                 __sxtab16
-#define __SMUAD                   __smuad
-#define __SMUADX                  __smuadx
-#define __SMLAD                   __smlad
-#define __SMLADX                  __smladx
-#define __SMLALD                  __smlald
-#define __SMLALDX                 __smlaldx
-#define __SMUSD                   __smusd
-#define __SMUSDX                  __smusdx
-#define __SMLSD                   __smlsd
-#define __SMLSDX                  __smlsdx
-#define __SMLSLD                  __smlsld
-#define __SMLSLDX                 __smlsldx
-#define __SEL                     __sel
-#define __QADD                    __qadd
-#define __QSUB                    __qsub
+#define __SADD8   __sadd8
+#define __QADD8   __qadd8
+#define __SHADD8  __shadd8
+#define __UADD8   __uadd8
+#define __UQADD8  __uqadd8
+#define __UHADD8  __uhadd8
+#define __SSUB8   __ssub8
+#define __QSUB8   __qsub8
+#define __SHSUB8  __shsub8
+#define __USUB8   __usub8
+#define __UQSUB8  __uqsub8
+#define __UHSUB8  __uhsub8
+#define __SADD16  __sadd16
+#define __QADD16  __qadd16
+#define __SHADD16 __shadd16
+#define __UADD16  __uadd16
+#define __UQADD16 __uqadd16
+#define __UHADD16 __uhadd16
+#define __SSUB16  __ssub16
+#define __QSUB16  __qsub16
+#define __SHSUB16 __shsub16
+#define __USUB16  __usub16
+#define __UQSUB16 __uqsub16
+#define __UHSUB16 __uhsub16
+#define __SASX    __sasx
+#define __QASX    __qasx
+#define __SHASX   __shasx
+#define __UASX    __uasx
+#define __UQASX   __uqasx
+#define __UHASX   __uhasx
+#define __SSAX    __ssax
+#define __QSAX    __qsax
+#define __SHSAX   __shsax
+#define __USAX    __usax
+#define __UQSAX   __uqsax
+#define __UHSAX   __uhsax
+#define __USAD8   __usad8
+#define __USADA8  __usada8
+#define __SSAT16  __ssat16
+#define __USAT16  __usat16
+#define __UXTB16  __uxtb16
+#define __UXTAB16 __uxtab16
+#define __SXTB16  __sxtb16
+#define __SXTAB16 __sxtab16
+#define __SMUAD   __smuad
+#define __SMUADX  __smuadx
+#define __SMLAD   __smlad
+#define __SMLADX  __smladx
+#define __SMLALD  __smlald
+#define __SMLALDX __smlaldx
+#define __SMUSD   __smusd
+#define __SMUSDX  __smusdx
+#define __SMLSD   __smlsd
+#define __SMLSDX  __smlsdx
+#define __SMLSLD  __smlsld
+#define __SMLSLDX __smlsldx
+#define __SEL     __sel
+#define __QADD    __qadd
+#define __QSUB    __qsub
 
 #define __PKHBT(ARG1, ARG2, ARG3) (((((uint32_t)(ARG1))) & 0x0000FFFFUL) | ((((uint32_t)(ARG2)) << (ARG3)) & 0xFFFF0000UL))
 
