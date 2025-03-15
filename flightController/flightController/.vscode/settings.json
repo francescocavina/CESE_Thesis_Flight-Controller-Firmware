@@ -3,6 +3,9 @@
         "compare": "c",
         "esc_uai.h": "c",
         "main.h": "c",
-        "loggingsystem_uai.h": "c"
+        "loggingsystem_uai.h": "c",
+        "debugging_support.h": "c",
+        "control_system_settings.h": "c",
+        "control_system_support.h": "c"
     }
 }

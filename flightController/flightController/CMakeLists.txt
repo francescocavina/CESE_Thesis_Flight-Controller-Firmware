@@ -52,7 +52,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ./Core/Src/stm32f4xx_it.c
     ./Core/Src/stm32f4xx_hal_msp.c
     ./APIs/Main_Application/Src/main_app.c
-    ./APIs/ErrorLED/Src/ErrorLED.c
+    ./APIs/Error_LED/Src/error_led.c
+    ./APIs/Control_System_Support/Src/control_system_support.c
     ./USB_DEVICE/App/usb_device.c
     ./USB_DEVICE/App/usbd_desc.c
     ./USB_DEVICE/App/usbd_cdc_if.c
@@ -114,7 +115,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     ./Core/Inc
     ./APIs/Main_Application/Inc
-    ./APIs/ErrorLED/Inc
+    ./APIs/Error_LED/Inc
+    ./APIs/Control_System_Support/Inc
     ./USB_DEVICE/App
     ./USB_DEVICE/Target
     ./Drivers/STM32F4xx_HAL_Driver/Inc
