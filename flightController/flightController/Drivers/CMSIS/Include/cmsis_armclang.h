@@ -60,7 +60,7 @@
 #ifndef __PACKED_UNION
 #define __PACKED_UNION union __attribute__((packed, aligned(1)))
 #endif
-#ifndef __UNALIGNED_UINT32 /* deprecated */
+#ifndef __UNALIGNED_UINT32     /* deprecated */
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpacked"
 /*lint -esym(9058, T_UINT32)*/ /* disable MISRA 2012 Rule 2.4 for T_UINT32 */

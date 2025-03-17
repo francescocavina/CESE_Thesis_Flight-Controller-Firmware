@@ -608,7 +608,7 @@ static TickType_t prvSampleTimeNow(BaseType_t *const pxTimerListsWereSwitched) {
     TickType_t                        xTimeNow;
     PRIVILEGED_DATA static TickType_t xLastTime = (TickType_t)0U; /*lint !e956 Variable is only accessible to one task. */
 
-    xTimeNow = xTaskGetTickCount();
+    xTimeNow                                    = xTaskGetTickCount();
 
     if (xTimeNow < xLastTime) {
         prvSwitchTimerLists();
@@ -800,7 +800,7 @@ static void prvSwitchTimerLists(void) {
         xNextExpireTime = listGET_ITEM_VALUE_OF_HEAD_ENTRY(pxCurrentTimerList);
 
         /* Remove the timer from the list. */
-        pxTimer = (Timer_t *)listGET_OWNER_OF_HEAD_ENTRY(pxCurrentTimerList); /*lint !e9087 !e9079 void * is used as this macro is used with tasks and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
+        pxTimer         = (Timer_t *)listGET_OWNER_OF_HEAD_ENTRY(pxCurrentTimerList); /*lint !e9087 !e9079 void * is used as this macro is used with tasks and co-routines too.  Alignment is known to be fine as the type of the pointer stored and retrieved is the same. */
         (void)uxListRemove(&(pxTimer->xTimerListItem));
         traceTIMER_EXPIRED(pxTimer);
 
@@ -944,7 +944,7 @@ BaseType_t xTimerPendFunctionCallFromISR(PendedFunction_t xFunctionToPend, void 
     xMessage.u.xCallbackParameters.pvParameter1       = pvParameter1;
     xMessage.u.xCallbackParameters.ulParameter2       = ulParameter2;
 
-    xReturn = xQueueSendFromISR(xTimerQueue, &xMessage, pxHigherPriorityTaskWoken);
+    xReturn                                           = xQueueSendFromISR(xTimerQueue, &xMessage, pxHigherPriorityTaskWoken);
 
     tracePEND_FUNC_CALL_FROM_ISR(xFunctionToPend, pvParameter1, ulParameter2, xReturn);
 
@@ -972,7 +972,7 @@ BaseType_t xTimerPendFunctionCall(PendedFunction_t xFunctionToPend, void *pvPara
     xMessage.u.xCallbackParameters.pvParameter1       = pvParameter1;
     xMessage.u.xCallbackParameters.ulParameter2       = ulParameter2;
 
-    xReturn = xQueueSendToBack(xTimerQueue, &xMessage, xTicksToWait);
+    xReturn                                           = xQueueSendToBack(xTimerQueue, &xMessage, xTicksToWait);
 
     tracePEND_FUNC_CALL(xFunctionToPend, pvParameter1, ulParameter2, xReturn);
 

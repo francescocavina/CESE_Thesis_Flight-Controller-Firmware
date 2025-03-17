@@ -212,7 +212,7 @@ typedef enum {
     osThreadDeleted   = 0x4, /* The thread being queried has been deleted, but its TCB has not yet been freed. */
     osThreadError     = 0x7FFFFFFF
 } osThreadState;
-#endif /* INCLUDE_eTaskGetState */
+#endif                       /* INCLUDE_eTaskGetState */
 
 /// Timer type value for the timer definition.
 /// \note MUST REMAIN UNCHANGED: \b os_timer_type shall be consistent in every CMSIS-RTOS.
@@ -401,7 +401,7 @@ uint32_t osKernelSysTick(void);
 #if defined(osObjectsExternal) // object is external
 #define osThreadDef(name, thread, priority, instances, stacksz) \
     extern const osThreadDef_t os_thread_def_##name
-#else // define the object
+#else                          // define the object
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 #define osThreadDef(name, thread, priority, instances, stacksz) \
@@ -488,7 +488,7 @@ osEvent osWait(uint32_t millisec);
 #if defined(osObjectsExternal) // object is external
 #define osTimerDef(name, function) \
     extern const osTimerDef_t os_timer_def_##name
-#else // define the object
+#else                          // define the object
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 #define osTimerDef(name, function)           \
@@ -571,7 +571,7 @@ osEvent osSignalWait(int32_t signals, uint32_t millisec);
 #if defined(osObjectsExternal) // object is external
 #define osMutexDef(name) \
     extern const osMutexDef_t os_mutex_def_##name
-#else // define the object
+#else                          // define the object
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 #define osMutexDef(name) \
@@ -630,7 +630,7 @@ osStatus osMutexDelete(osMutexId mutex_id);
 #if defined(osObjectsExternal) // object is external
 #define osSemaphoreDef(name) \
     extern const osSemaphoreDef_t os_semaphore_def_##name
-#else // define the object
+#else                          // define the object
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 #define osSemaphoreDef(name) \
@@ -693,7 +693,7 @@ osStatus osSemaphoreDelete(osSemaphoreId semaphore_id);
 #if defined(osObjectsExternal) // object is external
 #define osPoolDef(name, no, type) \
     extern const osPoolDef_t os_pool_def_##name
-#else // define the object
+#else                          // define the object
 #define osPoolDef(name, no, type)          \
     const osPoolDef_t os_pool_def_##name = \
         {(no), sizeof(type), NULL}
@@ -746,7 +746,7 @@ osStatus osPoolFree(osPoolId pool_id, void *block);
 #if defined(osObjectsExternal) // object is external
 #define osMessageQDef(name, queue_sz, type) \
     extern const osMessageQDef_t os_messageQ_def_##name
-#else // define the object
+#else                          // define the object
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
 #define osMessageQDef(name, queue_sz, type)        \
     const osMessageQDef_t os_messageQ_def_##name = \
@@ -807,7 +807,7 @@ osEvent osMessageGet(osMessageQId queue_id, uint32_t millisec);
 #if defined(osObjectsExternal) // object is external
 #define osMailQDef(name, queue_sz, type) \
     extern struct os_mailQ_cb *os_mailQ_cb_##name extern osMailQDef_t os_mailQ_def_##name
-#else // define the object
+#else                          // define the object
 #define osMailQDef(name, queue_sz, type)      \
     struct os_mailQ_cb *os_mailQ_cb_##name;   \
     const osMailQDef_t  os_mailQ_def_##name = \

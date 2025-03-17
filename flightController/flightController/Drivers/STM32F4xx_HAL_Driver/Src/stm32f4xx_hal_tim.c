@@ -524,7 +524,7 @@ HAL_StatusTypeDef HAL_TIM_Base_Start_DMA(TIM_HandleTypeDef *htim, const uint32_t
     htim->hdma[TIM_DMA_ID_UPDATE]->XferHalfCpltCallback = TIM_DMAPeriodElapsedHalfCplt;
 
     /* Set the DMA error callback */
-    htim->hdma[TIM_DMA_ID_UPDATE]->XferErrorCallback = TIM_DMAError;
+    htim->hdma[TIM_DMA_ID_UPDATE]->XferErrorCallback    = TIM_DMAError;
 
     /* Enable the DMA stream */
     if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_UPDATE], (uint32_t)pData, (uint32_t)&htim->Instance->ARR,
@@ -997,7 +997,7 @@ HAL_StatusTypeDef HAL_TIM_OC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)pData, (uint32_t)&htim->Instance->CCR1,
@@ -1017,7 +1017,7 @@ HAL_StatusTypeDef HAL_TIM_OC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)pData, (uint32_t)&htim->Instance->CCR2,
@@ -1037,7 +1037,7 @@ HAL_StatusTypeDef HAL_TIM_OC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC3]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC3], (uint32_t)pData, (uint32_t)&htim->Instance->CCR3,
@@ -1056,7 +1056,7 @@ HAL_StatusTypeDef HAL_TIM_OC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC4]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC4], (uint32_t)pData, (uint32_t)&htim->Instance->CCR4,
@@ -1592,7 +1592,7 @@ HAL_StatusTypeDef HAL_TIM_PWM_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channe
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)pData, (uint32_t)&htim->Instance->CCR1,
@@ -1612,7 +1612,7 @@ HAL_StatusTypeDef HAL_TIM_PWM_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channe
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)pData, (uint32_t)&htim->Instance->CCR2,
@@ -1631,7 +1631,7 @@ HAL_StatusTypeDef HAL_TIM_PWM_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channe
         htim->hdma[TIM_DMA_ID_CC3]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC3], (uint32_t)pData, (uint32_t)&htim->Instance->CCR3,
@@ -1650,7 +1650,7 @@ HAL_StatusTypeDef HAL_TIM_PWM_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channe
         htim->hdma[TIM_DMA_ID_CC4]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC4], (uint32_t)pData, (uint32_t)&htim->Instance->CCR4,
@@ -2182,7 +2182,7 @@ HAL_StatusTypeDef HAL_TIM_IC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)&htim->Instance->CCR1, (uint32_t)pData,
@@ -2201,7 +2201,7 @@ HAL_StatusTypeDef HAL_TIM_IC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)&htim->Instance->CCR2, (uint32_t)pData,
@@ -2220,7 +2220,7 @@ HAL_StatusTypeDef HAL_TIM_IC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC3]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC3], (uint32_t)&htim->Instance->CCR3, (uint32_t)pData,
@@ -2239,7 +2239,7 @@ HAL_StatusTypeDef HAL_TIM_IC_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Channel
         htim->hdma[TIM_DMA_ID_CC4]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC4], (uint32_t)&htim->Instance->CCR4, (uint32_t)pData,
@@ -2802,13 +2802,13 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Init(TIM_HandleTypeDef *htim, const TIM_Encode
     TIM_Base_SetConfig(htim->Instance, &htim->Init);
 
     /* Get the TIMx SMCR register value */
-    tmpsmcr = htim->Instance->SMCR;
+    tmpsmcr  = htim->Instance->SMCR;
 
     /* Get the TIMx CCMR1 register value */
     tmpccmr1 = htim->Instance->CCMR1;
 
     /* Get the TIMx CCER register value */
-    tmpccer = htim->Instance->CCER;
+    tmpccer  = htim->Instance->CCER;
 
     /* Set the encoder Mode */
     tmpsmcr |= sConfig->EncoderMode;
@@ -2829,16 +2829,16 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Init(TIM_HandleTypeDef *htim, const TIM_Encode
     tmpccer |= sConfig->IC1Polarity | (sConfig->IC2Polarity << 4U);
 
     /* Write to TIMx SMCR */
-    htim->Instance->SMCR = tmpsmcr;
+    htim->Instance->SMCR  = tmpsmcr;
 
     /* Write to TIMx CCMR1 */
     htim->Instance->CCMR1 = tmpccmr1;
 
     /* Write to TIMx CCER */
-    htim->Instance->CCER = tmpccer;
+    htim->Instance->CCER  = tmpccer;
 
     /* Initialize the DMA burst operation state */
-    htim->DMABurstState = HAL_DMA_BURST_STATE_READY;
+    htim->DMABurstState   = HAL_DMA_BURST_STATE_READY;
 
     /* Set the TIM channels state */
     TIM_CHANNEL_STATE_SET(htim, TIM_CHANNEL_1, HAL_TIM_CHANNEL_STATE_READY);
@@ -3248,7 +3248,7 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Ch
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)&htim->Instance->CCR1, (uint32_t)pData1,
@@ -3274,7 +3274,7 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Ch
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAError;
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)&htim->Instance->CCR2, (uint32_t)pData2,
                              Length) != HAL_OK) {
@@ -3299,7 +3299,7 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Ch
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)&htim->Instance->CCR1, (uint32_t)pData1,
@@ -3313,7 +3313,7 @@ HAL_StatusTypeDef HAL_TIM_Encoder_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Ch
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)&htim->Instance->CCR2, (uint32_t)pData2,
@@ -3896,7 +3896,7 @@ HAL_StatusTypeDef HAL_TIM_OnePulse_ConfigChannel(TIM_HandleTypeDef *htim, TIM_On
         /* Process Locked */
         __HAL_LOCK(htim);
 
-        htim->State = HAL_TIM_STATE_BUSY;
+        htim->State        = HAL_TIM_STATE_BUSY;
 
         /* Extract the Output compare configuration from sConfig structure */
         temp1.OCMode       = sConfig->OCMode;
@@ -4101,7 +4101,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiWriteStart(TIM_HandleTypeDef *htim, uint
         htim->hdma[TIM_DMA_ID_UPDATE]->XferHalfCpltCallback = TIM_DMAPeriodElapsedHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_UPDATE]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_UPDATE]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_UPDATE], (uint32_t)BurstBuffer,
@@ -4117,7 +4117,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiWriteStart(TIM_HandleTypeDef *htim, uint
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)BurstBuffer,
@@ -4133,7 +4133,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiWriteStart(TIM_HandleTypeDef *htim, uint
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)BurstBuffer,
@@ -4149,7 +4149,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiWriteStart(TIM_HandleTypeDef *htim, uint
         htim->hdma[TIM_DMA_ID_CC3]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC3], (uint32_t)BurstBuffer,
@@ -4165,7 +4165,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiWriteStart(TIM_HandleTypeDef *htim, uint
         htim->hdma[TIM_DMA_ID_CC4]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC4], (uint32_t)BurstBuffer,
@@ -4181,7 +4181,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiWriteStart(TIM_HandleTypeDef *htim, uint
         htim->hdma[TIM_DMA_ID_COMMUTATION]->XferHalfCpltCallback = TIMEx_DMACommutationHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_COMMUTATION]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_COMMUTATION]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_COMMUTATION], (uint32_t)BurstBuffer,
@@ -4197,7 +4197,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiWriteStart(TIM_HandleTypeDef *htim, uint
         htim->hdma[TIM_DMA_ID_TRIGGER]->XferHalfCpltCallback = TIM_DMATriggerHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_TRIGGER]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_TRIGGER]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_TRIGGER], (uint32_t)BurstBuffer,
@@ -4399,7 +4399,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiReadStart(TIM_HandleTypeDef *htim, uint3
         htim->hdma[TIM_DMA_ID_UPDATE]->XferHalfCpltCallback = TIM_DMAPeriodElapsedHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_UPDATE]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_UPDATE]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_UPDATE], (uint32_t)&htim->Instance->DMAR, (uint32_t)BurstBuffer,
@@ -4415,7 +4415,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiReadStart(TIM_HandleTypeDef *htim, uint3
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)&htim->Instance->DMAR, (uint32_t)BurstBuffer,
@@ -4431,7 +4431,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiReadStart(TIM_HandleTypeDef *htim, uint3
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)&htim->Instance->DMAR, (uint32_t)BurstBuffer,
@@ -4447,7 +4447,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiReadStart(TIM_HandleTypeDef *htim, uint3
         htim->hdma[TIM_DMA_ID_CC3]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC3], (uint32_t)&htim->Instance->DMAR, (uint32_t)BurstBuffer,
@@ -4463,7 +4463,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiReadStart(TIM_HandleTypeDef *htim, uint3
         htim->hdma[TIM_DMA_ID_CC4]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_CC4]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC4], (uint32_t)&htim->Instance->DMAR, (uint32_t)BurstBuffer,
@@ -4479,7 +4479,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiReadStart(TIM_HandleTypeDef *htim, uint3
         htim->hdma[TIM_DMA_ID_COMMUTATION]->XferHalfCpltCallback = TIMEx_DMACommutationHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_COMMUTATION]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_COMMUTATION]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_COMMUTATION], (uint32_t)&htim->Instance->DMAR, (uint32_t)BurstBuffer,
@@ -4495,7 +4495,7 @@ HAL_StatusTypeDef HAL_TIM_DMABurst_MultiReadStart(TIM_HandleTypeDef *htim, uint3
         htim->hdma[TIM_DMA_ID_TRIGGER]->XferHalfCpltCallback = TIM_DMATriggerHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_TRIGGER]->XferErrorCallback = TIM_DMAError;
+        htim->hdma[TIM_DMA_ID_TRIGGER]->XferErrorCallback    = TIM_DMAError;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_TRIGGER], (uint32_t)&htim->Instance->DMAR, (uint32_t)BurstBuffer,
@@ -4610,13 +4610,13 @@ HAL_StatusTypeDef HAL_TIM_GenerateEvent(TIM_HandleTypeDef *htim, uint32_t EventS
     __HAL_LOCK(htim);
 
     /* Change the TIM state */
-    htim->State = HAL_TIM_STATE_BUSY;
+    htim->State         = HAL_TIM_STATE_BUSY;
 
     /* Set the event sources */
     htim->Instance->EGR = EventSource;
 
     /* Change the TIM state */
-    htim->State = HAL_TIM_STATE_READY;
+    htim->State         = HAL_TIM_STATE_READY;
 
     __HAL_UNLOCK(htim);
 
@@ -6159,7 +6159,7 @@ static void TIM_OC1_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Co
     TIMx->CCER &= ~TIM_CCER_CC1E;
 
     /* Get the TIMx CR2 register value */
-    tmpcr2 = TIMx->CR2;
+    tmpcr2   = TIMx->CR2;
 
     /* Get the TIMx CCMR1 register value */
     tmpccmrx = TIMx->CCMR1;
@@ -6202,16 +6202,16 @@ static void TIM_OC1_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Co
     }
 
     /* Write to TIMx CR2 */
-    TIMx->CR2 = tmpcr2;
+    TIMx->CR2   = tmpcr2;
 
     /* Write to TIMx CCMR1 */
     TIMx->CCMR1 = tmpccmrx;
 
     /* Set the Capture Compare Register value */
-    TIMx->CCR1 = OC_Config->Pulse;
+    TIMx->CCR1  = OC_Config->Pulse;
 
     /* Write to TIMx CCER */
-    TIMx->CCER = tmpccer;
+    TIMx->CCER  = tmpccer;
 }
 
 /**
@@ -6232,7 +6232,7 @@ void TIM_OC2_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Config) {
     TIMx->CCER &= ~TIM_CCER_CC2E;
 
     /* Get the TIMx CR2 register value */
-    tmpcr2 = TIMx->CR2;
+    tmpcr2   = TIMx->CR2;
 
     /* Get the TIMx CCMR1 register value */
     tmpccmrx = TIMx->CCMR1;
@@ -6275,16 +6275,16 @@ void TIM_OC2_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Config) {
     }
 
     /* Write to TIMx CR2 */
-    TIMx->CR2 = tmpcr2;
+    TIMx->CR2   = tmpcr2;
 
     /* Write to TIMx CCMR1 */
     TIMx->CCMR1 = tmpccmrx;
 
     /* Set the Capture Compare Register value */
-    TIMx->CCR2 = OC_Config->Pulse;
+    TIMx->CCR2  = OC_Config->Pulse;
 
     /* Write to TIMx CCER */
-    TIMx->CCER = tmpccer;
+    TIMx->CCER  = tmpccer;
 }
 
 /**
@@ -6305,7 +6305,7 @@ static void TIM_OC3_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Co
     TIMx->CCER &= ~TIM_CCER_CC3E;
 
     /* Get the TIMx CR2 register value */
-    tmpcr2 = TIMx->CR2;
+    tmpcr2   = TIMx->CR2;
 
     /* Get the TIMx CCMR2 register value */
     tmpccmrx = TIMx->CCMR2;
@@ -6347,16 +6347,16 @@ static void TIM_OC3_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Co
     }
 
     /* Write to TIMx CR2 */
-    TIMx->CR2 = tmpcr2;
+    TIMx->CR2   = tmpcr2;
 
     /* Write to TIMx CCMR2 */
     TIMx->CCMR2 = tmpccmrx;
 
     /* Set the Capture Compare Register value */
-    TIMx->CCR3 = OC_Config->Pulse;
+    TIMx->CCR3  = OC_Config->Pulse;
 
     /* Write to TIMx CCER */
-    TIMx->CCER = tmpccer;
+    TIMx->CCER  = tmpccer;
 }
 
 /**
@@ -6377,7 +6377,7 @@ static void TIM_OC4_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Co
     TIMx->CCER &= ~TIM_CCER_CC4E;
 
     /* Get the TIMx CR2 register value */
-    tmpcr2 = TIMx->CR2;
+    tmpcr2   = TIMx->CR2;
 
     /* Get the TIMx CCMR2 register value */
     tmpccmrx = TIMx->CCMR2;
@@ -6406,16 +6406,16 @@ static void TIM_OC4_SetConfig(TIM_TypeDef *TIMx, const TIM_OC_InitTypeDef *OC_Co
     }
 
     /* Write to TIMx CR2 */
-    TIMx->CR2 = tmpcr2;
+    TIMx->CR2   = tmpcr2;
 
     /* Write to TIMx CCMR2 */
     TIMx->CCMR2 = tmpccmrx;
 
     /* Set the Capture Compare Register value */
-    TIMx->CCR4 = OC_Config->Pulse;
+    TIMx->CCR4  = OC_Config->Pulse;
 
     /* Write to TIMx CCER */
-    TIMx->CCER = tmpccer;
+    TIMx->CCER  = tmpccer;
 }
 
 /**

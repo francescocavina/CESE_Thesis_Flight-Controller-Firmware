@@ -61,7 +61,7 @@ __STATIC_FORCEINLINE void SCB_EnableICache(void) {
 
     __DSB();
     __ISB();
-    SCB->ICIALLU = 0UL; /* invalidate I-Cache */
+    SCB->ICIALLU = 0UL;                   /* invalidate I-Cache */
     __DSB();
     __ISB();
     SCB->CCR |= (uint32_t)SCB_CCR_IC_Msk; /* enable I-Cache */
@@ -146,7 +146,7 @@ __STATIC_FORCEINLINE void SCB_EnableDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -176,7 +176,7 @@ __STATIC_FORCEINLINE void SCB_DisableDCache(void) {
     uint32_t sets;
     uint32_t ways;
 
-    SCB->CSSELR = 0U; /* select Level 1 data cache */
+    SCB->CSSELR = 0U;                      /* select Level 1 data cache */
     __DSB();
 
     SCB->CCR &= ~(uint32_t)SCB_CCR_DC_Msk; /* disable D-Cache */
@@ -185,7 +185,7 @@ __STATIC_FORCEINLINE void SCB_DisableDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* clean & invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -218,7 +218,7 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -251,7 +251,7 @@ __STATIC_FORCEINLINE void SCB_CleanDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* clean D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -284,7 +284,7 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* clean & invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {

@@ -224,11 +224,11 @@ typedef struct
  */
 typedef struct
 {
-    uint32_t PeriphClockSelection; /*!< The Extended Clock to be configured.
-                                        This parameter can be a value of @ref RCCEx_Periph_Clock_Selection */
+    uint32_t PeriphClockSelection;      /*!< The Extended Clock to be configured.
+                                             This parameter can be a value of @ref RCCEx_Periph_Clock_Selection */
 
-    RCC_PLLI2SInitTypeDef PLLI2S;  /*!< PLL I2S structure parameters.
-                                        This parameter will be used only when PLLI2S is selected as Clock Source I2S */
+    RCC_PLLI2SInitTypeDef PLLI2S;       /*!< PLL I2S structure parameters.
+                                             This parameter will be used only when PLLI2S is selected as Clock Source I2S */
 
 #if defined(STM32F413xx) || defined(STM32F423xx)
     uint32_t PLLDivR;                   /*!< Specifies the PLL division factor for SAI1 clock.
@@ -372,7 +372,7 @@ typedef struct
 #endif                             /* STM32F469xx || STM32F479xx */
 } RCC_PeriphCLKInitTypeDef;
 
-#endif /* STM32F427xx || STM32F437xx || STM32F429xx || STM32F439xx || STM32F469xx || STM32F479xx */
+#endif                             /* STM32F427xx || STM32F437xx || STM32F429xx || STM32F439xx || STM32F469xx || STM32F479xx */
 
 #if defined(STM32F405xx) || defined(STM32F415xx) || defined(STM32F407xx) || defined(STM32F417xx) || \
     defined(STM32F401xC) || defined(STM32F401xE) || defined(STM32F411xE)

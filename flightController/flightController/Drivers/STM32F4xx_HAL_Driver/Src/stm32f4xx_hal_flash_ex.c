@@ -322,16 +322,16 @@ void HAL_FLASHEx_OBGetConfig(FLASH_OBProgramInitTypeDef *pOBInit) {
     pOBInit->OptionType = OPTIONBYTE_WRP | OPTIONBYTE_RDP | OPTIONBYTE_USER | OPTIONBYTE_BOR;
 
     /*Get WRP*/
-    pOBInit->WRPSector = (uint32_t)FLASH_OB_GetWRP();
+    pOBInit->WRPSector  = (uint32_t)FLASH_OB_GetWRP();
 
     /*Get RDP Level*/
-    pOBInit->RDPLevel = (uint32_t)FLASH_OB_GetRDP();
+    pOBInit->RDPLevel   = (uint32_t)FLASH_OB_GetRDP();
 
     /*Get USER*/
     pOBInit->USERConfig = (uint8_t)FLASH_OB_GetUser();
 
     /*Get BOR Level*/
-    pOBInit->BORLevel = (uint32_t)FLASH_OB_GetBOR();
+    pOBInit->BORLevel   = (uint32_t)FLASH_OB_GetBOR();
 }
 
 #if defined(STM32F427xx) || defined(STM32F437xx) || defined(STM32F429xx) || defined(STM32F439xx) || \
@@ -410,7 +410,7 @@ void HAL_FLASHEx_AdvOBGetConfig(FLASH_AdvOBProgramInitTypeDef *pAdvOBInit) {
     pAdvOBInit->SectorsBank2 = (*(__IO uint16_t *)(OPTCR1_BYTE2_ADDRESS));
 
     /*Get Boot config OB*/
-    pAdvOBInit->BootConfig = *(__IO uint8_t *)OPTCR_BYTE0_ADDRESS;
+    pAdvOBInit->BootConfig   = *(__IO uint8_t *)OPTCR_BYTE0_ADDRESS;
 #endif /* STM32F401xC || STM32F401xE || STM32F410xx || STM32F411xE || STM32F446xx || STM32F412Zx || STM32F412Vx || STM32F412Rx || STM32F412Cx || \
           STM32F413xx || STM32F423xx */
 }
@@ -428,10 +428,10 @@ void HAL_FLASHEx_AdvOBGetConfig(FLASH_AdvOBProgramInitTypeDef *pAdvOBInit) {
  * @retval HAL Status
  */
 HAL_StatusTypeDef HAL_FLASHEx_OB_SelectPCROP(void) {
-    uint8_t optiontmp = 0xFF;
+    uint8_t optiontmp                    = 0xFF;
 
     /* Mask SPRMOD bit */
-    optiontmp = (uint8_t)((*(__IO uint8_t *)OPTCR_BYTE3_ADDRESS) & (uint8_t)0x7F);
+    optiontmp                            = (uint8_t)((*(__IO uint8_t *)OPTCR_BYTE3_ADDRESS) & (uint8_t)0x7F);
 
     /* Update Option Byte */
     *(__IO uint8_t *)OPTCR_BYTE3_ADDRESS = (uint8_t)(OB_PCROP_SELECTED | optiontmp);
@@ -452,10 +452,10 @@ HAL_StatusTypeDef HAL_FLASHEx_OB_SelectPCROP(void) {
  * @retval HAL Status
  */
 HAL_StatusTypeDef HAL_FLASHEx_OB_DeSelectPCROP(void) {
-    uint8_t optiontmp = 0xFF;
+    uint8_t optiontmp                    = 0xFF;
 
     /* Mask SPRMOD bit */
-    optiontmp = (uint8_t)((*(__IO uint8_t *)OPTCR_BYTE3_ADDRESS) & (uint8_t)0x7F);
+    optiontmp                            = (uint8_t)((*(__IO uint8_t *)OPTCR_BYTE3_ADDRESS) & (uint8_t)0x7F);
 
     /* Update Option Byte */
     *(__IO uint8_t *)OPTCR_BYTE3_ADDRESS = (uint8_t)(OB_PCROP_DESELECTED | optiontmp);
@@ -1094,7 +1094,7 @@ static HAL_StatusTypeDef FLASH_OB_UserConfig(uint8_t Iwdg, uint8_t Stop, uint8_t
 
     if (status == HAL_OK) {
         /* Mask OPTLOCK, OPTSTRT, BOR_LEV and BFB2 bits */
-        optiontmp = (uint8_t)((*(__IO uint8_t *)OPTCR_BYTE0_ADDRESS) & (uint8_t)0x1F);
+        optiontmp                            = (uint8_t)((*(__IO uint8_t *)OPTCR_BYTE0_ADDRESS) & (uint8_t)0x1F);
 
         /* Update User Option Byte */
         *(__IO uint8_t *)OPTCR_BYTE0_ADDRESS = Iwdg | (uint8_t)(Stdby | (uint8_t)(Stop | ((uint8_t)optiontmp)));

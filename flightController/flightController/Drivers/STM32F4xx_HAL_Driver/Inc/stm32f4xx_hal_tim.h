@@ -330,18 +330,18 @@ typedef enum {
 typedef struct __TIM_HandleTypeDef
 #else
 typedef struct
-#endif                                                  /* USE_HAL_TIM_REGISTER_CALLBACKS */
+#endif                                                                           /* USE_HAL_TIM_REGISTER_CALLBACKS */
 {
-    TIM_TypeDef          *Instance;                     /*!< Register base address                             */
-    TIM_Base_InitTypeDef  Init;                         /*!< TIM Time Base required parameters                 */
-    HAL_TIM_ActiveChannel Channel;                      /*!< Active channel                                    */
-    DMA_HandleTypeDef    *hdma[7];                      /*!< DMA Handlers array
-                                                             This array is accessed by a @ref DMA_Handle_index */
-    HAL_LockTypeDef                   Lock;             /*!< Locking object                                    */
-    __IO HAL_TIM_StateTypeDef         State;            /*!< TIM operation state                               */
-    __IO HAL_TIM_ChannelStateTypeDef  ChannelState[4];  /*!< TIM channel operation state                       */
-    __IO HAL_TIM_ChannelStateTypeDef  ChannelNState[4]; /*!< TIM complementary channel operation state         */
-    __IO HAL_TIM_DMABurstStateTypeDef DMABurstState;    /*!< DMA burst operation state                         */
+    TIM_TypeDef          *Instance;                                              /*!< Register base address                             */
+    TIM_Base_InitTypeDef  Init;                                                  /*!< TIM Time Base required parameters                 */
+    HAL_TIM_ActiveChannel Channel;                                               /*!< Active channel                                    */
+    DMA_HandleTypeDef    *hdma[7];                                               /*!< DMA Handlers array
+                                                                                      This array is accessed by a @ref DMA_Handle_index */
+    HAL_LockTypeDef                   Lock;                                      /*!< Locking object                                    */
+    __IO HAL_TIM_StateTypeDef         State;                                     /*!< TIM operation state                               */
+    __IO HAL_TIM_ChannelStateTypeDef  ChannelState[4];                           /*!< TIM channel operation state                       */
+    __IO HAL_TIM_ChannelStateTypeDef  ChannelNState[4];                          /*!< TIM complementary channel operation state         */
+    __IO HAL_TIM_DMABurstStateTypeDef DMABurstState;                             /*!< DMA burst operation state                         */
 
 #if (USE_HAL_TIM_REGISTER_CALLBACKS == 1)
     void (*Base_MspInitCallback)(struct __TIM_HandleTypeDef *htim);              /*!< TIM Base Msp Init Callback                              */

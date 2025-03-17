@@ -1057,16 +1057,16 @@ typedef struct
 typedef struct
 {
     __OM union {
-        __OM uint8_t  u8;  /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 8-bit */
-        __OM uint16_t u16; /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 16-bit */
-        __OM uint32_t u32; /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 32-bit */
-    } PORT[32U];           /*!< Offset: 0x000 ( /W)  ITM Stimulus Port Registers */
+        __OM uint8_t  u8;   /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 8-bit */
+        __OM uint16_t u16;  /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 16-bit */
+        __OM uint32_t u32;  /*!< Offset: 0x000 ( /W)  ITM Stimulus Port 32-bit */
+    } PORT[32U];            /*!< Offset: 0x000 ( /W)  ITM Stimulus Port Registers */
     uint32_t       RESERVED0[864U];
-    __IOM uint32_t TER;    /*!< Offset: 0xE00 (R/W)  ITM Trace Enable Register */
+    __IOM uint32_t TER;     /*!< Offset: 0xE00 (R/W)  ITM Trace Enable Register */
     uint32_t       RESERVED1[15U];
-    __IOM uint32_t TPR;    /*!< Offset: 0xE40 (R/W)  ITM Trace Privilege Register */
+    __IOM uint32_t TPR;     /*!< Offset: 0xE40 (R/W)  ITM Trace Privilege Register */
     uint32_t       RESERVED2[15U];
-    __IOM uint32_t TCR;    /*!< Offset: 0xE80 (R/W)  ITM Trace Control Register */
+    __IOM uint32_t TCR;     /*!< Offset: 0xE80 (R/W)  ITM Trace Control Register */
     uint32_t       RESERVED3[32U];
     uint32_t       RESERVED4[43U];
     __OM uint32_t  LAR;     /*!< Offset: 0xFB0 ( /W)  ITM Lock Access Register */
@@ -2114,17 +2114,17 @@ typedef struct
 #define EMSS    ((EMSS_Type *)EMSS_BASE)       /*!<Ehanced MSS Registers struct */
 
 #if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1U)
-#define MPU_BASE (SCS_BASE + 0x0D90UL)  /*!< Memory Protection Unit */
-#define MPU      ((MPU_Type *)MPU_BASE) /*!< Memory Protection Unit */
+#define MPU_BASE (SCS_BASE + 0x0D90UL)         /*!< Memory Protection Unit */
+#define MPU      ((MPU_Type *)MPU_BASE)        /*!< Memory Protection Unit */
 #endif
 
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-#define SAU_BASE (SCS_BASE + 0x0DD0UL)  /*!< Security Attribution Unit */
-#define SAU      ((SAU_Type *)SAU_BASE) /*!< Security Attribution Unit */
+#define SAU_BASE (SCS_BASE + 0x0DD0UL)               /*!< Security Attribution Unit */
+#define SAU      ((SAU_Type *)SAU_BASE)              /*!< Security Attribution Unit */
 #endif
 
-#define FPU_BASE (SCS_BASE + 0x0F30UL)  /*!< Floating Point Unit */
-#define FPU      ((FPU_Type *)FPU_BASE) /*!< Floating Point Unit */
+#define FPU_BASE (SCS_BASE + 0x0F30UL)               /*!< Floating Point Unit */
+#define FPU      ((FPU_Type *)FPU_BASE)              /*!< Floating Point Unit */
 
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
 #define SCS_BASE_NS (0xE002E000UL)                   /*!< System Control Space Base Address (non-secure address space) */
@@ -2143,14 +2143,14 @@ typedef struct
 #define DIB_NS     ((DIB_Type *)DIB_BASE_NS)         /*!< DIB configuration struct          (non-secure address space) */
 
 #if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1U)
-#define MPU_BASE_NS (SCS_BASE_NS + 0x0D90UL)  /*!< Memory Protection Unit            (non-secure address space) */
-#define MPU_NS      ((MPU_Type *)MPU_BASE_NS) /*!< Memory Protection Unit            (non-secure address space) */
+#define MPU_BASE_NS (SCS_BASE_NS + 0x0D90UL)         /*!< Memory Protection Unit            (non-secure address space) */
+#define MPU_NS      ((MPU_Type *)MPU_BASE_NS)        /*!< Memory Protection Unit            (non-secure address space) */
 #endif
 
-#define FPU_BASE_NS (SCS_BASE_NS + 0x0F30UL)  /*!< Floating Point Unit               (non-secure address space) */
-#define FPU_NS      ((FPU_Type *)FPU_BASE_NS) /*!< Floating Point Unit               (non-secure address space) */
+#define FPU_BASE_NS (SCS_BASE_NS + 0x0F30UL)         /*!< Floating Point Unit               (non-secure address space) */
+#define FPU_NS      ((FPU_Type *)FPU_BASE_NS)        /*!< Floating Point Unit               (non-secure address space) */
 
-#endif                                        /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif                                               /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
 /*@} */
 
 /*******************************************************************************
@@ -2240,11 +2240,11 @@ __STATIC_INLINE void __NVIC_SetPriorityGrouping(uint32_t PriorityGroup) {
     uint32_t reg_value;
     uint32_t PriorityGroupTmp = (PriorityGroup & (uint32_t)0x07UL);             /* only values 0..7 are used          */
 
-    reg_value = SCB->AIRCR;                                                     /* read old register configuration    */
+    reg_value                 = SCB->AIRCR;                                     /* read old register configuration    */
     reg_value &= ~((uint32_t)(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk)); /* clear bits to change               */
     reg_value  = (reg_value |
                  ((uint32_t)0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
-                 (PriorityGroupTmp << SCB_AIRCR_PRIGROUP_Pos)); /* Insert write key and priority group */
+                 (PriorityGroupTmp << SCB_AIRCR_PRIGROUP_Pos));                /* Insert write key and priority group */
     SCB->AIRCR = reg_value;
 }
 
@@ -2487,8 +2487,8 @@ __STATIC_INLINE void NVIC_DecodePriority(uint32_t Priority, uint32_t PriorityGro
     PreemptPriorityBits = ((7UL - PriorityGroupTmp) > (uint32_t)(__NVIC_PRIO_BITS)) ? (uint32_t)(__NVIC_PRIO_BITS) : (uint32_t)(7UL - PriorityGroupTmp);
     SubPriorityBits     = ((PriorityGroupTmp + (uint32_t)(__NVIC_PRIO_BITS)) < (uint32_t)7UL) ? (uint32_t)0UL : (uint32_t)((PriorityGroupTmp - 7UL) + (uint32_t)(__NVIC_PRIO_BITS));
 
-    *pPreemptPriority = (Priority >> SubPriorityBits) & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL);
-    *pSubPriority     = (Priority) & (uint32_t)((1UL << (SubPriorityBits)) - 1UL);
+    *pPreemptPriority   = (Priority >> SubPriorityBits) & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL);
+    *pSubPriority       = (Priority) & (uint32_t)((1UL << (SubPriorityBits)) - 1UL);
 }
 
 /**
@@ -2524,8 +2524,8 @@ __STATIC_INLINE uint32_t __NVIC_GetVector(IRQn_Type IRQn) {
   \details Initiates a system reset request to reset the MCU.
  */
 __NO_RETURN __STATIC_INLINE void __NVIC_SystemReset(void) {
-    __DSB(); /* Ensure all outstanding memory accesses including
-                buffered write are completed before reset */
+    __DSB();                                            /* Ensure all outstanding memory accesses including
+                                                           buffered write are completed before reset */
     SCB->AIRCR = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
                             (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
                             SCB_AIRCR_SYSRESETREQ_Msk); /* Keep priority group unchanged */
@@ -2570,11 +2570,11 @@ __STATIC_INLINE void TZ_NVIC_SetPriorityGrouping_NS(uint32_t PriorityGroup) {
     uint32_t reg_value;
     uint32_t PriorityGroupTmp = (PriorityGroup & (uint32_t)0x07UL);             /* only values 0..7 are used          */
 
-    reg_value = SCB_NS->AIRCR;                                                  /* read old register configuration    */
+    reg_value                 = SCB_NS->AIRCR;                                  /* read old register configuration    */
     reg_value &= ~((uint32_t)(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk)); /* clear bits to change               */
     reg_value     = (reg_value |
                  ((uint32_t)0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
-                 (PriorityGroupTmp << SCB_AIRCR_PRIGROUP_Pos)); /* Insert write key and priority group */
+                 (PriorityGroupTmp << SCB_AIRCR_PRIGROUP_Pos));             /* Insert write key and priority group */
     SCB_NS->AIRCR = reg_value;
 }
 
@@ -2904,7 +2904,7 @@ __STATIC_FORCEINLINE void SCB_EnableICache(void) {
 
     __DSB();
     __ISB();
-    SCB->ICIALLU = 0UL; /* invalidate I-Cache */
+    SCB->ICIALLU = 0UL;                   /* invalidate I-Cache */
     __DSB();
     __ISB();
     SCB->CCR |= (uint32_t)SCB_CCR_IC_Msk; /* enable I-Cache */
@@ -2989,7 +2989,7 @@ __STATIC_FORCEINLINE void SCB_EnableDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -3019,7 +3019,7 @@ __STATIC_FORCEINLINE void SCB_DisableDCache(void) {
     uint32_t sets;
     uint32_t ways;
 
-    SCB->CSSELR = 0U; /* select Level 1 data cache */
+    SCB->CSSELR = 0U;                      /* select Level 1 data cache */
     __DSB();
 
     SCB->CCR &= ~(uint32_t)SCB_CCR_DC_Msk; /* disable D-Cache */
@@ -3028,7 +3028,7 @@ __STATIC_FORCEINLINE void SCB_DisableDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* clean & invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -3061,7 +3061,7 @@ __STATIC_FORCEINLINE void SCB_InvalidateDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -3094,7 +3094,7 @@ __STATIC_FORCEINLINE void SCB_CleanDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* clean D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -3127,7 +3127,7 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache(void) {
     ccsidr = SCB->CCSIDR;
 
     /* clean & invalidate D-Cache */
-    sets = (uint32_t)(CCSIDR_SETS(ccsidr));
+    sets   = (uint32_t)(CCSIDR_SETS(ccsidr));
     do {
         ways = (uint32_t)(CCSIDR_WAYS(ccsidr));
         do {
@@ -3254,7 +3254,7 @@ __STATIC_FORCEINLINE void SCB_CleanInvalidateDCache_by_Addr(uint32_t *addr, int3
  */
 __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) {
     if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk) {
-        return (1UL); /* Reload value impossible */
+        return (1UL);                                                /* Reload value impossible */
     }
 
     SysTick->LOAD = (uint32_t)(ticks - 1UL);                         /* set reload register */
@@ -3262,8 +3262,8 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) {
     SysTick->VAL  = 0UL;                                             /* Load the SysTick Counter Value */
     SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
                     SysTick_CTRL_TICKINT_Msk |
-                    SysTick_CTRL_ENABLE_Msk; /* Enable SysTick IRQ and SysTick Timer */
-    return (0UL);                            /* Function successful */
+                    SysTick_CTRL_ENABLE_Msk;                         /* Enable SysTick IRQ and SysTick Timer */
+    return (0UL);                                                    /* Function successful */
 }
 
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
@@ -3281,7 +3281,7 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) {
  */
 __STATIC_INLINE uint32_t TZ_SysTick_Config_NS(uint32_t ticks) {
     if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk) {
-        return (1UL); /* Reload value impossible */
+        return (1UL);                                                      /* Reload value impossible */
     }
 
     SysTick_NS->LOAD = (uint32_t)(ticks - 1UL);                            /* set reload register */
@@ -3289,10 +3289,10 @@ __STATIC_INLINE uint32_t TZ_SysTick_Config_NS(uint32_t ticks) {
     SysTick_NS->VAL  = 0UL;                                                /* Load the SysTick Counter Value */
     SysTick_NS->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
                        SysTick_CTRL_TICKINT_Msk |
-                       SysTick_CTRL_ENABLE_Msk; /* Enable SysTick IRQ and SysTick Timer */
-    return (0UL);                               /* Function successful */
+                       SysTick_CTRL_ENABLE_Msk;                            /* Enable SysTick IRQ and SysTick Timer */
+    return (0UL);                                                          /* Function successful */
 }
-#endif                                          /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
+#endif                                                                     /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
 
 #endif
 

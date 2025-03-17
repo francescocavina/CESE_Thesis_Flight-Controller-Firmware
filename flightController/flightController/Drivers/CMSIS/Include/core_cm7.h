@@ -1036,21 +1036,21 @@ typedef struct
     __IOM uint32_t TCR;    /*!< Offset: 0xE80 (R/W)  ITM Trace Control Register */
     uint32_t       RESERVED3[32U];
     uint32_t       RESERVED4[43U];
-    __OM uint32_t  LAR;  /*!< Offset: 0xFB0 ( /W)  ITM Lock Access Register */
-    __IM uint32_t  LSR;  /*!< Offset: 0xFB4 (R/ )  ITM Lock Status Register */
+    __OM uint32_t  LAR;    /*!< Offset: 0xFB0 ( /W)  ITM Lock Access Register */
+    __IM uint32_t  LSR;    /*!< Offset: 0xFB4 (R/ )  ITM Lock Status Register */
     uint32_t       RESERVED5[6U];
-    __IM uint32_t  PID4; /*!< Offset: 0xFD0 (R/ )  ITM Peripheral Identification Register #4 */
-    __IM uint32_t  PID5; /*!< Offset: 0xFD4 (R/ )  ITM Peripheral Identification Register #5 */
-    __IM uint32_t  PID6; /*!< Offset: 0xFD8 (R/ )  ITM Peripheral Identification Register #6 */
-    __IM uint32_t  PID7; /*!< Offset: 0xFDC (R/ )  ITM Peripheral Identification Register #7 */
-    __IM uint32_t  PID0; /*!< Offset: 0xFE0 (R/ )  ITM Peripheral Identification Register #0 */
-    __IM uint32_t  PID1; /*!< Offset: 0xFE4 (R/ )  ITM Peripheral Identification Register #1 */
-    __IM uint32_t  PID2; /*!< Offset: 0xFE8 (R/ )  ITM Peripheral Identification Register #2 */
-    __IM uint32_t  PID3; /*!< Offset: 0xFEC (R/ )  ITM Peripheral Identification Register #3 */
-    __IM uint32_t  CID0; /*!< Offset: 0xFF0 (R/ )  ITM Component  Identification Register #0 */
-    __IM uint32_t  CID1; /*!< Offset: 0xFF4 (R/ )  ITM Component  Identification Register #1 */
-    __IM uint32_t  CID2; /*!< Offset: 0xFF8 (R/ )  ITM Component  Identification Register #2 */
-    __IM uint32_t  CID3; /*!< Offset: 0xFFC (R/ )  ITM Component  Identification Register #3 */
+    __IM uint32_t  PID4;   /*!< Offset: 0xFD0 (R/ )  ITM Peripheral Identification Register #4 */
+    __IM uint32_t  PID5;   /*!< Offset: 0xFD4 (R/ )  ITM Peripheral Identification Register #5 */
+    __IM uint32_t  PID6;   /*!< Offset: 0xFD8 (R/ )  ITM Peripheral Identification Register #6 */
+    __IM uint32_t  PID7;   /*!< Offset: 0xFDC (R/ )  ITM Peripheral Identification Register #7 */
+    __IM uint32_t  PID0;   /*!< Offset: 0xFE0 (R/ )  ITM Peripheral Identification Register #0 */
+    __IM uint32_t  PID1;   /*!< Offset: 0xFE4 (R/ )  ITM Peripheral Identification Register #1 */
+    __IM uint32_t  PID2;   /*!< Offset: 0xFE8 (R/ )  ITM Peripheral Identification Register #2 */
+    __IM uint32_t  PID3;   /*!< Offset: 0xFEC (R/ )  ITM Peripheral Identification Register #3 */
+    __IM uint32_t  CID0;   /*!< Offset: 0xFF0 (R/ )  ITM Component  Identification Register #0 */
+    __IM uint32_t  CID1;   /*!< Offset: 0xFF4 (R/ )  ITM Component  Identification Register #1 */
+    __IM uint32_t  CID2;   /*!< Offset: 0xFF8 (R/ )  ITM Component  Identification Register #2 */
+    __IM uint32_t  CID3;   /*!< Offset: 0xFFC (R/ )  ITM Component  Identification Register #3 */
 } ITM_Type;
 
 /* ITM Trace Privilege Register Definitions */
@@ -1769,12 +1769,12 @@ typedef struct
 #define CoreDebug ((CoreDebug_Type *)CoreDebug_BASE) /*!< Core Debug configuration struct */
 
 #if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1U)
-#define MPU_BASE (SCS_BASE + 0x0D90UL)  /*!< Memory Protection Unit */
-#define MPU      ((MPU_Type *)MPU_BASE) /*!< Memory Protection Unit */
+#define MPU_BASE (SCS_BASE + 0x0D90UL)               /*!< Memory Protection Unit */
+#define MPU      ((MPU_Type *)MPU_BASE)              /*!< Memory Protection Unit */
 #endif
 
-#define FPU_BASE (SCS_BASE + 0x0F30UL)  /*!< Floating Point Unit */
-#define FPU      ((FPU_Type *)FPU_BASE) /*!< Floating Point Unit */
+#define FPU_BASE (SCS_BASE + 0x0F30UL)               /*!< Floating Point Unit */
+#define FPU      ((FPU_Type *)FPU_BASE)              /*!< Floating Point Unit */
 
 /*@} */
 
@@ -1851,11 +1851,11 @@ __STATIC_INLINE void __NVIC_SetPriorityGrouping(uint32_t PriorityGroup) {
     uint32_t reg_value;
     uint32_t PriorityGroupTmp = (PriorityGroup & (uint32_t)0x07UL);             /* only values 0..7 are used          */
 
-    reg_value = SCB->AIRCR;                                                     /* read old register configuration    */
+    reg_value                 = SCB->AIRCR;                                     /* read old register configuration    */
     reg_value &= ~((uint32_t)(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk)); /* clear bits to change               */
     reg_value  = (reg_value |
                  ((uint32_t)0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
-                 (PriorityGroupTmp << SCB_AIRCR_PRIGROUP_Pos)); /* Insert write key and priority group */
+                 (PriorityGroupTmp << SCB_AIRCR_PRIGROUP_Pos));                /* Insert write key and priority group */
     SCB->AIRCR = reg_value;
 }
 
@@ -2046,8 +2046,8 @@ __STATIC_INLINE void NVIC_DecodePriority(uint32_t Priority, uint32_t PriorityGro
     PreemptPriorityBits = ((7UL - PriorityGroupTmp) > (uint32_t)(__NVIC_PRIO_BITS)) ? (uint32_t)(__NVIC_PRIO_BITS) : (uint32_t)(7UL - PriorityGroupTmp);
     SubPriorityBits     = ((PriorityGroupTmp + (uint32_t)(__NVIC_PRIO_BITS)) < (uint32_t)7UL) ? (uint32_t)0UL : (uint32_t)((PriorityGroupTmp - 7UL) + (uint32_t)(__NVIC_PRIO_BITS));
 
-    *pPreemptPriority = (Priority >> SubPriorityBits) & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL);
-    *pSubPriority     = (Priority) & (uint32_t)((1UL << (SubPriorityBits)) - 1UL);
+    *pPreemptPriority   = (Priority >> SubPriorityBits) & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL);
+    *pSubPriority       = (Priority) & (uint32_t)((1UL << (SubPriorityBits)) - 1UL);
 }
 
 /**
@@ -2083,8 +2083,8 @@ __STATIC_INLINE uint32_t __NVIC_GetVector(IRQn_Type IRQn) {
   \details Initiates a system reset request to reset the MCU.
  */
 __NO_RETURN __STATIC_INLINE void __NVIC_SystemReset(void) {
-    __DSB(); /* Ensure all outstanding memory accesses included
-                buffered write are completed before reset */
+    __DSB();                                            /* Ensure all outstanding memory accesses included
+                                                           buffered write are completed before reset */
     SCB->AIRCR = (uint32_t)((0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
                             (SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) |
                             SCB_AIRCR_SYSRESETREQ_Msk); /* Keep priority group unchanged */
@@ -2167,7 +2167,7 @@ __STATIC_INLINE uint32_t SCB_GetFPUType(void) {
  */
 __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) {
     if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk) {
-        return (1UL); /* Reload value impossible */
+        return (1UL);                                                /* Reload value impossible */
     }
 
     SysTick->LOAD = (uint32_t)(ticks - 1UL);                         /* set reload register */
@@ -2175,8 +2175,8 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) {
     SysTick->VAL  = 0UL;                                             /* Load the SysTick Counter Value */
     SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
                     SysTick_CTRL_TICKINT_Msk |
-                    SysTick_CTRL_ENABLE_Msk; /* Enable SysTick IRQ and SysTick Timer */
-    return (0UL);                            /* Function successful */
+                    SysTick_CTRL_ENABLE_Msk;                         /* Enable SysTick IRQ and SysTick Timer */
+    return (0UL);                                                    /* Function successful */
 }
 
 #endif

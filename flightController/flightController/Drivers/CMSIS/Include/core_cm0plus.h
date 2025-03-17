@@ -324,7 +324,7 @@ typedef struct
     __IOM uint32_t ICPR[1U]; /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
     uint32_t       RESERVED3[31U];
     uint32_t       RESERVED4[64U];
-    __IOM uint32_t IP[8U]; /*!< Offset: 0x300 (R/W)  Interrupt Priority Register */
+    __IOM uint32_t IP[8U];   /*!< Offset: 0x300 (R/W)  Interrupt Priority Register */
 } NVIC_Type;
 
 /*@} end of group CMSIS_NVIC */
@@ -341,10 +341,10 @@ typedef struct
  */
 typedef struct
 {
-    __IM uint32_t  CPUID; /*!< Offset: 0x000 (R/ )  CPUID Base Register */
-    __IOM uint32_t ICSR;  /*!< Offset: 0x004 (R/W)  Interrupt Control and State Register */
+    __IM uint32_t  CPUID;   /*!< Offset: 0x000 (R/ )  CPUID Base Register */
+    __IOM uint32_t ICSR;    /*!< Offset: 0x004 (R/W)  Interrupt Control and State Register */
 #if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-    __IOM uint32_t VTOR;  /*!< Offset: 0x008 (R/W)  Vector Table Offset Register */
+    __IOM uint32_t VTOR;    /*!< Offset: 0x008 (R/W)  Vector Table Offset Register */
 #else
     uint32_t RESERVED0;
 #endif
@@ -638,8 +638,8 @@ typedef struct
 #define NVIC    ((NVIC_Type *)NVIC_BASE)       /*!< NVIC configuration struct */
 
 #if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1U)
-#define MPU_BASE (SCS_BASE + 0x0D90UL)  /*!< Memory Protection Unit */
-#define MPU      ((MPU_Type *)MPU_BASE) /*!< Memory Protection Unit */
+#define MPU_BASE (SCS_BASE + 0x0D90UL)         /*!< Memory Protection Unit */
+#define MPU      ((MPU_Type *)MPU_BASE)        /*!< Memory Protection Unit */
 #endif
 
 /*@} */
@@ -873,8 +873,8 @@ __STATIC_INLINE void NVIC_DecodePriority(uint32_t Priority, uint32_t PriorityGro
     PreemptPriorityBits = ((7UL - PriorityGroupTmp) > (uint32_t)(__NVIC_PRIO_BITS)) ? (uint32_t)(__NVIC_PRIO_BITS) : (uint32_t)(7UL - PriorityGroupTmp);
     SubPriorityBits     = ((PriorityGroupTmp + (uint32_t)(__NVIC_PRIO_BITS)) < (uint32_t)7UL) ? (uint32_t)0UL : (uint32_t)((PriorityGroupTmp - 7UL) + (uint32_t)(__NVIC_PRIO_BITS));
 
-    *pPreemptPriority = (Priority >> SubPriorityBits) & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL);
-    *pSubPriority     = (Priority) & (uint32_t)((1UL << (SubPriorityBits)) - 1UL);
+    *pPreemptPriority   = (Priority >> SubPriorityBits) & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL);
+    *pSubPriority       = (Priority) & (uint32_t)((1UL << (SubPriorityBits)) - 1UL);
 }
 
 /**
@@ -988,7 +988,7 @@ __STATIC_INLINE uint32_t SCB_GetFPUType(void) {
  */
 __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) {
     if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk) {
-        return (1UL); /* Reload value impossible */
+        return (1UL);                                                /* Reload value impossible */
     }
 
     SysTick->LOAD = (uint32_t)(ticks - 1UL);                         /* set reload register */
@@ -996,8 +996,8 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks) {
     SysTick->VAL  = 0UL;                                             /* Load the SysTick Counter Value */
     SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |
                     SysTick_CTRL_TICKINT_Msk |
-                    SysTick_CTRL_ENABLE_Msk; /* Enable SysTick IRQ and SysTick Timer */
-    return (0UL);                            /* Function successful */
+                    SysTick_CTRL_ENABLE_Msk;                         /* Enable SysTick IRQ and SysTick Timer */
+    return (0UL);                                                    /* Function successful */
 }
 
 #endif

@@ -76,7 +76,7 @@ extern "C" {
 
 #ifndef USBD_SELF_POWERED
 #define USBD_SELF_POWERED 1U
-#endif /*USBD_SELF_POWERED */
+#endif                       /*USBD_SELF_POWERED */
 
 #ifndef USBD_MAX_POWER
 #define USBD_MAX_POWER 0x32U /* 100 mA */
@@ -414,9 +414,9 @@ __STATIC_INLINE uint16_t SWAPBYTE(uint8_t *addr) {
     uint16_t _Byte2;
     uint8_t *_pbuff = addr;
 
-    _Byte1 = *(uint8_t *)_pbuff;
+    _Byte1          = *(uint8_t *)_pbuff;
     _pbuff++;
-    _Byte2 = *(uint8_t *)_pbuff;
+    _Byte2   = *(uint8_t *)_pbuff;
 
     _SwapVal = (_Byte2 << 8) | _Byte1;
 
@@ -454,10 +454,10 @@ __STATIC_INLINE uint16_t SWAPBYTE(uint8_t *addr) {
 #if defined(__GNUC__) && !defined(__CC_ARM) /* GNU Compiler */
 #ifndef __ALIGN_END
 #define __ALIGN_END __attribute__((aligned(4U)))
-#endif /* __ALIGN_END */
+#endif                                      /* __ALIGN_END */
 #ifndef __ALIGN_BEGIN
 #define __ALIGN_BEGIN
-#endif /* __ALIGN_BEGIN */
+#endif                                      /* __ALIGN_BEGIN */
 #else
 #ifndef __ALIGN_END
 #define __ALIGN_END

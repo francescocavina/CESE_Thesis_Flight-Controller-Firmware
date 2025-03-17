@@ -304,7 +304,7 @@ EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup, const EventBits_
         const EventBits_t uxCurrentEventBits = pxEventBits->uxEventBits;
 
         /* Check to see if the wait condition is already met or not. */
-        xWaitConditionMet = prvTestWaitCondition(uxCurrentEventBits, uxBitsToWaitFor, xWaitForAllBits);
+        xWaitConditionMet                    = prvTestWaitCondition(uxCurrentEventBits, uxBitsToWaitFor, xWaitForAllBits);
 
         if (xWaitConditionMet != pdFALSE) {
             /* The wait condition has already been met so there is no need to
@@ -490,7 +490,7 @@ EventBits_t xEventGroupSetBits(EventGroupHandle_t xEventGroup, const EventBits_t
             xMatchFound     = pdFALSE;
 
             /* Split the bits waited for from the control bits. */
-            uxControlBits = uxBitsWaitedFor & eventEVENT_BITS_CONTROL_BYTES;
+            uxControlBits   = uxBitsWaitedFor & eventEVENT_BITS_CONTROL_BYTES;
             uxBitsWaitedFor &= ~eventEVENT_BITS_CONTROL_BYTES;
 
             if ((uxControlBits & eventWAIT_FOR_ALL_BITS) == (EventBits_t)0) {
@@ -653,5 +653,5 @@ void vEventGroupSetNumber(void *xEventGroup, UBaseType_t uxEventGroupNumber) {
     ((EventGroup_t *)xEventGroup)->uxEventGroupNumber = uxEventGroupNumber; /*lint !e9087 !e9079 EventGroupHandle_t is a pointer to an EventGroup_t, but EventGroupHandle_t is kept opaque outside of this file for data hiding purposes. */
 }
 
-#endif /* configUSE_TRACE_FACILITY */
+#endif                                                                      /* configUSE_TRACE_FACILITY */
 /*-----------------------------------------------------------*/

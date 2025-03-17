@@ -22,7 +22,7 @@
  */
 
 /*
- * @file:    control_system_settings.h
+ * @file:    controlSystem_settings.h
  * @date:    03/02/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
@@ -30,35 +30,39 @@
  * @brief:   This file contains the control system settings.
  */
 
-#ifndef CONTROL_SYSTEM_SETTINGS_H
-#define CONTROL_SYSTEM_SETTINGS_H
+#ifndef CONTROLSYSTEM_SETTINGS_H
+#define CONTROLSYSTEM_SETTINGS_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+/* Drivers Settings */
+#define FSA8S_CHANNELS (10)
 /* Control System Settings */
-#define CONTROL_SYSTEM_MODE                   (0)
-#define CONTROL_SYSTEM_LOOP_PERIOD_S          (0.004) // Loop period in [s]
-#define CONTROL_SYSTEM_LOOP_PERIOD_MS         (4)     // Loop period in [ms]
-#define CONTROL_SYSTEM_MINIMUM_INPUT_THROTTLE (25)
-#define CONTROL_SYSTEM_MAXIMUM_INPUT_THROTTLE (1800)
-#define CONTROL_SYSTEM_PID_OUTPUT_LIMIT       (200)
-#define CONTROL_SYSTEM_PID_ITERM_LIMIT        (200)
+#define CONTROLSYSTEM_MODE                   (0)
+#define CONTROLSYSTEM_LOOP_PERIOD_S          (0.004) // Loop period in [s]
+#define CONTROLSYSTEM_LOOP_PERIOD_MS         (4)     // Loop period in [ms]
+#define CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE (25)
+#define CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE (1800)
+#define CONTROLSYSTEM_PID_OUTPUT_LIMIT       (200)
+#define CONTROLSYSTEM_PID_ITERM_LIMIT        (200)
+#define ESC_MAXIMUM_SPEED                    (90)
+#define ESC_MINIMUM_SPEED                    (10)
 /* PID gains: Angles */
-#define KP_ROLL_ANGLE  (2.0)
-#define KP_PITCH_ANGLE (2.0)
-#define KI_ROLL_ANGLE  (0.0)
-#define KI_PITCH_ANGLE (0.0)
-#define KD_ROLL_ANGLE  (0.0)
-#define KD_PITCH_ANGLE (0.0)
+#define CONTROLSYSTEM_KP_ROLL_ANGLE  (2.0)
+#define CONTROLSYSTEM_KP_PITCH_ANGLE (2.0)
+#define CONTROLSYSTEM_KI_ROLL_ANGLE  (0.0)
+#define CONTROLSYSTEM_KI_PITCH_ANGLE (0.0)
+#define CONTROLSYSTEM_KD_ROLL_ANGLE  (0.0)
+#define CONTROLSYSTEM_KD_PITCH_ANGLE (0.0)
 /* PID gains: Rates */
-#define KP_ROLL_RATE  (1.404)
-#define KP_PITCH_RATE (0.0)
-#define KP_YAW_RATE   (0.0)
-#define KI_ROLL_RATE  (0.596)
-#define KI_PITCH_RATE (0.0)
-#define KI_YAW_RATE   (0.0)
-#define KD_ROLL_RATE  (0.0)
-#define KD_PITCH_RATE (0.0)
-#define KD_YAW_RATE   (0.0)
+#define CONTROLSYSTEM_KP_ROLL_RATE  (1.404)
+#define CONTROLSYSTEM_KP_PITCH_RATE (0.0)
+#define CONTROLSYSTEM_KP_YAW_RATE   (0.0)
+#define CONTROLSYSTEM_KI_ROLL_RATE  (0.596)
+#define CONTROLSYSTEM_KI_PITCH_RATE (0.0)
+#define CONTROLSYSTEM_KI_YAW_RATE   (0.0)
+#define CONTROLSYSTEM_KD_ROLL_RATE  (0.0)
+#define CONTROLSYSTEM_KD_PITCH_RATE (0.0)
+#define CONTROLSYSTEM_KD_YAW_RATE   (0.0)
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -72,6 +76,6 @@ extern "C" {
 }
 #endif
 
-#endif /* CONTROL_SYSTEM_SETTINGS_H */
+#endif /* CONTROLSYSTEM_SETTINGS_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

@@ -1585,21 +1585,21 @@ extern "C" {
 #define ETH_MAC_RXFIFO_FULL 0x00000300U                           /* Rx FIFO fill level: full */
 #if defined(STM32F1)
 #else
-#define ETH_MAC_READCONTROLLER_IDLE           0x00000000U /* Rx FIFO read controller IDLE state */
-#define ETH_MAC_READCONTROLLER_READING_DATA   0x00000020U /* Rx FIFO read controller Reading frame data */
-#define ETH_MAC_READCONTROLLER_READING_STATUS 0x00000040U /* Rx FIFO read controller Reading frame status \
-                                                            (or time-stamp) */
+#define ETH_MAC_READCONTROLLER_IDLE           0x00000000U         /* Rx FIFO read controller IDLE state */
+#define ETH_MAC_READCONTROLLER_READING_DATA   0x00000020U         /* Rx FIFO read controller Reading frame data */
+#define ETH_MAC_READCONTROLLER_READING_STATUS 0x00000040U         /* Rx FIFO read controller Reading frame status \
+                                                                    (or time-stamp) */
 #endif
-#define ETH_MAC_READCONTROLLER_FLUSHING 0x00000060U       /* Rx FIFO read controller Flushing the frame data and \
-                                                             status */
-#define ETH_MAC_RXFIFO_WRITE_ACTIVE         0x00000010U   /* Rx FIFO write controller active */
-#define ETH_MAC_SMALL_FIFO_NOTACTIVE        0x00000000U   /* MAC small FIFO read / write controllers not active */
-#define ETH_MAC_SMALL_FIFO_READ_ACTIVE      0x00000002U   /* MAC small FIFO read controller active */
-#define ETH_MAC_SMALL_FIFO_WRITE_ACTIVE     0x00000004U   /* MAC small FIFO write controller active */
-#define ETH_MAC_SMALL_FIFO_RW_ACTIVE        0x00000006U   /* MAC small FIFO read / write controllers active */
-#define ETH_MAC_MII_RECEIVE_PROTOCOL_ACTIVE 0x00000001U   /* MAC MII receive protocol engine active */
+#define ETH_MAC_READCONTROLLER_FLUSHING 0x00000060U               /* Rx FIFO read controller Flushing the frame data and \
+                                                                     status */
+#define ETH_MAC_RXFIFO_WRITE_ACTIVE         0x00000010U           /* Rx FIFO write controller active */
+#define ETH_MAC_SMALL_FIFO_NOTACTIVE        0x00000000U           /* MAC small FIFO read / write controllers not active */
+#define ETH_MAC_SMALL_FIFO_READ_ACTIVE      0x00000002U           /* MAC small FIFO read controller active */
+#define ETH_MAC_SMALL_FIFO_WRITE_ACTIVE     0x00000004U           /* MAC small FIFO write controller active */
+#define ETH_MAC_SMALL_FIFO_RW_ACTIVE        0x00000006U           /* MAC small FIFO read / write controllers active */
+#define ETH_MAC_MII_RECEIVE_PROTOCOL_ACTIVE 0x00000001U           /* MAC MII receive protocol engine active */
 
-#define ETH_TxPacketConfig ETH_TxPacketConfigTypeDef      /* Transmit Packet Configuration structure definition */
+#define ETH_TxPacketConfig ETH_TxPacketConfigTypeDef              /* Transmit Packet Configuration structure definition */
 
 /**
  * @}

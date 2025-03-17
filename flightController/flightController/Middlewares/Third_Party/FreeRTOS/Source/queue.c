@@ -91,14 +91,14 @@ performed just because a higher priority task has been woken. */
  * Items are queued by copy, not reference.  See the following link for the
  * rationale: https://www.freertos.org/Embedded-RTOS-Queues.html
  */
-typedef struct QueueDefinition /* The old naming convention is used to prevent breaking kernel aware debuggers. */
+typedef struct QueueDefinition              /* The old naming convention is used to prevent breaking kernel aware debuggers. */
 {
-    int8_t *pcHead;            /*< Points to the beginning of the queue storage area. */
-    int8_t *pcWriteTo;         /*< Points to the free next place in the storage area. */
+    int8_t *pcHead;                         /*< Points to the beginning of the queue storage area. */
+    int8_t *pcWriteTo;                      /*< Points to the free next place in the storage area. */
 
     union {
-        QueuePointers_t xQueue;     /*< Data required exclusively when this structure is used as a queue. */
-        SemaphoreData_t xSemaphore; /*< Data required exclusively when this structure is used as a semaphore. */
+        QueuePointers_t xQueue;             /*< Data required exclusively when this structure is used as a queue. */
+        SemaphoreData_t xSemaphore;         /*< Data required exclusively when this structure is used as a semaphore. */
     } u;
 
     List_t xTasksWaitingToSend;             /*< List of tasks that are blocked waiting to post onto this queue.  Stored in priority order. */
@@ -112,7 +112,7 @@ typedef struct QueueDefinition /* The old naming convention is used to prevent b
     volatile int8_t cTxLock;                /*< Stores the number of items transmitted to the queue (added to the queue) while the queue was locked.  Set to queueUNLOCKED when the queue is not locked. */
 
 #if ((configSUPPORT_STATIC_ALLOCATION == 1) && (configSUPPORT_DYNAMIC_ALLOCATION == 1))
-    uint8_t ucStaticallyAllocated; /*< Set to pdTRUE if the memory used by the queue was statically allocated to ensure no attempt is made to free the memory. */
+    uint8_t ucStaticallyAllocated;          /*< Set to pdTRUE if the memory used by the queue was statically allocated to ensure no attempt is made to free the memory. */
 #endif
 
 #if (configUSE_QUEUE_SETS == 1)
@@ -252,7 +252,7 @@ BaseType_t xQueueGenericReset(QueueHandle_t xQueue, BaseType_t xNewQueue) {
 
     taskENTER_CRITICAL();
     {
-        pxQueue->u.xQueue.pcTail     = pxQueue->pcHead + (pxQueue->uxLength * pxQueue->uxItemSize); /*lint !e9016 Pointer arithmetic allowed on char types, especially when it assists conveying intent. */
+        pxQueue->u.xQueue.pcTail     = pxQueue->pcHead + (pxQueue->uxLength * pxQueue->uxItemSize);        /*lint !e9016 Pointer arithmetic allowed on char types, especially when it assists conveying intent. */
         pxQueue->uxMessagesWaiting   = (UBaseType_t)0U;
         pxQueue->pcWriteTo           = pxQueue->pcHead;
         pxQueue->u.xQueue.pcReadFrom = pxQueue->pcHead + ((pxQueue->uxLength - 1U) * pxQueue->uxItemSize); /*lint !e9016 Pointer arithmetic allowed on char types, especially when it assists conveying intent. */
@@ -365,7 +365,7 @@ QueueHandle_t xQueueGenericCreate(const UBaseType_t uxQueueLength, const UBaseTy
     are greater than or equal to the pointer to char requirements the cast
     is safe.  In other cases alignment requirements are not strict (one or
     two bytes). */
-    pxNewQueue = (Queue_t *)pvPortMalloc(sizeof(Queue_t) + xQueueSizeInBytes); /*lint !e9087 !e9079 see comment above. */
+    pxNewQueue        = (Queue_t *)pvPortMalloc(sizeof(Queue_t) + xQueueSizeInBytes); /*lint !e9087 !e9079 see comment above. */
 
     if (pxNewQueue != NULL) {
         /* Jump past the queue structure to find the location of the queue
@@ -440,8 +440,8 @@ static void prvInitialiseMutex(Queue_t *pxNewQueue) {
         correctly for a generic queue, but this function is creating a
         mutex.  Overwrite those members that need to be set differently -
         in particular the information required for priority inheritance. */
-        pxNewQueue->u.xSemaphore.xMutexHolder = NULL;
-        pxNewQueue->uxQueueType               = queueQUEUE_IS_MUTEX;
+        pxNewQueue->u.xSemaphore.xMutexHolder         = NULL;
+        pxNewQueue->uxQueueType                       = queueQUEUE_IS_MUTEX;
 
         /* In case this is a recursive mutex. */
         pxNewQueue->u.xSemaphore.uxRecursiveCallCount = 0;
@@ -703,7 +703,7 @@ BaseType_t xQueueGenericSend(QueueHandle_t xQueue, const void *const pvItemToQue
                 {
                     const UBaseType_t uxPreviousMessagesWaiting = pxQueue->uxMessagesWaiting;
 
-                    xYieldRequired = prvCopyDataToQueue(pxQueue, pvItemToQueue, xCopyPosition);
+                    xYieldRequired                              = prvCopyDataToQueue(pxQueue, pvItemToQueue, xCopyPosition);
 
                     if (pxQueue->pxQueueSetContainer != NULL) {
                         if ((xCopyPosition == queueOVERWRITE) && (uxPreviousMessagesWaiting != (UBaseType_t)0)) {
@@ -1624,7 +1624,7 @@ BaseType_t xQueuePeekFromISR(QueueHandle_t xQueue, void *const pvBuffer) {
             prvCopyDataFromQueue(pxQueue, pvBuffer);
             pxQueue->u.xQueue.pcReadFrom = pcOriginalReadPosition;
 
-            xReturn = pdPASS;
+            xReturn                      = pdPASS;
         } else {
             xReturn = pdFAIL;
             traceQUEUE_PEEK_FROM_ISR_FAILED(pxQueue);
@@ -2240,7 +2240,7 @@ void vQueueAddToRegistry(QueueHandle_t xQueue, const char *pcQueueName) /*lint !
 const char *pcQueueGetName(QueueHandle_t xQueue) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 {
     UBaseType_t ux;
-    const char *pcReturn = NULL; /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+    const char *pcReturn = NULL;                 /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 
     /* Note there is nothing here to protect against another task adding or
     removing entries from the registry while it is being searched. */
@@ -2274,7 +2274,7 @@ void vQueueUnregisterQueue(QueueHandle_t xQueue) {
             /* Set the handle to NULL to ensure the same queue handle cannot
             appear in the registry twice if it is added, removed, then
             added again. */
-            xQueueRegistry[ux].xHandle = (QueueHandle_t)0;
+            xQueueRegistry[ux].xHandle     = (QueueHandle_t)0;
             break;
         } else {
             mtCOVERAGE_TEST_MARKER();

@@ -138,12 +138,12 @@
  * @retval HAL status
  */
 HAL_StatusTypeDef HAL_PWREx_EnableBkUpReg(void) {
-    uint32_t tickstart = 0U;
+    uint32_t tickstart           = 0U;
 
     *(__IO uint32_t *)CSR_BRE_BB = (uint32_t)ENABLE;
 
     /* Get tick */
-    tickstart = HAL_GetTick();
+    tickstart                    = HAL_GetTick();
 
     /* Wait till Backup regulator ready flag is set */
     while (__HAL_PWR_GET_FLAG(PWR_FLAG_BRR) == RESET) {
@@ -159,12 +159,12 @@ HAL_StatusTypeDef HAL_PWREx_EnableBkUpReg(void) {
  * @retval HAL status
  */
 HAL_StatusTypeDef HAL_PWREx_DisableBkUpReg(void) {
-    uint32_t tickstart = 0U;
+    uint32_t tickstart           = 0U;
 
     *(__IO uint32_t *)CSR_BRE_BB = (uint32_t)DISABLE;
 
     /* Get tick */
-    tickstart = HAL_GetTick();
+    tickstart                    = HAL_GetTick();
 
     /* Wait till Backup regulator ready flag is set */
     while (__HAL_PWR_GET_FLAG(PWR_FLAG_BRR) != RESET) {

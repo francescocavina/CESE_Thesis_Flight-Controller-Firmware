@@ -259,7 +259,7 @@ static void prvPortStartFirstTask(void) {
     would otherwise result in the unnecessary leaving of space in the SVC stack
     for lazy saving of FPU registers. */
     __asm volatile(
-        " ldr r0, =0xE000ED08 	\n" /* Use the NVIC offset register to locate the stack. */
+        " ldr r0, =0xE000ED08 	\n"                 /* Use the NVIC offset register to locate the stack. */
         " ldr r0, [r0] 			\n"
         " ldr r0, [r0] 			\n"
         " msr msp, r0			\n"         /* Set the msp back to the start of the stack. */
@@ -300,21 +300,21 @@ BaseType_t xPortStartScheduler(void) {
         ensure interrupt entry is as fast and simple as possible.
 
         Save the interrupt priority value that is about to be clobbered. */
-        ulOriginalPriority = *pucFirstUserPriorityRegister;
+        ulOriginalPriority            = *pucFirstUserPriorityRegister;
 
         /* Determine the number of priority bits available.  First write to all
         possible bits. */
         *pucFirstUserPriorityRegister = portMAX_8_BIT_VALUE;
 
         /* Read the value back to see how many bits stuck. */
-        ucMaxPriorityValue = *pucFirstUserPriorityRegister;
+        ucMaxPriorityValue            = *pucFirstUserPriorityRegister;
 
         /* Use the same mask on the maximum system call priority. */
-        ucMaxSysCallPriority = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
+        ucMaxSysCallPriority          = configMAX_SYSCALL_INTERRUPT_PRIORITY & ucMaxPriorityValue;
 
         /* Calculate the maximum acceptable priority group value for the number
         of bits read back. */
-        ulMaxPRIGROUPValue = portMAX_PRIGROUP_BITS;
+        ulMaxPRIGROUPValue            = portMAX_PRIGROUP_BITS;
         while ((ucMaxPriorityValue & portTOP_BIT_OF_BYTE) == portTOP_BIT_OF_BYTE) {
             ulMaxPRIGROUPValue--;
             ucMaxPriorityValue <<= (uint8_t)0x01;
@@ -421,7 +421,7 @@ void xPortPendSVHandler(void) {
         "	mrs r0, psp							\n"
         "	isb									\n"
         "										\n"
-        "	ldr	r3, pxCurrentTCBConst			\n" /* Get the location of the current TCB. */
+        "	ldr	r3, pxCurrentTCBConst			\n"         /* Get the location of the current TCB. */
         "	ldr	r2, [r3]						\n"
         "										\n"
         "	tst r14, #0x10						\n" /* Is the task using the FPU context?  If so, push high vfp registers. */
@@ -537,7 +537,7 @@ __attribute__((weak)) void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTi
                            : "memory");
     } else {
         /* Set the new reload value. */
-        portNVIC_SYSTICK_LOAD_REG = ulReloadValue;
+        portNVIC_SYSTICK_LOAD_REG          = ulReloadValue;
 
         /* Clear the SysTick count flag and set the count value back to
         zero. */
@@ -613,7 +613,7 @@ __attribute__((weak)) void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTi
             /* As the pending tick will be processed as soon as this
             function exits, the tick value maintained by the tick is stepped
             forward by one less than the time spent waiting. */
-            ulCompleteTickPeriods = xExpectedIdleTime - 1UL;
+            ulCompleteTickPeriods     = xExpectedIdleTime - 1UL;
         } else {
             /* Something other than the tick interrupt ended the sleep.
             Work out how long the sleep lasted rounded to complete tick
@@ -623,11 +623,11 @@ __attribute__((weak)) void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTi
 
             /* How many complete tick periods passed while the processor
             was waiting? */
-            ulCompleteTickPeriods = ulCompletedSysTickDecrements / ulTimerCountsForOneTick;
+            ulCompleteTickPeriods        = ulCompletedSysTickDecrements / ulTimerCountsForOneTick;
 
             /* The reload value is set to whatever fraction of a single tick
             period remains. */
-            portNVIC_SYSTICK_LOAD_REG = ((ulCompleteTickPeriods + 1UL) * ulTimerCountsForOneTick) - ulCompletedSysTickDecrements;
+            portNVIC_SYSTICK_LOAD_REG    = ((ulCompleteTickPeriods + 1UL) * ulTimerCountsForOneTick) - ulCompletedSysTickDecrements;
         }
 
         /* Restart SysTick so it runs from portNVIC_SYSTICK_LOAD_REG
@@ -666,8 +666,8 @@ __attribute__((weak)) void vPortSetupTimerInterrupt(void) {
     portNVIC_SYSTICK_CURRENT_VALUE_REG = 0UL;
 
     /* Configure SysTick to interrupt at the requested rate. */
-    portNVIC_SYSTICK_LOAD_REG = (configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ) - 1UL;
-    portNVIC_SYSTICK_CTRL_REG = (portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT);
+    portNVIC_SYSTICK_LOAD_REG          = (configSYSTICK_CLOCK_HZ / configTICK_RATE_HZ) - 1UL;
+    portNVIC_SYSTICK_CTRL_REG          = (portNVIC_SYSTICK_CLK_BIT | portNVIC_SYSTICK_INT_BIT | portNVIC_SYSTICK_ENABLE_BIT);
 }
 /*-----------------------------------------------------------*/
 

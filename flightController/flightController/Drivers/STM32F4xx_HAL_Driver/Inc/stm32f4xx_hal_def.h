@@ -113,11 +113,11 @@ typedef enum {
 #elif defined(__GNUC__) && !defined(__CC_ARM) /* GNU Compiler */
 #ifndef __weak
 #define __weak __attribute__((weak))
-#endif /* __weak */
+#endif                                        /* __weak */
 #ifndef __packed
 #define __packed __attribute__((__packed__))
-#endif /* __packed */
-#endif /* __GNUC__ */
+#endif                                        /* __packed */
+#endif                                        /* __GNUC__ */
 
 /* Macro to get variable aligned on 4-bytes, for __ICCARM__ the directive "#pragma data_alignment=4" must be used instead */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050) /* ARM Compiler V6 */
@@ -130,10 +130,10 @@ typedef enum {
 #elif defined(__GNUC__) && !defined(__CC_ARM) /* GNU Compiler */
 #ifndef __ALIGN_END
 #define __ALIGN_END __attribute__((aligned(4)))
-#endif /* __ALIGN_END */
+#endif                                        /* __ALIGN_END */
 #ifndef __ALIGN_BEGIN
 #define __ALIGN_BEGIN
-#endif /* __ALIGN_BEGIN */
+#endif                                        /* __ALIGN_BEGIN */
 #else
 #ifndef __ALIGN_END
 #define __ALIGN_END

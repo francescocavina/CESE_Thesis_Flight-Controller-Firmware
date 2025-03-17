@@ -822,7 +822,7 @@ __weak uint32_t HAL_RCC_GetSysClockFreq(void) {
             /* HSI used as PLL clock source */
             pllvco = (uint32_t)((((uint64_t)HSI_VALUE * ((uint64_t)((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> RCC_PLLCFGR_PLLN_Pos)))) / (uint64_t)pllm);
         }
-        pllp = ((((RCC->PLLCFGR & RCC_PLLCFGR_PLLP) >> RCC_PLLCFGR_PLLP_Pos) + 1U) * 2U);
+        pllp         = ((((RCC->PLLCFGR & RCC_PLLCFGR_PLLP) >> RCC_PLLCFGR_PLLP_Pos) + 1U) * 2U);
 
         sysclockfreq = pllvco / pllp;
         break;
@@ -938,13 +938,13 @@ __weak void HAL_RCC_GetOscConfig(RCC_OscInitTypeDef *RCC_OscInitStruct) {
  */
 void HAL_RCC_GetClockConfig(RCC_ClkInitTypeDef *RCC_ClkInitStruct, uint32_t *pFLatency) {
     /* Set all possible values for the Clock type parameter --------------------*/
-    RCC_ClkInitStruct->ClockType = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct->ClockType      = RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 
     /* Get the SYSCLK configuration --------------------------------------------*/
-    RCC_ClkInitStruct->SYSCLKSource = (uint32_t)(RCC->CFGR & RCC_CFGR_SW);
+    RCC_ClkInitStruct->SYSCLKSource   = (uint32_t)(RCC->CFGR & RCC_CFGR_SW);
 
     /* Get the HCLK configuration ----------------------------------------------*/
-    RCC_ClkInitStruct->AHBCLKDivider = (uint32_t)(RCC->CFGR & RCC_CFGR_HPRE);
+    RCC_ClkInitStruct->AHBCLKDivider  = (uint32_t)(RCC->CFGR & RCC_CFGR_HPRE);
 
     /* Get the APB1 configuration ----------------------------------------------*/
     RCC_ClkInitStruct->APB1CLKDivider = (uint32_t)(RCC->CFGR & RCC_CFGR_PPRE1);
@@ -953,7 +953,7 @@ void HAL_RCC_GetClockConfig(RCC_ClkInitTypeDef *RCC_ClkInitStruct, uint32_t *pFL
     RCC_ClkInitStruct->APB2CLKDivider = (uint32_t)((RCC->CFGR & RCC_CFGR_PPRE2) >> 3U);
 
     /* Get the Flash Wait State (Latency) configuration ------------------------*/
-    *pFLatency = (uint32_t)(FLASH->ACR & FLASH_ACR_LATENCY);
+    *pFLatency                        = (uint32_t)(FLASH->ACR & FLASH_ACR_LATENCY);
 }
 
 /**

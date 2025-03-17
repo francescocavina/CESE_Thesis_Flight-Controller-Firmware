@@ -374,7 +374,7 @@ __STATIC_FORCEINLINE uint32_t __RBIT(uint32_t value) {
 #else
     uint32_t s = (4U /*sizeof(v)*/ * 8U) - 1U; /* extra shift needed at end */
 
-    result = value;                            /* r will be reversed bits of v; first get LSB of v */
+    result     = value;                        /* r will be reversed bits of v; first get LSB of v */
     for (value >>= 1U; value != 0U; value >>= 1U) {
         result <<= 1U;
         result |= value & 1U;

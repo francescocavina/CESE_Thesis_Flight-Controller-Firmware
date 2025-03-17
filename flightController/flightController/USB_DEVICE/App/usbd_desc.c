@@ -140,7 +140,7 @@ USBD_DescriptorsTypeDef FS_Desc =
 #if (USBD_LPM_ENABLED == 1)
         ,
         USBD_FS_USR_BOSDescriptor
-#endif /* (USBD_LPM_ENABLED == 1) */
+#endif                  /* (USBD_LPM_ENABLED == 1) */
 };
 
 #if defined(__ICCARM__) /* IAR Compiler */
@@ -395,7 +395,7 @@ static void IntToUnicode(uint32_t value, uint8_t *pbuf, uint8_t len) {
             pbuf[2 * idx] = (value >> 28) + 'A' - 10;
         }
 
-        value = value << 4;
+        value             = value << 4;
 
         pbuf[2 * idx + 1] = 0;
     }

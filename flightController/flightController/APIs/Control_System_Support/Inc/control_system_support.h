@@ -36,6 +36,7 @@
 #define CONTROL_SYSTEM_SUPPORT_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+#include "control_system_settings.h"
 #include "main.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,9 +48,6 @@ extern "C" {
 #endif
 
 /* --- Public macros definitions --------------------------------------------------------------- */
-#define FSA8S_CHANNELS    (10) // Number of remote control channels to read
-#define ESC_MAXIMUM_SPEED (90)
-#define ESC_MINIMUM_SPEED (10)
 
 /* --- Public data type declarations ----------------------------------------------------------- */
 /**
@@ -147,6 +145,10 @@ typedef struct {
     uint8_t ESC2_speed;
     uint8_t ESC3_speed;
     uint8_t ESC4_speed;
+    /* Control Loop Period */
+    uint32_t controlLoopPeriod;
+    /* Task Execution Time */
+    uint32_t taskExecutionTime;
 } ControlSystemValues_t;
 /* --- Public variable declarations ------------------------------------------------------------ */
 

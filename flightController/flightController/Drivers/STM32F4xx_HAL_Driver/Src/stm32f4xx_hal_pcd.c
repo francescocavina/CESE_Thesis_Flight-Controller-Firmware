@@ -200,15 +200,15 @@ HAL_StatusTypeDef HAL_PCD_Init(PCD_HandleTypeDef *hpcd) {
         hpcd->IN_ep[i].num         = i;
         hpcd->IN_ep[i].tx_fifo_num = i;
         /* Control until ep is activated */
-        hpcd->IN_ep[i].type      = EP_TYPE_CTRL;
-        hpcd->IN_ep[i].maxpacket = 0U;
-        hpcd->IN_ep[i].xfer_buff = 0U;
-        hpcd->IN_ep[i].xfer_len  = 0U;
+        hpcd->IN_ep[i].type        = EP_TYPE_CTRL;
+        hpcd->IN_ep[i].maxpacket   = 0U;
+        hpcd->IN_ep[i].xfer_buff   = 0U;
+        hpcd->IN_ep[i].xfer_len    = 0U;
     }
 
     for (i = 0U; i < hpcd->Init.dev_endpoints; i++) {
-        hpcd->OUT_ep[i].is_in = 0U;
-        hpcd->OUT_ep[i].num   = i;
+        hpcd->OUT_ep[i].is_in     = 0U;
+        hpcd->OUT_ep[i].num       = i;
         /* Control until ep is activated */
         hpcd->OUT_ep[i].type      = EP_TYPE_CTRL;
         hpcd->OUT_ep[i].maxpacket = 0U;
@@ -1003,7 +1003,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
 
             RegVal = USBx->GRXSTSP;
 
-            ep = &hpcd->OUT_ep[RegVal & USB_OTG_GRXSTSP_EPNUM];
+            ep     = &hpcd->OUT_ep[RegVal & USB_OTG_GRXSTSP_EPNUM];
 
             if (((RegVal & USB_OTG_GRXSTSP_PKTSTS) >> 17) == STS_DATA_UPDT) {
                 if ((RegVal & USB_OTG_GRXSTSP_BCNT) != 0U) {
@@ -1024,7 +1024,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
         }
 
         if (__HAL_PCD_GET_FLAG(hpcd, USB_OTG_GINTSTS_OEPINT)) {
-            epnum = 0U;
+            epnum   = 0U;
 
             /* Read in the device interrupt bits */
             ep_intr = USB_ReadDevAllOutEpInterrupt(hpcd->Instance);
@@ -1088,7 +1088,7 @@ void HAL_PCD_IRQHandler(PCD_HandleTypeDef *hpcd) {
             /* Read in the device interrupt bits */
             ep_intr = USB_ReadDevAllInEpInterrupt(hpcd->Instance);
 
-            epnum = 0U;
+            epnum   = 0U;
 
             while (ep_intr != 0U) {
                 if ((ep_intr & 0x1U) != 0U) /* In ITR */
@@ -1700,7 +1700,7 @@ HAL_StatusTypeDef HAL_PCD_EP_Close(PCD_HandleTypeDef *hpcd, uint8_t ep_addr) {
 HAL_StatusTypeDef HAL_PCD_EP_Receive(PCD_HandleTypeDef *hpcd, uint8_t ep_addr, uint8_t *pBuf, uint32_t len) {
     PCD_EPTypeDef *ep;
 
-    ep = &hpcd->OUT_ep[ep_addr & EP_ADDR_MSK];
+    ep             = &hpcd->OUT_ep[ep_addr & EP_ADDR_MSK];
 
     /*setup and start the Xfer */
     ep->xfer_buff  = pBuf;
@@ -1738,7 +1738,7 @@ uint32_t HAL_PCD_EP_GetRxCount(PCD_HandleTypeDef const *hpcd, uint8_t ep_addr) {
 HAL_StatusTypeDef HAL_PCD_EP_Transmit(PCD_HandleTypeDef *hpcd, uint8_t ep_addr, uint8_t *pBuf, uint32_t len) {
     PCD_EPTypeDef *ep;
 
-    ep = &hpcd->IN_ep[ep_addr & EP_ADDR_MSK];
+    ep             = &hpcd->IN_ep[ep_addr & EP_ADDR_MSK];
 
     /*setup and start the Xfer */
     ep->xfer_buff  = pBuf;
@@ -2035,7 +2035,7 @@ static HAL_StatusTypeDef PCD_EP_OutXfrComplete_int(PCD_HandleTypeDef *hpcd, uint
                 ((DoepintReg & USB_OTG_DOEPINT_STPKTRX) == USB_OTG_DOEPINT_STPKTRX)) {
                 CLEAR_OUT_EP_INTR(epnum, USB_OTG_DOEPINT_STPKTRX);
             } else {
-                ep = &hpcd->OUT_ep[epnum];
+                ep             = &hpcd->OUT_ep[epnum];
 
                 /* out data packet received over EP */
                 ep->xfer_count = ep->xfer_size - (USBx_OUTEP(epnum)->DOEPTSIZ & USB_OTG_DOEPTSIZ_XFRSIZ);

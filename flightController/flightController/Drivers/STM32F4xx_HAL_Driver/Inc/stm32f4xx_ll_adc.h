@@ -315,10 +315,10 @@ extern "C" {
  */
 typedef struct
 {
-    uint32_t CommonClock; /*!< Set parameter common to several ADC: Clock source and prescaler.
-                               This parameter can be a value of @ref ADC_LL_EC_COMMON_CLOCK_SOURCE
-
-                               This feature can be modified afterwards using unitary function @ref LL_ADC_SetCommonClock(). */
+    uint32_t CommonClock;           /*!< Set parameter common to several ADC: Clock source and prescaler.
+                                         This parameter can be a value of @ref ADC_LL_EC_COMMON_CLOCK_SOURCE
+          
+                                         This feature can be modified afterwards using unitary function @ref LL_ADC_SetCommonClock(). */
 
 #if defined(ADC_MULTIMODE_SUPPORT)
     uint32_t Multimode;             /*!< Set ADC multimode configuration to operate in independent mode or multimode (for devices with several ADC instances).
@@ -2153,7 +2153,7 @@ __STATIC_INLINE uint32_t LL_ADC_REG_GetTriggerSource(const ADC_TypeDef *ADCx) {
 
     /* Value for shift of {0; 4; 8; 12} depending on value of bitfield          */
     /* corresponding to ADC_CR2_EXTEN {0; 1; 2; 3}.                             */
-    uint32_t ShiftExten = ((TriggerSource & ADC_CR2_EXTEN) >> (ADC_REG_TRIG_EXTEN_BITOFFSET_POS - 2UL));
+    uint32_t ShiftExten    = ((TriggerSource & ADC_CR2_EXTEN) >> (ADC_REG_TRIG_EXTEN_BITOFFSET_POS - 2UL));
 
     /* Set bitfield corresponding to ADC_CR2_EXTEN and ADC_CR2_EXTSEL           */
     /* to match with triggers literals definition.                              */
@@ -2767,7 +2767,7 @@ __STATIC_INLINE uint32_t LL_ADC_INJ_GetTriggerSource(const ADC_TypeDef *ADCx) {
 
     /* Value for shift of {0; 4; 8; 12} depending on value of bitfield          */
     /* corresponding to ADC_CR2_JEXTEN {0; 1; 2; 3}.                            */
-    uint32_t ShiftExten = ((TriggerSource & ADC_CR2_JEXTEN) >> (ADC_INJ_TRIG_EXTEN_BITOFFSET_POS - 2UL));
+    uint32_t ShiftExten    = ((TriggerSource & ADC_CR2_JEXTEN) >> (ADC_INJ_TRIG_EXTEN_BITOFFSET_POS - 2UL));
 
     /* Set bitfield corresponding to ADC_CR2_JEXTEN and ADC_CR2_JEXTSEL         */
     /* to match with triggers literals definition.                              */

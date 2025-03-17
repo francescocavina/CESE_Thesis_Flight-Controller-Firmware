@@ -312,7 +312,7 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
         (void)USBD_LL_OpenEP(pdev, CDCOutEpAdd, USBD_EP_TYPE_BULK,
                              CDC_DATA_HS_OUT_PACKET_SIZE);
 
-        pdev->ep_out[CDCOutEpAdd & 0xFU].is_used = 1U;
+        pdev->ep_out[CDCOutEpAdd & 0xFU].is_used  = 1U;
 
         /* Set bInterval for CDC CMD Endpoint */
         pdev->ep_in[CDCCmdEpAdd & 0xFU].bInterval = CDC_HS_BINTERVAL;
@@ -327,7 +327,7 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
         (void)USBD_LL_OpenEP(pdev, CDCOutEpAdd, USBD_EP_TYPE_BULK,
                              CDC_DATA_FS_OUT_PACKET_SIZE);
 
-        pdev->ep_out[CDCOutEpAdd & 0xFU].is_used = 1U;
+        pdev->ep_out[CDCOutEpAdd & 0xFU].is_used  = 1U;
 
         /* Set bInterval for CMD Endpoint */
         pdev->ep_in[CDCCmdEpAdd & 0xFU].bInterval = CDC_FS_BINTERVAL;
@@ -337,7 +337,7 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx) {
     (void)USBD_LL_OpenEP(pdev, CDCCmdEpAdd, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
     pdev->ep_in[CDCCmdEpAdd & 0xFU].is_used = 1U;
 
-    hcdc->RxBuffer = NULL;
+    hcdc->RxBuffer                          = NULL;
 
     /* Init  physical Interface components */
     ((USBD_CDC_ItfTypeDef *)pdev->pUserData[pdev->classId])->Init();
@@ -753,7 +753,7 @@ uint8_t USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev) {
 
     if (hcdc->TxState == 0U) {
         /* Tx Transfer in progress */
-        hcdc->TxState = 1U;
+        hcdc->TxState                               = 1U;
 
         /* Update the packet total length */
         pdev->ep_in[CDCInEpAdd & 0xFU].total_length = hcdc->TxLength;

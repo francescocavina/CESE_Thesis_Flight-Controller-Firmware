@@ -419,8 +419,8 @@ ErrorStatus LL_ADC_Init(ADC_TypeDef *ADCx, LL_ADC_InitTypeDef *ADC_InitStruct) {
 void LL_ADC_StructInit(LL_ADC_InitTypeDef *ADC_InitStruct) {
     /* Set ADC_InitStruct fields to default values */
     /* Set fields of ADC instance */
-    ADC_InitStruct->Resolution    = LL_ADC_RESOLUTION_12B;
-    ADC_InitStruct->DataAlignment = LL_ADC_DATA_ALIGN_RIGHT;
+    ADC_InitStruct->Resolution         = LL_ADC_RESOLUTION_12B;
+    ADC_InitStruct->DataAlignment      = LL_ADC_DATA_ALIGN_RIGHT;
 
     /* Enable scan mode to have a generic behavior with ADC of other            */
     /* STM32 families, without this setting available:                          */

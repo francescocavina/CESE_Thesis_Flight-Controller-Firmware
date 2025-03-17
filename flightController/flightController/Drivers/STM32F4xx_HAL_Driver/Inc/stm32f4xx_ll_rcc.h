@@ -101,20 +101,20 @@ typedef struct
  * @{
  */
 #if !defined(HSE_VALUE)
-#define HSE_VALUE 25000000U /*!< Value of the HSE oscillator in Hz */
-#endif                      /* HSE_VALUE */
+#define HSE_VALUE 25000000U            /*!< Value of the HSE oscillator in Hz */
+#endif                                 /* HSE_VALUE */
 
 #if !defined(HSI_VALUE)
-#define HSI_VALUE 16000000U /*!< Value of the HSI oscillator in Hz */
-#endif                      /* HSI_VALUE */
+#define HSI_VALUE 16000000U            /*!< Value of the HSI oscillator in Hz */
+#endif                                 /* HSI_VALUE */
 
 #if !defined(LSE_VALUE)
-#define LSE_VALUE 32768U /*!< Value of the LSE oscillator in Hz */
-#endif                   /* LSE_VALUE */
+#define LSE_VALUE 32768U               /*!< Value of the LSE oscillator in Hz */
+#endif                                 /* LSE_VALUE */
 
 #if !defined(LSI_VALUE)
-#define LSI_VALUE 32000U /*!< Value of the LSI oscillator in Hz */
-#endif                   /* LSI_VALUE */
+#define LSI_VALUE 32000U               /*!< Value of the LSI oscillator in Hz */
+#endif                                 /* LSI_VALUE */
 
 #if !defined(EXTERNAL_CLOCK_VALUE)
 #define EXTERNAL_CLOCK_VALUE 12288000U /*!< Value of the I2S_CKIN external oscillator in Hz */
@@ -372,17 +372,17 @@ typedef struct
  * @{
  */
 #if defined(RCC_DCKCFGR_SAI1SRC)
-#define LL_RCC_SAI1_CLKSOURCE_PLLSAI (uint32_t)(RCC_DCKCFGR_SAI1SRC | 0x00000000U)                   /*!< PLLSAI clock used as SAI1 clock source */
-#define LL_RCC_SAI1_CLKSOURCE_PLLI2S (uint32_t)(RCC_DCKCFGR_SAI1SRC | (RCC_DCKCFGR_SAI1SRC_0 >> 16)) /*!< PLLI2S clock used as SAI1 clock source */
-#define LL_RCC_SAI1_CLKSOURCE_PLL    (uint32_t)(RCC_DCKCFGR_SAI1SRC | (RCC_DCKCFGR_SAI1SRC_1 >> 16)) /*!< PLL clock used as SAI1 clock source */
-#define LL_RCC_SAI1_CLKSOURCE_PIN    (uint32_t)(RCC_DCKCFGR_SAI1SRC | (RCC_DCKCFGR_SAI1SRC >> 16))   /*!< External pin clock used as SAI1 clock source */
-#endif                                                                                               /* RCC_DCKCFGR_SAI1SRC */
+#define LL_RCC_SAI1_CLKSOURCE_PLLSAI (uint32_t)(RCC_DCKCFGR_SAI1SRC | 0x00000000U)                       /*!< PLLSAI clock used as SAI1 clock source */
+#define LL_RCC_SAI1_CLKSOURCE_PLLI2S (uint32_t)(RCC_DCKCFGR_SAI1SRC | (RCC_DCKCFGR_SAI1SRC_0 >> 16))     /*!< PLLI2S clock used as SAI1 clock source */
+#define LL_RCC_SAI1_CLKSOURCE_PLL    (uint32_t)(RCC_DCKCFGR_SAI1SRC | (RCC_DCKCFGR_SAI1SRC_1 >> 16))     /*!< PLL clock used as SAI1 clock source */
+#define LL_RCC_SAI1_CLKSOURCE_PIN    (uint32_t)(RCC_DCKCFGR_SAI1SRC | (RCC_DCKCFGR_SAI1SRC >> 16))       /*!< External pin clock used as SAI1 clock source */
+#endif                                                                                                   /* RCC_DCKCFGR_SAI1SRC */
 #if defined(RCC_DCKCFGR_SAI2SRC)
-#define LL_RCC_SAI2_CLKSOURCE_PLLSAI (uint32_t)(RCC_DCKCFGR_SAI2SRC | 0x00000000U)                   /*!< PLLSAI clock used as SAI2 clock source */
-#define LL_RCC_SAI2_CLKSOURCE_PLLI2S (uint32_t)(RCC_DCKCFGR_SAI2SRC | (RCC_DCKCFGR_SAI2SRC_0 >> 16)) /*!< PLLI2S clock used as SAI2 clock source */
-#define LL_RCC_SAI2_CLKSOURCE_PLL    (uint32_t)(RCC_DCKCFGR_SAI2SRC | (RCC_DCKCFGR_SAI2SRC_1 >> 16)) /*!< PLL clock used as SAI2 clock source */
-#define LL_RCC_SAI2_CLKSOURCE_PLLSRC (uint32_t)(RCC_DCKCFGR_SAI2SRC | (RCC_DCKCFGR_SAI2SRC >> 16))   /*!< PLL Main clock used as SAI2 clock source */
-#endif                                                                                               /* RCC_DCKCFGR_SAI2SRC */
+#define LL_RCC_SAI2_CLKSOURCE_PLLSAI (uint32_t)(RCC_DCKCFGR_SAI2SRC | 0x00000000U)                       /*!< PLLSAI clock used as SAI2 clock source */
+#define LL_RCC_SAI2_CLKSOURCE_PLLI2S (uint32_t)(RCC_DCKCFGR_SAI2SRC | (RCC_DCKCFGR_SAI2SRC_0 >> 16))     /*!< PLLI2S clock used as SAI2 clock source */
+#define LL_RCC_SAI2_CLKSOURCE_PLL    (uint32_t)(RCC_DCKCFGR_SAI2SRC | (RCC_DCKCFGR_SAI2SRC_1 >> 16))     /*!< PLL clock used as SAI2 clock source */
+#define LL_RCC_SAI2_CLKSOURCE_PLLSRC (uint32_t)(RCC_DCKCFGR_SAI2SRC | (RCC_DCKCFGR_SAI2SRC >> 16))       /*!< PLL Main clock used as SAI2 clock source */
+#endif                                                                                                   /* RCC_DCKCFGR_SAI2SRC */
 #if defined(RCC_DCKCFGR_SAI1ASRC)
 #if defined(RCC_SAI1A_PLLSOURCE_SUPPORT)
 #define LL_RCC_SAI1_A_CLKSOURCE_PLLI2S (uint32_t)(RCC_DCKCFGR_SAI1ASRC | 0x00000000U)                    /*!< PLLI2S clock used as SAI1 block A clock source */

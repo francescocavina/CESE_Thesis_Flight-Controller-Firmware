@@ -69,32 +69,32 @@ extern "C" {
  */
 typedef struct
 {
-    uint32_t PeripheralMode; /*!< Specifies the peripheral mode.
-                                  This parameter can be a value of @ref I2C_LL_EC_PERIPHERAL_MODE
+    uint32_t PeripheralMode;  /*!< Specifies the peripheral mode.
+                                   This parameter can be a value of @ref I2C_LL_EC_PERIPHERAL_MODE
+ 
+                                   This feature can be modified afterwards using unitary function @ref LL_I2C_SetMode(). */
 
-                                  This feature can be modified afterwards using unitary function @ref LL_I2C_SetMode(). */
-
-    uint32_t ClockSpeed;     /*!< Specifies the clock frequency.
-                                  This parameter must be set to a value lower than 400kHz (in Hz)
-    
-                                  This feature can be modified afterwards using unitary function @ref LL_I2C_SetClockPeriod()
-                                  or @ref LL_I2C_SetDutyCycle() or @ref LL_I2C_SetClockSpeedMode() or @ref LL_I2C_ConfigSpeed(). */
-
-    uint32_t DutyCycle;      /*!< Specifies the I2C fast mode duty cycle.
-                                  This parameter can be a value of @ref I2C_LL_EC_DUTYCYCLE
+    uint32_t ClockSpeed;      /*!< Specifies the clock frequency.
+                                   This parameter must be set to a value lower than 400kHz (in Hz)
      
-                                  This feature can be modified afterwards using unitary function @ref LL_I2C_SetDutyCycle(). */
+                                   This feature can be modified afterwards using unitary function @ref LL_I2C_SetClockPeriod()
+                                   or @ref LL_I2C_SetDutyCycle() or @ref LL_I2C_SetClockSpeedMode() or @ref LL_I2C_ConfigSpeed(). */
+
+    uint32_t DutyCycle;       /*!< Specifies the I2C fast mode duty cycle.
+                                   This parameter can be a value of @ref I2C_LL_EC_DUTYCYCLE
+      
+                                   This feature can be modified afterwards using unitary function @ref LL_I2C_SetDutyCycle(). */
 
 #if defined(I2C_FLTR_ANOFF) && defined(I2C_FLTR_DNF)
-    uint32_t AnalogFilter;  /*!< Enables or disables analog noise filter.
-                                 This parameter can be a value of @ref I2C_LL_EC_ANALOGFILTER_SELECTION
- 
-                                 This feature can be modified afterwards using unitary functions @ref LL_I2C_EnableAnalogFilter() or LL_I2C_DisableAnalogFilter(). */
+    uint32_t AnalogFilter;    /*!< Enables or disables analog noise filter.
+                                   This parameter can be a value of @ref I2C_LL_EC_ANALOGFILTER_SELECTION
+   
+                                   This feature can be modified afterwards using unitary functions @ref LL_I2C_EnableAnalogFilter() or LL_I2C_DisableAnalogFilter(). */
 
-    uint32_t DigitalFilter; /*!< Configures the digital noise filter.
-                                 This parameter can be a number between Min_Data = 0x00 and Max_Data = 0x0F
-
-                                 This feature can be modified afterwards using unitary function @ref LL_I2C_SetDigitalFilter(). */
+    uint32_t DigitalFilter;   /*!< Configures the digital noise filter.
+                                   This parameter can be a number between Min_Data = 0x00 and Max_Data = 0x0F
+  
+                                   This feature can be modified afterwards using unitary function @ref LL_I2C_SetDigitalFilter(). */
 
 #endif
     uint32_t OwnAddress1;     /*!< Specifies the device own address 1.
@@ -798,7 +798,7 @@ __STATIC_INLINE void LL_I2C_ConfigSpeed(I2C_TypeDef *I2Cx, uint32_t PeriphClock,
     uint32_t clockconfig = 0x0U;
 
     /* Compute frequency range */
-    freqrange = __LL_I2C_FREQ_HZ_TO_MHZ(PeriphClock);
+    freqrange            = __LL_I2C_FREQ_HZ_TO_MHZ(PeriphClock);
 
     /* Configure I2Cx: Frequency range register */
     MODIFY_REG(I2Cx->CR2, I2C_CR2_FREQ, freqrange);

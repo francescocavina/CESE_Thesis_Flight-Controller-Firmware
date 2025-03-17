@@ -487,7 +487,7 @@ HAL_StatusTypeDef HAL_TIMEx_HallSensor_Start_DMA(TIM_HandleTypeDef *htim, uint32
     htim->hdma[TIM_DMA_ID_CC1]->XferCpltCallback     = TIM_DMACaptureCplt;
     htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMACaptureHalfCplt;
     /* Set the DMA error callback */
-    htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAError;
+    htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAError;
 
     /* Enable the DMA stream for Capture 1*/
     if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)&htim->Instance->CCR1, (uint32_t)pData, Length) != HAL_OK) {
@@ -823,7 +823,7 @@ HAL_StatusTypeDef HAL_TIMEx_OCN_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Chan
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAErrorCCxN;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAErrorCCxN;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)pData, (uint32_t)&htim->Instance->CCR1,
@@ -842,7 +842,7 @@ HAL_StatusTypeDef HAL_TIMEx_OCN_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Chan
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAErrorCCxN;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAErrorCCxN;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)pData, (uint32_t)&htim->Instance->CCR2,
@@ -861,7 +861,7 @@ HAL_StatusTypeDef HAL_TIMEx_OCN_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Chan
         htim->hdma[TIM_DMA_ID_CC3]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback = TIM_DMAErrorCCxN;
+        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback    = TIM_DMAErrorCCxN;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC3], (uint32_t)pData, (uint32_t)&htim->Instance->CCR3,
@@ -1242,7 +1242,7 @@ HAL_StatusTypeDef HAL_TIMEx_PWMN_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Cha
         htim->hdma[TIM_DMA_ID_CC1]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback = TIM_DMAErrorCCxN;
+        htim->hdma[TIM_DMA_ID_CC1]->XferErrorCallback    = TIM_DMAErrorCCxN;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC1], (uint32_t)pData, (uint32_t)&htim->Instance->CCR1,
@@ -1261,7 +1261,7 @@ HAL_StatusTypeDef HAL_TIMEx_PWMN_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Cha
         htim->hdma[TIM_DMA_ID_CC2]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback = TIM_DMAErrorCCxN;
+        htim->hdma[TIM_DMA_ID_CC2]->XferErrorCallback    = TIM_DMAErrorCCxN;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC2], (uint32_t)pData, (uint32_t)&htim->Instance->CCR2,
@@ -1280,7 +1280,7 @@ HAL_StatusTypeDef HAL_TIMEx_PWMN_Start_DMA(TIM_HandleTypeDef *htim, uint32_t Cha
         htim->hdma[TIM_DMA_ID_CC3]->XferHalfCpltCallback = TIM_DMADelayPulseHalfCplt;
 
         /* Set the DMA error callback */
-        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback = TIM_DMAErrorCCxN;
+        htim->hdma[TIM_DMA_ID_CC3]->XferErrorCallback    = TIM_DMAErrorCCxN;
 
         /* Enable the DMA stream */
         if (HAL_DMA_Start_IT(htim->hdma[TIM_DMA_ID_CC3], (uint32_t)pData, (uint32_t)&htim->Instance->CCR3,
@@ -1761,7 +1761,7 @@ HAL_StatusTypeDef HAL_TIMEx_ConfigCommutEvent_DMA(TIM_HandleTypeDef *htim, uint3
     htim->hdma[TIM_DMA_ID_COMMUTATION]->XferCpltCallback     = TIMEx_DMACommutationCplt;
     htim->hdma[TIM_DMA_ID_COMMUTATION]->XferHalfCpltCallback = TIMEx_DMACommutationHalfCplt;
     /* Set the DMA error callback */
-    htim->hdma[TIM_DMA_ID_COMMUTATION]->XferErrorCallback = TIM_DMAError;
+    htim->hdma[TIM_DMA_ID_COMMUTATION]->XferErrorCallback    = TIM_DMAError;
 
     /* Disable Commutation Interrupt */
     __HAL_TIM_DISABLE_IT(htim, TIM_IT_COM);
@@ -1799,10 +1799,10 @@ HAL_StatusTypeDef HAL_TIMEx_MasterConfigSynchronization(TIM_HandleTypeDef       
     htim->State = HAL_TIM_STATE_BUSY;
 
     /* Get the TIMx CR2 register value */
-    tmpcr2 = htim->Instance->CR2;
+    tmpcr2      = htim->Instance->CR2;
 
     /* Get the TIMx SMCR register value */
-    tmpsmcr = htim->Instance->SMCR;
+    tmpsmcr     = htim->Instance->SMCR;
 
     /* Reset the MMS Bits */
     tmpcr2 &= ~TIM_CR2_MMS;
@@ -2072,7 +2072,7 @@ void TIMEx_DMACommutationCplt(DMA_HandleTypeDef *hdma) {
     TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
 
     /* Change the htim state */
-    htim->State = HAL_TIM_STATE_READY;
+    htim->State             = HAL_TIM_STATE_READY;
 
 #if (USE_HAL_TIM_REGISTER_CALLBACKS == 1)
     htim->CommutationCallback(htim);
@@ -2090,7 +2090,7 @@ void TIMEx_DMACommutationHalfCplt(DMA_HandleTypeDef *hdma) {
     TIM_HandleTypeDef *htim = (TIM_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
 
     /* Change the htim state */
-    htim->State = HAL_TIM_STATE_READY;
+    htim->State             = HAL_TIM_STATE_READY;
 
 #if (USE_HAL_TIM_REGISTER_CALLBACKS == 1)
     htim->CommutationHalfCpltCallback(htim);

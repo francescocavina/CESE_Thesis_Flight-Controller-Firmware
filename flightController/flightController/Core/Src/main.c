@@ -183,7 +183,7 @@ static void MX_ADC1_Init(void) {
 
     /* USER CODE END ADC1_Init 0 */
 
-    ADC_ChannelConfTypeDef sConfig = {0};
+    ADC_ChannelConfTypeDef sConfig   = {0};
 
     /* USER CODE BEGIN ADC1_Init 1 */
 
@@ -235,7 +235,7 @@ static void MX_I2C1_Init(void) {
 
     /* USER CODE END I2C1_Init 1 */
     hi2c1.Instance             = I2C1;
-    hi2c1.Init.ClockSpeed      = 100000;
+    hi2c1.Init.ClockSpeed      = 400000;
     hi2c1.Init.DutyCycle       = I2C_DUTYCYCLE_2;
     hi2c1.Init.OwnAddress1     = 0;
     hi2c1.Init.AddressingMode  = I2C_ADDRESSINGMODE_7BIT;
@@ -268,12 +268,12 @@ static void MX_TIM3_Init(void) {
     /* USER CODE BEGIN TIM3_Init 1 */
 
     /* USER CODE END TIM3_Init 1 */
-    htim3.Instance               = TIM3;
-    htim3.Init.Prescaler         = 20;
-    htim3.Init.CounterMode       = TIM_COUNTERMODE_UP;
-    htim3.Init.Period            = 65535;
-    htim3.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
-    htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+    htim3.Instance                        = TIM3;
+    htim3.Init.Prescaler                  = 20;
+    htim3.Init.CounterMode                = TIM_COUNTERMODE_UP;
+    htim3.Init.Period                     = 65535;
+    htim3.Init.ClockDivision              = TIM_CLOCKDIVISION_DIV1;
+    htim3.Init.AutoReloadPreload          = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_PWM_Init(&htim3) != HAL_OK) {
         Error_Handler();
     }

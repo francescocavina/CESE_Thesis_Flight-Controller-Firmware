@@ -1328,16 +1328,16 @@ HAL_StatusTypeDef HAL_ADC_Start_DMA(ADC_HandleTypeDef *hadc, uint32_t *pData, ui
         /* Pointer to the common control register to which is belonging hadc    */
         /* (Depending on STM32F4 product, there may be up to 3 ADCs and 1 common */
         /* control register)                                                    */
-        tmpADC_Common = ADC_COMMON_REGISTER(hadc);
+        tmpADC_Common                          = ADC_COMMON_REGISTER(hadc);
 
         /* Set the DMA transfer complete callback */
-        hadc->DMA_Handle->XferCpltCallback = ADC_DMAConvCplt;
+        hadc->DMA_Handle->XferCpltCallback     = ADC_DMAConvCplt;
 
         /* Set the DMA half transfer complete callback */
         hadc->DMA_Handle->XferHalfCpltCallback = ADC_DMAHalfConvCplt;
 
         /* Set the DMA error callback */
-        hadc->DMA_Handle->XferErrorCallback = ADC_DMAError;
+        hadc->DMA_Handle->XferErrorCallback    = ADC_DMAError;
 
         /* Manage ADC and DMA start: ADC overrun interruption, DMA start, ADC     */
         /* start (in case of SW start):                                           */

@@ -219,7 +219,7 @@ USBD_StatusTypeDef USBD_StdEPReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
     uint8_t               idx;
     USBD_StatusTypeDef    ret = USBD_OK;
 
-    ep_addr = LOBYTE(req->wIndex);
+    ep_addr                   = LOBYTE(req->wIndex);
 
     switch (req->bmRequest & USB_REQ_TYPE_MASK) {
     case USB_REQ_TYPE_CLASS:
@@ -308,7 +308,7 @@ USBD_StatusTypeDef USBD_StdEPReq(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
                     USBD_CtlError(pdev, req);
                     break;
                 }
-                pep = ((ep_addr & 0x80U) == 0x80U) ? &pdev->ep_in[ep_addr & 0x7FU] : &pdev->ep_out[ep_addr & 0x7FU];
+                pep         = ((ep_addr & 0x80U) == 0x80U) ? &pdev->ep_in[ep_addr & 0x7FU] : &pdev->ep_out[ep_addr & 0x7FU];
 
                 pep->status = 0x0000U;
 
@@ -613,7 +613,7 @@ static USBD_StatusTypeDef USBD_SetConfig(USBD_HandleTypeDef *pdev, USBD_SetupReq
         if (cfgidx != 0U) {
             pdev->dev_config = cfgidx;
 
-            ret = USBD_SetClassConfig(pdev, cfgidx);
+            ret              = USBD_SetClassConfig(pdev, cfgidx);
 
             if (ret != USBD_OK) {
                 USBD_CtlError(pdev, req);
@@ -646,7 +646,7 @@ static USBD_StatusTypeDef USBD_SetConfig(USBD_HandleTypeDef *pdev, USBD_SetupReq
             /* set new configuration */
             pdev->dev_config = cfgidx;
 
-            ret = USBD_SetClassConfig(pdev, cfgidx);
+            ret              = USBD_SetClassConfig(pdev, cfgidx);
 
             if (ret != USBD_OK) {
                 USBD_CtlError(pdev, req);
@@ -835,8 +835,8 @@ void USBD_GetString(uint8_t *desc, uint8_t *unicode, uint16_t *len) {
         return;
     }
 
-    pdesc = desc;
-    *len  = MIN(USBD_MAX_STR_DESC_SIZ, ((uint16_t)USBD_GetLen(pdesc) * 2U) + 2U);
+    pdesc        = desc;
+    *len         = MIN(USBD_MAX_STR_DESC_SIZ, ((uint16_t)USBD_GetLen(pdesc) * 2U) + 2U);
 
     unicode[idx] = *(uint8_t *)len;
     idx++;

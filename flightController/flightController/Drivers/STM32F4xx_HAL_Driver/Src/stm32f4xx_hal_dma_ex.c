@@ -165,7 +165,7 @@ HAL_StatusTypeDef HAL_DMAEx_MultiBufferStart_IT(DMA_HandleTypeDef *hdma, uint32_
 
     if (HAL_DMA_STATE_READY == hdma->State) {
         /* Change DMA peripheral state */
-        hdma->State = HAL_DMA_STATE_BUSY;
+        hdma->State     = HAL_DMA_STATE_BUSY;
 
         /* Initialize the error code */
         hdma->ErrorCode = HAL_DMA_ERROR_NONE;
@@ -260,7 +260,7 @@ static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddres
     /* Peripheral to Memory */
     if ((hdma->Init.Direction) == DMA_MEMORY_TO_PERIPH) {
         /* Configure DMA Stream destination address */
-        hdma->Instance->PAR = DstAddress;
+        hdma->Instance->PAR  = DstAddress;
 
         /* Configure DMA Stream source address */
         hdma->Instance->M0AR = SrcAddress;
@@ -268,7 +268,7 @@ static void DMA_MultiBufferSetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddres
     /* Memory to Peripheral */
     else {
         /* Configure DMA Stream source address */
-        hdma->Instance->PAR = SrcAddress;
+        hdma->Instance->PAR  = SrcAddress;
 
         /* Configure DMA Stream destination address */
         hdma->Instance->M0AR = DstAddress;

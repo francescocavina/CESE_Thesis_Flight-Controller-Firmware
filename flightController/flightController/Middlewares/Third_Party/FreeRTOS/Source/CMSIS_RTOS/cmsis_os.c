@@ -826,7 +826,7 @@ osPoolId osPoolCreate(const osPoolDef_t *pool_def) {
         thePool->currentIndex = 0;
 
         /* Memory for markers */
-        thePool->markers = pvPortMalloc(pool_def->pool_sz);
+        thePool->markers      = pvPortMalloc(pool_def->pool_sz);
 
         if (thePool->markers) {
             /* Now allocate the pool itself. */
@@ -1027,7 +1027,7 @@ osEvent osMessageGet(osMessageQId queue_id, uint32_t millisec) {
 
     taskWoken = pdFALSE;
 
-    ticks = 0;
+    ticks     = 0;
     if (millisec == osWaitForever) {
         ticks = portMAX_DELAY;
     } else if (millisec != 0) {
@@ -1083,7 +1083,7 @@ osMailQId osMailCreate(const osMailQDef_t *queue_def, osThreadId thread_id) {
 
     /* Create a mail queue control block */
 
-    *(queue_def->cb) = pvPortMalloc(sizeof(struct os_mailQ_cb));
+    *(queue_def->cb)     = pvPortMalloc(sizeof(struct os_mailQ_cb));
 
     if (*(queue_def->cb) == NULL) {
         return NULL;
@@ -1091,7 +1091,7 @@ osMailQId osMailCreate(const osMailQDef_t *queue_def, osThreadId thread_id) {
     (*(queue_def->cb))->queue_def = queue_def;
 
     /* Create a queue in FreeRTOS */
-    (*(queue_def->cb))->handle = xQueueCreate(queue_def->queue_sz, sizeof(void *));
+    (*(queue_def->cb))->handle    = xQueueCreate(queue_def->queue_sz, sizeof(void *));
 
     if ((*(queue_def->cb))->handle == NULL) {
         vPortFree(*(queue_def->cb));
@@ -1203,7 +1203,7 @@ osEvent osMailGet(osMailQId queue_id, uint32_t millisec) {
 
     taskWoken = pdFALSE;
 
-    ticks = 0;
+    ticks     = 0;
     if (millisec == osWaitForever) {
         ticks = portMAX_DELAY;
     } else if (millisec != 0) {

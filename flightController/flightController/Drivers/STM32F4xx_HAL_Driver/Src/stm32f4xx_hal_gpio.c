@@ -176,7 +176,7 @@ void HAL_GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_InitTypeDef *GPIO_Init) {
         /* Get the IO position */
         ioposition = 0x01U << position;
         /* Get the current IO position */
-        iocurrent = (uint32_t)(GPIO_Init->Pin) & ioposition;
+        iocurrent  = (uint32_t)(GPIO_Init->Pin) & ioposition;
 
         if (iocurrent == ioposition) {
             /*--------------------- GPIO Mode Configuration ------------------------*/
@@ -192,7 +192,7 @@ void HAL_GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_InitTypeDef *GPIO_Init) {
                 GPIOx->OSPEEDR = temp;
 
                 /* Configure the IO Output Type */
-                temp = GPIOx->OTYPER;
+                temp           = GPIOx->OTYPER;
                 temp &= ~(GPIO_OTYPER_OT_0 << position);
                 temp |= (((GPIO_Init->Mode & OUTPUT_TYPE) >> OUTPUT_TYPE_Pos) << position);
                 GPIOx->OTYPER = temp;
@@ -238,21 +238,21 @@ void HAL_GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_InitTypeDef *GPIO_Init) {
                 SYSCFG->EXTICR[position >> 2U] = temp;
 
                 /* Clear Rising Falling edge configuration */
-                temp = EXTI->RTSR;
+                temp                           = EXTI->RTSR;
                 temp &= ~((uint32_t)iocurrent);
                 if ((GPIO_Init->Mode & TRIGGER_RISING) != 0x00U) {
                     temp |= iocurrent;
                 }
                 EXTI->RTSR = temp;
 
-                temp = EXTI->FTSR;
+                temp       = EXTI->FTSR;
                 temp &= ~((uint32_t)iocurrent);
                 if ((GPIO_Init->Mode & TRIGGER_FALLING) != 0x00U) {
                     temp |= iocurrent;
                 }
                 EXTI->FTSR = temp;
 
-                temp = EXTI->EMR;
+                temp       = EXTI->EMR;
                 temp &= ~((uint32_t)iocurrent);
                 if ((GPIO_Init->Mode & EXTI_EVT) != 0x00U) {
                     temp |= iocurrent;
@@ -260,7 +260,7 @@ void HAL_GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_InitTypeDef *GPIO_Init) {
                 EXTI->EMR = temp;
 
                 /* Clear EXTI line configuration */
-                temp = EXTI->IMR;
+                temp      = EXTI->IMR;
                 temp &= ~((uint32_t)iocurrent);
                 if ((GPIO_Init->Mode & EXTI_IT) != 0x00U) {
                     temp |= iocurrent;
@@ -293,7 +293,7 @@ void HAL_GPIO_DeInit(GPIO_TypeDef *GPIOx, uint32_t GPIO_Pin) {
         /* Get the IO position */
         ioposition = 0x01U << position;
         /* Get the current IO position */
-        iocurrent = (GPIO_Pin)&ioposition;
+        iocurrent  = (GPIO_Pin)&ioposition;
 
         if (iocurrent == ioposition) {
             /*------------------------- EXTI Mode Configuration --------------------*/
@@ -413,7 +413,7 @@ void HAL_GPIO_TogglePin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
     assert_param(IS_GPIO_PIN(GPIO_Pin));
 
     /* get current Output Data Register value */
-    odr = GPIOx->ODR;
+    odr         = GPIOx->ODR;
 
     /* Set selected pins that were at low level, and reset ones that were high */
     GPIOx->BSRR = ((odr & GPIO_Pin) << GPIO_NUMBER) | (~odr & GPIO_Pin);
@@ -445,7 +445,7 @@ HAL_StatusTypeDef HAL_GPIO_LockPin(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin) {
     /* Set LCKx bit(s): LCKK='1' + LCK[15-0] */
     GPIOx->LCKR = tmp;
     /* Read LCKR register. This read is mandatory to complete key lock sequence */
-    tmp = GPIOx->LCKR;
+    tmp         = GPIOx->LCKR;
 
     /* Read again in order to confirm lock is active */
     if ((GPIOx->LCKR & GPIO_LCKR_LCKK) != RESET) {

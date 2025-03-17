@@ -498,13 +498,13 @@ HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout) {
     uint32_t tickstart = 0U;
 
     /* Clear Error Code */
-    pFlash.ErrorCode = HAL_FLASH_ERROR_NONE;
+    pFlash.ErrorCode   = HAL_FLASH_ERROR_NONE;
 
     /* Wait for the FLASH operation to complete by polling on BUSY flag to be reset.
        Even if the FLASH operation fails, the BUSY flag will be reset and an error
        flag will be set */
     /* Get tick */
-    tickstart = HAL_GetTick();
+    tickstart          = HAL_GetTick();
 
     while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY) != RESET) {
         if (Timeout != HAL_MAX_DELAY) {

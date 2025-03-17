@@ -999,7 +999,7 @@ __STATIC_INLINE uint32_t LL_USART_GetBaudRate(const USART_TypeDef *USARTx, uint3
     uint32_t usartdiv  = 0x0U;
     uint32_t brrresult = 0x0U;
 
-    usartdiv = USARTx->BRR;
+    usartdiv           = USARTx->BRR;
 
     if (OverSampling == LL_USART_OVERSAMPLING_8) {
         if ((usartdiv & 0xFFF7U) != 0U) {

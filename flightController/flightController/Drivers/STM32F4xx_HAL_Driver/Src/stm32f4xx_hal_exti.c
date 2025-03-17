@@ -157,8 +157,8 @@ HAL_StatusTypeDef HAL_EXTI_SetConfigLine(EXTI_HandleTypeDef *hexti, EXTI_ConfigT
     hexti->Line = pExtiConfig->Line;
 
     /* Compute line mask */
-    linepos  = (pExtiConfig->Line & EXTI_PIN_MASK);
-    maskline = (1uL << linepos);
+    linepos     = (pExtiConfig->Line & EXTI_PIN_MASK);
+    maskline    = (1uL << linepos);
 
     /* Configure triggers for configurable lines */
     if ((pExtiConfig->Line & EXTI_CONFIG) != 0x00u) {
@@ -234,8 +234,8 @@ HAL_StatusTypeDef HAL_EXTI_GetConfigLine(EXTI_HandleTypeDef *hexti, EXTI_ConfigT
     pExtiConfig->Line = hexti->Line;
 
     /* Compute line mask */
-    linepos  = (pExtiConfig->Line & EXTI_PIN_MASK);
-    maskline = (1uL << linepos);
+    linepos           = (pExtiConfig->Line & EXTI_PIN_MASK);
+    maskline          = (1uL << linepos);
 
     /* 1] Get core mode : interrupt */
 
@@ -300,8 +300,8 @@ HAL_StatusTypeDef HAL_EXTI_ClearConfigLine(EXTI_HandleTypeDef *hexti) {
     assert_param(IS_EXTI_LINE(hexti->Line));
 
     /* compute line mask */
-    linepos  = (hexti->Line & EXTI_PIN_MASK);
-    maskline = (1uL << linepos);
+    linepos   = (hexti->Line & EXTI_PIN_MASK);
+    maskline  = (1uL << linepos);
 
     /* 1] Clear interrupt mode */
     EXTI->IMR = (EXTI->IMR & ~maskline);
@@ -402,7 +402,7 @@ void HAL_EXTI_IRQHandler(EXTI_HandleTypeDef *hexti) {
     maskline = (1uL << (hexti->Line & EXTI_PIN_MASK));
 
     /* Get pending bit  */
-    regval = (EXTI->PR & maskline);
+    regval   = (EXTI->PR & maskline);
     if (regval != 0x00u) {
         /* Clear pending bit */
         EXTI->PR = maskline;
@@ -441,7 +441,7 @@ uint32_t HAL_EXTI_GetPending(EXTI_HandleTypeDef *hexti, uint32_t Edge) {
     maskline = (1uL << linepos);
 
     /* return 1 if bit is set else 0 */
-    regval = ((EXTI->PR & maskline) >> linepos);
+    regval   = ((EXTI->PR & maskline) >> linepos);
     return regval;
 }
 
@@ -485,7 +485,7 @@ void HAL_EXTI_GenerateSWI(EXTI_HandleTypeDef *hexti) {
     assert_param(IS_EXTI_CONFIG_LINE(hexti->Line));
 
     /* Compute line mask */
-    maskline = (1uL << (hexti->Line & EXTI_PIN_MASK));
+    maskline    = (1uL << (hexti->Line & EXTI_PIN_MASK));
 
     /* Generate Software interrupt */
     EXTI->SWIER = maskline;

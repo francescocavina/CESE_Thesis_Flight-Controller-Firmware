@@ -114,22 +114,22 @@ typedef struct
  *             x  : Should be set to 0.
  */
 typedef enum {
-    HAL_UART_STATE_RESET = 0x00U,      /*!< Peripheral is not yet Initialized
+    HAL_UART_STATE_RESET      = 0x00U, /*!< Peripheral is not yet Initialized
                                            Value is allowed for gState and RxState */
-    HAL_UART_STATE_READY = 0x20U,      /*!< Peripheral Initialized and ready for use
+    HAL_UART_STATE_READY      = 0x20U, /*!< Peripheral Initialized and ready for use
                                            Value is allowed for gState and RxState */
-    HAL_UART_STATE_BUSY = 0x24U,       /*!< an internal process is ongoing
+    HAL_UART_STATE_BUSY       = 0x24U, /*!< an internal process is ongoing
                                            Value is allowed for gState only */
-    HAL_UART_STATE_BUSY_TX = 0x21U,    /*!< Data Transmission process is ongoing
+    HAL_UART_STATE_BUSY_TX    = 0x21U, /*!< Data Transmission process is ongoing
                                            Value is allowed for gState only */
-    HAL_UART_STATE_BUSY_RX = 0x22U,    /*!< Data Reception process is ongoing
+    HAL_UART_STATE_BUSY_RX    = 0x22U, /*!< Data Reception process is ongoing
                                            Value is allowed for RxState only */
     HAL_UART_STATE_BUSY_TX_RX = 0x23U, /*!< Data Transmission and Reception process is ongoing
                                            Not to be used for neither gState nor RxState.
                                            Value is result of combination (Or) between gState and RxState values */
-    HAL_UART_STATE_TIMEOUT = 0xA0U,    /*!< Timeout state
+    HAL_UART_STATE_TIMEOUT    = 0xA0U, /*!< Timeout state
                                            Value is allowed for gState only */
-    HAL_UART_STATE_ERROR = 0xE0U       /*!< Error
+    HAL_UART_STATE_ERROR      = 0xE0U  /*!< Error
                                            Value is allowed for gState only */
 } HAL_UART_StateTypeDef;
 
@@ -157,40 +157,40 @@ typedef uint32_t HAL_UART_RxEventTypeTypeDef;
  * @brief  UART handle Structure definition
  */
 typedef struct __UART_HandleTypeDef {
-    USART_TypeDef *Instance;                      /*!< UART registers base address        */
+    USART_TypeDef *Instance;                                                   /*!< UART registers base address        */
 
-    UART_InitTypeDef Init;                        /*!< UART communication parameters      */
+    UART_InitTypeDef Init;                                                     /*!< UART communication parameters      */
 
-    const uint8_t *pTxBuffPtr;                    /*!< Pointer to UART Tx transfer Buffer */
+    const uint8_t *pTxBuffPtr;                                                 /*!< Pointer to UART Tx transfer Buffer */
 
-    uint16_t TxXferSize;                          /*!< UART Tx Transfer size              */
+    uint16_t TxXferSize;                                                       /*!< UART Tx Transfer size              */
 
-    __IO uint16_t TxXferCount;                    /*!< UART Tx Transfer Counter           */
+    __IO uint16_t TxXferCount;                                                 /*!< UART Tx Transfer Counter           */
 
-    uint8_t *pRxBuffPtr;                          /*!< Pointer to UART Rx transfer Buffer */
+    uint8_t *pRxBuffPtr;                                                       /*!< Pointer to UART Rx transfer Buffer */
 
-    uint16_t RxXferSize;                          /*!< UART Rx Transfer size              */
+    uint16_t RxXferSize;                                                       /*!< UART Rx Transfer size              */
 
-    __IO uint16_t RxXferCount;                    /*!< UART Rx Transfer Counter           */
+    __IO uint16_t RxXferCount;                                                 /*!< UART Rx Transfer Counter           */
 
-    __IO HAL_UART_RxTypeTypeDef ReceptionType;    /*!< Type of ongoing reception          */
+    __IO HAL_UART_RxTypeTypeDef ReceptionType;                                 /*!< Type of ongoing reception          */
 
-    __IO HAL_UART_RxEventTypeTypeDef RxEventType; /*!< Type of Rx Event                   */
+    __IO HAL_UART_RxEventTypeTypeDef RxEventType;                              /*!< Type of Rx Event                   */
 
-    DMA_HandleTypeDef *hdmatx;                    /*!< UART Tx DMA Handle parameters      */
+    DMA_HandleTypeDef *hdmatx;                                                 /*!< UART Tx DMA Handle parameters      */
 
-    DMA_HandleTypeDef *hdmarx;                    /*!< UART Rx DMA Handle parameters      */
+    DMA_HandleTypeDef *hdmarx;                                                 /*!< UART Rx DMA Handle parameters      */
 
-    HAL_LockTypeDef Lock;                         /*!< Locking object                     */
+    HAL_LockTypeDef Lock;                                                      /*!< Locking object                     */
 
-    __IO HAL_UART_StateTypeDef gState;            /*!< UART state information related to global Handle management
-                                                       and also related to Tx operations.
-                                                       This parameter can be a value of @ref HAL_UART_StateTypeDef */
+    __IO HAL_UART_StateTypeDef gState;                                         /*!< UART state information related to global Handle management
+                                                                                    and also related to Tx operations.
+                                                                                    This parameter can be a value of @ref HAL_UART_StateTypeDef */
 
-    __IO HAL_UART_StateTypeDef RxState;           /*!< UART state information related to Rx operations.
-                                                       This parameter can be a value of @ref HAL_UART_StateTypeDef */
+    __IO HAL_UART_StateTypeDef RxState;                                        /*!< UART state information related to Rx operations.
+                                                                                    This parameter can be a value of @ref HAL_UART_StateTypeDef */
 
-    __IO uint32_t ErrorCode;                      /*!< UART Error code                    */
+    __IO uint32_t ErrorCode;                                                   /*!< UART Error code                    */
 
 #if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
     void (*TxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Tx Half Complete Callback        */
@@ -225,8 +225,8 @@ typedef enum {
     HAL_UART_ABORT_RECEIVE_COMPLETE_CB_ID  = 0x07U, /*!< UART Abort Receive Complete Callback ID  */
     HAL_UART_WAKEUP_CB_ID                  = 0x08U, /*!< UART Wakeup Callback ID                  */
 
-    HAL_UART_MSPINIT_CB_ID   = 0x0BU,               /*!< UART MspInit callback ID                 */
-    HAL_UART_MSPDEINIT_CB_ID = 0x0CU                /*!< UART MspDeInit callback ID               */
+    HAL_UART_MSPINIT_CB_ID                 = 0x0BU, /*!< UART MspInit callback ID                 */
+    HAL_UART_MSPDEINIT_CB_ID               = 0x0CU  /*!< UART MspDeInit callback ID               */
 
 } HAL_UART_CallbackIDTypeDef;
 

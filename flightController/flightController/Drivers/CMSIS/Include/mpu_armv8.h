@@ -295,7 +295,7 @@ __STATIC_INLINE void ARM_MPU_LoadEx(MPU_Type *mpu, uint32_t rnr, ARM_MPU_Region_
         uint32_t rnrBase   = rnr & ~(MPU_TYPE_RALIASES - 1U);
         uint32_t rnrOffset = rnr % MPU_TYPE_RALIASES;
 
-        mpu->RNR = rnrBase;
+        mpu->RNR           = rnrBase;
         while ((rnrOffset + cnt) > MPU_TYPE_RALIASES) {
             uint32_t c = MPU_TYPE_RALIASES - rnrOffset;
             ARM_MPU_OrderedMemcpy(&(mpu->RBAR) + (rnrOffset * 2U), &(table->RBAR), c * rowWordSize);

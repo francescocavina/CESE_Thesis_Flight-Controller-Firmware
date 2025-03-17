@@ -107,7 +107,7 @@ static size_t xNumberOfSuccessfulFrees       = 0;
 member of an BlockLink_t structure is set then the block belongs to the
 application.  When the bit is free the block is still part of the free heap
 space. */
-static size_t xBlockAllocatedBit = 0;
+static size_t xBlockAllocatedBit             = 0;
 
 /*-----------------------------------------------------------*/
 
@@ -163,7 +163,7 @@ void *pvPortMalloc(size_t xWantedSize) {
                 if (pxBlock != pxEnd) {
                     /* Return the memory space pointed to - jumping over the
                     BlockLink_t structure at its start. */
-                    pvReturn = (void *)(((uint8_t *)pxPreviousBlock->pxNextFreeBlock) + xHeapStructSize);
+                    pvReturn                         = (void *)(((uint8_t *)pxPreviousBlock->pxNextFreeBlock) + xHeapStructSize);
 
                     /* This block is being returned for use so must be taken out
                     of the list of free blocks. */
@@ -296,7 +296,7 @@ static void prvHeapInit(void) {
     size_t       xTotalHeapSize = configTOTAL_HEAP_SIZE;
 
     /* Ensure the heap starts on a correctly aligned boundary. */
-    uxAddress = (size_t)ucHeap;
+    uxAddress                   = (size_t)ucHeap;
 
     if ((uxAddress & portBYTE_ALIGNMENT_MASK) != 0) {
         uxAddress += (portBYTE_ALIGNMENT - 1);
@@ -304,7 +304,7 @@ static void prvHeapInit(void) {
         xTotalHeapSize -= uxAddress - (size_t)ucHeap;
     }
 
-    pucAlignedHeap = (uint8_t *)uxAddress;
+    pucAlignedHeap         = (uint8_t *)uxAddress;
 
     /* xStart is used to hold a pointer to the first item in the list of free
     blocks.  The void cast is used to prevent compiler warnings. */
@@ -313,12 +313,12 @@ static void prvHeapInit(void) {
 
     /* pxEnd is used to mark the end of the list of free blocks and is inserted
     at the end of the heap space. */
-    uxAddress = ((size_t)pucAlignedHeap) + xTotalHeapSize;
+    uxAddress              = ((size_t)pucAlignedHeap) + xTotalHeapSize;
     uxAddress -= xHeapStructSize;
     uxAddress &= ~((size_t)portBYTE_ALIGNMENT_MASK);
-    pxEnd                  = (void *)uxAddress;
-    pxEnd->xBlockSize      = 0;
-    pxEnd->pxNextFreeBlock = NULL;
+    pxEnd                             = (void *)uxAddress;
+    pxEnd->xBlockSize                 = 0;
+    pxEnd->pxNextFreeBlock            = NULL;
 
     /* To start with there is a single free block that is sized to take up the
     entire heap space, minus the space taken by pxEnd. */
@@ -327,11 +327,11 @@ static void prvHeapInit(void) {
     pxFirstFreeBlock->pxNextFreeBlock = pxEnd;
 
     /* Only one block exists - and it covers the entire usable heap space. */
-    xMinimumEverFreeBytesRemaining = pxFirstFreeBlock->xBlockSize;
-    xFreeBytesRemaining            = pxFirstFreeBlock->xBlockSize;
+    xMinimumEverFreeBytesRemaining    = pxFirstFreeBlock->xBlockSize;
+    xFreeBytesRemaining               = pxFirstFreeBlock->xBlockSize;
 
     /* Work out the position of the top bit in a size_t variable. */
-    xBlockAllocatedBit = ((size_t)1) << ((sizeof(size_t) * heapBITS_PER_BYTE) - 1);
+    xBlockAllocatedBit                = ((size_t)1) << ((sizeof(size_t) * heapBITS_PER_BYTE) - 1);
 }
 /*-----------------------------------------------------------*/
 

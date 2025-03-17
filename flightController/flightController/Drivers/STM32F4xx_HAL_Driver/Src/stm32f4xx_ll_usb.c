@@ -959,7 +959,7 @@ HAL_StatusTypeDef USB_StopDevice(USB_OTG_GlobalTypeDef *USBx) {
     USBx_DEVICE->DAINTMSK = 0U;
 
     /* Flush the FIFO */
-    ret = USB_FlushRxFifo(USBx);
+    ret                   = USB_FlushRxFifo(USBx);
     if (ret != HAL_OK) {
         return ret;
     }
@@ -1355,11 +1355,11 @@ HAL_StatusTypeDef USB_InitFSLSPClkSel(const USB_OTG_GlobalTypeDef *USBx, uint8_t
  *   before clearing the reset bit.
  */
 HAL_StatusTypeDef USB_ResetPort(const USB_OTG_GlobalTypeDef *USBx) {
-    uint32_t USBx_BASE = (uint32_t)USBx;
+    uint32_t USBx_BASE  = (uint32_t)USBx;
 
     __IO uint32_t hprt0 = 0U;
 
-    hprt0 = USBx_HPRT0;
+    hprt0               = USBx_HPRT0;
 
     hprt0 &= ~(USB_OTG_HPRT_PENA | USB_OTG_HPRT_PCDET |
                USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
@@ -1384,7 +1384,7 @@ HAL_StatusTypeDef USB_DriveVbus(const USB_OTG_GlobalTypeDef *USBx, uint8_t state
     uint32_t      USBx_BASE = (uint32_t)USBx;
     __IO uint32_t hprt0     = 0U;
 
-    hprt0 = USBx_HPRT0;
+    hprt0                   = USBx_HPRT0;
 
     hprt0 &= ~(USB_OTG_HPRT_PENA | USB_OTG_HPRT_PCDET |
                USB_OTG_HPRT_PENCHNG | USB_OTG_HPRT_POCCHNG);
@@ -1411,7 +1411,7 @@ uint32_t USB_GetHostSpeed(USB_OTG_GlobalTypeDef const *USBx) {
     uint32_t      USBx_BASE = (uint32_t)USBx;
     __IO uint32_t hprt0     = 0U;
 
-    hprt0 = USBx_HPRT0;
+    hprt0                   = USBx_HPRT0;
     return ((hprt0 & USB_OTG_HPRT_PSPD) >> 17);
 }
 

@@ -89,27 +89,27 @@ typedef USB_OTG_EPTypeDef     PCD_EPTypeDef;
 typedef struct __PCD_HandleTypeDef
 #else
 typedef struct
-#endif                                 /* USE_HAL_PCD_REGISTER_CALLBACKS */
+#endif                                                                                 /* USE_HAL_PCD_REGISTER_CALLBACKS */
 {
-    PCD_TypeDef          *Instance;    /*!< Register base address             */
-    PCD_InitTypeDef       Init;        /*!< PCD required parameters           */
-    __IO uint8_t          USB_Address; /*!< USB Address                       */
-    PCD_EPTypeDef         IN_ep[16];   /*!< IN endpoint parameters            */
-    PCD_EPTypeDef         OUT_ep[16];  /*!< OUT endpoint parameters           */
-    HAL_LockTypeDef       Lock;        /*!< PCD peripheral status             */
-    __IO PCD_StateTypeDef State;       /*!< PCD communication state           */
-    __IO uint32_t         ErrorCode;   /*!< PCD Error code                    */
-    uint32_t              Setup[12];   /*!< Setup packet buffer               */
-    PCD_LPM_StateTypeDef  LPM_State;   /*!< LPM State                         */
+    PCD_TypeDef          *Instance;                                                    /*!< Register base address             */
+    PCD_InitTypeDef       Init;                                                        /*!< PCD required parameters           */
+    __IO uint8_t          USB_Address;                                                 /*!< USB Address                       */
+    PCD_EPTypeDef         IN_ep[16];                                                   /*!< IN endpoint parameters            */
+    PCD_EPTypeDef         OUT_ep[16];                                                  /*!< OUT endpoint parameters           */
+    HAL_LockTypeDef       Lock;                                                        /*!< PCD peripheral status             */
+    __IO PCD_StateTypeDef State;                                                       /*!< PCD communication state           */
+    __IO uint32_t         ErrorCode;                                                   /*!< PCD Error code                    */
+    uint32_t              Setup[12];                                                   /*!< Setup packet buffer               */
+    PCD_LPM_StateTypeDef  LPM_State;                                                   /*!< LPM State                         */
     uint32_t              BESL;
-    uint32_t              FrameNumber; /*!< Store Current Frame number        */
+    uint32_t              FrameNumber;                                                 /*!< Store Current Frame number        */
 
-    uint32_t lpm_active;               /*!< Enable or disable the Link Power Management .
-                                       This parameter can be set to ENABLE or DISABLE        */
+    uint32_t lpm_active;                                                               /*!< Enable or disable the Link Power Management .
+                                                                                       This parameter can be set to ENABLE or DISABLE        */
 
-    uint32_t battery_charging_active;  /*!< Enable or disable Battery charging.
-                                       This parameter can be set to ENABLE or DISABLE        */
-    void *pData;                       /*!< Pointer to upper stack Handler */
+    uint32_t battery_charging_active;                                                  /*!< Enable or disable Battery charging.
+                                                                                       This parameter can be set to ENABLE or DISABLE        */
+    void *pData;                                                                       /*!< Pointer to upper stack Handler */
 
 #if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
     void (*SOFCallback)(struct __PCD_HandleTypeDef *hpcd);                             /*!< USB OTG PCD SOF callback                */
@@ -258,8 +258,8 @@ typedef enum {
     HAL_PCD_CONNECT_CB_ID    = 0x06, /*!< USB PCD Connect callback ID      */
     HAL_PCD_DISCONNECT_CB_ID = 0x07, /*!< USB PCD Disconnect callback ID   */
 
-    HAL_PCD_MSPINIT_CB_ID   = 0x08,  /*!< USB PCD MspInit callback ID      */
-    HAL_PCD_MSPDEINIT_CB_ID = 0x09   /*!< USB PCD MspDeInit callback ID    */
+    HAL_PCD_MSPINIT_CB_ID    = 0x08, /*!< USB PCD MspInit callback ID      */
+    HAL_PCD_MSPDEINIT_CB_ID  = 0x09  /*!< USB PCD MspDeInit callback ID    */
 
 } HAL_PCD_CallbackIDTypeDef;
 /**
@@ -404,29 +404,29 @@ PCD_StateTypeDef HAL_PCD_GetState(PCD_HandleTypeDef const *hpcd);
 
 #if defined(USB_OTG_FS) || defined(USB_OTG_HS)
 #ifndef USB_OTG_DOEPINT_OTEPSPR
-#define USB_OTG_DOEPINT_OTEPSPR (0x1UL << 5) /*!< Status Phase Received interrupt */
-#endif                                       /* defined USB_OTG_DOEPINT_OTEPSPR */
+#define USB_OTG_DOEPINT_OTEPSPR (0x1UL << 5)  /*!< Status Phase Received interrupt */
+#endif                                        /* defined USB_OTG_DOEPINT_OTEPSPR */
 
 #ifndef USB_OTG_DOEPMSK_OTEPSPRM
 #define USB_OTG_DOEPMSK_OTEPSPRM (0x1UL << 5) /*!< Setup Packet Received interrupt mask */
 #endif                                        /* defined USB_OTG_DOEPMSK_OTEPSPRM */
 
 #ifndef USB_OTG_DOEPINT_NAK
-#define USB_OTG_DOEPINT_NAK (0x1UL << 13) /*!< NAK interrupt */
-#endif                                    /* defined USB_OTG_DOEPINT_NAK */
+#define USB_OTG_DOEPINT_NAK (0x1UL << 13)     /*!< NAK interrupt */
+#endif                                        /* defined USB_OTG_DOEPINT_NAK */
 
 #ifndef USB_OTG_DOEPMSK_NAKM
-#define USB_OTG_DOEPMSK_NAKM (0x1UL << 13) /*!< OUT Packet NAK interrupt mask */
-#endif                                     /* defined USB_OTG_DOEPMSK_NAKM */
+#define USB_OTG_DOEPMSK_NAKM (0x1UL << 13)    /*!< OUT Packet NAK interrupt mask */
+#endif                                        /* defined USB_OTG_DOEPMSK_NAKM */
 
 #ifndef USB_OTG_DOEPINT_STPKTRX
 #define USB_OTG_DOEPINT_STPKTRX (0x1UL << 15) /*!< Setup Packet Received interrupt */
 #endif                                        /* defined USB_OTG_DOEPINT_STPKTRX */
 
 #ifndef USB_OTG_DOEPMSK_NYETM
-#define USB_OTG_DOEPMSK_NYETM (0x1UL << 14) /*!< Setup Packet Received interrupt mask */
-#endif                                      /* defined USB_OTG_DOEPMSK_NYETM */
-#endif                                      /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
+#define USB_OTG_DOEPMSK_NYETM (0x1UL << 14)   /*!< Setup Packet Received interrupt mask */
+#endif                                        /* defined USB_OTG_DOEPMSK_NYETM */
+#endif                                        /* defined (USB_OTG_FS) || defined (USB_OTG_HS) */
 
 /* Private macros ------------------------------------------------------------*/
 /** @defgroup PCD_Private_Macros PCD Private Macros

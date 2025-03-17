@@ -148,7 +148,7 @@ struct xLIST_ITEM {
 typedef struct xLIST_ITEM ListItem_t;                   /* For some reason lint wants this as two separate definitions. */
 
 struct xMINI_LIST_ITEM {
-    listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
+    listFIRST_LIST_ITEM_INTEGRITY_CHECK_VALUE           /*< Set to a known value if configUSE_LIST_DATA_INTEGRITY_CHECK_BYTES is set to 1. */
         configLIST_VOLATILE TickType_t     xItemValue;
     struct xLIST_ITEM *configLIST_VOLATILE pxNext;
     struct xLIST_ITEM *configLIST_VOLATILE pxPrevious;
@@ -275,7 +275,7 @@ typedef struct xLIST {
         List_t *const pxConstList = (pxList);                                       \
         /* Increment the index to the next item and return the item, ensuring */    \
         /* we don't return the marker used at the end of the list.  */              \
-        (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;                    \
+        (pxConstList)->pxIndex    = (pxConstList)->pxIndex->pxNext;                 \
         if ((void *)(pxConstList)->pxIndex == (void *)&((pxConstList)->xListEnd)) { \
             (pxConstList)->pxIndex = (pxConstList)->pxIndex->pxNext;                \
         }                                                                           \

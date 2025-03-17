@@ -118,8 +118,8 @@ HAL_StatusTypeDef HAL_PCDEx_SetRxFiFo(PCD_HandleTypeDef *hpcd, uint16_t size) {
 HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef *hpcd) {
     USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
 
-    hpcd->lpm_active = 1U;
-    hpcd->LPM_State  = LPM_L0;
+    hpcd->lpm_active            = 1U;
+    hpcd->LPM_State             = LPM_L0;
     USBx->GINTMSK |= USB_OTG_GINTMSK_LPMINTM;
     USBx->GLPMCFG |= (USB_OTG_GLPMCFG_LPMEN | USB_OTG_GLPMCFG_LPMACK | USB_OTG_GLPMCFG_ENBESL);
 
@@ -134,7 +134,7 @@ HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef *hpcd) {
 HAL_StatusTypeDef HAL_PCDEx_DeActivateLPM(PCD_HandleTypeDef *hpcd) {
     USB_OTG_GlobalTypeDef *USBx = hpcd->Instance;
 
-    hpcd->lpm_active = 0U;
+    hpcd->lpm_active            = 0U;
     USBx->GINTMSK &= ~USB_OTG_GINTMSK_LPMINTM;
     USBx->GLPMCFG &= ~(USB_OTG_GLPMCFG_LPMEN | USB_OTG_GLPMCFG_LPMACK | USB_OTG_GLPMCFG_ENBESL);
 

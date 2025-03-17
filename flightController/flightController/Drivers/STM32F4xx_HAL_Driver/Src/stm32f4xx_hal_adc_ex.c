@@ -386,7 +386,7 @@ HAL_StatusTypeDef HAL_ADCEx_InjectedPollForConversion(ADC_HandleTypeDef *hadc, u
     uint32_t tickstart = 0U;
 
     /* Get tick */
-    tickstart = HAL_GetTick();
+    tickstart          = HAL_GetTick();
 
     /* Check End of conversion flag */
     while (!(__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_JEOC))) {
@@ -600,13 +600,13 @@ HAL_StatusTypeDef HAL_ADCEx_MultiModeStart_DMA(ADC_HandleTypeDef *hadc, uint32_t
         __HAL_UNLOCK(hadc);
 
         /* Set the DMA transfer complete callback */
-        hadc->DMA_Handle->XferCpltCallback = ADC_MultiModeDMAConvCplt;
+        hadc->DMA_Handle->XferCpltCallback     = ADC_MultiModeDMAConvCplt;
 
         /* Set the DMA half transfer complete callback */
         hadc->DMA_Handle->XferHalfCpltCallback = ADC_MultiModeDMAHalfConvCplt;
 
         /* Set the DMA error callback */
-        hadc->DMA_Handle->XferErrorCallback = ADC_MultiModeDMAError;
+        hadc->DMA_Handle->XferErrorCallback    = ADC_MultiModeDMAError;
 
         /* Manage ADC and DMA start: ADC overrun interruption, DMA start, ADC     */
         /* start (in case of SW start):                                           */

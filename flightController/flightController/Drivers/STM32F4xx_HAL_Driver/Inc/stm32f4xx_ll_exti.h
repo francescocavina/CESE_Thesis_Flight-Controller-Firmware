@@ -83,69 +83,69 @@ typedef struct
 /** @defgroup EXTI_LL_EC_LINE LINE
  * @{
  */
-#define LL_EXTI_LINE_0  EXTI_IMR_IM0  /*!< Extended line 0 */
-#define LL_EXTI_LINE_1  EXTI_IMR_IM1  /*!< Extended line 1 */
-#define LL_EXTI_LINE_2  EXTI_IMR_IM2  /*!< Extended line 2 */
-#define LL_EXTI_LINE_3  EXTI_IMR_IM3  /*!< Extended line 3 */
-#define LL_EXTI_LINE_4  EXTI_IMR_IM4  /*!< Extended line 4 */
-#define LL_EXTI_LINE_5  EXTI_IMR_IM5  /*!< Extended line 5 */
-#define LL_EXTI_LINE_6  EXTI_IMR_IM6  /*!< Extended line 6 */
-#define LL_EXTI_LINE_7  EXTI_IMR_IM7  /*!< Extended line 7 */
-#define LL_EXTI_LINE_8  EXTI_IMR_IM8  /*!< Extended line 8 */
-#define LL_EXTI_LINE_9  EXTI_IMR_IM9  /*!< Extended line 9 */
-#define LL_EXTI_LINE_10 EXTI_IMR_IM10 /*!< Extended line 10 */
-#define LL_EXTI_LINE_11 EXTI_IMR_IM11 /*!< Extended line 11 */
-#define LL_EXTI_LINE_12 EXTI_IMR_IM12 /*!< Extended line 12 */
-#define LL_EXTI_LINE_13 EXTI_IMR_IM13 /*!< Extended line 13 */
-#define LL_EXTI_LINE_14 EXTI_IMR_IM14 /*!< Extended line 14 */
-#define LL_EXTI_LINE_15 EXTI_IMR_IM15 /*!< Extended line 15 */
+#define LL_EXTI_LINE_0  EXTI_IMR_IM0              /*!< Extended line 0 */
+#define LL_EXTI_LINE_1  EXTI_IMR_IM1              /*!< Extended line 1 */
+#define LL_EXTI_LINE_2  EXTI_IMR_IM2              /*!< Extended line 2 */
+#define LL_EXTI_LINE_3  EXTI_IMR_IM3              /*!< Extended line 3 */
+#define LL_EXTI_LINE_4  EXTI_IMR_IM4              /*!< Extended line 4 */
+#define LL_EXTI_LINE_5  EXTI_IMR_IM5              /*!< Extended line 5 */
+#define LL_EXTI_LINE_6  EXTI_IMR_IM6              /*!< Extended line 6 */
+#define LL_EXTI_LINE_7  EXTI_IMR_IM7              /*!< Extended line 7 */
+#define LL_EXTI_LINE_8  EXTI_IMR_IM8              /*!< Extended line 8 */
+#define LL_EXTI_LINE_9  EXTI_IMR_IM9              /*!< Extended line 9 */
+#define LL_EXTI_LINE_10 EXTI_IMR_IM10             /*!< Extended line 10 */
+#define LL_EXTI_LINE_11 EXTI_IMR_IM11             /*!< Extended line 11 */
+#define LL_EXTI_LINE_12 EXTI_IMR_IM12             /*!< Extended line 12 */
+#define LL_EXTI_LINE_13 EXTI_IMR_IM13             /*!< Extended line 13 */
+#define LL_EXTI_LINE_14 EXTI_IMR_IM14             /*!< Extended line 14 */
+#define LL_EXTI_LINE_15 EXTI_IMR_IM15             /*!< Extended line 15 */
 #if defined(EXTI_IMR_IM16)
-#define LL_EXTI_LINE_16 EXTI_IMR_IM16 /*!< Extended line 16 */
+#define LL_EXTI_LINE_16 EXTI_IMR_IM16             /*!< Extended line 16 */
 #endif
-#define LL_EXTI_LINE_17 EXTI_IMR_IM17 /*!< Extended line 17 */
+#define LL_EXTI_LINE_17 EXTI_IMR_IM17             /*!< Extended line 17 */
 #if defined(EXTI_IMR_IM18)
-#define LL_EXTI_LINE_18 EXTI_IMR_IM18 /*!< Extended line 18 */
+#define LL_EXTI_LINE_18 EXTI_IMR_IM18             /*!< Extended line 18 */
 #endif
-#define LL_EXTI_LINE_19 EXTI_IMR_IM19 /*!< Extended line 19 */
+#define LL_EXTI_LINE_19 EXTI_IMR_IM19             /*!< Extended line 19 */
 #if defined(EXTI_IMR_IM20)
-#define LL_EXTI_LINE_20 EXTI_IMR_IM20 /*!< Extended line 20 */
+#define LL_EXTI_LINE_20 EXTI_IMR_IM20             /*!< Extended line 20 */
 #endif
 #if defined(EXTI_IMR_IM21)
-#define LL_EXTI_LINE_21 EXTI_IMR_IM21 /*!< Extended line 21 */
+#define LL_EXTI_LINE_21 EXTI_IMR_IM21             /*!< Extended line 21 */
 #endif
 #if defined(EXTI_IMR_IM22)
-#define LL_EXTI_LINE_22 EXTI_IMR_IM22 /*!< Extended line 22 */
+#define LL_EXTI_LINE_22 EXTI_IMR_IM22             /*!< Extended line 22 */
 #endif
 #if defined(EXTI_IMR_IM23)
-#define LL_EXTI_LINE_23 EXTI_IMR_IM23 /*!< Extended line 23 */
+#define LL_EXTI_LINE_23 EXTI_IMR_IM23             /*!< Extended line 23 */
 #endif
 #if defined(EXTI_IMR_IM24)
-#define LL_EXTI_LINE_24 EXTI_IMR_IM24 /*!< Extended line 24 */
+#define LL_EXTI_LINE_24 EXTI_IMR_IM24             /*!< Extended line 24 */
 #endif
 #if defined(EXTI_IMR_IM25)
-#define LL_EXTI_LINE_25 EXTI_IMR_IM25 /*!< Extended line 25 */
+#define LL_EXTI_LINE_25 EXTI_IMR_IM25             /*!< Extended line 25 */
 #endif
 #if defined(EXTI_IMR_IM26)
-#define LL_EXTI_LINE_26 EXTI_IMR_IM26 /*!< Extended line 26 */
+#define LL_EXTI_LINE_26 EXTI_IMR_IM26             /*!< Extended line 26 */
 #endif
 #if defined(EXTI_IMR_IM27)
-#define LL_EXTI_LINE_27 EXTI_IMR_IM27 /*!< Extended line 27 */
+#define LL_EXTI_LINE_27 EXTI_IMR_IM27             /*!< Extended line 27 */
 #endif
 #if defined(EXTI_IMR_IM28)
-#define LL_EXTI_LINE_28 EXTI_IMR_IM28 /*!< Extended line 28 */
+#define LL_EXTI_LINE_28 EXTI_IMR_IM28             /*!< Extended line 28 */
 #endif
 #if defined(EXTI_IMR_IM29)
-#define LL_EXTI_LINE_29 EXTI_IMR_IM29 /*!< Extended line 29 */
+#define LL_EXTI_LINE_29 EXTI_IMR_IM29             /*!< Extended line 29 */
 #endif
 #if defined(EXTI_IMR_IM30)
-#define LL_EXTI_LINE_30 EXTI_IMR_IM30 /*!< Extended line 30 */
+#define LL_EXTI_LINE_30 EXTI_IMR_IM30             /*!< Extended line 30 */
 #endif
 #if defined(EXTI_IMR_IM31)
-#define LL_EXTI_LINE_31 EXTI_IMR_IM31            /*!< Extended line 31 */
+#define LL_EXTI_LINE_31 EXTI_IMR_IM31             /*!< Extended line 31 */
 #endif
-#define LL_EXTI_LINE_ALL_0_31 EXTI_IMR_IM        /*!< All Extended line not reserved*/
+#define LL_EXTI_LINE_ALL_0_31 EXTI_IMR_IM         /*!< All Extended line not reserved*/
 
-#define LL_EXTI_LINE_ALL ((uint32_t)0xFFFFFFFFU) /*!< All Extended line */
+#define LL_EXTI_LINE_ALL ((uint32_t)0xFFFFFFFFU)  /*!< All Extended line */
 
 #if defined(USE_FULL_LL_DRIVER)
 #define LL_EXTI_LINE_NONE ((uint32_t)0x00000000U) /*!< None Extended line */

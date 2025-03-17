@@ -46,10 +46,12 @@
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-/* FreeRTOS Settings */
-#define USE_FREERTOS                   // Remove comment when using FreeRTOS
-#define DEFAULT_TASK_DELAY             (100)
+/* FreeRTOS General Settings */
+#define USE_FREERTOS       // Remove comment when using FreeRTOS
+#define DEFAULT_TASK_DELAY (100)
+/* FreeRTOS Tasks Priorities */
 #define TASK_ONOFFBUTTON_PRIORITY      (3)
+#define TASK_STARTUP_PRIORITY          (3)
 #define TASK_CONTROLSYSTEM_PRIORITY    (6)
 #define TASK_USBCOMMUNICATION_PRIORITY (5)
 #define TASK_DEBUGGING_PRIORITY        (4)
@@ -57,35 +59,35 @@
 #define TASK_BATTERYALARM_PRIORITY     (2)
 #define TASK_HEARTBEATLIGHT_PRIORITY   (2)
 #define TASK_FLIGHTLIGHTS_PRIORITY     (2)
+/* FreeRTOS Queues Sizes */
+#define USB_COMMUNICATION_INFO_QUEUE_SIZE  (32)
+#define USB_COMMUNICATION_DEBUG_QUEUE_SIZE (1)
 /* Logging and Debugging Settings */
 #define MAIN_APP_LOGGING_DEBUGGING                               (1)
 #define MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE                   (1000)
 #define MAIN_APP_DEBUGGING_FSA8S_MAIN                            (1)
-#define MAIN_APP_DEBUGGING_FSA8S_AUX                             (0)
-#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES     (0)
-#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES                 (0)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES (0)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES             (0)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (0)
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (0) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (0) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (0) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_ESCS                                  (0)
-#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES        (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES        (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES           (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS           (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID_OUTPUT       (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE          (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS            (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT        (0)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS           (0)
-#define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK             (0)
-/* Drivers Settings */
-#define USB_COMMUNICATION_INFO_QUEUE_SIZE  (32)
-#define USB_COMMUNICATION_DEBUG_QUEUE_SIZE (1)
-
+#define MAIN_APP_DEBUGGING_FSA8S_AUX                             (1)
+#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES     (1)
+#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES                 (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES             (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (1)
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (1) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (1) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (1) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_ESCS                                  (1)
+#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES        (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES        (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES           (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS           (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID_OUTPUT       (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE          (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS            (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT        (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS           (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR                (1)
+#define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK             (1)
 /* Battery Level Settings */
 #define BATTERY_LEVEL_CALIBRATION_OFFSET (0.76)
 
@@ -93,38 +95,39 @@
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Flight Controller State */
-static bool_t FlightController_isRunning     = false;
-static bool_t FlightController_isInitialized = false;
+static bool_t FlightController_isRunning                          = false;
+static bool_t FlightController_isInitialized                      = false;
 
 /* Drivers Handles */
-static IBUS_HandleTypeDef_t *rc_controller = NULL;
-static GY87_HandleTypeDef_t *hgy87         = NULL;
-static ESC_HandleTypeDef_t  *hesc          = NULL;
+static IBUS_HandleTypeDef_t *rc_controller                        = NULL;
+static GY87_HandleTypeDef_t *hgy87                                = NULL;
+static ESC_HandleTypeDef_t  *hesc                                 = NULL;
 
 /* Timers Handles */
-static TimerHandle_t Timer_Handle_OnOffButton = NULL;
+static TimerHandle_t Timer_Handle_OnOffButton                     = NULL;
 /* Queues Handles */
-static QueueHandle_t Queue_Handle_ControlSystemValues_Debug = NULL; // Queue to send pointers to Task_Debugging with Task_ControlSystem variables
-static QueueHandle_t Queue_Handle_USB_Communication_Info    = NULL; // Queue to send pointers to Task_USB_Communication with information strings
-static QueueHandle_t Queue_Handle_USB_Communication_Debug   = NULL; // Queue to send pointers to Task_USB_Communication with debugging strings
-static QueueHandle_t Queue_Handle_FlightLights_Commands     = NULL; // Queue to send pointers to Task_FlightLights with flight lights radio controller commands
-static QueueHandle_t Queue_Handle_BatteryLevel              = NULL; // Queue to send battery level from Task_BatteryLevel to Task_BatteryAlarm
+static QueueHandle_t Queue_Handle_ControlSystemValues_Debug       = NULL; // Queue to send pointers to Task_Debugging with Task_ControlSystem variables
+static QueueHandle_t Queue_Handle_USB_Communication_Info          = NULL; // Queue to send pointers to Task_USB_Communication with information strings
+static QueueHandle_t Queue_Handle_USB_Communication_Debug         = NULL; // Queue to send pointers to Task_USB_Communication with debugging strings
+static QueueHandle_t Queue_Handle_FlightLights_Commands           = NULL; // Queue to send pointers to Task_FlightLights with flight lights radio controller commands
+static QueueHandle_t Queue_Handle_BatteryLevel                    = NULL; // Queue to send battery level from Task_BatteryLevel to Task_BatteryAlarm
 /* Semaphores Handles */
 static SemaphoreHandle_t Semaphore_Handle_controlSystemValuesSwap = NULL;
 static SemaphoreHandle_t Semaphore_Handle_debuggingBufferSwap     = NULL;
 static SemaphoreHandle_t Semaphore_Handle_flightLightsBufferSwap  = NULL;
 /* Tasks Handles */
-static TaskHandle_t Task_Handle_OnOffButton       = NULL;
-static TaskHandle_t Task_Handle_ControlSystem     = NULL;
-static TaskHandle_t Task_Handle_USB_Communication = NULL;
-static TaskHandle_t Task_Handle_Debugging         = NULL;
-static TaskHandle_t Task_Handle_BatteryLevel      = NULL;
-static TaskHandle_t Task_Handle_BatteryAlarm      = NULL;
-static TaskHandle_t Task_Handle_HeartbeatLight    = NULL;
-static TaskHandle_t Task_Handle_FlightLights      = NULL;
+static TaskHandle_t Task_Handle_OnOffButton                       = NULL;
+static TaskHandle_t Task_Handle_StartUp                           = NULL;
+static TaskHandle_t Task_Handle_ControlSystem                     = NULL;
+static TaskHandle_t Task_Handle_USB_Communication                 = NULL;
+static TaskHandle_t Task_Handle_Debugging                         = NULL;
+static TaskHandle_t Task_Handle_BatteryLevel                      = NULL;
+static TaskHandle_t Task_Handle_BatteryAlarm                      = NULL;
+static TaskHandle_t Task_Handle_HeartbeatLight                    = NULL;
+static TaskHandle_t Task_Handle_FlightLights                      = NULL;
 /* Timers Variables */
-static bool_t   Timer_Flag_OnOffButton           = false;
-static uint16_t Timer_AutoReloadTime_OnOffButton = PW_ON_OFF_DRIVER_TIME;
+static bool_t   Timer_Flag_OnOffButton                            = false;
+static uint16_t Timer_AutoReloadTime_OnOffButton                  = PW_ON_OFF_DRIVER_TIME;
 
 /* Control System Variables Debugging */
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
@@ -170,21 +173,22 @@ static uint8_t  debuggingStr_GY87_magnetometerValues[40]             = {0};     
 static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]       = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_temperature[16]                    = {0};            // Size checked
 static uint8_t  debuggingStr_BatteryLevel[10]                        = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_ReferenceAngles[40]       = {0};
+static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]       = {0};
 static uint8_t  debuggingStr_ControlSystem_KalmanAngles[30]          = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_AnglesErrors[40]          = {0};
-static uint8_t  debuggingStr_ControlSystem_AnglesPID[40]             = {0};
-static uint8_t  debuggingStr_ControlSystem_ReferenceRates[40]        = {0};
-static uint8_t  debuggingStr_ControlSystem_RatesErrors[40]           = {0};
-static uint8_t  debuggingStr_ControlSystem_RatesPID[40]              = {0};
-static uint8_t  debuggingStr_motorsSpeeds[40]                        = {0};
-static uint8_t  debuggingStr_ESCs[40]                                = {0}; // Size checked
+static uint8_t  debuggingStr_ControlSystem_anglesErrors[40]          = {0};
+static uint8_t  debuggingStr_ControlSystem_anglesPID[40]             = {0};
+static uint8_t  debuggingStr_ControlSystem_referenceRates[40]        = {0};
+static uint8_t  debuggingStr_ControlSystem_ratesErrors[40]           = {0};
+static uint8_t  debuggingStr_ControlSystem_ratesPID[40]              = {0};
+static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[40]          = {0};
+static uint8_t  debuggingStr_ControlSystem_Auxiliar[40]              = {0};
+static uint8_t  debuggingStr_ESCs[40]                                = {0};
 static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0}; // Size checked
 #endif
 
 /* FS-A8S Radio Controller Variables */
-static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS]            = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
-static uint16_t        FSA8S_channelValues[FSA8S_CHANNELS] = {0};
+static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS]                              = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
+static uint16_t        FSA8S_channelValues[FSA8S_CHANNELS]                   = {0};
 
 /* GY87 IMU Variables */
 static bool_t                                gyroscopeCalibrationIsDone      = false;
@@ -198,14 +202,14 @@ static float                                 GY87_magnetometerHeadingValue = 0;
 static float                                 GY87_temperature              = 0;
 
 /* Control System Mode */
-float KalmanPrediction_rollAngle   = 0;
-float KalmanPrediction_pitchAngle  = 0;
-float KalmanUncertainty_rollAngle  = 2 * 2;
-float KalmanUncertainty_pitchAngle = 2 * 2;
+float KalmanPrediction_rollAngle                                           = 0;
+float KalmanPrediction_pitchAngle                                          = 0;
+float KalmanUncertainty_rollAngle                                          = 2 * 2;
+float KalmanUncertainty_pitchAngle                                         = 2 * 2;
 /* ESCs Values*/
-uint8_t ESC_speeds[4] = {0};
+uint8_t ESC_speeds[4]                                                      = {0};
 /* Throttle stick check */
-static bool_t throttleStick_startedDown = false;
+static bool_t throttleStick_startedDown                                    = false;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -267,6 +271,13 @@ void Task_Debugging(void *ptr);
 void Task_OnOffButton(void *ptr);
 
 /*
+ * @brief  Task: Initializes and configures the flight controller system.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void Task_Init(void *ptr);
+
+/*
  * @brief  Task: Reads the flight controller battery level and gives a signal whenever the level
  *               is below a threshold set by the user.
  * @param  Task pointer: not used.
@@ -304,33 +315,6 @@ void Task_FlightLights(void *ptr);
  * @retval None
  */
 void Timer_Callback_OnOffButton(TimerHandle_t xTimer);
-
-/*
- * @brief  Timer Callback: Sets a flag whenever the timer has expired. It is used for the Battery
- *                         Level Alarm.
- * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
- *         timer.
- * @retval None
- */
-void Timer_Callback_BatteryLevelAlarm(TimerHandle_t xTimer);
-
-/*
- * @brief  Timer Callback: Sets a flag whenever the timer has expired. It is used for the
- *                         Flight Lights.
- * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
- *         timer.
- * @retval None
- */
-void Timer_Callback_FlightLights(TimerHandle_t xTimer);
-
-/*
- * @brief  Timer Callback: Sets a flag whenever the timer has expired. It is used for the
- *                         Control System Loop.
- * @param  TimerHandle_t structure that contains the configuration information for a FreeRTOS
- *         timer.
- * @retval None
- */
-void Timer_Callback_ControlSystem(TimerHandle_t xTimer);
 
 /* --- Public variable definitions ------------------------------------------------------------- */
 extern I2C_HandleTypeDef  hi2c1;
@@ -419,45 +403,45 @@ bool_t FreeRTOS_CreateSemaphores(void) {
 
 bool_t FreeRTOS_CreateTasks(void) {
 
-    /* Task 1: ControlSystem */
+    /* Task 3: ControlSystem */
     xTaskCreate(Task_ControlSystem, "Task_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_CONTROLSYSTEM_PRIORITY), &Task_Handle_ControlSystem);
     if (Task_Handle_ControlSystem == NULL) {
         return false;
     }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
-    /* Task 2: USB_Communication */
+    /* Task 4: USB_Communication */
     xTaskCreate(Task_USB_Communication, "Task_USB_Communication", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_USBCOMMUNICATION_PRIORITY), &Task_Handle_USB_Communication);
     if (Task_Handle_USB_Communication == NULL) {
         return false;
     }
 
-    /* Task 3: Debugging */
+    /* Task 5: Debugging */
     xTaskCreate(Task_Debugging, "Task_Debugging", (3 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_DEBUGGING_PRIORITY), &Task_Handle_Debugging);
     if (Task_Handle_Debugging == NULL) {
         return false;
     }
 #endif
 
-    /* Task 4: BatteryLevel */
-    xTaskCreate(Task_BatteryLevel, "Task_BatteryLevel", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYLEVEL_PRIORITY), &Task_Handle_BatteryLevel);
+    /* Task 6: BatteryLevel */
+    xTaskCreate(Task_BatteryLevel, "Task_BatteryLevel", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYLEVEL_PRIORITY), &Task_Handle_BatteryLevel);
     if (Task_Handle_BatteryLevel == NULL) {
         return false;
     }
 
-    /* Task 5: BatteryAlarm */
+    /* Task 7: BatteryAlarm */
     xTaskCreate(Task_BatteryAlarm, "Task_BatteryAlarm", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYALARM_PRIORITY), &Task_Handle_BatteryAlarm);
     if (Task_Handle_BatteryAlarm == NULL) {
         return false;
     }
 
-    /* Task 6: HeartbeatLight */
+    /* Task 8: HeartbeatLight */
     xTaskCreate(Task_HeartbeatLight, "Task_HeartbeatLight", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_HEARTBEATLIGHT_PRIORITY), &Task_Handle_HeartbeatLight);
     if (Task_Handle_HeartbeatLight == NULL) {
         return false;
     }
 
-    /* Task 7: FlightLights */
+    /* Task 9: FlightLights */
     xTaskCreate(Task_FlightLights, "Task_FlightLights", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTLIGHTS_PRIORITY), &Task_Handle_FlightLights);
     if (Task_Handle_FlightLights == NULL) {
         return false;
@@ -471,11 +455,26 @@ void Task_ControlSystem(void *ptr) {
     (void)ptr;
 
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(4);
+    const TickType_t xTaskPeriod     = pdMS_TO_TICKS(4);
     /* Get initial tick count */
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    TickType_t xLastWakeTime         = xTaskGetTickCount();
+    /* Variables to measure control loop period */
+    TickType_t xPreviousLastWakeTime = 0;
+    TickType_t xActualWakeTime       = 0;
+    TickType_t xControlLoopPeriod    = 0;
+    /* Variables to measure the execution time of the task */
+    TickType_t xTaskStartTime;
 
     while (1) {
+        /* Record task start time for execution measurement */
+        xTaskStartTime        = xTaskGetTickCount();
+
+        /* Measure actual wake-up time */
+        xActualWakeTime       = xTaskGetTickCount();
+        /* Calculate period between ACTUAL wake times */
+        xControlLoopPeriod    = xActualWakeTime - xPreviousLastWakeTime;
+        /* Store current actual time for next iteration */
+        xPreviousLastWakeTime = xActualWakeTime;
 
         /* Calibrate GY-87 gyroscope sensor */
         if (false == gyroscopeCalibrationIsDone) {
@@ -493,11 +492,11 @@ void Task_ControlSystem(void *ptr) {
         }
 
         /* Control system processing */
-        if (FlightController_isInitialized && 0 == CONTROL_SYSTEM_MODE) {
+        if (FlightController_isInitialized && 0 == CONTROLSYSTEM_MODE) {
 
             /* Read FS-A8S channels */
             for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
-                FSA8S_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
+                // FSA8S_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
             }
 
             /* Read GY-87 gyroscope sensor */
@@ -521,11 +520,11 @@ void Task_ControlSystem(void *ptr) {
             GY87_temperature = GY87_ReadTemperatureSensor(hgy87);
 #endif
 
-            // /* Calculate Kalman angles */
+            /* Calculate Kalman angles */
             Kalman_CalculateAngle(&KalmanPrediction_rollAngle, &KalmanUncertainty_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
             Kalman_CalculateAngle(&KalmanPrediction_pitchAngle, &KalmanUncertainty_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
 
-        } else if (FlightController_isInitialized && 1 == CONTROL_SYSTEM_MODE) {
+        } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
         }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
@@ -536,13 +535,13 @@ void Task_ControlSystem(void *ptr) {
             controlSystemActiveValues_TaskControlSystem->radioController_channelValues[i] = FSA8S_channelValues[i];
         }
         /* References (Values) */
-        controlSystemActiveValues_TaskControlSystem->reference_throttle   = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_rollValue  = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_pitchValue = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_yawValue   = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_throttle                  = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_rollValue                 = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_pitchValue                = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_yawValue                  = 0;
         /* References (Angles) */
-        controlSystemActiveValues_TaskControlSystem->reference_rollAngle  = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_pitchAngle = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_rollAngle                 = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_pitchAngle                = 0;
         /* IMU Calibration (Gyroscope) */
         controlSystemActiveValues_TaskControlSystem->gyroCalibration_calibrationDone     = GY87_gyroscopeCalibrationValues.calibrationDone;
         controlSystemActiveValues_TaskControlSystem->gyroCalibration_fixedCalibration_en = GY87_gyroscopeCalibrationValues.fixedCalibration_en;
@@ -550,82 +549,85 @@ void Task_ControlSystem(void *ptr) {
         controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRatePitch   = GY87_gyroscopeCalibrationValues.calibrationRatePitch;
         controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRateYaw     = GY87_gyroscopeCalibrationValues.calibrationRateYaw;
         /* IMU Measurements (controlSystemActiveValues_TaskControlSystem->Gyroscope) */
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateRoll  = GY87_gyroscopeValues.rotationRateRoll;
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRatePitch = GY87_gyroscopeValues.rotationRatePitch;
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateYaw   = GY87_gyroscopeValues.rotationRateYaw;
+        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateRoll    = GY87_gyroscopeValues.rotationRateRoll;
+        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRatePitch   = GY87_gyroscopeValues.rotationRatePitch;
+        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateYaw     = GY87_gyroscopeValues.rotationRateYaw;
         /* IMU Calibration (Accelerometer) */
-        controlSystemActiveValues_TaskControlSystem->accCalibration_calibrationDone     = GY87_accelerometerCalibrationValues.calibrationDone;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_fixedCalibration_en = GY87_accelerometerCalibrationValues.fixedCalibration_en;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationX = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationX;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationY = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationY;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationZ = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationZ;
+        controlSystemActiveValues_TaskControlSystem->accCalibration_calibrationDone      = GY87_accelerometerCalibrationValues.calibrationDone;
+        controlSystemActiveValues_TaskControlSystem->accCalibration_fixedCalibration_en  = GY87_accelerometerCalibrationValues.fixedCalibration_en;
+        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationX  = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationX;
+        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationY  = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationY;
+        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationZ  = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationZ;
         /* IMU Measurements (Accelerometer) */
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationX = GY87_accelerometerValues.linearAccelerationX;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationY = GY87_accelerometerValues.linearAccelerationY;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationZ = GY87_accelerometerValues.linearAccelerationZ;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_angleRoll           = GY87_accelerometerValues.angleRoll;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_anglePitch          = GY87_accelerometerValues.anglePitch;
+        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationX  = GY87_accelerometerValues.linearAccelerationX;
+        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationY  = GY87_accelerometerValues.linearAccelerationY;
+        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationZ  = GY87_accelerometerValues.linearAccelerationZ;
+        controlSystemActiveValues_TaskControlSystem->accMeasurement_angleRoll            = GY87_accelerometerValues.angleRoll;
+        controlSystemActiveValues_TaskControlSystem->accMeasurement_anglePitch           = GY87_accelerometerValues.anglePitch;
         /* IMU Measurements (Magnetometer) */
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldX  = GY87_magnetometerValues.magneticFieldX;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldY  = GY87_magnetometerValues.magneticFieldY;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldZ  = GY87_magnetometerValues.magneticFieldZ;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticHeading = GY87_magnetometerHeadingValue;
+        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldX       = GY87_magnetometerValues.magneticFieldX;
+        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldY       = GY87_magnetometerValues.magneticFieldY;
+        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldZ       = GY87_magnetometerValues.magneticFieldZ;
+        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticHeading      = GY87_magnetometerHeadingValue;
         /* IMU Measurements (Temperature Sensor) */
-        controlSystemActiveValues_TaskControlSystem->temperature = GY87_temperature;
+        controlSystemActiveValues_TaskControlSystem->temperature                         = GY87_temperature;
         /* Kalman Filter Variables */
-        controlSystemActiveValues_TaskControlSystem->KalmanPrediction_rollAngle   = KalmanPrediction_rollAngle;
-        controlSystemActiveValues_TaskControlSystem->KalmanPrediction_pitchAngle  = KalmanPrediction_pitchAngle;
-        controlSystemActiveValues_TaskControlSystem->KalmanUncertainty_rollAngle  = KalmanUncertainty_rollAngle;
-        controlSystemActiveValues_TaskControlSystem->KalmanUncertainty_pitchAngle = KalmanUncertainty_pitchAngle;
+        controlSystemActiveValues_TaskControlSystem->KalmanPrediction_rollAngle          = KalmanPrediction_rollAngle;
+        controlSystemActiveValues_TaskControlSystem->KalmanPrediction_pitchAngle         = KalmanPrediction_pitchAngle;
+        controlSystemActiveValues_TaskControlSystem->KalmanUncertainty_rollAngle         = KalmanUncertainty_rollAngle;
+        controlSystemActiveValues_TaskControlSystem->KalmanUncertainty_pitchAngle        = KalmanUncertainty_pitchAngle;
         /* Errors: Angles */
-        controlSystemActiveValues_TaskControlSystem->error_rollAngle  = 0;
-        controlSystemActiveValues_TaskControlSystem->error_pitchAngle = 0;
+        controlSystemActiveValues_TaskControlSystem->error_rollAngle                     = 0;
+        controlSystemActiveValues_TaskControlSystem->error_pitchAngle                    = 0;
         /* PID (Angles): Previous Errors */
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_rollAngle  = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_pitchAngle = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousError_rollAngle         = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousError_pitchAngle        = 0;
         /* PID (Angles): Previous Integral Terms */
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_rollAngle  = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_pitchAngle = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_rollAngle         = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_pitchAngle        = 0;
         /* PID Outputs: Angles */
-        controlSystemActiveValues_TaskControlSystem->PID_Output_rollAngle  = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_Output_pitchAngle = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_Output_rollAngle                = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_Output_pitchAngle               = 0;
         /* References: Rates */
-        controlSystemActiveValues_TaskControlSystem->reference_rollRate  = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_pitchRate = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_yawRate   = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_rollRate                  = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_pitchRate                 = 0;
+        controlSystemActiveValues_TaskControlSystem->reference_yawRate                   = 0;
         /* Errors: Rates */
-        controlSystemActiveValues_TaskControlSystem->error_rollRate  = 0;
-        controlSystemActiveValues_TaskControlSystem->error_pitchRate = 0;
-        controlSystemActiveValues_TaskControlSystem->error_yawRate   = 0;
+        controlSystemActiveValues_TaskControlSystem->error_rollRate                      = 0;
+        controlSystemActiveValues_TaskControlSystem->error_pitchRate                     = 0;
+        controlSystemActiveValues_TaskControlSystem->error_yawRate                       = 0;
         /* PID (Rates): Previous Errors */
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_rollRate  = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_pitchRate = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_yawRate   = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousError_rollRate          = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousError_pitchRate         = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousError_yawRate           = 0;
         /* PID (Rates): Previous Integral Terms */
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_rollRate  = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_pitchRate = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_yawRate   = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_rollRate          = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_pitchRate         = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_yawRate           = 0;
         /* PID Outputs: Rates */
-        controlSystemActiveValues_TaskControlSystem->PID_Output_rollRate  = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_Output_pitchRate = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_Output_yawRate   = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_Output_rollRate                 = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_Output_pitchRate                = 0;
+        controlSystemActiveValues_TaskControlSystem->PID_Output_yawRate                  = 0;
         /* Motors Speeds */
-        controlSystemActiveValues_TaskControlSystem->motor1_speed = 0;
-        controlSystemActiveValues_TaskControlSystem->motor2_speed = 0;
-        controlSystemActiveValues_TaskControlSystem->motor3_speed = 0;
-        controlSystemActiveValues_TaskControlSystem->motor4_speed = 0;
+        controlSystemActiveValues_TaskControlSystem->motor1_speed                        = 0;
+        controlSystemActiveValues_TaskControlSystem->motor2_speed                        = 0;
+        controlSystemActiveValues_TaskControlSystem->motor3_speed                        = 0;
+        controlSystemActiveValues_TaskControlSystem->motor4_speed                        = 0;
         /* ESCs Values*/
-        controlSystemActiveValues_TaskControlSystem->ESC1_speed = ESC_speeds[0];
-        controlSystemActiveValues_TaskControlSystem->ESC2_speed = ESC_speeds[1];
-        controlSystemActiveValues_TaskControlSystem->ESC3_speed = ESC_speeds[2];
-        controlSystemActiveValues_TaskControlSystem->ESC4_speed = ESC_speeds[3];
-
+        controlSystemActiveValues_TaskControlSystem->ESC1_speed                          = ESC_speeds[0];
+        controlSystemActiveValues_TaskControlSystem->ESC2_speed                          = ESC_speeds[1];
+        controlSystemActiveValues_TaskControlSystem->ESC3_speed                          = ESC_speeds[2];
+        controlSystemActiveValues_TaskControlSystem->ESC4_speed                          = ESC_speeds[3];
+        /* Control Loop Period */
+        controlSystemActiveValues_TaskControlSystem->controlLoopPeriod                   = xControlLoopPeriod;
+        /* Task Execution Time */
+        controlSystemActiveValues_TaskControlSystem->taskExecutionTime                   = xTaskGetTickCount() - xTaskStartTime;
         /* Try to swap buffers when ready to send */
         if (xSemaphoreTake(Semaphore_Handle_controlSystemValuesSwap, 0) == pdTRUE) {
             /* Swap buffers as Task_ControlSystem is not using 'controlSystemActiveValues_TaskControlSystem' */
-            ControlSystemValues_t *tempValues           = controlSystemActiveValues_TaskControlSystem;
-            controlSystemActiveValues_TaskControlSystem = controlSystemActiveValues_TaskDebugging;
-            controlSystemActiveValues_TaskDebugging     = tempValues;
+            ControlSystemValues_t *tempValues             = controlSystemActiveValues_TaskControlSystem;
+            controlSystemActiveValues_TaskControlSystem   = controlSystemActiveValues_TaskDebugging;
+            controlSystemActiveValues_TaskDebugging       = tempValues;
 
             /* Signal Task_USB_Communication */
             ControlSystemValues_t *logControlSystemValues = controlSystemActiveValues_TaskDebugging;
@@ -667,10 +669,10 @@ void Task_USB_Communication(void *ptr) {
     uint8_t *logDebuggingString   = NULL;
 
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(10);
+    const TickType_t xTaskPeriod  = pdMS_TO_TICKS(10);
 
     /* Get initial tick count */
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    TickType_t xLastWakeTime      = xTaskGetTickCount();
 
     while (1) {
 
@@ -709,7 +711,7 @@ void Task_Debugging(void *ptr) {
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(10);
     /* Get initial tick count */
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
 
     ControlSystemValues_t *logControlSystemValues;
     uint32_t               system_tick   = 0;
@@ -734,80 +736,80 @@ void Task_Debugging(void *ptr) {
 #if (MAIN_APP_DEBUGGING_FSA8S_MAIN == 1)
                 /* Log channel values */
                 snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%d",
-                         FSA8S_CHANNEL_VALUES_3, logControlSystemValues->radioController_channelValues[2],
-                         FSA8S_CHANNEL_VALUES_1, logControlSystemValues->radioController_channelValues[0],
-                         FSA8S_CHANNEL_VALUES_2, logControlSystemValues->radioController_channelValues[1],
-                         FSA8S_CHANNEL_VALUES_4, logControlSystemValues->radioController_channelValues[3],
-                         FSA8S_CHANNEL_VALUES_6, logControlSystemValues->radioController_channelValues[5]);
+                         DEBUG_FSA8S_CHANNEL_VALUES_3, logControlSystemValues->radioController_channelValues[2],
+                         DEBUG_FSA8S_CHANNEL_VALUES_1, logControlSystemValues->radioController_channelValues[0],
+                         DEBUG_FSA8S_CHANNEL_VALUES_2, logControlSystemValues->radioController_channelValues[1],
+                         DEBUG_FSA8S_CHANNEL_VALUES_4, logControlSystemValues->radioController_channelValues[3],
+                         DEBUG_FSA8S_CHANNEL_VALUES_6, logControlSystemValues->radioController_channelValues[5]);
 #endif
 
 #if (MAIN_APP_DEBUGGING_FSA8S_AUX == 1)
                 /* Log channel values */
                 snprintf((char *)debuggingStr_FSA8S_aux, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%d",
-                         FSA8S_CHANNEL_VALUES_5, logControlSystemValues->radioController_channelValues[4],
-                         FSA8S_CHANNEL_VALUES_7, logControlSystemValues->radioController_channelValues[6],
-                         FSA8S_CHANNEL_VALUES_8, logControlSystemValues->radioController_channelValues[7],
-                         FSA8S_CHANNEL_VALUES_9, logControlSystemValues->radioController_channelValues[8],
-                         FSA8S_CHANNEL_VALUES_10, logControlSystemValues->radioController_channelValues[9]);
+                         DEBUG_FSA8S_CHANNEL_VALUES_5, logControlSystemValues->radioController_channelValues[4],
+                         DEBUG_FSA8S_CHANNEL_VALUES_7, logControlSystemValues->radioController_channelValues[6],
+                         DEBUG_FSA8S_CHANNEL_VALUES_8, logControlSystemValues->radioController_channelValues[7],
+                         DEBUG_FSA8S_CHANNEL_VALUES_9, logControlSystemValues->radioController_channelValues[8],
+                         DEBUG_FSA8S_CHANNEL_VALUES_10, logControlSystemValues->radioController_channelValues[9]);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES)
                 /* Log GY87 gyroscope calibration values */
                 snprintf((char *)debuggingStr_GY87_gyroscopeCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
-                         GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroCalibration_rotationRateRoll,
-                         GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroCalibration_rotationRatePitch,
-                         GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroCalibration_rotationRateYaw);
+                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroCalibration_rotationRateRoll,
+                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroCalibration_rotationRatePitch,
+                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroCalibration_rotationRateYaw);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES)
                 /* Log GY87 accelerometer calibration values */
                 snprintf((char *)debuggingStr_GY87_accelerometerCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
-                         GY87_ACC_CALIBRATION_VALUES_LINEAR_X, logControlSystemValues->accCalibration_linearAccelerationX,
-                         GY87_ACC_CALIBRATION_VALUES_LINEAR_Y, logControlSystemValues->accCalibration_linearAccelerationY,
-                         GY87_ACC_CALIBRATION_VALUES_LINEAR_Z, logControlSystemValues->accCalibration_linearAccelerationZ);
+                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_X, logControlSystemValues->accCalibration_linearAccelerationX,
+                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Y, logControlSystemValues->accCalibration_linearAccelerationY,
+                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Z, logControlSystemValues->accCalibration_linearAccelerationZ);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES == 1)
                 /* Log GY87 gyroscope values */
                 snprintf((char *)debuggingStr_GY87_gyroscopeValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
-                         GY87_GYRO_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroMeasurement_rotationRateRoll,
-                         GY87_GYRO_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroMeasurement_rotationRatePitch,
-                         GY87_GYRO_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroMeasurement_rotationRateYaw);
+                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroMeasurement_rotationRateRoll,
+                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroMeasurement_rotationRatePitch,
+                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroMeasurement_rotationRateYaw);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES == 1)
                 /* Log GY87 accelerometer values */
                 snprintf((char *)debuggingStr_GY87_accelerometerValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
-                         GY87_ACC_VALUES_LINEAR_X, logControlSystemValues->accCalibration_linearAccelerationX,
-                         GY87_ACC_VALUES_LINEAR_Y, logControlSystemValues->accCalibration_linearAccelerationY,
-                         GY87_ACC_VALUES_LINEAR_Z, logControlSystemValues->accCalibration_linearAccelerationZ);
+                         DEBUG_GY87_ACC_VALUES_LINEAR_X, logControlSystemValues->accCalibration_linearAccelerationX,
+                         DEBUG_GY87_ACC_VALUES_LINEAR_Y, logControlSystemValues->accCalibration_linearAccelerationY,
+                         DEBUG_GY87_ACC_VALUES_LINEAR_Z, logControlSystemValues->accCalibration_linearAccelerationZ);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES == 1)
                 /* Log GY87 accelerometer angles */
                 snprintf((char *)debuggingStr_GY87_accelerometerAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
-                         GY87_ACC_VALUES_ANGLE_ROLL, logControlSystemValues->accMeasurement_angleRoll,
-                         GY87_ACC_VALUES_ANGLE_PITCH, logControlSystemValues->accMeasurement_anglePitch);
+                         DEBUG_GY87_ACC_VALUES_ANGLE_ROLL, logControlSystemValues->accMeasurement_angleRoll,
+                         DEBUG_GY87_ACC_VALUES_ANGLE_PITCH, logControlSystemValues->accMeasurement_anglePitch);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES == 1)
                 /* Log GY87 magnetometer values */
                 snprintf((char *)debuggingStr_GY87_magnetometerValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
-                         GY87_MAG_VALUES_MAG_FIELD_X, logControlSystemValues->magMeasurement_magneticFieldX,
-                         GY87_MAG_VALUES_MAG_FIELD_Y, logControlSystemValues->magMeasurement_magneticFieldY,
-                         GY87_MAG_VALUES_MAG_FIELD_Z, logControlSystemValues->magMeasurement_magneticFieldZ);
+                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_X, logControlSystemValues->magMeasurement_magneticFieldX,
+                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_Y, logControlSystemValues->magMeasurement_magneticFieldY,
+                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_Z, logControlSystemValues->magMeasurement_magneticFieldZ);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING == 1)
                 /* Log GY87 magnetometer heading */
                 snprintf((char *)debuggingStr_GY87_magnetometerHeadingValue, 16 * sizeof(uint8_t), (const char *)"/%d_%.2f",
-                         GY87_MAG_HEADING, logControlSystemValues->magMeasurement_magneticHeading);
+                         DEBUG_GY87_MAG_HEADING, logControlSystemValues->magMeasurement_magneticHeading);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_TEMPERATURE == 1)
                 /* Log GY87 temperature value */
                 snprintf((char *)debuggingStr_GY87_temperature, 16 * sizeof(uint8_t), (const char *)"/%d_%.1f",
-                         GY87_TEMPERATURE, logControlSystemValues->temperature);
+                         DEBUG_GY87_TEMPERATURE, logControlSystemValues->temperature);
 #endif
 
 #if (MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL == 1)
@@ -815,99 +817,106 @@ void Task_Debugging(void *ptr) {
                 xQueuePeek(Queue_Handle_BatteryLevel, &FlightController_batteryLevel, 0);
                 /* Log flight controller battery level */
                 snprintf((char *)debuggingStr_BatteryLevel, 10 * sizeof(uint8_t), (const char *)"/%d_%.2f",
-                         FLIGHT_CONTROLLER_BATTERY_LEVEL, (double)FlightController_batteryLevel);
+                         DEBUG_FLIGHT_CONTROLLER_BATTERY_LEVEL, (double)FlightController_batteryLevel);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES == 1)
                 /* Log control system reference values */
-                snprintf((char *)debuggingStr_ControlSystem_ReferenceAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_REFERENCE_THROTTLE, logControlSystemValues->reference_throttle,
-                         CONTROLSYSTEM_REFERENCE_ROLL_VALUE, logControlSystemValues->reference_rollValue,
-                         CONTROLSYSTEM_REFERENCE_PITCH_VALUE, logControlSystemValues->reference_pitchValue,
-                         CONTROLSYSTEM_REFERENCE_YAW_VALUE, logControlSystemValues->reference_yawValue);
+                snprintf((char *)debuggingStr_ControlSystem_referenceAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_REFERENCE_THROTTLE, logControlSystemValues->reference_throttle,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_ROLL_VALUE, logControlSystemValues->reference_rollValue,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_VALUE, logControlSystemValues->reference_pitchValue,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_YAW_VALUE, logControlSystemValues->reference_yawValue);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES == 1)
                 /* Log control system reference values */
-                snprintf((char *)debuggingStr_ControlSystem_ReferenceAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_REFERENCE_ROLL_ANGLE, logControlSystemValues->reference_rollAngle,
-                         CONTROLSYSTEM_REFERENCE_PITCH_ANGLE, logControlSystemValues->reference_pitchAngle);
+                snprintf((char *)debuggingStr_ControlSystem_referenceAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_REFERENCE_ROLL_ANGLE, logControlSystemValues->reference_rollAngle,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_ANGLE, logControlSystemValues->reference_pitchAngle);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES == 1)
                 /* Log control system angles */
                 snprintf((char *)debuggingStr_ControlSystem_KalmanAngles, 30 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_KALMAN_ROLL_ANGLE, logControlSystemValues->KalmanPrediction_rollAngle,
-                         CONTROLSYSTEM_KALMAN_PITCH_ANGLE, logControlSystemValues->KalmanPrediction_pitchAngle);
+                         DEBUG_CONTROLSYSTEM_KALMAN_ROLL_ANGLE, logControlSystemValues->KalmanPrediction_rollAngle,
+                         DEBUG_CONTROLSYSTEM_KALMAN_PITCH_ANGLE, logControlSystemValues->KalmanPrediction_pitchAngle);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS == 1)
                 /* Log control system angles errors */
-                snprintf((char *)debuggingStr_ControlSystem_AnglesErrors, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_ERROR_ROLL_ANGLE, logControlSystemValues->error_rollAngle,
-                         CONTROLSYSTEM_ERROR_PITCH_ANGLE, logControlSystemValues->error_pitchAngle);
+                snprintf((char *)debuggingStr_ControlSystem_anglesErrors, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_ERROR_ROLL_ANGLE, logControlSystemValues->error_rollAngle,
+                         DEBUG_CONTROLSYSTEM_ERROR_PITCH_ANGLE, logControlSystemValues->error_pitchAngle);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID_OUTPUT == 1)
                 /* Log control system angles PID */
-                snprintf((char *)debuggingStr_ControlSystem_AnglesPID, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_PID_OUTPUT_ROLL_ANGLE, logControlSystemValues->PID_Output_rollAngle,
-                         CONTROLSYSTEM_PID_OUTPUT_PITCH_ANGLE, logControlSystemValues->PID_Output_pitchAngle);
+                snprintf((char *)debuggingStr_ControlSystem_anglesPID, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_PID_OUTPUT_ROLL_ANGLE, logControlSystemValues->PID_Output_rollAngle,
+                         DEBUG_CONTROLSYSTEM_PID_OUTPUT_PITCH_ANGLE, logControlSystemValues->PID_Output_pitchAngle);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE == 1)
                 /* Log control system reference rates */
-                snprintf((char *)debuggingStr_ControlSystem_ReferenceRates, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_REFERENCE_ROLL_RATE, logControlSystemValues->reference_rollRate,
-                         CONTROLSYSTEM_REFERENCE_PITCH_RATE, logControlSystemValues->reference_pitchRate,
-                         CONTROLSYSTEM_REFERENCE_YAW_RATE, logControlSystemValues->reference_yawRate);
+                snprintf((char *)debuggingStr_ControlSystem_referenceRates, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_REFERENCE_ROLL_RATE, logControlSystemValues->reference_rollRate,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_RATE, logControlSystemValues->reference_pitchRate,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_YAW_RATE, logControlSystemValues->reference_yawRate);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS == 1)
                 /* Log control system rates errors */
-                snprintf((char *)debuggingStr_ControlSystem_RatesErrors, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_ERROR_ROLL_RATE, logControlSystemValues->error_rollRate,
-                         CONTROLSYSTEM_ERROR_PITCH_RATE, logControlSystemValues->error_pitchRate,
-                         CONTROLSYSTEM_ERROR_YAW_RATE, logControlSystemValues->error_yawRate);
+                snprintf((char *)debuggingStr_ControlSystem_ratesErrors, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_ERROR_ROLL_RATE, logControlSystemValues->error_rollRate,
+                         DEBUG_CONTROLSYSTEM_ERROR_PITCH_RATE, logControlSystemValues->error_pitchRate,
+                         DEBUG_CONTROLSYSTEM_ERROR_YAW_RATE, logControlSystemValues->error_yawRate);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT == 1)
                 /* Log control system rates PID */
-                snprintf((char *)debuggingStr_ControlSystem_RatesPID, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
-                         CONTROLSYSTEM_PID_OUTPUT_ROLL_RATE, logControlSystemValues->PID_Output_rollRate,
-                         CONTROLSYSTEM_PID_OUTPUT_PITCH_RATE, logControlSystemValues->PID_Output_pitchRate,
-                         CONTROLSYSTEM_PID_OUTPUT_YAW_RATE, logControlSystemValues->PID_Output_yawRate);
+                snprintf((char *)debuggingStr_ControlSystem_ratesPID, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_PID_OUTPUT_ROLL_RATE, logControlSystemValues->PID_Output_rollRate,
+                         DEBUG_CONTROLSYSTEM_PID_OUTPUT_PITCH_RATE, logControlSystemValues->PID_Output_pitchRate,
+                         DEBUG_CONTROLSYSTEM_PID_OUTPUT_YAW_RATE, logControlSystemValues->PID_Output_yawRate);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS == 1)
                 /* Log ESC values*/
-                snprintf((char *)debuggingStr_motorsSpeeds, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
-                         CONTROL_SYSTEM_MOTOR_SPEED_1, logControlSystemValues->motor1_speed,
-                         CONTROL_SYSTEM_MOTOR_SPEED_2, logControlSystemValues->motor2_speed,
-                         CONTROL_SYSTEM_MOTOR_SPEED_3, logControlSystemValues->motor3_speed,
-                         CONTROL_SYSTEM_MOTOR_SPEED_4, logControlSystemValues->motor4_speed);
+                snprintf((char *)debuggingStr_ControlSystem_motorsSpeeds, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_MOTOR_SPEED_1, logControlSystemValues->motor1_speed,
+                         DEBUG_CONTROLSYSTEM_MOTOR_SPEED_2, logControlSystemValues->motor2_speed,
+                         DEBUG_CONTROLSYSTEM_MOTOR_SPEED_3, logControlSystemValues->motor3_speed,
+                         DEBUG_CONTROLSYSTEM_MOTOR_SPEED_4, logControlSystemValues->motor4_speed);
+#endif
+
+#if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR == 1)
+                /* Log control system auxiliar values */
+                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 40 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu",
+                         DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED, (logControlSystemValues->controlLoopPeriod * 1000 / configTICK_RATE_HZ),
+                         DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME, (logControlSystemValues->taskExecutionTime * 1000 / configTICK_RATE_HZ));
 #endif
 
 #if (MAIN_APP_DEBUGGING_ESCS == 1)
                 /* Log ESC values*/
-                snprintf((char *)debuggingStr_ESCs, 40 * sizeof(uint8_t), (const char *)"/%d_%d/%d_%d/%d_%d/%d_%d",
-                         ESC_1, logControlSystemValues->ESC1_speed,
-                         ESC_2, logControlSystemValues->ESC2_speed,
-                         ESC_3, logControlSystemValues->ESC3_speed,
-                         ESC_4, logControlSystemValues->ESC4_speed);
+                snprintf((char *)debuggingStr_ESCs, 60 * sizeof(uint8_t), (const char *)"/%d_%d/%d_%d/%d_%d/%d_%d",
+                         DEBUG_ESC_1, logControlSystemValues->ESC1_speed,
+                         DEBUG_ESC_2, logControlSystemValues->ESC2_speed,
+                         DEBUG_ESC_3, logControlSystemValues->ESC3_speed,
+                         DEBUG_ESC_4, logControlSystemValues->ESC4_speed);
 #endif
 
 #if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK)
                 /* Log tasks stack high watermark */
                 snprintf((char *)debuggingStr_TasksStackHighWatermark, 80 * sizeof(uint8_t), (const char *)"/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld",
-                         TASK_STACK_WATERMARK_ONOFFBUTTON, Task_StackHighWatermark_OnOffButton,
-                         TASK_STACK_WATERMARK_CONTROLSYSTEM, Task_StackHighWatermark_ControlSystem,
-                         TASK_STACK_WATERMARK_USBCOMMUNICATION, Task_StackHighWatermark_USB_Communication,
-                         TASK_STACK_WATERMARK_DEBUGGING, Task_StackHighWatermark_Debugging,
-                         TASK_STACK_WATERMARK_BATTERYLEVEL, Task_StackHighWatermark_BatteryLevel,
-                         TASK_STACK_WATERMARK_BATTERYALARM, Task_StackHighWatermark_BatteryAlarm,
-                         TASK_STACK_WATERMARK_HEARTBEATLIGHT, Task_StackHighWatermark_HeartbeatLight,
-                         TASK_STACK_WATERMARK_FLIGHTLIGHTS, Task_StackHighWatermark_FlightLights);
+                         DEBUG_TASK_STACK_WATERMARK_ONOFFBUTTON, Task_StackHighWatermark_OnOffButton,
+                         DEBUG_TASK_STACK_WATERMARK_CONTROLSYSTEM, Task_StackHighWatermark_ControlSystem,
+                         DEBUG_TASK_STACK_WATERMARK_USBCOMMUNICATION, Task_StackHighWatermark_USB_Communication,
+                         DEBUG_TASK_STACK_WATERMARK_DEBUGGING, Task_StackHighWatermark_Debugging,
+                         DEBUG_TASK_STACK_WATERMARK_BATTERYLEVEL, Task_StackHighWatermark_BatteryLevel,
+                         DEBUG_TASK_STACK_WATERMARK_BATTERYALARM, Task_StackHighWatermark_BatteryAlarm,
+                         DEBUG_TASK_STACK_WATERMARK_HEARTBEATLIGHT, Task_StackHighWatermark_HeartbeatLight,
+                         DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS, Task_StackHighWatermark_FlightLights);
 #endif
             }
 
@@ -930,14 +939,15 @@ void Task_Debugging(void *ptr) {
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_magnetometerHeadingValue);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_temperature);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_BatteryLevel);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_ReferenceAngles);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceAngles);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_KalmanAngles);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_AnglesErrors);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_AnglesPID);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_ReferenceRates);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_RatesErrors);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_RatesPID);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_motorsSpeeds);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_anglesErrors);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_anglesPID);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceRates);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_ratesErrors);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_ratesPID);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_motorsSpeeds);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_Auxiliar);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ESCs);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_TasksStackHighWatermark);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "\n");
@@ -949,7 +959,7 @@ void Task_Debugging(void *ptr) {
             debuggingActiveBuffer_TaskUSBCommunication = debuggingActiveBuffer_TaskDebugging;
             debuggingActiveBuffer_TaskDebugging        = tempBuffer;
             /* Signal Task_USB_Communication */
-            uint8_t *logDebuggingString = debuggingActiveBuffer_TaskUSBCommunication;
+            uint8_t *logDebuggingString                = debuggingActiveBuffer_TaskUSBCommunication;
             xQueueSend(Queue_Handle_USB_Communication_Debug, &logDebuggingString, 0);
         }
 
@@ -970,7 +980,7 @@ void Task_OnOffButton(void *ptr) {
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
     /* Get initial tick count */
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
 
     while (1) {
 
@@ -994,6 +1004,73 @@ void Task_OnOffButton(void *ptr) {
     }
 }
 
+void Task_StartUp(void *ptr) {
+    (void)ptr;
+
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
+
+    while (1) {
+        /* Check if flight controller is already running */
+        if (FlightController_isRunning) {
+
+            /* Turn on-board LED off */
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+
+            /* Initialize drivers */
+            rc_controller = FSA8S_Init(&huart2);
+            if (NULL == rc_controller) {
+                /* Error */
+                ErrorLED_Start(FSA8S_InitializationError);
+            }
+            hgy87 = GY87_Init(&hi2c1);
+            if (NULL == hgy87) {
+                /* Error */
+                ErrorLED_Start(GY87_InitializationError);
+            }
+            hesc = ESC_Init(&htim3);
+            if (NULL == hesc) {
+                /* Error */
+                ErrorLED_Start(ESC_InitializationError);
+            }
+
+            /* Create system timers, queues, semaphores and tasks */
+            if (FreeRTOS_CreateTimers() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_TimersCreationError);
+            }
+            if (FreeRTOS_CreateQueues() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_QueuesCreationError);
+            }
+            if (FreeRTOS_CreateSemaphores() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_SemaphoresCreationError);
+            }
+            if (FreeRTOS_CreateTasks() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_TasksCreationError);
+            }
+
+/* Initialize buffer structures */
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+            memset(&controlSystemValues_A, 0, sizeof(ControlSystemValues_t));
+            memset(&controlSystemValues_B, 0, sizeof(ControlSystemValues_t));
+            memset(debuggingStr_A, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
+            memset(debuggingStr_B, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
+#endif
+
+            /* Delete this task, as initialization must happen only once */
+            vTaskDelete(Task_Handle_StartUp);
+        }
+
+        /* Set task time delay */
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
+    }
+}
+
 void Task_BatteryLevel(void *ptr) {
     (void)ptr;
 
@@ -1003,7 +1080,7 @@ void Task_BatteryLevel(void *ptr) {
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(1000);
     /* Get initial tick count */
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
 
     while (1) {
 
@@ -1014,7 +1091,7 @@ void Task_BatteryLevel(void *ptr) {
         HAL_ADC_PollForConversion(&hadc1, 1);
 
         /* Read ADC value */
-        adcValue = HAL_ADC_GetValue(&hadc1);
+        adcValue                      = HAL_ADC_GetValue(&hadc1);
 
         /* Convert ADC value to real value */
         FlightController_batteryLevel = (adcValue * 3.3) / 4096;
@@ -1041,19 +1118,19 @@ void Task_BatteryLevel(void *ptr) {
 void Task_BatteryAlarm(void *ptr) {
     (void)ptr;
 
-    uint8_t alarmSequence[]     = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    uint8_t alarmSequenceSize   = sizeof(alarmSequence);
-    uint8_t alarmSequenceCursor = 0;
+    uint8_t alarmSequence[]             = {1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t alarmSequenceSize           = sizeof(alarmSequence);
+    uint8_t alarmSequenceCursor         = 0;
 
     const uint16_t ALARM_SEQUENCE_DELAY = 200;
 
     /* For main task timing */
-    const TickType_t xTaskPeriod   = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-    TickType_t       xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xTaskPeriod        = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    TickType_t       xLastWakeTime      = xTaskGetTickCount();
 
     /* For alarm sequence timing */
-    TickType_t xAlarmLastWakeTime = xLastWakeTime;
-    TickType_t xAlarmPeriod       = pdMS_TO_TICKS(ALARM_SEQUENCE_DELAY);
+    TickType_t xAlarmLastWakeTime       = xLastWakeTime;
+    TickType_t xAlarmPeriod             = pdMS_TO_TICKS(ALARM_SEQUENCE_DELAY);
 
     float FlightController_batteryLevel;
 
@@ -1081,7 +1158,7 @@ void Task_BatteryAlarm(void *ptr) {
                 /* Reset sequence cursor when alarm is off */
                 alarmSequenceCursor = 0;
                 /* Reset alarm timing reference point */
-                xAlarmLastWakeTime = xTaskGetTickCount();
+                xAlarmLastWakeTime  = xTaskGetTickCount();
             }
         }
 
@@ -1098,12 +1175,12 @@ void Task_BatteryAlarm(void *ptr) {
 void Task_HeartbeatLight(void *ptr) {
     (void)ptr;
 
-    uint8_t ledState = GPIO_PIN_RESET;
+    uint8_t ledState             = GPIO_PIN_RESET;
 
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(HEARTBEAT_PERIOD / 2);
     /* Get initial tick count */
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
 
     while (1) {
 
@@ -1137,7 +1214,7 @@ void Task_FlightLights(void *ptr) {
     } LightSequence;
 
     /* Consolidated sequence definitions */
-    static const LightSequence sequences[3] = {                              /* Sequence A */
+    static const LightSequence sequences[3]     = {                              /* Sequence A */
                                                {
                                                    {1, 0, 0, 0, 0, 0, 0, 0}, /* LED1 */
                                                    {0, 0, 1, 0, 0, 0, 0, 0}, /* LED2 */
@@ -1167,22 +1244,22 @@ void Task_FlightLights(void *ptr) {
     uint16_t  flightLightCommand_sequenceSelect = 0;
     uint16_t  flightLightCommand_sequenceEnable = 0;
 
-    const uint16_t CHANNEL_THRESHOLD_LOW   = 250;
-    const uint16_t CHANNEL_THRESHOLD_MID   = 750;
-    const uint16_t LIGHTS_ENABLE_THRESHOLD = 500;
-    const uint16_t BASE_SEQUENCE_DELAY     = 200;
+    const uint16_t CHANNEL_THRESHOLD_LOW        = 250;
+    const uint16_t CHANNEL_THRESHOLD_MID        = 750;
+    const uint16_t LIGHTS_ENABLE_THRESHOLD      = 500;
+    const uint16_t BASE_SEQUENCE_DELAY          = 200;
 
-    uint8_t  activeSequence       = 0;
-    uint8_t  sequenceCursor       = 0;
-    uint16_t currentSequenceDelay = BASE_SEQUENCE_DELAY;
+    uint8_t  activeSequence                     = 0;
+    uint8_t  sequenceCursor                     = 0;
+    uint16_t currentSequenceDelay               = BASE_SEQUENCE_DELAY;
 
     /* For main task timing */
-    const TickType_t xTaskPeriod   = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-    TickType_t       xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xTaskPeriod                = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    TickType_t       xLastWakeTime              = xTaskGetTickCount();
 
     /* For LED sequence timing */
-    TickType_t xSequenceLastWakeTime = xLastWakeTime;
-    TickType_t xSequencePeriod       = pdMS_TO_TICKS(currentSequenceDelay);
+    TickType_t xSequenceLastWakeTime            = xLastWakeTime;
+    TickType_t xSequencePeriod                  = pdMS_TO_TICKS(currentSequenceDelay);
 
     while (1) {
         /* Read the flight lights commands */
@@ -1232,7 +1309,7 @@ void Task_FlightLights(void *ptr) {
             HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
 
             /* Reset sequence cursor when lights are disabled */
-            sequenceCursor = 0;
+            sequenceCursor        = 0;
             /* Reset sequence timing reference point */
             xSequenceLastWakeTime = xTaskGetTickCount();
         }
@@ -1251,7 +1328,7 @@ void Task_FlightLights(void *ptr) {
 void Timer_Callback_OnOffButton(TimerHandle_t xTimer) {
 
     /* Get no. of times this timer has expired */
-    uint32_t ulCount = (uint32_t)pvTimerGetTimerID(xTimer);
+    uint32_t ulCount      = (uint32_t)pvTimerGetTimerID(xTimer);
 
     /* Get timer period */
     uint32_t xTimerPeriod = xTimerGetPeriod(xTimer);
@@ -1302,64 +1379,26 @@ void Timer_Callback_OnOffButton(TimerHandle_t xTimer) {
 /* --- Public function implementation ---------------------------------------------------------- */
 void FlightController_Init(void) {
 
-    // /* Task: FlightController_OnOffButton */
-    // BaseType_t ret = xTaskCreate(FlightController_OnOffButton, "FlightController_OnOffButton", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTCONTROLLER_ONOFFBUTTON_PRIORITY), &Task_Handle_OnOffButton);
-    // /* Check the task was created successfully. */
-    // configASSERT(ret == pdPASS);
-
-    /* Timer1: OnOffButton */
-    // Timer_Handle_OnOffButton = xTimerCreate("OnOffButton", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer_Callback_OnOffButton);
-
-    /* Turn on-board LED off */
-    HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-
-    /* Check if flight controller is already running */
-    FlightController_isRunning = 1; // DELETE THIS LINE
-    if (FlightController_isRunning) {
-
-        /* Initialize drivers */
-        rc_controller = FSA8S_Init(&huart2);
-        if (NULL == rc_controller) {
-            /* Error */
-            ErrorLED_Start(FSA8S_InitializationError);
-        }
-        hgy87 = GY87_Init(&hi2c1);
-        if (NULL == hgy87) {
-            /* Error */
-            ErrorLED_Start(GY87_InitializationError);
-        }
-        hesc = ESC_Init(&htim3);
-        if (NULL == hesc) {
-            /* Error */
-            ErrorLED_Start(ESC_InitializationError);
-        }
-
-        /* Create system timers, queues, semaphores and tasks */
-        if (FreeRTOS_CreateTimers() == false) {
-            /* Error */
-            ErrorLED_Start(FreeRTOS_TimersCreationError);
-        }
-        if (FreeRTOS_CreateQueues() == false) {
-            /* Error */
-            ErrorLED_Start(FreeRTOS_QueuesCreationError);
-        }
-        if (FreeRTOS_CreateSemaphores() == false) {
-            /* Error */
-            ErrorLED_Start(FreeRTOS_SemaphoresCreationError);
-        }
-        if (FreeRTOS_CreateTasks() == false) {
-            /* Error */
-            ErrorLED_Start(FreeRTOS_TasksCreationError);
-        }
+    /* Task 1: OnOffButton */
+    xTaskCreate(Task_OnOffButton, "Task_OnOffButton", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_ONOFFBUTTON_PRIORITY), &Task_Handle_OnOffButton);
+    if (Task_Handle_OnOffButton == NULL) {
+        /* Error */
+        ErrorLED_Start(FreeRTOS_TasksCreationError);
     }
 
-    /* Initialize buffer structures */
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
-    memset(&controlSystemValues_A, 0, sizeof(ControlSystemValues_t));
-    memset(&controlSystemValues_B, 0, sizeof(ControlSystemValues_t));
-    memset(debuggingStr_A, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
-    memset(debuggingStr_B, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
-#endif
+    /* Task 2: StartUp */
+    xTaskCreate(Task_StartUp, "Task_StartUp", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_STARTUP_PRIORITY), &Task_Handle_StartUp);
+    if (Task_Handle_StartUp == NULL) {
+        /* Error */
+        ErrorLED_Start(FreeRTOS_TasksCreationError);
+    }
+
+    /* Timer1: OnOffButton */
+    Timer_Handle_OnOffButton = xTimerCreate("Timer_OnOffButton", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer_Callback_OnOffButton);
+    if (Timer_Handle_OnOffButton == NULL) {
+        /* Error */
+        ErrorLED_Start(FreeRTOS_TimersCreationError);
+    }
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

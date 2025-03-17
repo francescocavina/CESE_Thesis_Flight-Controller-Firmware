@@ -936,7 +936,7 @@ typedef struct
 #define LL_TIM_TIM11_TI1_RMP_SPDIFRX (TIM_OR_TI1_RMP_0 | TIM11_OR_RMP_MASK) /*!< TIM11 channel 1 is connected to SPDIFRX */
 
 /* Legacy define */
-#define LL_TIM_TIM11_TI1_RMP_GPIO1 LL_TIM_TIM11_TI1_RMP_SPDIFRX /*!< Legacy define for LL_TIM_TIM11_TI1_RMP_SPDIFRX */
+#define LL_TIM_TIM11_TI1_RMP_GPIO1 LL_TIM_TIM11_TI1_RMP_SPDIFRX             /*!< Legacy define for LL_TIM_TIM11_TI1_RMP_SPDIFRX */
 
 #else
 #define LL_TIM_TIM11_TI1_RMP_GPIO1 (TIM_OR_TI1_RMP_0 | TIM11_OR_RMP_MASK)   /*!< TIM11 channel 1 is connected to GPIO */

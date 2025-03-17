@@ -2,8 +2,13 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 ColumnLimit: 0
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments:
+    Enabled: true
+    AcrossEmptyLines: true
+    AcrossComments: true
 AlignConsecutiveDeclarations: true
-AlignTrailingComments: true
+AlignTrailingComments:
+    Kind: Always
+    OverEmptyLines: 2
 AlignConsecutiveMacros: true
 UseTab: Never

@@ -246,7 +246,7 @@ StreamBufferHandle_t xStreamBufferGenericCreate(size_t xBufferSizeBytes, size_t 
     space would be reported as one byte smaller than would be logically
     expected. */
     xBufferSizeBytes++;
-    pucAllocatedMemory = (uint8_t *)pvPortMalloc(xBufferSizeBytes + sizeof(StreamBuffer_t)); /*lint !e9079 malloc() only returns void*. */
+    pucAllocatedMemory = (uint8_t *)pvPortMalloc(xBufferSizeBytes + sizeof(StreamBuffer_t));                                                                                                /*lint !e9079 malloc() only returns void*. */
 
     if (pucAllocatedMemory != NULL) {
         prvInitialiseNewStreamBuffer((StreamBuffer_t *)pucAllocatedMemory, /* Structure at the start of the allocated memory. */ /*lint !e9087 Safe cast as allocated memory is aligned. */ /*lint !e826 Area is not too small and alignment is guaranteed provided malloc() behaves as expected and returns aligned buffer. */
@@ -264,7 +264,7 @@ StreamBufferHandle_t xStreamBufferGenericCreate(size_t xBufferSizeBytes, size_t 
     return (StreamBufferHandle_t)pucAllocatedMemory; /*lint !e9087 !e826 Safe cast as allocated memory is aligned. */
 }
 
-#endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+#endif                                               /* configSUPPORT_DYNAMIC_ALLOCATION */
 /*-----------------------------------------------------------*/
 
 #if (configSUPPORT_STATIC_ALLOCATION == 1)
@@ -686,7 +686,7 @@ size_t xStreamBufferReceive(StreamBufferHandle_t xStreamBuffer,
             pxStreamBuffer->xTaskWaitingToReceive = NULL;
 
             /* Recheck the data available after blocking. */
-            xBytesAvailable = prvBytesInBuffer(pxStreamBuffer);
+            xBytesAvailable                       = prvBytesInBuffer(pxStreamBuffer);
         } else {
             mtCOVERAGE_TEST_MARKER();
         }
@@ -951,7 +951,7 @@ static size_t prvWriteBytesToBuffer(StreamBuffer_t *const pxStreamBuffer, const 
 
     configASSERT(xCount > (size_t)0);
 
-    xNextHead = pxStreamBuffer->xHead;
+    xNextHead    = pxStreamBuffer->xHead;
 
     /* Calculate the number of bytes that can be added in the first write -
     which may be less than the total number of bytes that need to be added if
@@ -992,7 +992,7 @@ static size_t prvReadBytesFromBuffer(StreamBuffer_t *pxStreamBuffer, uint8_t *pu
     xCount = configMIN(xBytesAvailable, xMaxCount);
 
     if (xCount > (size_t)0) {
-        xNextTail = pxStreamBuffer->xTail;
+        xNextTail    = pxStreamBuffer->xTail;
 
         /* Calculate the number of bytes that can be read - which may be
         less than the number wanted if the data wraps around to the start of
@@ -1063,7 +1063,7 @@ known value to assist in development/debugging. */
         result in confusion as to what is actually being observed. */
         const BaseType_t xWriteValue = 0x55;
         configASSERT(memset(pucBuffer, (int)xWriteValue, xBufferSizeBytes) == pucBuffer);
-    } /*lint !e529 !e438 xWriteValue is only used if configASSERT() is defined. */
+    }                                                                   /*lint !e529 !e438 xWriteValue is only used if configASSERT() is defined. */
 #endif
 
     (void)memset((void *)pxStreamBuffer, 0x00, sizeof(StreamBuffer_t)); /*lint !e9087 memset() requires void *. */
