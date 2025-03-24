@@ -42,6 +42,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "MPU6050_driver_UAI.h"
+
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
 extern "C" {
@@ -59,6 +61,9 @@ typedef bool bool_t;
  * @brief Control System Values structure.
  */
 typedef struct {
+    /* General */
+    bool_t throttleStick_startedDown;
+    bool_t ESC_isEnabled;
     /* Radio Controller Readings */
     uint16_t radioController_channelValues[FSA8S_CHANNELS];
     /* References (Values) */
@@ -70,32 +75,16 @@ typedef struct {
     float reference_rollAngle;
     float reference_pitchAngle;
     /* IMU Calibration (Gyroscope) */
-    bool_t gyroCalibration_calibrationDone;
-    bool_t gyroCalibration_fixedCalibration_en;
-    float  gyroCalibration_rotationRateRoll;
-    float  gyroCalibration_rotationRatePitch;
-    float  gyroCalibration_rotationRateYaw;
+    GY87_gyroscopeCalibrationValues_t gyroCalibration;
     /* IMU Measurements (Gyroscope) */
-    float gyroMeasurement_rotationRateRoll;
-    float gyroMeasurement_rotationRatePitch;
-    float gyroMeasurement_rotationRateYaw;
+    GY87_gyroscopeValues_t gyroMeasurement;
     /* IMU Calibration (Accelerometer) */
-    bool_t accCalibration_calibrationDone;
-    bool_t accCalibration_fixedCalibration_en;
-    float  accCalibration_linearAccelerationX;
-    float  accCalibration_linearAccelerationY;
-    float  accCalibration_linearAccelerationZ;
+    GY87_accelerometerCalibrationValues_t accCalibration;
     /* IMU Measurements (Accelerometer) */
-    float accMeasurement_linearAccelerationX;
-    float accMeasurement_linearAccelerationY;
-    float accMeasurement_linearAccelerationZ;
-    float accMeasurement_angleRoll;
-    float accMeasurement_anglePitch;
+    GY87_accelerometerValues_t accMeasurement;
     /* IMU Measurements (Magnetometer) */
-    float magMeasurement_magneticFieldX;
-    float magMeasurement_magneticFieldY;
-    float magMeasurement_magneticFieldZ;
-    float magMeasurement_magneticHeading;
+    GY87_magnetometerValues_t magMeasurement;
+    float                     magMeasurement_magneticHeading;
     /* IMU Measurements (Temperature Sensor) */
     float temperature;
     /* Kalman Filter Variables */

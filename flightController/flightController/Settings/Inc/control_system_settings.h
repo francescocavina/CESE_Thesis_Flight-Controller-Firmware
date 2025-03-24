@@ -37,7 +37,7 @@
 /* Drivers Settings */
 #define FSA8S_CHANNELS (10)
 /* Control System Settings */
-#define CONTROLSYSTEM_MODE                   (0)
+#define CONTROLSYSTEM_MODE                   (1)
 #define CONTROLSYSTEM_LOOP_PERIOD_S          (0.004) // Loop period in [s]
 #define CONTROLSYSTEM_LOOP_PERIOD_MS         (4)     // Loop period in [ms]
 #define CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE (25)

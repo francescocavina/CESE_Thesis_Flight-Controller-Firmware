@@ -173,6 +173,7 @@ static uint8_t  debuggingStr_GY87_magnetometerValues[40]             = {0};     
 static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]       = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_temperature[16]                    = {0};            // Size checked
 static uint8_t  debuggingStr_BatteryLevel[10]                        = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_referenceValues[40]       = {0};
 static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]       = {0};
 static uint8_t  debuggingStr_ControlSystem_KalmanAngles[30]          = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_anglesErrors[40]          = {0};
@@ -186,32 +187,18 @@ static uint8_t  debuggingStr_ESCs[40]                                = {0};
 static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0}; // Size checked
 #endif
 
-/* FS-A8S Radio Controller Variables */
-static FSA8S_CHANNEL_t channels[FSA8S_CHANNELS]                              = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
-static uint16_t        FSA8S_channelValues[FSA8S_CHANNELS]                   = {0};
-
-/* GY87 IMU Variables */
-static bool_t                                gyroscopeCalibrationIsDone      = false;
-static GY87_gyroscopeCalibrationValues_t     GY87_gyroscopeCalibrationValues = {false, true, 0.0, 0.0, 0.0};
-static GY87_gyroscopeValues_t                GY87_gyroscopeValues;
-static bool_t                                accelerometerCalibrationIsDone      = false;
-static GY87_accelerometerCalibrationValues_t GY87_accelerometerCalibrationValues = {false, true, 0.0, 0.0, 0.0};
-static GY87_accelerometerValues_t            GY87_accelerometerValues;
-static GY87_magnetometerValues_t             GY87_magnetometerValues;
-static float                                 GY87_magnetometerHeadingValue = 0;
-static float                                 GY87_temperature              = 0;
-
-/* Control System Mode */
-float KalmanPrediction_rollAngle                                           = 0;
-float KalmanPrediction_pitchAngle                                          = 0;
-float KalmanUncertainty_rollAngle                                          = 2 * 2;
-float KalmanUncertainty_pitchAngle                                         = 2 * 2;
-/* ESCs Values*/
-uint8_t ESC_speeds[4]                                                      = {0};
-/* Throttle stick check */
-static bool_t throttleStick_startedDown                                    = false;
+/* Control System */
+static ControlSystemValues_t controlSystemValues;
+static FSA8S_CHANNEL_t       channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
 
 /* --- Private function declarations ----------------------------------------------------------- */
+/*
+ * @brief  Initializes the system variables.
+ * @param  None
+ * @retval None
+ */
+void Initialize_SystemVariables(void);
+
 /*
  * @brief  Creates system software timers.
  * @param  None
@@ -326,6 +313,28 @@ extern ADC_HandleTypeDef  hadc1;
 /* --- Private variable definitions ------------------------------------------------------------ */
 
 /* --- Private function implementation --------------------------------------------------------- */
+void Initialize_SystemVariables(void) {
+    /* Control System Variables */
+    controlSystemValues.throttleStick_startedDown                     = false;
+
+    controlSystemValues.gyroCalibration.calibrationDone               = false;
+    controlSystemValues.gyroCalibration.fixedCalibration_en           = true;
+    controlSystemValues.gyroCalibration.calibrationRateRoll           = 0.0;
+    controlSystemValues.gyroCalibration.calibrationRatePitch          = 0.0;
+    controlSystemValues.gyroCalibration.calibrationRateYaw            = 0.0;
+
+    controlSystemValues.accCalibration.calibrationDone                = false;
+    controlSystemValues.accCalibration.fixedCalibration_en            = true;
+    controlSystemValues.accCalibration.calibrationLinearAccelerationX = 0.0;
+    controlSystemValues.accCalibration.calibrationLinearAccelerationY = 0.0;
+    controlSystemValues.accCalibration.calibrationLinearAccelerationZ = 0.0;
+
+    controlSystemValues.KalmanPrediction_rollAngle                    = 0;
+    controlSystemValues.KalmanPrediction_pitchAngle                   = 0;
+    controlSystemValues.KalmanUncertainty_rollAngle                   = 2 * 2;
+    controlSystemValues.KalmanUncertainty_pitchAngle                  = 2 * 2;
+}
+
 bool_t FreeRTOS_CreateTimers(void) {
 
     /* Successfully created all timers */
@@ -477,17 +486,15 @@ void Task_ControlSystem(void *ptr) {
         xPreviousLastWakeTime = xActualWakeTime;
 
         /* Calibrate GY-87 gyroscope sensor */
-        if (false == gyroscopeCalibrationIsDone) {
-            GY87_CalibrateGyroscope(hgy87, &GY87_gyroscopeCalibrationValues, !((bool_t)GY87_CALIBRATION_EN));
-            gyroscopeCalibrationIsDone = GY87_gyroscopeCalibrationValues.calibrationDone;
+        if (false == controlSystemValues.gyroCalibration.calibrationDone) {
+            GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN));
         }
         /* Calibrate GY-87 accelerometer sensor */
-        if (false == accelerometerCalibrationIsDone) {
-            GY87_CalibrateAccelerometer(hgy87, &GY87_accelerometerCalibrationValues, !((bool_t)GY87_CALIBRATION_EN));
-            accelerometerCalibrationIsDone = GY87_accelerometerCalibrationValues.calibrationDone;
+        if (false == controlSystemValues.accCalibration.calibrationDone) {
+            GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN));
         }
         /* Check that both sensors are calibrated */
-        if (gyroscopeCalibrationIsDone && accelerometerCalibrationIsDone && false == FlightController_isInitialized) {
+        if (controlSystemValues.gyroCalibration.calibrationDone && controlSystemValues.accCalibration.calibrationDone && false == FlightController_isInitialized) {
             FlightController_isInitialized = true;
         }
 
@@ -496,132 +503,210 @@ void Task_ControlSystem(void *ptr) {
 
             /* Read FS-A8S channels */
             for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
-                // FSA8S_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
+                controlSystemValues.radioController_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
             }
 
             /* Read GY-87 gyroscope sensor */
-            GY87_ReadGyroscope(hgy87, &GY87_gyroscopeValues, &GY87_gyroscopeCalibrationValues);
+            GY87_ReadGyroscope(hgy87, &controlSystemValues.gyroMeasurement, &controlSystemValues.gyroCalibration);
 
             /* Read GY-87 accelerometer sensor */
-            GY87_ReadAccelerometer(hgy87, &GY87_accelerometerValues, &GY87_accelerometerCalibrationValues);
+            GY87_ReadAccelerometer(hgy87, &controlSystemValues.accMeasurement, &controlSystemValues.accCalibration);
 
 /* Read GY-87 magnetometer values */
 #if (MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES == 1)
-            GY87_ReadMagnetometer(hgy87, &GY87_magnetometerValues);
+            GY87_ReadMagnetometer(hgy87, &controlSystemValues.magMeasurement);
 #endif
 
 /* Read GY-87 magnetometer heading */
 #if (MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING == 1)
-            GY87_magnetometerHeadingValue = GY87_ReadMagnetometerHeading(hgy87);
+            controlSystemValues.magMeasurement_magneticHeading = GY87_ReadMagnetometerHeading(hgy87);
 #endif
 
 /* Read GY-87 temperature sensor */
 #if (MAIN_APP_DEBUGGING_GY87_TEMPERATURE == 1)
-            GY87_temperature = GY87_ReadTemperatureSensor(hgy87);
+            controlSystemValues.temperature = GY87_ReadTemperatureSensor(hgy87);
 #endif
 
             /* Calculate Kalman angles */
-            Kalman_CalculateAngle(&KalmanPrediction_rollAngle, &KalmanUncertainty_rollAngle, GY87_gyroscopeValues.rotationRateRoll, GY87_accelerometerValues.angleRoll);
-            Kalman_CalculateAngle(&KalmanPrediction_pitchAngle, &KalmanUncertainty_pitchAngle, GY87_gyroscopeValues.rotationRatePitch, GY87_accelerometerValues.anglePitch);
+            Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
+            Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
 
         } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
+
+            /* Read FS-A8S channels  for flight lights */
+            controlSystemValues.radioController_channelValues[7] = FSA8S_ReadChannel(rc_controller, CHANNEL_8);
+            controlSystemValues.radioController_channelValues[8] = FSA8S_ReadChannel(rc_controller, CHANNEL_9);
+            controlSystemValues.radioController_channelValues[9] = FSA8S_ReadChannel(rc_controller, CHANNEL_10);
+
+            /* Avoid uncontrolled motor start */
+
+            if (false == controlSystemValues.throttleStick_startedDown) {
+                /* Read throttle input from radio controller */
+                controlSystemValues.radioController_channelValues[3] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                controlSystemValues.reference_throttle               = controlSystemValues.radioController_channelValues[3];
+
+                if (15 > controlSystemValues.reference_throttle) {
+                    controlSystemValues.throttleStick_startedDown = true;
+                } else {
+                    controlSystemValues.throttleStick_startedDown = false;
+                }
+
+            } else {
+                /* Check if ESCs are enabled (Switch B on radio controller) */
+                controlSystemValues.radioController_channelValues[5] = FSA8S_ReadChannel(rc_controller, CHANNEL_6);
+                if (500 <= controlSystemValues.radioController_channelValues[5]) {
+                    controlSystemValues.ESC_isEnabled = true;
+                } else {
+                    controlSystemValues.ESC_isEnabled = false;
+                }
+
+                /* Turn off motors in case ESCs are disabled */
+                if (false == controlSystemValues.ESC_isEnabled) {
+
+                    /* Save motors speed */
+                    controlSystemValues.ESC1_speed = 0;
+                    controlSystemValues.ESC2_speed = 0;
+                    controlSystemValues.ESC3_speed = 0;
+                    controlSystemValues.ESC4_speed = 0;
+
+                    /* Turn off motors */
+                    // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
+                    // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
+                    // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
+                    // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
+
+                    /* Reset PID variables */
+                    CSM_ResetPID();
+
+                } else {
+
+                    /* Read input throttle from radio controller */
+                    controlSystemValues.reference_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+
+                    /* Check if throttle stick is low */
+                    if (CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE > controlSystemValues.reference_throttle) {
+
+                        /* Save motors speed */
+                        controlSystemValues.ESC1_speed = 0;
+                        controlSystemValues.ESC2_speed = 0;
+                        controlSystemValues.ESC3_speed = 0;
+                        controlSystemValues.ESC4_speed = 0;
+
+                        /* Turn off motors */
+                        // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
+                        // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
+                        // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
+                        // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
+
+                        /* Reset PID variables */
+                        CSM_ResetPID();
+
+                    } else {
+
+                        /* Read GY-87 gyroscope sensor */
+                        GY87_ReadGyroscope(hgy87, &controlSystemValues.gyroMeasurement, &controlSystemValues.gyroCalibration);
+                        /* Read GY-87 accelerometer sensor */
+                        GY87_ReadAccelerometer(hgy87, &controlSystemValues.accMeasurement, &controlSystemValues.accCalibration);
+
+                        /* Calculate Kalman angles */
+                        Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
+                        Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
+
+                        /* Read inputs from radio controller */
+                        controlSystemValues.radioController_channelValues[0] = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
+                        controlSystemValues.radioController_channelValues[1] = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
+                        controlSystemValues.radioController_channelValues[2] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                        controlSystemValues.radioController_channelValues[3] = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
+                        controlSystemValues.reference_throttle               = (float)controlSystemValues.radioController_channelValues[2];
+                        controlSystemValues.reference_rollValue              = (float)controlSystemValues.radioController_channelValues[0];
+                        controlSystemValues.reference_pitchValue             = (float)controlSystemValues.radioController_channelValues[1];
+                        controlSystemValues.reference_yawValue               = (float)controlSystemValues.radioController_channelValues[3];
+
+                        /* Adjust and limit throttle input */
+                        if (CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE < controlSystemValues.reference_throttle) {
+                            controlSystemValues.reference_throttle = CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE;
+                        }
+
+                        /* Calculate desired angles by mapping radio controller values to angles */
+                        controlSystemValues.reference_rollAngle  = 0.03 * (controlSystemValues.reference_rollValue - 500);
+                        controlSystemValues.reference_pitchAngle = 0.03 * (controlSystemValues.reference_pitchValue - 500);
+
+                        /* Calculate angles errors */
+                        controlSystemValues.error_rollAngle      = controlSystemValues.reference_rollAngle - controlSystemValues.KalmanPrediction_rollAngle;
+                        controlSystemValues.error_pitchAngle     = controlSystemValues.reference_pitchAngle - controlSystemValues.KalmanPrediction_pitchAngle;
+
+                        /* Calculate PID for roll angle */
+                        CSM_CalculatePID(&controlSystemValues.PID_Output_rollAngle, &controlSystemValues.PID_previousIterm_rollAngle, &controlSystemValues.PID_previousError_rollAngle, controlSystemValues.error_rollAngle, CONTROLSYSTEM_KP_ROLL_ANGLE, CONTROLSYSTEM_KI_ROLL_ANGLE, CONTROLSYSTEM_KD_ROLL_ANGLE);
+                        /* Calculate PID for pitch angle */
+                        CSM_CalculatePID(&controlSystemValues.PID_Output_pitchAngle, &controlSystemValues.PID_previousIterm_pitchAngle, &controlSystemValues.PID_previousError_pitchAngle, controlSystemValues.error_pitchAngle, CONTROLSYSTEM_KP_PITCH_ANGLE, CONTROLSYSTEM_KI_PITCH_ANGLE, CONTROLSYSTEM_KD_PITCH_ANGLE);
+
+                        /* Calculate desired rates */
+                        controlSystemValues.reference_rollRate  = controlSystemValues.PID_Output_rollAngle;
+                        controlSystemValues.reference_pitchRate = controlSystemValues.PID_Output_pitchAngle;
+                        controlSystemValues.reference_yawRate   = 0.03 * (controlSystemValues.reference_yawValue - 500);
+
+                        /* Calculate rates errors */
+                        controlSystemValues.error_rollRate      = controlSystemValues.reference_rollRate - controlSystemValues.gyroMeasurement.rotationRateRoll;
+                        controlSystemValues.error_pitchRate     = controlSystemValues.reference_pitchRate - controlSystemValues.gyroMeasurement.rotationRatePitch;
+                        controlSystemValues.error_yawRate       = controlSystemValues.reference_yawRate - controlSystemValues.gyroMeasurement.rotationRateYaw;
+
+                        /* Calculate PID for roll rate */
+                        CSM_CalculatePID(&controlSystemValues.PID_Output_rollRate, &controlSystemValues.PID_previousIterm_rollRate, &controlSystemValues.PID_previousError_rollRate, controlSystemValues.error_rollRate, CONTROLSYSTEM_KP_ROLL_RATE, CONTROLSYSTEM_KI_ROLL_RATE, CONTROLSYSTEM_KD_ROLL_RATE);
+                        /* Calculate PID for pitch rate */
+                        CSM_CalculatePID(&controlSystemValues.PID_Output_pitchRate, &controlSystemValues.PID_previousIterm_pitchRate, &controlSystemValues.PID_previousError_pitchRate, controlSystemValues.error_pitchRate, CONTROLSYSTEM_KP_PITCH_RATE, CONTROLSYSTEM_KI_PITCH_RATE, CONTROLSYSTEM_KD_PITCH_RATE);
+                        /* Calculate PID for yaw rate */
+                        CSM_CalculatePID(&controlSystemValues.PID_Output_yawRate, &controlSystemValues.PID_previousIterm_yawRate, &controlSystemValues.PID_previousError_yawRate, controlSystemValues.error_yawRate, CONTROLSYSTEM_KP_YAW_RATE, CONTROLSYSTEM_KI_YAW_RATE, CONTROLSYSTEM_KD_YAW_RATE);
+
+                        /* Calculate motors speed */
+                        controlSystemValues.motor1_speed = (controlSystemValues.reference_throttle - controlSystemValues.PID_Output_rollRate - controlSystemValues.PID_Output_pitchRate - controlSystemValues.PID_Output_yawRate) / 10;
+                        controlSystemValues.motor2_speed = (controlSystemValues.reference_throttle + controlSystemValues.PID_Output_rollRate + controlSystemValues.PID_Output_pitchRate - controlSystemValues.PID_Output_yawRate) / 10;
+                        controlSystemValues.motor3_speed = (controlSystemValues.reference_throttle + controlSystemValues.PID_Output_rollRate - controlSystemValues.PID_Output_pitchRate + controlSystemValues.PID_Output_yawRate) / 10;
+                        controlSystemValues.motor4_speed = (controlSystemValues.reference_throttle - controlSystemValues.PID_Output_rollRate + controlSystemValues.PID_Output_pitchRate + controlSystemValues.PID_Output_yawRate) / 10;
+
+                        /* Adjust and limit motors maximum speed */
+                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor1_speed)
+                            controlSystemValues.motor1_speed = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor2_speed)
+                            controlSystemValues.motor2_speed = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor3_speed)
+                            controlSystemValues.motor3_speed = ESC_MAXIMUM_SPEED;
+                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor4_speed)
+                            controlSystemValues.motor4_speed = ESC_MAXIMUM_SPEED;
+
+                        /* Adjust and limit motors minimum speed */
+                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor1_speed)
+                            controlSystemValues.motor1_speed = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor2_speed)
+                            controlSystemValues.motor2_speed = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor3_speed)
+                            controlSystemValues.motor3_speed = ESC_MINIMUM_SPEED;
+                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor4_speed)
+                            controlSystemValues.motor4_speed = ESC_MINIMUM_SPEED;
+
+                        /* Save motors speed */
+                        controlSystemValues.ESC1_speed = controlSystemValues.motor1_speed;
+                        controlSystemValues.ESC2_speed = controlSystemValues.motor2_speed;
+                        controlSystemValues.ESC3_speed = controlSystemValues.motor3_speed;
+                        controlSystemValues.ESC4_speed = controlSystemValues.motor4_speed;
+
+                        /* Set motors speed */
+                        // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
+                        // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
+                        // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
+                        // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
+                    }
+                }
+            }
         }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
+        /* Control Loop Period */
+        controlSystemValues.controlLoopPeriod = xControlLoopPeriod;
+        /* Task Execution Time */
+        controlSystemValues.taskExecutionTime = xTaskGetTickCount() - xTaskStartTime;
         /* Clear buffer */
         memset(controlSystemActiveValues_TaskControlSystem, 0, sizeof(ControlSystemValues_t));
-        /* Radio Controller Readings */
-        for (int8_t i = 0; i < FSA8S_CHANNELS; i++) {
-            controlSystemActiveValues_TaskControlSystem->radioController_channelValues[i] = FSA8S_channelValues[i];
-        }
-        /* References (Values) */
-        controlSystemActiveValues_TaskControlSystem->reference_throttle                  = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_rollValue                 = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_pitchValue                = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_yawValue                  = 0;
-        /* References (Angles) */
-        controlSystemActiveValues_TaskControlSystem->reference_rollAngle                 = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_pitchAngle                = 0;
-        /* IMU Calibration (Gyroscope) */
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_calibrationDone     = GY87_gyroscopeCalibrationValues.calibrationDone;
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_fixedCalibration_en = GY87_gyroscopeCalibrationValues.fixedCalibration_en;
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRateRoll    = GY87_gyroscopeCalibrationValues.calibrationRateRoll;
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRatePitch   = GY87_gyroscopeCalibrationValues.calibrationRatePitch;
-        controlSystemActiveValues_TaskControlSystem->gyroCalibration_rotationRateYaw     = GY87_gyroscopeCalibrationValues.calibrationRateYaw;
-        /* IMU Measurements (controlSystemActiveValues_TaskControlSystem->Gyroscope) */
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateRoll    = GY87_gyroscopeValues.rotationRateRoll;
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRatePitch   = GY87_gyroscopeValues.rotationRatePitch;
-        controlSystemActiveValues_TaskControlSystem->gyroMeasurement_rotationRateYaw     = GY87_gyroscopeValues.rotationRateYaw;
-        /* IMU Calibration (Accelerometer) */
-        controlSystemActiveValues_TaskControlSystem->accCalibration_calibrationDone      = GY87_accelerometerCalibrationValues.calibrationDone;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_fixedCalibration_en  = GY87_accelerometerCalibrationValues.fixedCalibration_en;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationX  = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationX;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationY  = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationY;
-        controlSystemActiveValues_TaskControlSystem->accCalibration_linearAccelerationZ  = GY87_accelerometerCalibrationValues.calibrationLinearAccelerationZ;
-        /* IMU Measurements (Accelerometer) */
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationX  = GY87_accelerometerValues.linearAccelerationX;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationY  = GY87_accelerometerValues.linearAccelerationY;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_linearAccelerationZ  = GY87_accelerometerValues.linearAccelerationZ;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_angleRoll            = GY87_accelerometerValues.angleRoll;
-        controlSystemActiveValues_TaskControlSystem->accMeasurement_anglePitch           = GY87_accelerometerValues.anglePitch;
-        /* IMU Measurements (Magnetometer) */
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldX       = GY87_magnetometerValues.magneticFieldX;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldY       = GY87_magnetometerValues.magneticFieldY;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticFieldZ       = GY87_magnetometerValues.magneticFieldZ;
-        controlSystemActiveValues_TaskControlSystem->magMeasurement_magneticHeading      = GY87_magnetometerHeadingValue;
-        /* IMU Measurements (Temperature Sensor) */
-        controlSystemActiveValues_TaskControlSystem->temperature                         = GY87_temperature;
-        /* Kalman Filter Variables */
-        controlSystemActiveValues_TaskControlSystem->KalmanPrediction_rollAngle          = KalmanPrediction_rollAngle;
-        controlSystemActiveValues_TaskControlSystem->KalmanPrediction_pitchAngle         = KalmanPrediction_pitchAngle;
-        controlSystemActiveValues_TaskControlSystem->KalmanUncertainty_rollAngle         = KalmanUncertainty_rollAngle;
-        controlSystemActiveValues_TaskControlSystem->KalmanUncertainty_pitchAngle        = KalmanUncertainty_pitchAngle;
-        /* Errors: Angles */
-        controlSystemActiveValues_TaskControlSystem->error_rollAngle                     = 0;
-        controlSystemActiveValues_TaskControlSystem->error_pitchAngle                    = 0;
-        /* PID (Angles): Previous Errors */
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_rollAngle         = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_pitchAngle        = 0;
-        /* PID (Angles): Previous Integral Terms */
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_rollAngle         = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_pitchAngle        = 0;
-        /* PID Outputs: Angles */
-        controlSystemActiveValues_TaskControlSystem->PID_Output_rollAngle                = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_Output_pitchAngle               = 0;
-        /* References: Rates */
-        controlSystemActiveValues_TaskControlSystem->reference_rollRate                  = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_pitchRate                 = 0;
-        controlSystemActiveValues_TaskControlSystem->reference_yawRate                   = 0;
-        /* Errors: Rates */
-        controlSystemActiveValues_TaskControlSystem->error_rollRate                      = 0;
-        controlSystemActiveValues_TaskControlSystem->error_pitchRate                     = 0;
-        controlSystemActiveValues_TaskControlSystem->error_yawRate                       = 0;
-        /* PID (Rates): Previous Errors */
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_rollRate          = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_pitchRate         = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousError_yawRate           = 0;
-        /* PID (Rates): Previous Integral Terms */
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_rollRate          = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_pitchRate         = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_previousIterm_yawRate           = 0;
-        /* PID Outputs: Rates */
-        controlSystemActiveValues_TaskControlSystem->PID_Output_rollRate                 = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_Output_pitchRate                = 0;
-        controlSystemActiveValues_TaskControlSystem->PID_Output_yawRate                  = 0;
-        /* Motors Speeds */
-        controlSystemActiveValues_TaskControlSystem->motor1_speed                        = 0;
-        controlSystemActiveValues_TaskControlSystem->motor2_speed                        = 0;
-        controlSystemActiveValues_TaskControlSystem->motor3_speed                        = 0;
-        controlSystemActiveValues_TaskControlSystem->motor4_speed                        = 0;
-        /* ESCs Values*/
-        controlSystemActiveValues_TaskControlSystem->ESC1_speed                          = ESC_speeds[0];
-        controlSystemActiveValues_TaskControlSystem->ESC2_speed                          = ESC_speeds[1];
-        controlSystemActiveValues_TaskControlSystem->ESC3_speed                          = ESC_speeds[2];
-        controlSystemActiveValues_TaskControlSystem->ESC4_speed                          = ESC_speeds[3];
-        /* Control Loop Period */
-        controlSystemActiveValues_TaskControlSystem->controlLoopPeriod                   = xControlLoopPeriod;
-        /* Task Execution Time */
-        controlSystemActiveValues_TaskControlSystem->taskExecutionTime                   = xTaskGetTickCount() - xTaskStartTime;
+        memcpy(controlSystemActiveValues_TaskControlSystem, &controlSystemValues, sizeof(ControlSystemValues_t));
         /* Try to swap buffers when ready to send */
         if (xSemaphoreTake(Semaphore_Handle_controlSystemValuesSwap, 0) == pdTRUE) {
             /* Swap buffers as Task_ControlSystem is not using 'controlSystemActiveValues_TaskControlSystem' */
@@ -638,9 +723,9 @@ void Task_ControlSystem(void *ptr) {
         /* Clear buffer */
         memset(FlightLightsActiveBuffer_TaskControlSystem, 0, sizeof(FlightLights_Buffer_A));
         /* Load radio controller values into the buffer */
-        FlightLightsActiveBuffer_TaskControlSystem[0] = FSA8S_channelValues[7];
-        FlightLightsActiveBuffer_TaskControlSystem[1] = FSA8S_channelValues[8];
-        FlightLightsActiveBuffer_TaskControlSystem[2] = FSA8S_channelValues[9];
+        FlightLightsActiveBuffer_TaskControlSystem[0] = controlSystemValues.radioController_channelValues[7];
+        FlightLightsActiveBuffer_TaskControlSystem[1] = controlSystemValues.radioController_channelValues[8];
+        FlightLightsActiveBuffer_TaskControlSystem[2] = controlSystemValues.radioController_channelValues[9];
         /* Flight Lights buffer swap implementation */
         if (xSemaphoreTake(Semaphore_Handle_flightLightsBufferSwap, 0) == pdTRUE) {
             /* Swap buffers for Flight Lights */
@@ -756,48 +841,48 @@ void Task_Debugging(void *ptr) {
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES)
                 /* Log GY87 gyroscope calibration values */
                 snprintf((char *)debuggingStr_GY87_gyroscopeCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
-                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroCalibration_rotationRateRoll,
-                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroCalibration_rotationRatePitch,
-                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroCalibration_rotationRateYaw);
+                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroCalibration.calibrationRateRoll,
+                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroCalibration.calibrationRatePitch,
+                         DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroCalibration.calibrationRateYaw);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES)
                 /* Log GY87 accelerometer calibration values */
                 snprintf((char *)debuggingStr_GY87_accelerometerCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
-                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_X, logControlSystemValues->accCalibration_linearAccelerationX,
-                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Y, logControlSystemValues->accCalibration_linearAccelerationY,
-                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Z, logControlSystemValues->accCalibration_linearAccelerationZ);
+                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_X, logControlSystemValues->accCalibration.calibrationLinearAccelerationX,
+                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Y, logControlSystemValues->accCalibration.calibrationLinearAccelerationY,
+                         DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Z, logControlSystemValues->accCalibration.calibrationLinearAccelerationZ);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES == 1)
                 /* Log GY87 gyroscope values */
                 snprintf((char *)debuggingStr_GY87_gyroscopeValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
-                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroMeasurement_rotationRateRoll,
-                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroMeasurement_rotationRatePitch,
-                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroMeasurement_rotationRateYaw);
+                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroMeasurement.rotationRateRoll,
+                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroMeasurement.rotationRatePitch,
+                         DEBUG_GY87_GYRO_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroMeasurement.rotationRateYaw);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES == 1)
                 /* Log GY87 accelerometer values */
                 snprintf((char *)debuggingStr_GY87_accelerometerValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
-                         DEBUG_GY87_ACC_VALUES_LINEAR_X, logControlSystemValues->accCalibration_linearAccelerationX,
-                         DEBUG_GY87_ACC_VALUES_LINEAR_Y, logControlSystemValues->accCalibration_linearAccelerationY,
-                         DEBUG_GY87_ACC_VALUES_LINEAR_Z, logControlSystemValues->accCalibration_linearAccelerationZ);
+                         DEBUG_GY87_ACC_VALUES_LINEAR_X, logControlSystemValues->accMeasurement.linearAccelerationX,
+                         DEBUG_GY87_ACC_VALUES_LINEAR_Y, logControlSystemValues->accMeasurement.linearAccelerationY,
+                         DEBUG_GY87_ACC_VALUES_LINEAR_Z, logControlSystemValues->accMeasurement.linearAccelerationZ);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES == 1)
                 /* Log GY87 accelerometer angles */
                 snprintf((char *)debuggingStr_GY87_accelerometerAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
-                         DEBUG_GY87_ACC_VALUES_ANGLE_ROLL, logControlSystemValues->accMeasurement_angleRoll,
-                         DEBUG_GY87_ACC_VALUES_ANGLE_PITCH, logControlSystemValues->accMeasurement_anglePitch);
+                         DEBUG_GY87_ACC_VALUES_ANGLE_ROLL, logControlSystemValues->accMeasurement.angleRoll,
+                         DEBUG_GY87_ACC_VALUES_ANGLE_PITCH, logControlSystemValues->accMeasurement.anglePitch);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES == 1)
                 /* Log GY87 magnetometer values */
                 snprintf((char *)debuggingStr_GY87_magnetometerValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
-                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_X, logControlSystemValues->magMeasurement_magneticFieldX,
-                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_Y, logControlSystemValues->magMeasurement_magneticFieldY,
-                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_Z, logControlSystemValues->magMeasurement_magneticFieldZ);
+                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_X, logControlSystemValues->magMeasurement.magneticFieldX,
+                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_Y, logControlSystemValues->magMeasurement.magneticFieldY,
+                         DEBUG_GY87_MAG_VALUES_MAG_FIELD_Z, logControlSystemValues->magMeasurement.magneticFieldZ);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING == 1)
@@ -822,11 +907,11 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES == 1)
                 /* Log control system reference values */
-                snprintf((char *)debuggingStr_ControlSystem_referenceAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
-                         DEBUG_CONTROLSYSTEM_REFERENCE_THROTTLE, logControlSystemValues->reference_throttle,
-                         DEBUG_CONTROLSYSTEM_REFERENCE_ROLL_VALUE, logControlSystemValues->reference_rollValue,
-                         DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_VALUE, logControlSystemValues->reference_pitchValue,
-                         DEBUG_CONTROLSYSTEM_REFERENCE_YAW_VALUE, logControlSystemValues->reference_yawValue);
+                snprintf((char *)debuggingStr_ControlSystem_referenceValues, 40 * sizeof(uint8_t), (const char *)"/%d_%d/%d_%d/%d_%d/%d_%d",
+                         DEBUG_CONTROLSYSTEM_REFERENCE_THROTTLE, (uint16_t)logControlSystemValues->reference_throttle,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_ROLL_VALUE, (uint16_t)logControlSystemValues->reference_rollValue,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_VALUE, (uint16_t)logControlSystemValues->reference_pitchValue,
+                         DEBUG_CONTROLSYSTEM_REFERENCE_YAW_VALUE, (uint16_t)logControlSystemValues->reference_yawValue);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES == 1)
@@ -892,9 +977,11 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR == 1)
                 /* Log control system auxiliar values */
-                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 40 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu",
+                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 40 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu/%d_%d/%d_%d",
                          DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED, (logControlSystemValues->controlLoopPeriod * 1000 / configTICK_RATE_HZ),
-                         DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME, (logControlSystemValues->taskExecutionTime * 1000 / configTICK_RATE_HZ));
+                         DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME, (logControlSystemValues->taskExecutionTime * 1000 / configTICK_RATE_HZ),
+                         DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN, (uint8_t)logControlSystemValues->throttleStick_startedDown,
+                         DEBUG_CONTROLSYSTEM_ESCS_ENABLED, (uint8_t)logControlSystemValues->ESC_isEnabled);
 #endif
 
 #if (MAIN_APP_DEBUGGING_ESCS == 1)
@@ -939,6 +1026,7 @@ void Task_Debugging(void *ptr) {
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_magnetometerHeadingValue);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_temperature);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_BatteryLevel);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceValues);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceAngles);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_KalmanAngles);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_anglesErrors);

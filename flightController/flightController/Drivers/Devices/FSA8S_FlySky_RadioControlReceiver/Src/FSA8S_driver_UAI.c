@@ -287,40 +287,20 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel)
     }
 
     /* Set number of tries for flight controller reading */
-    const uint8_t MAX_ATTEMPTS = 5;
-    uint8_t       attempts     = 0;
+    const uint8_t MAX_ATTEMPTS                       = 5;
+    uint8_t       attempts                           = 0;
 
     /* Keep track of last valid reading */
     static uint16_t lastValidReadings[IBUS_CHANNELS] = {0};
 
-    /* Local buffer for atomic processing */
-    uint8_t safeBuffer[IBUS_BUFFER_LENGTH];
-
     while (attempts < MAX_ATTEMPTS) {
-/* Create atomic copy of DMA buffer */
-#ifdef USE_FREERTOS
-        taskENTER_CRITICAL();
-        memcpy(safeBuffer, hibus->buffer, IBUS_BUFFER_LENGTH);
-        taskEXIT_CRITICAL();
-#else
-        __disable_irq();
-        memcpy(safeBuffer, hibus->buffer, IBUS_BUFFER_LENGTH);
-        __enable_irq();
-#endif
-
-        /* Use temporary structure to process data safely */
-        IBUS_HandleTypeDef_t tempHandle = *hibus;
-        tempHandle.buffer               = safeBuffer;
 
         /* Check if first two bytes are IBUS_LENGTH and IBUS_COMMAND */
-        if (FSA8S_CheckFirstBytes(&tempHandle)) {
+        if (FSA8S_CheckFirstBytes(hibus)) {
             /* Perform a checksum */
-            if (FSA8S_Checksum(&tempHandle)) {
+            if (FSA8S_Checksum(hibus)) {
                 /* Valid data received - process it */
-                FSA8S_AmendData(&tempHandle);
-
-                /* Copy processed data back to the original structure */
-                hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET] = tempHandle.data[channel - IBUS_CHANNEL_NUM_OFFSET];
+                FSA8S_AmendData(hibus);
 
                 /* Store this as last valid reading */
                 lastValidReadings[channel - IBUS_CHANNEL_NUM_OFFSET] = hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
@@ -329,12 +309,6 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel)
             }
         }
         attempts++;
-
-#ifdef USE_FREERTOS
-        vTaskDelay(pdMS_TO_TICKS(1));
-#else
-        HAL_Delay(1);
-#endif
     }
 
     /* Check if DMA is hung */
