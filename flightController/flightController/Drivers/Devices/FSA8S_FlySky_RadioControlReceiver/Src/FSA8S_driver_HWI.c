@@ -103,23 +103,25 @@ bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t *hibus) {
         return false;
     }
 
-    /* Check if DMA is in error state */
-    if (hibus->huart->RxState == HAL_UART_STATE_ERROR || hibus->huart->hdmarx->State == HAL_DMA_STATE_ERROR || hibus->huart->hdmarx->State == HAL_DMA_STATE_TIMEOUT) {
+    /* Abort current DMA */
+    HAL_UART_DMAStop(hibus->huart);
 
-        /* Abort current DMA */
-        HAL_UART_DMAStop(hibus->huart);
+    /* Clear buffer to ensure clean state */
+    memset(hibus->buffer, 0, hibus->bufferSize);
 
-        /* Reset error flags */
-        hibus->huart->ErrorCode         = HAL_UART_ERROR_NONE;
-        hibus->huart->hdmarx->ErrorCode = HAL_DMA_ERROR_NONE;
-
-        /* Restart DMA reception */
-        HAL_UART_Receive_DMA(hibus->huart, hibus->buffer, hibus->bufferSize);
-
-        return true;
+    /* Flush UART receive register */
+    uint8_t dummy;
+    while (HAL_UART_Receive(hibus->huart, &dummy, 1, 0) == HAL_OK) {
     }
 
-    return false;
+    /* Reset error flags */
+    hibus->huart->ErrorCode         = HAL_UART_ERROR_NONE;
+    hibus->huart->hdmarx->ErrorCode = HAL_DMA_ERROR_NONE;
+
+    /* Restart DMA reception */
+    HAL_UART_Receive_DMA(hibus->huart, hibus->buffer, hibus->bufferSize);
+
+    return true;
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

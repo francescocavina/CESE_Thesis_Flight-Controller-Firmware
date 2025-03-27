@@ -54,6 +54,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ./APIs/Main_Application/Src/main_app.c
     ./APIs/Error_LED/Src/error_led.c
     ./APIs/Control_System_Support/Src/control_system_support.c
+    ./APIs/System_Failure_Test/Src/system_failure_test.c
     ./USB_DEVICE/App/usb_device.c
     ./USB_DEVICE/App/usbd_desc.c
     ./USB_DEVICE/App/usbd_cdc_if.c
@@ -117,6 +118,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     ./APIs/Main_Application/Inc
     ./APIs/Error_LED/Inc
     ./APIs/Control_System_Support/Inc
+    ./APIs/System_Failure_Test/Inc
     ./USB_DEVICE/App
     ./USB_DEVICE/Target
     ./Drivers/STM32F4xx_HAL_Driver/Inc

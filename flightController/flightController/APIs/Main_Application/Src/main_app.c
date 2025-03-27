@@ -36,6 +36,7 @@
 #include "control_system_support.h"
 #include "debug_signals_ids.h"
 #include "error_led.h"
+#include "system_failure_test.h"
 #include "user_settings.h"
 
 #include "ESC_UAI.h"
@@ -47,8 +48,9 @@
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 /* FreeRTOS General Settings */
-#define USE_FREERTOS       // Remove comment when using FreeRTOS
-#define DEFAULT_TASK_DELAY (100)
+#define USE_FREERTOS                  // Remove comment when using FreeRTOS
+#define DEFAULT_TASK_DELAY            (100)
+#define TEST_SYSTEM_FAILURE_PROCEDURE (1)
 /* FreeRTOS Tasks Priorities */
 #define TASK_ONOFFBUTTON_PRIORITY      (3)
 #define TASK_STARTUP_PRIORITY          (3)
@@ -303,12 +305,20 @@ void Task_FlightLights(void *ptr);
  */
 void Timer_Callback_OnOffButton(TimerHandle_t xTimer);
 
+/*
+ * @brief  WWDG Early Wakeup Callback: Handles actions when window watchdog early warning occurs
+ * @param  WWDG_HandleTypeDef pointer to the watchdog handle structure
+ * @retval None
+ */
+void HAL_WWDG_EarlyWakeupCallback(WWDG_HandleTypeDef *hwwdg);
+
 /* --- Public variable definitions ------------------------------------------------------------- */
 extern I2C_HandleTypeDef  hi2c1;
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef  hdma_usart2_rx;
 extern TIM_HandleTypeDef  htim3;
 extern ADC_HandleTypeDef  hadc1;
+extern WWDG_HandleTypeDef hwwdg;
 
 /* --- Private variable definitions ------------------------------------------------------------ */
 
@@ -487,16 +497,40 @@ void Task_ControlSystem(void *ptr) {
 
         /* Calibrate GY-87 gyroscope sensor */
         if (false == controlSystemValues.gyroCalibration.calibrationDone) {
+            vTaskDelay(pdMS_TO_TICKS(200));
             GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN));
         }
         /* Calibrate GY-87 accelerometer sensor */
         if (false == controlSystemValues.accCalibration.calibrationDone) {
+            vTaskDelay(pdMS_TO_TICKS(200));
             GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN));
         }
         /* Check that both sensors are calibrated */
         if (controlSystemValues.gyroCalibration.calibrationDone && controlSystemValues.accCalibration.calibrationDone && false == FlightController_isInitialized) {
+            /* Beep to indicate that the system is ready */
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
+            vTaskDelay(pdMS_TO_TICKS(100));
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
+            vTaskDelay(pdMS_TO_TICKS(150));
+            HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
+            /* Set global flags */
             FlightController_isInitialized = true;
         }
+
+        /* Refresh the WWDG */
+        HAL_WWDG_Refresh(&hwwdg);
+
+        /* System Failure Simulation */
+        // #if (TEST_SYSTEM_FAILURE_PROCEDURE == 1)
+        //         controlSystemValues.radioController_channelValues[4] = FSA8S_ReadChannel(rc_controller, CHANNEL_5);
+        //         Test_SystemFailureProcedure(controlSystemValues.radioController_channelValues[4]);
+        // #endif
 
         /* Control system processing */
         if (FlightController_isInitialized && 0 == CONTROLSYSTEM_MODE) {
@@ -1171,33 +1205,33 @@ void Task_BatteryLevel(void *ptr) {
     TickType_t xLastWakeTime     = xTaskGetTickCount();
 
     while (1) {
+        if (FlightController_isInitialized) {
+            /* Start ADC Conversion */
+            HAL_ADC_Start(&hadc1);
 
-        /* Start ADC Conversion */
-        HAL_ADC_Start(&hadc1);
+            /* Poll ADC peripheral */
+            HAL_ADC_PollForConversion(&hadc1, 1);
 
-        /* Poll ADC peripheral */
-        HAL_ADC_PollForConversion(&hadc1, 1);
+            /* Read ADC value */
+            adcValue                      = HAL_ADC_GetValue(&hadc1);
 
-        /* Read ADC value */
-        adcValue                      = HAL_ADC_GetValue(&hadc1);
+            /* Convert ADC value to real value */
+            FlightController_batteryLevel = (adcValue * 3.3) / 4096;
 
-        /* Convert ADC value to real value */
-        FlightController_batteryLevel = (adcValue * 3.3) / 4096;
+            /* Correct real value, as when battery full, ADC input is not 3.3V */
+            FlightController_batteryLevel = FlightController_batteryLevel * 1.046046;
 
-        /* Correct real value, as when battery full, ADC input is not 3.3V */
-        FlightController_batteryLevel = FlightController_batteryLevel * 1.046046;
+            /* Map real value to battery levels */
+            FlightController_batteryLevel = FlightController_batteryLevel * 3.363636 + BATTERY_LEVEL_CALIBRATION_OFFSET;
 
-        /* Map real value to battery levels */
-        FlightController_batteryLevel = FlightController_batteryLevel * 3.363636 + BATTERY_LEVEL_CALIBRATION_OFFSET;
-
-        /* Send to queue, overwriting old value */
-        xQueueOverwrite(Queue_Handle_BatteryLevel, &FlightController_batteryLevel);
+            /* Send to queue, overwriting old value */
+            xQueueOverwrite(Queue_Handle_BatteryLevel, &FlightController_batteryLevel);
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
-        /* Get stack watermark */
-        Task_StackHighWatermark_BatteryLevel = uxTaskGetStackHighWaterMark(NULL);
+            /* Get stack watermark */
+            Task_StackHighWatermark_BatteryLevel = uxTaskGetStackHighWaterMark(NULL);
 #endif
-
+        }
         /* Set task time delay */
         vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
     }
@@ -1223,38 +1257,39 @@ void Task_BatteryAlarm(void *ptr) {
     float FlightController_batteryLevel;
 
     while (1) {
-        if (xQueuePeek(Queue_Handle_BatteryLevel, &FlightController_batteryLevel, 0) == pdTRUE) {
-            if (FlightController_batteryLevel < BATTERY_ALARM_THRESHOLD) {
-                /* Check if it's time to update the alarm sequence */
-                if ((xTaskGetTickCount() - xAlarmLastWakeTime) >= xAlarmPeriod) {
-                    /* Parse alarm sequence */
-                    alarmSequenceCursor++;
-                    if (alarmSequenceSize <= alarmSequenceCursor) {
-                        alarmSequenceCursor = 0;
+        if (FlightController_isInitialized) {
+            if (xQueuePeek(Queue_Handle_BatteryLevel, &FlightController_batteryLevel, 0) == pdTRUE) {
+                if (FlightController_batteryLevel < BATTERY_ALARM_THRESHOLD) {
+                    /* Check if it's time to update the alarm sequence */
+                    if ((xTaskGetTickCount() - xAlarmLastWakeTime) >= xAlarmPeriod) {
+                        /* Parse alarm sequence */
+                        alarmSequenceCursor++;
+                        if (alarmSequenceSize <= alarmSequenceCursor) {
+                            alarmSequenceCursor = 0;
+                        }
+
+                        /* Write to buzzer */
+                        HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, alarmSequence[alarmSequenceCursor]);
+
+                        /* Update alarm timing reference point */
+                        xAlarmLastWakeTime = xTaskGetTickCount();
                     }
+                } else {
+                    /* Turn buzzer off when battery level is OK */
+                    HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 
-                    /* Write to buzzer */
-                    HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, alarmSequence[alarmSequenceCursor]);
-
-                    /* Update alarm timing reference point */
-                    xAlarmLastWakeTime = xTaskGetTickCount();
+                    /* Reset sequence cursor when alarm is off */
+                    alarmSequenceCursor = 0;
+                    /* Reset alarm timing reference point */
+                    xAlarmLastWakeTime  = xTaskGetTickCount();
                 }
-            } else {
-                /* Turn buzzer off when battery level is OK */
-                HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
-
-                /* Reset sequence cursor when alarm is off */
-                alarmSequenceCursor = 0;
-                /* Reset alarm timing reference point */
-                xAlarmLastWakeTime  = xTaskGetTickCount();
             }
-        }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
-        /* Get stack watermark */
-        Task_StackHighWatermark_BatteryAlarm = uxTaskGetStackHighWaterMark(NULL);
+            /* Get stack watermark */
+            Task_StackHighWatermark_BatteryAlarm = uxTaskGetStackHighWaterMark(NULL);
 #endif
-
+        }
         /* Set task time delay */
         vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
     }
@@ -1461,6 +1496,23 @@ void Timer_Callback_OnOffButton(TimerHandle_t xTimer) {
     } else {
         /* Store the incremented count back into the timer's ID */
         vTimerSetTimerID(xTimer, (void *)ulCount);
+    }
+}
+
+void HAL_WWDG_EarlyWakeupCallback(WWDG_HandleTypeDef *hwwdg) {
+    if (!FlightController_isInitialized) {
+        /* During initialization phase, refresh to prevent reset */
+        HAL_WWDG_Refresh(hwwdg);
+    } else {
+        /* Emergency shutdown - Stop all motors */
+        if (hesc != NULL) {
+            // ESC_SetSpeed(hesc, hesc->esc1, 0);
+            // ESC_SetSpeed(hesc, hesc->esc2, 0);
+            // ESC_SetSpeed(hesc, hesc->esc3, 0);
+            // ESC_SetSpeed(hesc, hesc->esc4, 0);
+        }
+
+        /* Don't refresh - let system reset */
     }
 }
 

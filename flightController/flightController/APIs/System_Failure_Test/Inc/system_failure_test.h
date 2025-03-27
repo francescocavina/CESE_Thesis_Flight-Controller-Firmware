@@ -22,51 +22,53 @@
  */
 
 /*
- * @file:    user_settings.h
- * @date:    26/08/2023
+ * @file:    system_failure_test_led.h
+ * @date:    03/26/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   This file contains the flight controller user settings.
+ * @brief:
+ *
+ * @details:
  */
 
-#ifndef USER_SETTINGS_H
-#define USER_SETTINGS_H
+#ifndef SYSTEM_FAILURE_TEST_H
+#define SYSTEM_FAILURE_TEST_H
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
+#include "main.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* ############################################################################################# */
-/* ####################################### USER SETTINGS ####################################### */
-/* ############################################################################################# */
+/* --- Public macros definitions --------------------------------------------------------------- */
 
-/* --- IMU SENSORS ----------------------------------------------------------------------------- */
-#define GY87_CALIBRATION_EN (1)
+/* --- Public data type declarations ----------------------------------------------------------- */
+/**
+ *  @brief bool_t type declaration.
+ */
+typedef bool bool_t;
 
-/* --- POWER ON/OFF DRIVER --------------------------------------------------------------------- */
-#define PW_ON_OFF_DRIVER_TIME \
-    (3000) // Time in [ms] that the on-board power on/off button needs
-           // to be pressed in order to turn on/off the flight
-           // controller.
+/* --- Public variable declarations ------------------------------------------------------------ */
 
-/* --- BATTERY ALARM --------------------------------------------------------------------------- */
-#define BATTERY_ALARM_THRESHOLD \
-    (9.5) // Voltage level in [V] at which the battery alarm starts
-          // beeping, indicating that the flight controller has low
-          // battery.
-
-/* --- ON-BOARD HEARTEAT LIGHT ----------------------------------------------------------------- */
-#define HEARTBEAT_PERIOD (500) // Heartbeat period in [ms] (duty cycle is 50%)
+/* --- Public function declarations ------------------------------------------------------------ */
+/**
+ * @brief  This function tests the System Failure Procedure. It increments a counter and when it reaches a certain value,
+ *         the system enters in a failure state.
+ * @param  flag: numeric value that causes the counter to increment. The counter increments after each flag value change.
+ * @retval None
+ */
+void Test_SystemFailureProcedure(uint16_t flag);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* USER_SETTINGS_H */
+#endif /* SYSTEM_FAILURE_TEST_H */
 
 /* --- End of file ----------------------------------------------------------------------------- */

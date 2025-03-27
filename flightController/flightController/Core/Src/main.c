@@ -32,6 +32,8 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef  hdma_usart2_rx;
 
+WWDG_HandleTypeDef hwwdg;
+
 osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 
@@ -45,6 +47,7 @@ static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_WWDG_Init(void);
 void        StartDefaultTask(void const *argument);
 
 /* USER CODE BEGIN PFP */
@@ -84,6 +87,7 @@ int main(void) {
     MX_I2C1_Init();
     MX_TIM3_Init();
     MX_ADC1_Init();
+    MX_WWDG_Init();
     /* USER CODE BEGIN 2 */
 
     // Initialize Flight Controller
@@ -329,6 +333,33 @@ static void MX_USART2_UART_Init(void) {
     }
     /* USER CODE BEGIN USART2_Init 2 */
     /* USER CODE END USART2_Init 2 */
+}
+
+/**
+ * @brief WWDG Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_WWDG_Init(void) {
+
+    /* USER CODE BEGIN WWDG_Init 0 */
+
+    /* USER CODE END WWDG_Init 0 */
+
+    /* USER CODE BEGIN WWDG_Init 1 */
+
+    /* USER CODE END WWDG_Init 1 */
+    hwwdg.Instance       = WWDG;
+    hwwdg.Init.Prescaler = WWDG_PRESCALER_4;
+    hwwdg.Init.Window    = 127;
+    hwwdg.Init.Counter   = 75;
+    hwwdg.Init.EWIMode   = WWDG_EWI_ENABLE;
+    if (HAL_WWDG_Init(&hwwdg) != HAL_OK) {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN WWDG_Init 2 */
+
+    /* USER CODE END WWDG_Init 2 */
 }
 
 /**

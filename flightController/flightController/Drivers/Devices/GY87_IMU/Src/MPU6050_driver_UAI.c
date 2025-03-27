@@ -50,12 +50,13 @@
 #define USE_FREERTOS // Remove comment when using FreeRTOS
 // #define GY87_USE_LOGGING            // Remove comment to allow driver info logging
 
-#define GY87_MAX_NUMBER_INSTANCES   (2)    // Maximum number of possible IMUs connected to the i2c bus
-#define GY87_CALIBRATION_ITERATIONS (2000) // No. of readings to get a calibration value
-#define MPU6050_SET_BIT             (1)
-#define MPU6050_CLEAR_BIT           (0)
-#define QMC5883L_SET_BIT            (1)
-#define QMC5883L_CLEAR_BIT          (0)
+#define GY87_MAX_NUMBER_INSTANCES                 (2)    // Maximum number of possible IMUs connected to the i2c bus
+#define GY87_GYROSCOPE_CALIBRATION_ITERATIONS     (2000) // No. of readings to get a calibration value
+#define GY87_ACCELEROMETER_CALIBRATION_ITERATIONS (2000) // No. of readings to get a calibration value
+#define MPU6050_SET_BIT                           (1)
+#define MPU6050_CLEAR_BIT                         (0)
+#define QMC5883L_SET_BIT                          (1)
+#define QMC5883L_CLEAR_BIT                        (0)
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288
@@ -69,14 +70,6 @@
 
 /* --- Private variable declarations ----------------------------------------------------------- */
 static uint8_t instancesNumber = 0;
-/* Gyroscope calibration values */
-static float gyroscopeCalibrationRoll  = 0;
-static float gyroscopeCalibrationPitch = 0;
-static float gyroscopeCalibrationYaw   = 0;
-/* Accelerometer calibration values */
-static float accelerometerCalibrationX = 0;
-static float accelerometerCalibrationY = 0;
-static float accelerometerCalibrationZ = 0;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -259,13 +252,13 @@ static GY87_HandleTypeDef_t *GY87_InstanceInit(I2C_HandleTypeDef *hi2c) {
     GY87_HandleTypeDef_t *hgy87 = pvPortMalloc(sizeof(GY87_HandleTypeDef_t));
 
     /* Allocate dynamic memory for data buffer */
-    uint8_t *buffer = pvPortMalloc(sizeof(1));
+    uint8_t *buffer             = pvPortMalloc(sizeof(1));
 #else
     /* Allocate dynamic memory for the GY87_HandleTypeDef_t structure */
     GY87_HandleTypeDef_t *hgy87 = malloc(sizeof(GY87_HandleTypeDef_t));
 
     /* Allocate dynamic memory for data buffer */
-    uint8_t *buffer = malloc(sizeof(1));
+    uint8_t *buffer             = malloc(sizeof(1));
 #endif
 
     /* Check if dynamic memory allocation was successful */
@@ -336,7 +329,7 @@ static void MPU6050_EnableDLPF(GY87_HandleTypeDef_t *hgy87) {
     /* Enable digital low pass filter */
     uint8_t regData;
 
-    regData = MPU_6050_BIT_CONFIG_DLPF_CFG_3;
+    regData = MPU_6050_BIT_CONFIG_DLPF_CFG_5;
     MPU6050_WriteRegisterBitmasked(hgy87->hi2c, hgy87->address, MPU_6050_REG_CONFIG, &regData, MPU6050_SET_BIT);
 }
 
@@ -646,11 +639,8 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrat
             gyroscopeCalibrationValues->calibrationRatePitch = 0;
             gyroscopeCalibrationValues->calibrationRateYaw   = 0;
         } else {
-            /* Define chunk size for yielding */
-            const uint16_t YIELD_CHUNK = 200;
-
             /* Calibrate gyroscope measurements */
-            for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
+            for (int i = 0; i < GY87_GYROSCOPE_CALIBRATION_ITERATIONS; i++) {
 
                 /* Read gyroscope values */
                 GY87_ReadGyroscope(hgy87, &gyroscopeValues, gyroscopeCalibrationValues);
@@ -660,19 +650,18 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrat
                 ratesPitch += gyroscopeValues.rotationRatePitch;
                 ratesYaw += gyroscopeValues.rotationRateYaw;
 
-                if ((i % YIELD_CHUNK) == 0 && i > 0) {
 #ifdef USE_FREERTOS
-                    /* Allow other tasks to run */
-                    taskYIELD();
+                vTaskDelay(pdMS_TO_TICKS(1));
+#else
+                HAL_Delay(1);
 #endif
-                }
             }
 
             gyroscopeCalibrationValues->calibrationDone      = true;
             gyroscopeCalibrationValues->fixedCalibration_en  = false;
-            gyroscopeCalibrationValues->calibrationRateRoll  = ratesRoll / GY87_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationValues->calibrationRatePitch = ratesPitch / GY87_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationValues->calibrationRateYaw   = ratesYaw / GY87_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationRateRoll  = ratesRoll / GY87_GYROSCOPE_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationRatePitch = ratesPitch / GY87_GYROSCOPE_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationRateYaw   = ratesYaw / GY87_GYROSCOPE_CALIBRATION_ITERATIONS;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
@@ -703,19 +692,19 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeValues_t *gyr
 
         /* Read gyroscope raw value for X axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_XOUT_H, gyroscopeRawData, sizeof(uint16_t));
-        gyroscopeValues->rawValueX = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
+        gyroscopeValues->rawValueX        = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along X axis (roll) */
         gyroscopeValues->rotationRateRoll = -((float)gyroscopeValues->rawValueX / scaleFactor) - gyroscopeCalibrationValues->calibrationRateRoll;
 
         /* Read gyroscope raw value for Y axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_YOUT_H, gyroscopeRawData, sizeof(uint16_t));
-        gyroscopeValues->rawValueY = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
+        gyroscopeValues->rawValueY         = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along Y axis (pitch) */
         gyroscopeValues->rotationRatePitch = -((float)gyroscopeValues->rawValueY / scaleFactor) - gyroscopeCalibrationValues->calibrationRatePitch;
 
         /* Read gyroscope raw value for Z axis  */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_GYRO_ZOUT_H, gyroscopeRawData, sizeof(uint16_t));
-        gyroscopeValues->rawValueZ = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
+        gyroscopeValues->rawValueZ       = (int16_t)(gyroscopeRawData[0] << 8 | gyroscopeRawData[1]);
         /* Calculate gyroscope rotation rate along Z axis (yaw)  */
         gyroscopeValues->rotationRateYaw = ((float)gyroscopeValues->rawValueZ / scaleFactor) - gyroscopeCalibrationValues->calibrationRateYaw;
 
@@ -750,11 +739,8 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometer
             accelerometerCalibrationValues->calibrationLinearAccelerationY = 0;
             accelerometerCalibrationValues->calibrationLinearAccelerationZ = 0;
         } else {
-            /* Define chunk size for yielding */
-            const uint16_t YIELD_CHUNK = 50;
-
             /* Calibrate accelerometer measurements */
-            for (int i = 0; i < GY87_CALIBRATION_ITERATIONS; i++) {
+            for (int i = 0; i < GY87_ACCELEROMETER_CALIBRATION_ITERATIONS; i++) {
 
                 /* Read accelerometer values */
                 GY87_ReadAccelerometer(hgy87, &accelerometerValues, accelerometerCalibrationValues);
@@ -764,19 +750,18 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometer
                 linearAccelerationsY += accelerometerValues.linearAccelerationY;
                 linearAccelerationsZ += (accelerometerValues.linearAccelerationZ - 1);
 
-                if ((i % YIELD_CHUNK) == 0 && i > 0) {
 #ifdef USE_FREERTOS
-                    /* Allow other tasks to run */
-                    taskYIELD();
+                vTaskDelay(pdMS_TO_TICKS(1));
+#else
+                HAL_Delay(1);
 #endif
-                }
             }
 
             accelerometerCalibrationValues->calibrationDone                = true;
             accelerometerCalibrationValues->fixedCalibration_en            = false;
-            accelerometerCalibrationValues->calibrationLinearAccelerationX = linearAccelerationsX / GY87_CALIBRATION_ITERATIONS;
-            accelerometerCalibrationValues->calibrationLinearAccelerationY = linearAccelerationsY / GY87_CALIBRATION_ITERATIONS;
-            accelerometerCalibrationValues->calibrationLinearAccelerationZ = linearAccelerationsZ / GY87_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationValues->calibrationLinearAccelerationX = linearAccelerationsX / GY87_ACCELEROMETER_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationValues->calibrationLinearAccelerationY = linearAccelerationsY / GY87_ACCELEROMETER_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationValues->calibrationLinearAccelerationZ = linearAccelerationsZ / GY87_ACCELEROMETER_CALIBRATION_ITERATIONS;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
@@ -827,8 +812,8 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerValue
         accZ = accelerometerValues->linearAccelerationZ = ((float)accelerometerValues->rawValueZ / scaleFactor) - accelerometerCalibrationValues->calibrationLinearAccelerationZ;
 
         /* Calculate roll and pitch angles using an approximation with linear accelerations */
-        denomRoll  = sqrt(accX * accX + accZ * accZ);
-        denomPitch = sqrt(accY * accY + accZ * accZ);
+        denomRoll                                       = sqrt(accX * accX + accZ * accZ);
+        denomPitch                                      = sqrt(accY * accY + accZ * accZ);
 
         /* Prevent division by zero */
         if (denomRoll > 0.0001f) {
@@ -895,19 +880,19 @@ void GY87_ReadMagnetometer(GY87_HandleTypeDef_t *hgy87, GY87_magnetometerValues_
 
         /* Read magnetometer raw value for X axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_EXT_SENS_DATA_00, magnetometerRawData, sizeof(uint16_t));
-        magnetometerValues->rawValueX = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]);
+        magnetometerValues->rawValueX      = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]);
         /* Calculate magnetometer magnetic field along X axis */
         magnetometerValues->magneticFieldX = ((float)magnetometerValues->rawValueX / scaleFactor);
 
         /* Read magnetometer raw value for Y axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_EXT_SENS_DATA_02, magnetometerRawData, sizeof(uint16_t));
-        magnetometerValues->rawValueY = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]);
+        magnetometerValues->rawValueY      = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]);
         /* Calculate magnetometer magnetic field along Y axis */
         magnetometerValues->magneticFieldY = ((float)magnetometerValues->rawValueY / scaleFactor);
 
         /* Read magnetometer raw value for Z axis */
         MPU6050_ReadRegister(hgy87->hi2c, hgy87->address, MPU_6050_REG_EXT_SENS_DATA_04, magnetometerRawData, sizeof(uint16_t));
-        magnetometerValues->rawValueZ = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]);
+        magnetometerValues->rawValueZ      = (int16_t)(magnetometerRawData[1] << 8 | magnetometerRawData[0]);
         /* Calculate magnetometer magnetic field along Z axis */
         magnetometerValues->magneticFieldZ = ((float)magnetometerValues->rawValueZ / scaleFactor);
 
