@@ -1,20 +1,20 @@
 /**
- ******************************************************************************
- * @file    usbd_core.h
- * @author  MCD Application Team
- * @brief   Header file for usbd_core.c file
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2015 STMicroelectronics.
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
- ******************************************************************************
- */
+  ******************************************************************************
+  * @file    usbd_core.h
+  * @author  MCD Application Team
+  * @brief   Header file for usbd_core.c file
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2015 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_CORE_H
@@ -26,56 +26,61 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_conf.h"
-#include "usbd_ctlreq.h"
 #include "usbd_def.h"
 #include "usbd_ioreq.h"
+#include "usbd_ctlreq.h"
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
- * @{
- */
+  * @{
+  */
 
 /** @defgroup USBD_CORE
- * @brief This file is the Header file for usbd_core.c file
- * @{
- */
+  * @brief This file is the Header file for usbd_core.c file
+  * @{
+  */
+
 
 /** @defgroup USBD_CORE_Exported_Defines
- * @{
- */
+  * @{
+  */
 #ifndef USBD_DEBUG_LEVEL
-#define USBD_DEBUG_LEVEL 0U
+#define USBD_DEBUG_LEVEL           0U
 #endif /* USBD_DEBUG_LEVEL */
 /**
- * @}
- */
+  * @}
+  */
+
 
 /** @defgroup USBD_CORE_Exported_TypesDefinitions
- * @{
- */
+  * @{
+  */
+
 
 /**
- * @}
- */
+  * @}
+  */
+
+
 
 /** @defgroup USBD_CORE_Exported_Macros
- * @{
- */
+  * @{
+  */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup USBD_CORE_Exported_Variables
- * @{
- */
-#define USBD_SOF USBD_LL_SOF
+  * @{
+  */
+#define USBD_SOF          USBD_LL_SOF
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup USBD_CORE_Exported_FunctionsPrototype
- * @{
- */
+  * @{
+  */
 USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev, USBD_DescriptorsTypeDef *pdesc, uint8_t id);
 USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev);
 USBD_StatusTypeDef USBD_Start(USBD_HandleTypeDef *pdev);
@@ -86,11 +91,11 @@ USBD_StatusTypeDef USBD_RegisterDevStateCallback(USBD_HandleTypeDef *pdev, USBD_
 #endif /* USBD_USER_REGISTER_CALLBACK */
 
 #ifdef USE_USBD_COMPOSITE
-USBD_StatusTypeDef USBD_RegisterClassComposite(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass,
-                                               USBD_CompositeClassTypeDef classtype, uint8_t *EpAddr);
+USBD_StatusTypeDef  USBD_RegisterClassComposite(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass,
+                                                USBD_CompositeClassTypeDef classtype, uint8_t *EpAddr);
 
-USBD_StatusTypeDef USBD_UnRegisterClassComposite(USBD_HandleTypeDef *pdev);
-uint8_t            USBD_CoreGetEPAdd(USBD_HandleTypeDef *pdev, uint8_t ep_dir, uint8_t ep_type, uint8_t ClassId);
+USBD_StatusTypeDef  USBD_UnRegisterClassComposite(USBD_HandleTypeDef *pdev);
+uint8_t USBD_CoreGetEPAdd(USBD_HandleTypeDef *pdev, uint8_t ep_dir, uint8_t ep_type, uint8_t ClassId);
 #endif /* USE_USBD_COMPOSITE */
 
 uint8_t USBD_CoreFindIF(USBD_HandleTypeDef *pdev, uint8_t index);
@@ -109,7 +114,7 @@ USBD_StatusTypeDef USBD_LL_SetSpeed(USBD_HandleTypeDef *pdev, USBD_SpeedTypeDef 
 USBD_StatusTypeDef USBD_LL_Suspend(USBD_HandleTypeDef *pdev);
 USBD_StatusTypeDef USBD_LL_Resume(USBD_HandleTypeDef *pdev);
 
-USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef *pdev);
+USBD_StatusTypeDef USBD_LL_SOF(USBD_HandleTypeDef  *pdev);
 USBD_StatusTypeDef USBD_LL_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum);
 USBD_StatusTypeDef USBD_LL_IsoOUTIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnum);
 
@@ -141,17 +146,17 @@ USBD_StatusTypeDef USBD_LL_PrepareReceive(USBD_HandleTypeDef *pdev, uint8_t ep_a
 USBD_StatusTypeDef USBD_LL_SetTestMode(USBD_HandleTypeDef *pdev, uint8_t testmode);
 #endif /* USBD_HS_TESTMODE_ENABLE */
 
-uint8_t  USBD_LL_IsStallEP(USBD_HandleTypeDef *pdev, uint8_t ep_addr);
-uint32_t USBD_LL_GetRxDataSize(USBD_HandleTypeDef *pdev, uint8_t ep_addr);
+uint8_t USBD_LL_IsStallEP(USBD_HandleTypeDef *pdev, uint8_t ep_addr);
+uint32_t USBD_LL_GetRxDataSize(USBD_HandleTypeDef *pdev, uint8_t  ep_addr);
 
-void USBD_LL_Delay(uint32_t Delay);
+void  USBD_LL_Delay(uint32_t Delay);
 
-void                   *USBD_GetEpDesc(uint8_t *pConfDesc, uint8_t EpAddr);
+void *USBD_GetEpDesc(uint8_t *pConfDesc, uint8_t EpAddr);
 USBD_DescHeaderTypeDef *USBD_GetNextDesc(uint8_t *pbuf, uint16_t *ptr);
 
 /**
- * @}
- */
+  * @}
+  */
 
 #ifdef __cplusplus
 }
@@ -160,9 +165,9 @@ USBD_DescHeaderTypeDef *USBD_GetNextDesc(uint8_t *pbuf, uint16_t *ptr);
 #endif /* __USBD_CORE_H */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /**
- * @}
- */
+  * @}
+  */

@@ -508,6 +508,7 @@ void Task_ControlSystem(void *ptr) {
         /* Check that both sensors are calibrated */
         if (controlSystemValues.gyroCalibration.calibrationDone && controlSystemValues.accCalibration.calibrationDone && false == FlightController_isInitialized) {
             /* Beep to indicate that the system is ready */
+#if (INITIALIZATION_READY_BEEPING == 1)
             HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
             vTaskDelay(pdMS_TO_TICKS(100));
             HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
@@ -519,6 +520,7 @@ void Task_ControlSystem(void *ptr) {
             HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 1);
             vTaskDelay(pdMS_TO_TICKS(150));
             HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
+#endif
             /* Set global flags */
             FlightController_isInitialized = true;
         }
@@ -837,6 +839,11 @@ void Task_Debugging(void *ptr) {
     uint16_t               written_chars = 0;
 
     float FlightController_batteryLevel;
+    uint8_t debuggingStr_ESCsState[4] = {0};
+    uint8_t debuggingStr_throttleStick_startedDown[4] = {0};
+    uint8_t debuggingStr_flightLightsState[4] = {0};
+    uint8_t debuggingStr_flightLightsType[4]  = {0};
+    uint16_t debuggingValue_flightLightsSpeed = 0;
 
     while (1) {
 
@@ -854,22 +861,43 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_FSA8S_MAIN == 1)
                 /* Log channel values */
-                snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%d",
+                if (logControlSystemValues->radioController_channelValues[5] >= 500) {
+                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "ON");
+                } else {
+                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "OFF");
+                }
+                snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%s",
                          DEBUG_FSA8S_CHANNEL_VALUES_3, logControlSystemValues->radioController_channelValues[2],
                          DEBUG_FSA8S_CHANNEL_VALUES_1, logControlSystemValues->radioController_channelValues[0],
                          DEBUG_FSA8S_CHANNEL_VALUES_2, logControlSystemValues->radioController_channelValues[1],
                          DEBUG_FSA8S_CHANNEL_VALUES_4, logControlSystemValues->radioController_channelValues[3],
-                         DEBUG_FSA8S_CHANNEL_VALUES_6, logControlSystemValues->radioController_channelValues[5]);
+                         DEBUG_FSA8S_CHANNEL_VALUES_6, debuggingStr_ESCsState);
 #endif
 
 #if (MAIN_APP_DEBUGGING_FSA8S_AUX == 1)
                 /* Log channel values */
-                snprintf((char *)debuggingStr_FSA8S_aux, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%d",
+                if (logControlSystemValues->radioController_channelValues[9] >= 500) {
+                    snprintf((char *)debuggingStr_flightLightsState, 4 * sizeof(uint8_t), "ON");
+                } else {
+                    snprintf((char *)debuggingStr_flightLightsState, 4 * sizeof(uint8_t), "OFF");
+                }
+                if (logControlSystemValues->radioController_channelValues[8] <= 250) {
+                    snprintf((char *)debuggingStr_flightLightsType, 4 * sizeof(uint8_t), "C");
+                } else if (logControlSystemValues->radioController_channelValues[8] > 250 && logControlSystemValues->radioController_channelValues[8] <= 750) {
+                    snprintf((char *)debuggingStr_flightLightsType, 4 * sizeof(uint8_t), "B");
+                } else if (logControlSystemValues->radioController_channelValues[8] > 750 && logControlSystemValues->radioController_channelValues[8] <= 1000) {
+                    snprintf((char *)debuggingStr_flightLightsType, 4 * sizeof(uint8_t), "A");
+                }
+                debuggingValue_flightLightsSpeed = 100 - logControlSystemValues->radioController_channelValues[7] / 10;
+                if (debuggingValue_flightLightsSpeed == 0) {
+                    debuggingValue_flightLightsSpeed = 1;
+                }
+                snprintf((char *)debuggingStr_FSA8S_aux, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%s/%d_%s/%d_%d",
                          DEBUG_FSA8S_CHANNEL_VALUES_5, logControlSystemValues->radioController_channelValues[4],
                          DEBUG_FSA8S_CHANNEL_VALUES_7, logControlSystemValues->radioController_channelValues[6],
-                         DEBUG_FSA8S_CHANNEL_VALUES_8, logControlSystemValues->radioController_channelValues[7],
-                         DEBUG_FSA8S_CHANNEL_VALUES_9, logControlSystemValues->radioController_channelValues[8],
-                         DEBUG_FSA8S_CHANNEL_VALUES_10, logControlSystemValues->radioController_channelValues[9]);
+                         DEBUG_FSA8S_CHANNEL_VALUES_10, debuggingStr_flightLightsState,
+                         DEBUG_FSA8S_CHANNEL_VALUES_9, debuggingStr_flightLightsType,
+                         DEBUG_FSA8S_CHANNEL_VALUES_8, debuggingValue_flightLightsSpeed);     
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES)
@@ -1011,11 +1039,21 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR == 1)
                 /* Log control system auxiliar values */
-                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 40 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu/%d_%d/%d_%d",
+                if (logControlSystemValues->throttleStick_startedDown == true) {
+                    snprintf((char *)debuggingStr_throttleStick_startedDown, 4 * sizeof(uint8_t), "YES");
+                } else {
+                    snprintf((char *)debuggingStr_throttleStick_startedDown, 4 * sizeof(uint8_t), "NO");
+                }
+                if (logControlSystemValues->ESC_isEnabled == true) {
+                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "ON");
+                } else {
+                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "OFF");
+                }
+                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 40 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu/%d_%s/%d_%s",
                          DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED, (logControlSystemValues->controlLoopPeriod * 1000 / configTICK_RATE_HZ),
                          DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME, (logControlSystemValues->taskExecutionTime * 1000 / configTICK_RATE_HZ),
-                         DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN, (uint8_t)logControlSystemValues->throttleStick_startedDown,
-                         DEBUG_CONTROLSYSTEM_ESCS_ENABLED, (uint8_t)logControlSystemValues->ESC_isEnabled);
+                         DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN, debuggingStr_throttleStick_startedDown,
+                         DEBUG_CONTROLSYSTEM_ESCS_ENABLED, debuggingStr_ESCsState);
 #endif
 
 #if (MAIN_APP_DEBUGGING_ESCS == 1)

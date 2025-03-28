@@ -59,22 +59,22 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LED_Pin                           GPIO_PIN_13
-#define LED_GPIO_Port                     GPIOC
-#define LED4_Pin                          GPIO_PIN_14
-#define LED4_GPIO_Port                    GPIOC
-#define LED1_Pin                          GPIO_PIN_2
-#define LED1_GPIO_Port                    GPIOB
-#define LED3_Pin                          GPIO_PIN_12
-#define LED3_GPIO_Port                    GPIOB
-#define BUZZER_Pin                        GPIO_PIN_15
-#define BUZZER_GPIO_Port                  GPIOA
-#define PW_ON_OFF_DRIVER_OUTPUT_Pin       GPIO_PIN_4
+#define LED_Pin GPIO_PIN_13
+#define LED_GPIO_Port GPIOC
+#define LED4_Pin GPIO_PIN_14
+#define LED4_GPIO_Port GPIOC
+#define LED1_Pin GPIO_PIN_2
+#define LED1_GPIO_Port GPIOB
+#define LED3_Pin GPIO_PIN_12
+#define LED3_GPIO_Port GPIOB
+#define BUZZER_Pin GPIO_PIN_15
+#define BUZZER_GPIO_Port GPIOA
+#define PW_ON_OFF_DRIVER_OUTPUT_Pin GPIO_PIN_4
 #define PW_ON_OFF_DRIVER_OUTPUT_GPIO_Port GPIOB
-#define PW_ON_OFF_DRIVER_INPUT_Pin        GPIO_PIN_5
-#define PW_ON_OFF_DRIVER_INPUT_GPIO_Port  GPIOB
-#define LED2_Pin                          GPIO_PIN_8
-#define LED2_GPIO_Port                    GPIOB
+#define PW_ON_OFF_DRIVER_INPUT_Pin GPIO_PIN_5
+#define PW_ON_OFF_DRIVER_INPUT_GPIO_Port GPIOB
+#define LED2_Pin GPIO_PIN_8
+#define LED2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
