@@ -167,7 +167,7 @@ static uint8_t  debuggingStr_SystemTime[16]                          = {0};     
 static uint8_t  debuggingStr_FSA8S_main[50]                          = {0};            // Size checked
 static uint8_t  debuggingStr_FSA8S_aux[50]                           = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_gyroscopeCalibrationValues[40]     = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_gyroscopeValues[40]                = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_gyroscopeValues[50]                = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_accelerometerCalibrationValues[40] = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_accelerometerValues[40]            = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_accelerometerAngles[40]            = {0};            // Size checked
@@ -175,18 +175,18 @@ static uint8_t  debuggingStr_GY87_magnetometerValues[40]             = {0};     
 static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]       = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_temperature[16]                    = {0};            // Size checked
 static uint8_t  debuggingStr_BatteryLevel[10]                        = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_referenceValues[40]       = {0};
-static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]       = {0};
-static uint8_t  debuggingStr_ControlSystem_KalmanAngles[30]          = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_anglesErrors[40]          = {0};
-static uint8_t  debuggingStr_ControlSystem_anglesPID[40]             = {0};
-static uint8_t  debuggingStr_ControlSystem_referenceRates[40]        = {0};
-static uint8_t  debuggingStr_ControlSystem_ratesErrors[40]           = {0};
-static uint8_t  debuggingStr_ControlSystem_ratesPID[40]              = {0};
-static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[40]          = {0};
-static uint8_t  debuggingStr_ControlSystem_Auxiliar[40]              = {0};
-static uint8_t  debuggingStr_ESCs[40]                                = {0};
-static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0}; // Size checked
+static uint8_t  debuggingStr_ControlSystem_referenceValues[40]       = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]       = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_KalmanAngles[40]          = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_anglesErrors[40]          = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_anglesPID[40]             = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_referenceRates[50]        = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_ratesErrors[50]           = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_ratesPID[50]              = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[50]          = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_Auxiliar[40]              = {0};            // Size checked
+static uint8_t  debuggingStr_ESCs[40]                                = {0};            // Size checked
+static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0};            // Size checked
 #endif
 
 /* Control System */
@@ -575,11 +575,10 @@ void Task_ControlSystem(void *ptr) {
             controlSystemValues.radioController_channelValues[9] = FSA8S_ReadChannel(rc_controller, CHANNEL_10);
 
             /* Avoid uncontrolled motor start */
-
             if (false == controlSystemValues.throttleStick_startedDown) {
                 /* Read throttle input from radio controller */
-                controlSystemValues.radioController_channelValues[3] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                controlSystemValues.reference_throttle               = controlSystemValues.radioController_channelValues[3];
+                controlSystemValues.radioController_channelValues[2] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                controlSystemValues.reference_throttle               = controlSystemValues.radioController_channelValues[2];
 
                 if (15 > controlSystemValues.reference_throttle) {
                     controlSystemValues.throttleStick_startedDown = true;
@@ -617,7 +616,8 @@ void Task_ControlSystem(void *ptr) {
                 } else {
 
                     /* Read input throttle from radio controller */
-                    controlSystemValues.reference_throttle = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                    controlSystemValues.radioController_channelValues[2] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
+                    controlSystemValues.reference_throttle               = controlSystemValues.radioController_channelValues[2];
 
                     /* Check if throttle stick is low */
                     if (CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE > controlSystemValues.reference_throttle) {
@@ -918,7 +918,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES == 1)
                 /* Log GY87 gyroscope values */
-                snprintf((char *)debuggingStr_GY87_gyroscopeValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
+                snprintf((char *)debuggingStr_GY87_gyroscopeValues, 50 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
                          DEBUG_GY87_GYRO_VALUES_ROT_RATE_ROLL, logControlSystemValues->gyroMeasurement.rotationRateRoll,
                          DEBUG_GY87_GYRO_VALUES_ROT_RATE_PITCH, logControlSystemValues->gyroMeasurement.rotationRatePitch,
                          DEBUG_GY87_GYRO_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroMeasurement.rotationRateYaw);
@@ -985,7 +985,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES == 1)
                 /* Log control system angles */
-                snprintf((char *)debuggingStr_ControlSystem_KalmanAngles, 30 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
+                snprintf((char *)debuggingStr_ControlSystem_KalmanAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
                          DEBUG_CONTROLSYSTEM_KALMAN_ROLL_ANGLE, logControlSystemValues->KalmanPrediction_rollAngle,
                          DEBUG_CONTROLSYSTEM_KALMAN_PITCH_ANGLE, logControlSystemValues->KalmanPrediction_pitchAngle);
 #endif
@@ -1006,7 +1006,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE == 1)
                 /* Log control system reference rates */
-                snprintf((char *)debuggingStr_ControlSystem_referenceRates, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
+                snprintf((char *)debuggingStr_ControlSystem_referenceRates, 50 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
                          DEBUG_CONTROLSYSTEM_REFERENCE_ROLL_RATE, logControlSystemValues->reference_rollRate,
                          DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_RATE, logControlSystemValues->reference_pitchRate,
                          DEBUG_CONTROLSYSTEM_REFERENCE_YAW_RATE, logControlSystemValues->reference_yawRate);
@@ -1014,7 +1014,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS == 1)
                 /* Log control system rates errors */
-                snprintf((char *)debuggingStr_ControlSystem_ratesErrors, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
+                snprintf((char *)debuggingStr_ControlSystem_ratesErrors, 50 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
                          DEBUG_CONTROLSYSTEM_ERROR_ROLL_RATE, logControlSystemValues->error_rollRate,
                          DEBUG_CONTROLSYSTEM_ERROR_PITCH_RATE, logControlSystemValues->error_pitchRate,
                          DEBUG_CONTROLSYSTEM_ERROR_YAW_RATE, logControlSystemValues->error_yawRate);
@@ -1022,7 +1022,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT == 1)
                 /* Log control system rates PID */
-                snprintf((char *)debuggingStr_ControlSystem_ratesPID, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
+                snprintf((char *)debuggingStr_ControlSystem_ratesPID, 50 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f",
                          DEBUG_CONTROLSYSTEM_PID_OUTPUT_ROLL_RATE, logControlSystemValues->PID_Output_rollRate,
                          DEBUG_CONTROLSYSTEM_PID_OUTPUT_PITCH_RATE, logControlSystemValues->PID_Output_pitchRate,
                          DEBUG_CONTROLSYSTEM_PID_OUTPUT_YAW_RATE, logControlSystemValues->PID_Output_yawRate);
@@ -1030,7 +1030,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS == 1)
                 /* Log ESC values*/
-                snprintf((char *)debuggingStr_ControlSystem_motorsSpeeds, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
+                snprintf((char *)debuggingStr_ControlSystem_motorsSpeeds, 50 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
                          DEBUG_CONTROLSYSTEM_MOTOR_SPEED_1, logControlSystemValues->motor1_speed,
                          DEBUG_CONTROLSYSTEM_MOTOR_SPEED_2, logControlSystemValues->motor2_speed,
                          DEBUG_CONTROLSYSTEM_MOTOR_SPEED_3, logControlSystemValues->motor3_speed,
@@ -1058,7 +1058,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_ESCS == 1)
                 /* Log ESC values*/
-                snprintf((char *)debuggingStr_ESCs, 60 * sizeof(uint8_t), (const char *)"/%d_%d/%d_%d/%d_%d/%d_%d",
+                snprintf((char *)debuggingStr_ESCs, 40 * sizeof(uint8_t), (const char *)"/%d_%d/%d_%d/%d_%d/%d_%d",
                          DEBUG_ESC_1, logControlSystemValues->ESC1_speed,
                          DEBUG_ESC_2, logControlSystemValues->ESC2_speed,
                          DEBUG_ESC_3, logControlSystemValues->ESC3_speed,
