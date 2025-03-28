@@ -838,12 +838,12 @@ void Task_Debugging(void *ptr) {
     uint32_t               system_tick   = 0;
     uint16_t               written_chars = 0;
 
-    float FlightController_batteryLevel;
-    uint8_t debuggingStr_ESCsState[4] = {0};
-    uint8_t debuggingStr_throttleStick_startedDown[4] = {0};
-    uint8_t debuggingStr_flightLightsState[4] = {0};
-    uint8_t debuggingStr_flightLightsType[4]  = {0};
-    uint16_t debuggingValue_flightLightsSpeed = 0;
+    float    FlightController_batteryLevel;
+    uint8_t  debuggingStr_ESCsState[4]                 = {0};
+    uint8_t  debuggingStr_throttleStick_startedDown[4] = {0};
+    uint8_t  debuggingStr_flightLightsState[4]         = {0};
+    uint8_t  debuggingStr_flightLightsType[4]          = {0};
+    uint16_t debuggingValue_flightLightsSpeed          = 0;
 
     while (1) {
 
@@ -897,7 +897,7 @@ void Task_Debugging(void *ptr) {
                          DEBUG_FSA8S_CHANNEL_VALUES_7, logControlSystemValues->radioController_channelValues[6],
                          DEBUG_FSA8S_CHANNEL_VALUES_10, debuggingStr_flightLightsState,
                          DEBUG_FSA8S_CHANNEL_VALUES_9, debuggingStr_flightLightsType,
-                         DEBUG_FSA8S_CHANNEL_VALUES_8, debuggingValue_flightLightsSpeed);     
+                         DEBUG_FSA8S_CHANNEL_VALUES_8, debuggingValue_flightLightsSpeed);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES)
