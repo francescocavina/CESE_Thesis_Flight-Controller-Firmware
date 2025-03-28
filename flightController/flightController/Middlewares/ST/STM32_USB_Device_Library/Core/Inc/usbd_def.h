@@ -520,3 +520,4 @@ __STATIC_INLINE uint16_t SWAPBYTE(uint8_t *addr)
 /**
   * @}
   */
+

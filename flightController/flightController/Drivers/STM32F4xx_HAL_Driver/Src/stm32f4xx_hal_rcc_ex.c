@@ -3830,3 +3830,4 @@ void HAL_RCC_GetOscConfig(RCC_OscInitTypeDef  *RCC_OscInitStruct)
 /**
   * @}
   */
+

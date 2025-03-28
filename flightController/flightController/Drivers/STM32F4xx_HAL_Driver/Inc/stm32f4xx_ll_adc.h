@@ -4779,3 +4779,4 @@ void        LL_ADC_INJ_StructInit(LL_ADC_INJ_InitTypeDef *ADC_INJ_InitStruct);
 #endif
 
 #endif /* __STM32F4xx_LL_ADC_H */
+

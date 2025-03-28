@@ -3,13 +3,17 @@ repos:
     rev: v2.3.0
     hooks:
     -   id: check-yaml
+        files: &files_to_check "^(flightController/flightController/APIs/|flightController/flightController/Drivers/Devices/|flightController/flightController/Settings/).*\\.[ch]$"
     -   id: end-of-file-fixer
+        files: *files_to_check
     -   id: check-case-conflict
+        files: *files_to_check
     -   id: check-merge-conflict
-        files: "^(flightController/flightController/APIs/|flightController/flightController/Drivers/Devices/|flightController/flightController/Settings/).*\\.[ch]$"
+        files: *files_to_check
+        
 -   repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v16.0.0
     hooks:
     -   id: clang-format
         args: [-style=file]
-        files: "^(flightController/flightController/APIs/|flightController/flightController/Drivers/Devices/|flightController/flightController/Settings/).*\\.[ch]$"
+        files: *files_to_check

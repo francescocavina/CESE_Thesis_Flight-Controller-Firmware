@@ -1055,3 +1055,4 @@ static uint8_t USBD_GetLen(uint8_t *buf)
 /**
   * @}
   */
+

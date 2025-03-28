@@ -1112,3 +1112,4 @@ static void ADC_MultiModeDMAError(DMA_HandleTypeDef *hdma)
 /**
   * @}
   */
+

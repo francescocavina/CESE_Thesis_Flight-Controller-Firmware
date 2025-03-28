@@ -890,3 +890,4 @@ uint8_t USBD_CDC_ReceivePacket(USBD_HandleTypeDef *pdev)
 /**
   * @}
   */
+

@@ -403,3 +403,5 @@ HAL_StatusTypeDef HAL_ADCEx_MultiModeConfigChannel(ADC_HandleTypeDef *hadc, ADC_
 #endif
 
 #endif /*__STM32F4xx_ADC_EX_H */
+
+

@@ -196,3 +196,4 @@ void vPortEndScheduler( void ) PRIVILEGED_FUNCTION;
 #endif
 
 #endif /* PORTABLE_H */
+

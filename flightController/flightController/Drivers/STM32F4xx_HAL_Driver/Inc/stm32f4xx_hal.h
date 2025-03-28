@@ -293,3 +293,5 @@ void HAL_DisableMemorySwappingBank(void);
 #endif
 
 #endif /* __STM32F4xx_HAL_H */
+
+

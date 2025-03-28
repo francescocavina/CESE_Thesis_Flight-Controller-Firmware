@@ -894,3 +894,5 @@ uint32_t HAL_ADC_GetError(ADC_HandleTypeDef *hadc);
 #endif
 
 #endif /*__STM32F4xx_ADC_H */
+
+
