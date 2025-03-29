@@ -118,27 +118,30 @@ typedef enum {
     DEBUG_CONTROLSYSTEM_MOTOR_SPEED_4                 = 70, /* 5; Control System Variables; Motors Speeds;        Motor 4;  [-]; */
 
     DEBUG_CONST_CONTROLSYSTEM_MODE                    = 71, /* 7; Control System Auxiliar; Mode;         Mode (0: Inputs Reading, 1: Full); [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_LOOP_PERIOD_MS          = 72, /* 7; Control System Auxiliar; Control Loop; Period (Configured);         [ms]; */
-    DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED          = 73, /* 7; Control System Auxiliar; Control Loop; Period (Measured);           [ms]; */
-    DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME           = 74, /* 7; Control System Auxiliar; Task;         Execution Time;              [ms]; */
-    DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN   = 75, /* 7; Control System Auxiliar; Other;        Throttle Stick Started Down; [-]; */
-    DEBUG_CONTROLSYSTEM_ESCS_ENABLED                  = 76, /* 7; Control System Auxiliar; Other;        ESCs State;                [-]; */
+    DEBUG_CONST_CONTROLSYSTEM_LOOP_PERIOD_MS          = 72, /* 7; Control System Auxiliar; Control Loop; Period (Configured);               [ms]; */
+    DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED          = 73, /* 7; Control System Auxiliar; Control Loop; Period (Measured);                 [ms]; */
+    DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME           = 74, /* 7; Control System Auxiliar; Task;         Execution Time;                    [ms]; */
+    DEBUG_CONTROLSYSTEM_ESCS_ENABLED                  = 75, /* 7; Control System Auxiliar; Other;        ESCs State;                        [-]; */
+    DEBUG_CONTROLSYSTEM_ESCS_STARTED_OFF              = 76, /* 7; Control System Auxiliar; Other;        ESCs Started Off;                  [-]; */
+    DEBUG_CONTROLSYSTEM_RADIOCONTROLLER_IS_CONNECTED  = 77, /* 7; Control System Auxiliar; Other;        Radio Controller is Connected;     [-]; */
+    DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN   = 78, /* 7; Control System Auxiliar; Other;        Throttle Stick Started Down;       [-]; */
+    DEBUG_CONTROLSYSTEM_SAFE_START                    = 79, /* 7; Control System Auxiliar; Other;        Safe Start;                        [-]; */
 
-    DEBUG_CONST_ESC_MINIMUM_SPEED                     = 77, /* 7; ESCs; Speed Limit; Minimum; [-]; */
-    DEBUG_CONST_ESC_MAXIMUM_SPEED                     = 78, /* 7; ESCs; Speed Limit; Maximum; [-]; */
-    DEBUG_ESC_1                                       = 79, /* 7; ESCs; ESC; Motor 1; [-]; */
-    DEBUG_ESC_2                                       = 80, /* 7; ESCs; ESC; Motor 2; [-]; */
-    DEBUG_ESC_3                                       = 81, /* 7; ESCs; ESC; Motor 3; [-]; */
-    DEBUG_ESC_4                                       = 82, /* 7; ESCs; ESC; Motor 4; [-]; */
+    DEBUG_CONST_ESC_MINIMUM_SPEED                     = 80, /* 7; ESCs; Speed Limit; Minimum; [-]; */
+    DEBUG_CONST_ESC_MAXIMUM_SPEED                     = 81, /* 7; ESCs; Speed Limit; Maximum; [-]; */
+    DEBUG_ESC_1                                       = 82, /* 7; ESCs; ESC; Motor 1; [-]; */
+    DEBUG_ESC_2                                       = 83, /* 7; ESCs; ESC; Motor 2; [-]; */
+    DEBUG_ESC_3                                       = 84, /* 7; ESCs; ESC; Motor 3; [-]; */
+    DEBUG_ESC_4                                       = 85, /* 7; ESCs; ESC; Motor 4; [-]; */
 
-    DEBUG_TASK_STACK_WATERMARK_ONOFFBUTTON            = 83, /* 2; System Stack; Stack High Watermark; Task: OnOffButton      ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_CONTROLSYSTEM          = 84, /* 2; System Stack; Stack High Watermark; Task: ControlSystem    ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_USBCOMMUNICATION       = 85, /* 2; System Stack; Stack High Watermark; Task: USB_Communication; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_DEBUGGING              = 86, /* 2; System Stack; Stack High Watermark; Task: Debugging        ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_BATTERYLEVEL           = 87, /* 2; System Stack; Stack High Watermark; Task: BatteryLevel     ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_BATTERYALARM           = 88, /* 2; System Stack; Stack High Watermark; Task: BatteryAlarm     ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_HEARTBEATLIGHT         = 89, /* 2; System Stack; Stack High Watermark; Task: HeartbeatLight   ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS           = 90, /* 2; System Stack; Stack High Watermark; Task: FlightLights     ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_ONOFFBUTTON            = 86, /* 2; System Stack; Stack High Watermark; Task: OnOffButton      ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_CONTROLSYSTEM          = 87, /* 2; System Stack; Stack High Watermark; Task: ControlSystem    ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_USBCOMMUNICATION       = 88, /* 2; System Stack; Stack High Watermark; Task: USB_Communication; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_DEBUGGING              = 89, /* 2; System Stack; Stack High Watermark; Task: Debugging        ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_BATTERYLEVEL           = 90, /* 2; System Stack; Stack High Watermark; Task: BatteryLevel     ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_BATTERYALARM           = 91, /* 2; System Stack; Stack High Watermark; Task: BatteryAlarm     ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_HEARTBEATLIGHT         = 92, /* 2; System Stack; Stack High Watermark; Task: HeartbeatLight   ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS           = 93, /* 2; System Stack; Stack High Watermark; Task: FlightLights     ; [words]; */
 } DebugSignalsIds_t;
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */

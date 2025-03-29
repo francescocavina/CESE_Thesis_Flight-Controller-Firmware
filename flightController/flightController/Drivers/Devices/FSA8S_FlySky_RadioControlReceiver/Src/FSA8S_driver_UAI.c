@@ -272,7 +272,7 @@ IBUS_HandleTypeDef_t *FSA8S_Init(UART_HandleTypeDef *huart) {
     }
 }
 
-uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel) {
+bool_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel, uint16_t *channelValue) {
     /* Check parameter */
     if (NULL == hibus) {
         return IBUS_CHANNEL_VALUE_NULL;
@@ -305,7 +305,9 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel)
                 /* Store this as last valid reading */
                 lastValidReadings[channel - IBUS_CHANNEL_NUM_OFFSET] = hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
 
-                return hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
+                /* Return channel value */
+                *channelValue                                        = hibus->data[channel - IBUS_CHANNEL_NUM_OFFSET];
+                return true;
             }
         }
         attempts++;
@@ -316,8 +318,9 @@ uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel)
         IBUS_CheckAndResetDMA(hibus);
     }
 
-    /* Return last valid reading rather than blocking indefinitely */
-    return lastValidReadings[channel - IBUS_CHANNEL_NUM_OFFSET];
+    /* Return last valid reading */
+    *channelValue = lastValidReadings[channel - IBUS_CHANNEL_NUM_OFFSET];
+    return false;
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

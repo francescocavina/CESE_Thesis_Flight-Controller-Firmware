@@ -110,8 +110,12 @@ bool_t IBUS_CheckAndResetDMA(IBUS_HandleTypeDef_t *hibus) {
     memset(hibus->buffer, 0, hibus->bufferSize);
 
     /* Flush UART receive register */
-    uint8_t dummy;
+    uint8_t  dummy;
+    uint32_t startTick = HAL_GetTick();
     while (HAL_UART_Receive(hibus->huart, &dummy, 1, 0) == HAL_OK) {
+        if ((HAL_GetTick() - startTick) > 2) {
+            break;
+        }
     }
 
     /* Reset error flags */

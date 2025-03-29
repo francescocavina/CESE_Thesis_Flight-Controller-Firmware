@@ -74,8 +74,8 @@
 #define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES (1)
 #define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES             (1)
 #define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (1)
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (1) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (1) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (0) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (0) // Not necessary for control system
 #define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (1) // Not necessary for control system
 #define MAIN_APP_DEBUGGING_ESCS                                  (1)
 #define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (1)
@@ -101,9 +101,9 @@ static bool_t FlightController_isRunning                          = false;
 static bool_t FlightController_isInitialized                      = false;
 
 /* Drivers Handles */
-static IBUS_HandleTypeDef_t *rc_controller                        = NULL;
-static GY87_HandleTypeDef_t *hgy87                                = NULL;
-static ESC_HandleTypeDef_t  *hesc                                 = NULL;
+IBUS_HandleTypeDef_t *rc_controller                               = NULL;
+GY87_HandleTypeDef_t *hgy87                                       = NULL;
+ESC_HandleTypeDef_t  *hesc                                        = NULL;
 
 /* Timers Handles */
 static TimerHandle_t Timer_Handle_OnOffButton                     = NULL;
@@ -184,7 +184,7 @@ static uint8_t  debuggingStr_ControlSystem_referenceRates[50]        = {0};     
 static uint8_t  debuggingStr_ControlSystem_ratesErrors[50]           = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_ratesPID[50]              = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[50]          = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_Auxiliar[40]              = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_Auxiliar[70]              = {0};            // Size checked
 static uint8_t  debuggingStr_ESCs[40]                                = {0};            // Size checked
 static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0};            // Size checked
 #endif
@@ -325,7 +325,10 @@ extern WWDG_HandleTypeDef hwwdg;
 /* --- Private function implementation --------------------------------------------------------- */
 void Initialize_SystemVariables(void) {
     /* Control System Variables */
+    controlSystemValues.ESC_startedOff                                = false;
+    controlSystemValues.radioController_isConnected                   = false;
     controlSystemValues.throttleStick_startedDown                     = false;
+    controlSystemValues.safeStart                                     = false;
 
     controlSystemValues.gyroCalibration.calibrationDone               = false;
     controlSystemValues.gyroCalibration.fixedCalibration_en           = true;
@@ -487,7 +490,6 @@ void Task_ControlSystem(void *ptr) {
     while (1) {
         /* Record task start time for execution measurement */
         xTaskStartTime        = xTaskGetTickCount();
-
         /* Measure actual wake-up time */
         xActualWakeTime       = xTaskGetTickCount();
         /* Calculate period between ACTUAL wake times */
@@ -528,18 +530,18 @@ void Task_ControlSystem(void *ptr) {
         /* Refresh the WWDG */
         HAL_WWDG_Refresh(&hwwdg);
 
-        /* System Failure Simulation */
-        // #if (TEST_SYSTEM_FAILURE_PROCEDURE == 1)
-        //         controlSystemValues.radioController_channelValues[4] = FSA8S_ReadChannel(rc_controller, CHANNEL_5);
-        //         Test_SystemFailureProcedure(controlSystemValues.radioController_channelValues[4]);
-        // #endif
+/* System Failure Simulation */
+#if (TEST_SYSTEM_FAILURE_PROCEDURE == 1)
+        FSA8S_ReadChannel(rc_controller, CHANNEL_5, &controlSystemValues.radioController_channelValues[4]);
+        Test_SystemFailureProcedure(controlSystemValues.radioController_channelValues[4]);
+#endif
 
         /* Control system processing */
         if (FlightController_isInitialized && 0 == CONTROLSYSTEM_MODE) {
 
             /* Read FS-A8S channels */
             for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
-                controlSystemValues.radioController_channelValues[i] = FSA8S_ReadChannel(rc_controller, channels[i]);
+                FSA8S_ReadChannel(rc_controller, channels[i], &controlSystemValues.radioController_channelValues[i]);
             }
 
             /* Read GY-87 gyroscope sensor */
@@ -569,26 +571,28 @@ void Task_ControlSystem(void *ptr) {
 
         } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
 
-            /* Read FS-A8S channels  for flight lights */
-            controlSystemValues.radioController_channelValues[7] = FSA8S_ReadChannel(rc_controller, CHANNEL_8);
-            controlSystemValues.radioController_channelValues[8] = FSA8S_ReadChannel(rc_controller, CHANNEL_9);
-            controlSystemValues.radioController_channelValues[9] = FSA8S_ReadChannel(rc_controller, CHANNEL_10);
+            /* Check if radio controller is connected */
+            CS_CheckRadioControllerStatus(&controlSystemValues);
 
-            /* Avoid uncontrolled motor start */
-            if (false == controlSystemValues.throttleStick_startedDown) {
-                /* Read throttle input from radio controller */
-                controlSystemValues.radioController_channelValues[2] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                controlSystemValues.reference_throttle               = controlSystemValues.radioController_channelValues[2];
+            /* Read FS-A8S channels */
+            for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
+                FSA8S_ReadChannel(rc_controller, channels[i], &controlSystemValues.radioController_channelValues[i]);
+            }
 
-                if (15 > controlSystemValues.reference_throttle) {
-                    controlSystemValues.throttleStick_startedDown = true;
-                } else {
-                    controlSystemValues.throttleStick_startedDown = false;
-                }
+            /* Read GY-87 temperature sensor */
+#if (MAIN_APP_DEBUGGING_GY87_TEMPERATURE == 1)
+            controlSystemValues.temperature = GY87_ReadTemperatureSensor(hgy87);
+#endif
 
-            } else {
+            /* Avoid uncontrolled motors start */
+            if (controlSystemValues.safeStart == false) {
+                CS_CheckForUncontrolledMotorsStart(&controlSystemValues);
+            }
+
+            /* Process data */
+            if (controlSystemValues.safeStart == true) {
+
                 /* Check if ESCs are enabled (Switch B on radio controller) */
-                controlSystemValues.radioController_channelValues[5] = FSA8S_ReadChannel(rc_controller, CHANNEL_6);
                 if (500 <= controlSystemValues.radioController_channelValues[5]) {
                     controlSystemValues.ESC_isEnabled = true;
                 } else {
@@ -597,48 +601,20 @@ void Task_ControlSystem(void *ptr) {
 
                 /* Turn off motors in case ESCs are disabled */
                 if (false == controlSystemValues.ESC_isEnabled) {
-
-                    /* Save motors speed */
-                    controlSystemValues.ESC1_speed = 0;
-                    controlSystemValues.ESC2_speed = 0;
-                    controlSystemValues.ESC3_speed = 0;
-                    controlSystemValues.ESC4_speed = 0;
-
-                    /* Turn off motors */
-                    // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
-                    // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
-                    // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
-                    // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
-
-                    /* Reset PID variables */
-                    CSM_ResetPID();
+                    /* Reset control system */
+                    CS_Reset(&controlSystemValues);
 
                 } else {
 
                     /* Read input throttle from radio controller */
-                    controlSystemValues.radioController_channelValues[2] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                    controlSystemValues.reference_throttle               = controlSystemValues.radioController_channelValues[2];
+                    controlSystemValues.reference_throttle = controlSystemValues.radioController_channelValues[2];
 
                     /* Check if throttle stick is low */
                     if (CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE > controlSystemValues.reference_throttle) {
-
-                        /* Save motors speed */
-                        controlSystemValues.ESC1_speed = 0;
-                        controlSystemValues.ESC2_speed = 0;
-                        controlSystemValues.ESC3_speed = 0;
-                        controlSystemValues.ESC4_speed = 0;
-
-                        /* Turn off motors */
-                        // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
-                        // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
-                        // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
-                        // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
-
-                        /* Reset PID variables */
-                        CSM_ResetPID();
+                        /* Reset control system */
+                        CS_Reset(&controlSystemValues);
 
                     } else {
-
                         /* Read GY-87 gyroscope sensor */
                         GY87_ReadGyroscope(hgy87, &controlSystemValues.gyroMeasurement, &controlSystemValues.gyroCalibration);
                         /* Read GY-87 accelerometer sensor */
@@ -649,14 +625,10 @@ void Task_ControlSystem(void *ptr) {
                         Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
 
                         /* Read inputs from radio controller */
-                        controlSystemValues.radioController_channelValues[0] = FSA8S_ReadChannel(rc_controller, CHANNEL_1);
-                        controlSystemValues.radioController_channelValues[1] = FSA8S_ReadChannel(rc_controller, CHANNEL_2);
-                        controlSystemValues.radioController_channelValues[2] = FSA8S_ReadChannel(rc_controller, CHANNEL_3);
-                        controlSystemValues.radioController_channelValues[3] = FSA8S_ReadChannel(rc_controller, CHANNEL_4);
-                        controlSystemValues.reference_throttle               = (float)controlSystemValues.radioController_channelValues[2];
-                        controlSystemValues.reference_rollValue              = (float)controlSystemValues.radioController_channelValues[0];
-                        controlSystemValues.reference_pitchValue             = (float)controlSystemValues.radioController_channelValues[1];
-                        controlSystemValues.reference_yawValue               = (float)controlSystemValues.radioController_channelValues[3];
+                        controlSystemValues.reference_throttle   = (float)controlSystemValues.radioController_channelValues[2];
+                        controlSystemValues.reference_rollValue  = (float)controlSystemValues.radioController_channelValues[0];
+                        controlSystemValues.reference_pitchValue = (float)controlSystemValues.radioController_channelValues[1];
+                        controlSystemValues.reference_yawValue   = (float)controlSystemValues.radioController_channelValues[3];
 
                         /* Adjust and limit throttle input */
                         if (CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE < controlSystemValues.reference_throttle) {
@@ -699,25 +671,8 @@ void Task_ControlSystem(void *ptr) {
                         controlSystemValues.motor3_speed = (controlSystemValues.reference_throttle + controlSystemValues.PID_Output_rollRate - controlSystemValues.PID_Output_pitchRate + controlSystemValues.PID_Output_yawRate) / 10;
                         controlSystemValues.motor4_speed = (controlSystemValues.reference_throttle - controlSystemValues.PID_Output_rollRate + controlSystemValues.PID_Output_pitchRate + controlSystemValues.PID_Output_yawRate) / 10;
 
-                        /* Adjust and limit motors maximum speed */
-                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor1_speed)
-                            controlSystemValues.motor1_speed = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor2_speed)
-                            controlSystemValues.motor2_speed = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor3_speed)
-                            controlSystemValues.motor3_speed = ESC_MAXIMUM_SPEED;
-                        if (ESC_MAXIMUM_SPEED < controlSystemValues.motor4_speed)
-                            controlSystemValues.motor4_speed = ESC_MAXIMUM_SPEED;
-
-                        /* Adjust and limit motors minimum speed */
-                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor1_speed)
-                            controlSystemValues.motor1_speed = ESC_MINIMUM_SPEED;
-                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor2_speed)
-                            controlSystemValues.motor2_speed = ESC_MINIMUM_SPEED;
-                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor3_speed)
-                            controlSystemValues.motor3_speed = ESC_MINIMUM_SPEED;
-                        if (ESC_MINIMUM_SPEED > controlSystemValues.motor4_speed)
-                            controlSystemValues.motor4_speed = ESC_MINIMUM_SPEED;
+                        /* Limit motors speed */
+                        CS_CheckForMotorsSpeedLimits(&controlSystemValues);
 
                         /* Save motors speed */
                         controlSystemValues.ESC1_speed = controlSystemValues.motor1_speed;
@@ -839,11 +794,14 @@ void Task_Debugging(void *ptr) {
     uint16_t               written_chars = 0;
 
     float    FlightController_batteryLevel;
-    uint8_t  debuggingStr_ESCsState[4]                 = {0};
-    uint8_t  debuggingStr_throttleStick_startedDown[4] = {0};
-    uint8_t  debuggingStr_flightLightsState[4]         = {0};
-    uint8_t  debuggingStr_flightLightsType[4]          = {0};
-    uint16_t debuggingValue_flightLightsSpeed          = 0;
+    uint8_t  debuggingStr_ESC_state[4]                   = {0};
+    uint8_t  debuggingStr_ESC_startedOff[4]              = {0};
+    uint8_t  debuggingStr_radioController_isConnected[4] = {0};
+    uint8_t  debuggingStr_throttleStick_startedDown[4]   = {0};
+    uint8_t  debuggingStr_flightLightsState[4]           = {0};
+    uint8_t  debuggingStr_flightLightsType[4]            = {0};
+    uint16_t debuggingValue_flightLightsSpeed            = 0;
+    uint8_t  debuggingStr_safeStart[4]                   = {0};
 
     while (1) {
 
@@ -862,16 +820,16 @@ void Task_Debugging(void *ptr) {
 #if (MAIN_APP_DEBUGGING_FSA8S_MAIN == 1)
                 /* Log channel values */
                 if (logControlSystemValues->radioController_channelValues[5] >= 500) {
-                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "ON");
+                    snprintf((char *)debuggingStr_ESC_startedOff, 4 * sizeof(uint8_t), "ON");
                 } else {
-                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "OFF");
+                    snprintf((char *)debuggingStr_ESC_startedOff, 4 * sizeof(uint8_t), "OFF");
                 }
                 snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%s",
                          DEBUG_FSA8S_CHANNEL_VALUES_3, logControlSystemValues->radioController_channelValues[2],
                          DEBUG_FSA8S_CHANNEL_VALUES_1, logControlSystemValues->radioController_channelValues[0],
                          DEBUG_FSA8S_CHANNEL_VALUES_2, logControlSystemValues->radioController_channelValues[1],
                          DEBUG_FSA8S_CHANNEL_VALUES_4, logControlSystemValues->radioController_channelValues[3],
-                         DEBUG_FSA8S_CHANNEL_VALUES_6, debuggingStr_ESCsState);
+                         DEBUG_FSA8S_CHANNEL_VALUES_6, debuggingStr_ESC_startedOff);
 #endif
 
 #if (MAIN_APP_DEBUGGING_FSA8S_AUX == 1)
@@ -1039,21 +997,40 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR == 1)
                 /* Log control system auxiliar values */
+                if (logControlSystemValues->ESC_isEnabled == true) {
+                    snprintf((char *)debuggingStr_ESC_state, 4 * sizeof(uint8_t), "ON");
+                } else {
+                    snprintf((char *)debuggingStr_ESC_state, 4 * sizeof(uint8_t), "OFF");
+                }
+                if (logControlSystemValues->ESC_startedOff == true) {
+                    snprintf((char *)debuggingStr_ESC_startedOff, 4 * sizeof(uint8_t), "YES");
+                } else {
+                    snprintf((char *)debuggingStr_ESC_startedOff, 4 * sizeof(uint8_t), "NO");
+                }
+                if (logControlSystemValues->radioController_isConnected == true) {
+                    snprintf((char *)debuggingStr_radioController_isConnected, 4 * sizeof(uint8_t), "YES");
+                } else {
+                    snprintf((char *)debuggingStr_radioController_isConnected, 4 * sizeof(uint8_t), "NO");
+                }
                 if (logControlSystemValues->throttleStick_startedDown == true) {
                     snprintf((char *)debuggingStr_throttleStick_startedDown, 4 * sizeof(uint8_t), "YES");
                 } else {
                     snprintf((char *)debuggingStr_throttleStick_startedDown, 4 * sizeof(uint8_t), "NO");
                 }
-                if (logControlSystemValues->ESC_isEnabled == true) {
-                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "ON");
+                if (logControlSystemValues->safeStart == true) {
+                    snprintf((char *)debuggingStr_safeStart, 4 * sizeof(uint8_t), "YES");
                 } else {
-                    snprintf((char *)debuggingStr_ESCsState, 4 * sizeof(uint8_t), "OFF");
+                    snprintf((char *)debuggingStr_safeStart, 4 * sizeof(uint8_t), "NO");
                 }
-                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 40 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu/%d_%s/%d_%s",
+
+                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 70 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu/%d_%s/%d_%s/%d_%s/%d_%s/%d_%s",
                          DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED, (logControlSystemValues->controlLoopPeriod * 1000 / configTICK_RATE_HZ),
                          DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME, (logControlSystemValues->taskExecutionTime * 1000 / configTICK_RATE_HZ),
+                         DEBUG_CONTROLSYSTEM_ESCS_ENABLED, debuggingStr_ESC_state,
+                         DEBUG_CONTROLSYSTEM_ESCS_STARTED_OFF, debuggingStr_ESC_startedOff,
+                         DEBUG_CONTROLSYSTEM_RADIOCONTROLLER_IS_CONNECTED, debuggingStr_radioController_isConnected,
                          DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN, debuggingStr_throttleStick_startedDown,
-                         DEBUG_CONTROLSYSTEM_ESCS_ENABLED, debuggingStr_ESCsState);
+                         DEBUG_CONTROLSYSTEM_SAFE_START, debuggingStr_safeStart);
 #endif
 
 #if (MAIN_APP_DEBUGGING_ESCS == 1)
@@ -1222,8 +1199,8 @@ void Task_StartUp(void *ptr) {
             memset(debuggingStr_B, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
 #endif
 
-            /* Delete this task, as initialization must happen only once */
-            vTaskDelete(Task_Handle_StartUp);
+            /* Suspend this task, as initialization must happen only once */
+            vTaskSuspend(Task_Handle_StartUp);
         }
 
         /* Set task time delay */

@@ -62,8 +62,11 @@ typedef bool bool_t;
  */
 typedef struct {
     /* General */
-    bool_t throttleStick_startedDown;
     bool_t ESC_isEnabled;
+    bool_t ESC_startedOff;
+    bool_t radioController_isConnected;
+    bool_t throttleStick_startedDown;
+    bool_t safeStart;
     /* Radio Controller Readings */
     uint16_t radioController_channelValues[FSA8S_CHANNELS];
     /* References (Values) */
@@ -142,6 +145,34 @@ typedef struct {
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+/*
+ * @brief  Turn motors off and reset control system variables.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
+ * @retval None
+ */
+void CS_Reset(ControlSystemValues_t *controlSystemValues);
+
+/*
+ * @brief  Checks the radio controller status.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
+ * @retval None
+ */
+void CS_CheckRadioControllerStatus(ControlSystemValues_t *controlSystemValues);
+
+/*
+ * @brief Checks if the ESCs are started off and the throttle stick is started down.
+ * @param controlSystemValues: Pointer to the Control System Values structure.
+ * @retval None
+ */
+void CS_CheckForUncontrolledMotorsStart(ControlSystemValues_t *controlSystemValues);
+
+/*
+ * @brief  Limit motors speed.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
+ * @retval None
+ */
+void CS_CheckForMotorsSpeedLimits(ControlSystemValues_t *controlSystemValues);
+
 /*
  * @brief  Calculates an angle using a Kalman filter.
  * @param  TODO

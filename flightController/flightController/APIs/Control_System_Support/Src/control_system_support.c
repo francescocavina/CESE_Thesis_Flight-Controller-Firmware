@@ -36,11 +36,16 @@
 #include "control_system_support.h"
 #include "control_system_settings.h"
 
+#include "ESC_UAI.h"
+#include "FSA8S_driver_UAI.h"
+
 /* --- Macros definitions ---------------------------------------------------------------------- */
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
 /* --- Private variable declarations ----------------------------------------------------------- */
+/* Drivers Handles */
+extern IBUS_HandleTypeDef_t *rc_controller;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 
@@ -51,6 +56,75 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
+void CS_Reset(ControlSystemValues_t *controlSystemValues) {
+
+    /* Save motors speed */
+    controlSystemValues->ESC1_speed = 0;
+    controlSystemValues->ESC2_speed = 0;
+    controlSystemValues->ESC3_speed = 0;
+    controlSystemValues->ESC4_speed = 0;
+
+    /* Turn motors off */
+    // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues->ESC4_speed);
+    // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues->ESC2_speed);
+    // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues->ESC3_speed);
+    // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues->ESC1_speed);
+
+    /* Reset PID variables */
+    CSM_ResetPID();
+}
+
+void CS_CheckRadioControllerStatus(ControlSystemValues_t *controlSystemValues) {
+
+    uint16_t channelValue         = 0;
+
+    /* Read radio controller channel */
+    bool_t radioController_Status = FSA8S_ReadChannel(rc_controller, CHANNEL_1, &channelValue);
+
+    /* Check if the radio controller is connected */
+    if (radioController_Status == false) {
+        controlSystemValues->radioController_isConnected = false;
+    } else {
+        controlSystemValues->radioController_isConnected = true;
+    }
+}
+
+void CS_CheckForUncontrolledMotorsStart(ControlSystemValues_t *controlSystemValues) {
+
+    /* Check if the ESCs are started off and the throttle stick is started down */
+    controlSystemValues->ESC_startedOff            = controlSystemValues->radioController_isConnected && (controlSystemValues->radioController_channelValues[5] <= 500);
+    controlSystemValues->throttleStick_startedDown = controlSystemValues->radioController_isConnected && (controlSystemValues->radioController_channelValues[2] <= 15);
+
+    if (controlSystemValues->ESC_startedOff == true && controlSystemValues->throttleStick_startedDown == true) {
+        controlSystemValues->safeStart = true;
+    } else {
+        controlSystemValues->safeStart = false;
+    }
+}
+
+void CS_CheckForMotorsSpeedLimits(ControlSystemValues_t *controlSystemValues) {
+
+    /* Adjust and limit motors minimum speed */
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor1_speed)
+        controlSystemValues->motor1_speed = ESC_MINIMUM_SPEED;
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor2_speed)
+        controlSystemValues->motor2_speed = ESC_MINIMUM_SPEED;
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor3_speed)
+        controlSystemValues->motor3_speed = ESC_MINIMUM_SPEED;
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor4_speed)
+        controlSystemValues->motor4_speed = ESC_MINIMUM_SPEED;
+
+    /* Adjust and limit motors maximum speed */
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor1_speed)
+        controlSystemValues->motor1_speed = ESC_MAXIMUM_SPEED;
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor2_speed)
+        controlSystemValues->motor2_speed = ESC_MAXIMUM_SPEED;
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor3_speed)
+        controlSystemValues->motor3_speed = ESC_MAXIMUM_SPEED;
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor4_speed)
+        controlSystemValues->motor4_speed = ESC_MAXIMUM_SPEED;
+}
+
 void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
 
     // float kalmanGain;

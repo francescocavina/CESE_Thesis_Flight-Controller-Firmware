@@ -100,11 +100,11 @@ IBUS_HandleTypeDef_t *FSA8S_Init(UART_HandleTypeDef *huart);
  * @param  hibus:   Pointer to a IBUS_HandleTypeDef_t structure that contains
  *                  the configuration information for the iBus communication.
  *         channel: Channel number to be read (CHANNEL_1 to CHANNEL_14).
- * @retval value:   Channel value from 0 to a defined maximum number.
- *         0:       If hibus parameter is NULL or channel number is not between
- *                  CHANNEL_1 to CHANNEL_14.
+ *         *channelValue: Pointer to a variable where the channel value will be stored.
+ * @retval true:  If the channel was read successfully.
+ *         false: If the channel was not read successfully.
  */
-uint16_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel);
+bool_t FSA8S_ReadChannel(IBUS_HandleTypeDef_t *hibus, FSA8S_CHANNEL_t channel, uint16_t *channelValue);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
