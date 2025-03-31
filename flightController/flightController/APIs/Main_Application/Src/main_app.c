@@ -193,7 +193,10 @@ static uint8_t  debuggingStr_ESCs[40]                                = {0};     
 static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0};            // Size checked
 #endif
 
-/* Control System */
+/* Task: On/Off Button */
+static bool_t OnOffButton_ReleaseRequired = false;
+
+/* Task: Control System */
 static ControlSystemValues_t controlSystemValues;
 static FSA8S_CHANNEL_t       channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
 
@@ -497,11 +500,13 @@ void Task_OnOffButton(void *ptr) {
         /* Check On/Off Button status */
         if (!HAL_GPIO_ReadPin(PW_ON_OFF_DRIVER_INPUT_GPIO_Port, PW_ON_OFF_DRIVER_INPUT_Pin)) {
             /* User is trying to turn it on or off */
-            if (!Timer_Flag_OnOffButton) {
-
+            if (!Timer_Flag_OnOffButton && !OnOffButton_ReleaseRequired) {
+                /* Start timer if not already running and not waiting for button release */
                 xTimerStart(Timer_Handle_OnOffButton, 0);
                 Timer_Flag_OnOffButton = true;
             }
+        } else {
+            OnOffButton_ReleaseRequired = false;
         }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
@@ -1523,7 +1528,13 @@ void Timer_Callback_OnOffButton(TimerHandle_t xTimer) {
                 /* Turn on flight controller */
                 HAL_GPIO_WritePin(PW_ON_OFF_DRIVER_OUTPUT_GPIO_Port, PW_ON_OFF_DRIVER_OUTPUT_Pin, 1);
 
-                FlightController_isRunning = true;
+                FlightController_isRunning  = true;
+
+                /* Set flag to require button release before next action */
+                OnOffButton_ReleaseRequired = true;
+
+                /* Stop the timer to prevent it from triggering again while button is held */
+                xTimerStop(xTimer, 0);
             } else {
                 /* Flight controller was on */
                 /* User turned it off */
