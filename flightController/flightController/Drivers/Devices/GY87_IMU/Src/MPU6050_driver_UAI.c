@@ -51,8 +51,8 @@
 // #define GY87_USE_LOGGING            // Remove comment to allow driver info logging
 
 #define GY87_MAX_NUMBER_INSTANCES                 (2)    // Maximum number of possible IMUs connected to the i2c bus
-#define GY87_GYROSCOPE_CALIBRATION_ITERATIONS     (2000) // No. of readings to get a calibration value
-#define GY87_ACCELEROMETER_CALIBRATION_ITERATIONS (2000) // No. of readings to get a calibration value
+#define GY87_GYROSCOPE_CALIBRATION_ITERATIONS     (3000) // No. of readings to get a calibration value
+#define GY87_ACCELEROMETER_CALIBRATION_ITERATIONS (3000) // No. of readings to get a calibration value
 #define MPU6050_SET_BIT                           (1)
 #define MPU6050_CLEAR_BIT                         (0)
 #define QMC5883L_SET_BIT                          (1)

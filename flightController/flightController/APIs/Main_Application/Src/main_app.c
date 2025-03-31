@@ -54,6 +54,7 @@
 /* FreeRTOS Tasks Priorities */
 #define TASK_ONOFFBUTTON_PRIORITY      (3)
 #define TASK_STARTUP_PRIORITY          (3)
+#define TASK_IMU_CALIBRATION_PRIORITY  (3)
 #define TASK_CONTROLSYSTEM_PRIORITY    (6)
 #define TASK_USBCOMMUNICATION_PRIORITY (5)
 #define TASK_DEBUGGING_PRIORITY        (4)
@@ -91,7 +92,7 @@
 #define MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR                (1)
 #define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK             (1)
 /* Battery Level Settings */
-#define BATTERY_LEVEL_CALIBRATION_OFFSET (0.76)
+#define BATTERY_LEVEL_CALIBRATION_OFFSET (-0.13)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -120,6 +121,7 @@ static SemaphoreHandle_t Semaphore_Handle_flightLightsBufferSwap  = NULL;
 /* Tasks Handles */
 static TaskHandle_t Task_Handle_OnOffButton                       = NULL;
 static TaskHandle_t Task_Handle_StartUp                           = NULL;
+static TaskHandle_t Task_Handle_IMU_Calibration                   = NULL;
 static TaskHandle_t Task_Handle_ControlSystem                     = NULL;
 static TaskHandle_t Task_Handle_USB_Communication                 = NULL;
 static TaskHandle_t Task_Handle_Debugging                         = NULL;
@@ -148,6 +150,8 @@ static uint16_t *FlightLightsActiveBuffer_TaskFlightLights  = FlightLights_Buffe
 /* Stack High Watermarks Variables */
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
 static UBaseType_t Task_StackHighWatermark_OnOffButton       = 0;
+static UBaseType_t Task_StackHighWatermark_StartUp           = 0;
+static UBaseType_t Task_StackHighWatermark_IMU_Calibration   = 0;
 static UBaseType_t Task_StackHighWatermark_ControlSystem     = 0;
 static UBaseType_t Task_StackHighWatermark_USB_Communication = 0;
 static UBaseType_t Task_StackHighWatermark_Debugging         = 0;
@@ -174,7 +178,7 @@ static uint8_t  debuggingStr_GY87_accelerometerAngles[40]            = {0};     
 static uint8_t  debuggingStr_GY87_magnetometerValues[40]             = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]       = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_temperature[16]                    = {0};            // Size checked
-static uint8_t  debuggingStr_BatteryLevel[10]                        = {0};            // Size checked
+static uint8_t  debuggingStr_BatteryLevel[20]                        = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_referenceValues[40]       = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]       = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_KalmanAngles[40]          = {0};            // Size checked
@@ -230,6 +234,27 @@ bool_t FreeRTOS_CreateSemaphores(void);
 bool_t FreeRTOS_CreateTasks(void);
 
 /*
+ * @brief  Task: Reads the on-board on/off button and turns on/off the flight controller.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void Task_OnOffButton(void *ptr);
+
+/*
+ * @brief  Task: Initializes and configures the flight controller system.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void Task_StartUp(void *ptr);
+
+/*
+ * @brief  Task: Calibrates the IMU module.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void Task_IMU_Calibration(void *ptr);
+
+/*
  * @brief  Task: Controls the whole system as a closed-loop system, taking as inputs the data
  *               received by the radio controller receiver and the IMU module, and controlling
  *               accordingly the electronic speed controllers.
@@ -251,20 +276,6 @@ void Task_USB_Communication(void *ptr);
  * @retval None
  */
 void Task_Debugging(void *ptr);
-
-/*
- * @brief  Task: Reads the on-board on/off button and turns on/off the flight controller.
- * @param  Task pointer: not used.
- * @retval None
- */
-void Task_OnOffButton(void *ptr);
-
-/*
- * @brief  Task: Initializes and configures the flight controller system.
- * @param  Task pointer: not used.
- * @retval None
- */
-void Task_Init(void *ptr);
 
 /*
  * @brief  Task: Reads the flight controller battery level and gives a signal whenever the level
@@ -326,7 +337,7 @@ extern WWDG_HandleTypeDef hwwdg;
 void Initialize_SystemVariables(void) {
     /* Control System Variables */
     controlSystemValues.ESC_startedOff                                = false;
-    controlSystemValues.radioController_isConnected                   = false;
+    controlSystemValues.radioController_startedConnected              = false;
     controlSystemValues.throttleStick_startedDown                     = false;
     controlSystemValues.safeStart                                     = false;
 
@@ -425,45 +436,45 @@ bool_t FreeRTOS_CreateSemaphores(void) {
 
 bool_t FreeRTOS_CreateTasks(void) {
 
-    /* Task 3: ControlSystem */
+    /* Task 4: ControlSystem */
     xTaskCreate(Task_ControlSystem, "Task_ControlSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_CONTROLSYSTEM_PRIORITY), &Task_Handle_ControlSystem);
     if (Task_Handle_ControlSystem == NULL) {
         return false;
     }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
-    /* Task 4: USB_Communication */
+    /* Task 5: USB_Communication */
     xTaskCreate(Task_USB_Communication, "Task_USB_Communication", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_USBCOMMUNICATION_PRIORITY), &Task_Handle_USB_Communication);
     if (Task_Handle_USB_Communication == NULL) {
         return false;
     }
 
-    /* Task 5: Debugging */
+    /* Task 6: Debugging */
     xTaskCreate(Task_Debugging, "Task_Debugging", (3 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_DEBUGGING_PRIORITY), &Task_Handle_Debugging);
     if (Task_Handle_Debugging == NULL) {
         return false;
     }
 #endif
 
-    /* Task 6: BatteryLevel */
+    /* Task 7: BatteryLevel */
     xTaskCreate(Task_BatteryLevel, "Task_BatteryLevel", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYLEVEL_PRIORITY), &Task_Handle_BatteryLevel);
     if (Task_Handle_BatteryLevel == NULL) {
         return false;
     }
 
-    /* Task 7: BatteryAlarm */
+    /* Task 8: BatteryAlarm */
     xTaskCreate(Task_BatteryAlarm, "Task_BatteryAlarm", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_BATTERYALARM_PRIORITY), &Task_Handle_BatteryAlarm);
     if (Task_Handle_BatteryAlarm == NULL) {
         return false;
     }
 
-    /* Task 8: HeartbeatLight */
+    /* Task 9: HeartbeatLight */
     xTaskCreate(Task_HeartbeatLight, "Task_HeartbeatLight", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_HEARTBEATLIGHT_PRIORITY), &Task_Handle_HeartbeatLight);
     if (Task_Handle_HeartbeatLight == NULL) {
         return false;
     }
 
-    /* Task 9: FlightLights */
+    /* Task 10: FlightLights */
     xTaskCreate(Task_FlightLights, "Task_FlightLights", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTLIGHTS_PRIORITY), &Task_Handle_FlightLights);
     if (Task_Handle_FlightLights == NULL) {
         return false;
@@ -471,6 +482,140 @@ bool_t FreeRTOS_CreateTasks(void) {
 
     /* Successfully created all tasks */
     return true;
+}
+
+void Task_OnOffButton(void *ptr) {
+    (void)ptr;
+
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
+
+    while (1) {
+
+        /* Check On/Off Button status */
+        if (!HAL_GPIO_ReadPin(PW_ON_OFF_DRIVER_INPUT_GPIO_Port, PW_ON_OFF_DRIVER_INPUT_Pin)) {
+            /* User is trying to turn it on or off */
+            if (!Timer_Flag_OnOffButton) {
+
+                xTimerStart(Timer_Handle_OnOffButton, 0);
+                Timer_Flag_OnOffButton = true;
+            }
+        }
+
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+        /* Get stack watermark */
+        Task_StackHighWatermark_OnOffButton = uxTaskGetStackHighWaterMark(NULL);
+#endif
+
+        /* Set task time delay */
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
+    }
+}
+
+void Task_StartUp(void *ptr) {
+    (void)ptr;
+
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
+
+    while (1) {
+        /* Check if flight controller is already running */
+        if (FlightController_isRunning) {
+
+            /* Turn on-board LED off */
+            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
+
+            /* Initialize radio controller */
+            rc_controller = FSA8S_Init(&huart2);
+            if (NULL == rc_controller) {
+                /* Error */
+                ErrorLED_Start(FSA8S_InitializationError);
+            }
+            /* Initialize ESCs */
+            hesc = ESC_Init(&htim3);
+            if (NULL == hesc) {
+                /* Error */
+                ErrorLED_Start(ESC_InitializationError);
+            }
+
+            /* Create system timers, queues, semaphores and tasks */
+            if (FreeRTOS_CreateTimers() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_TimersCreationError);
+            }
+            if (FreeRTOS_CreateQueues() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_QueuesCreationError);
+            }
+            if (FreeRTOS_CreateSemaphores() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_SemaphoresCreationError);
+            }
+            if (FreeRTOS_CreateTasks() == false) {
+                /* Error */
+                ErrorLED_Start(FreeRTOS_TasksCreationError);
+            }
+
+/* Initialize buffer structures */
+#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+            memset(&controlSystemValues_A, 0, sizeof(ControlSystemValues_t));
+            memset(&controlSystemValues_B, 0, sizeof(ControlSystemValues_t));
+            memset(debuggingStr_A, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
+            memset(debuggingStr_B, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
+#endif
+
+            /* Suspend this task, as initialization must happen only once */
+            vTaskSuspend(Task_Handle_StartUp);
+        }
+
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+        /* Get stack watermark */
+        Task_StackHighWatermark_StartUp = uxTaskGetStackHighWaterMark(NULL);
+#endif
+
+        /* Set task time delay */
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
+    }
+}
+
+void Task_IMU_Calibration(void *ptr) {
+    (void)ptr;
+
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(100);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
+
+    while (1) {
+
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+        /* Get stack watermark */
+        Task_StackHighWatermark_IMU_Calibration = uxTaskGetStackHighWaterMark(NULL);
+#endif
+
+        /* Calibrate GY-87 gyroscope sensor */
+        if (false == controlSystemValues.gyroCalibration.calibrationDone) {
+            vTaskDelay(pdMS_TO_TICKS(200));
+            GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN));
+        }
+        /* Calibrate GY-87 accelerometer sensor */
+        if (false == controlSystemValues.accCalibration.calibrationDone) {
+            vTaskDelay(pdMS_TO_TICKS(200));
+            GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN));
+        }
+
+        if (controlSystemValues.gyroCalibration.calibrationDone && controlSystemValues.accCalibration.calibrationDone) {
+            /* Calibration done, suspend this task */
+            vTaskSuspend(Task_Handle_IMU_Calibration);
+        }
+
+        /* Set task time delay */
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
+    }
 }
 
 void Task_ControlSystem(void *ptr) {
@@ -497,16 +642,6 @@ void Task_ControlSystem(void *ptr) {
         /* Store current actual time for next iteration */
         xPreviousLastWakeTime = xActualWakeTime;
 
-        /* Calibrate GY-87 gyroscope sensor */
-        if (false == controlSystemValues.gyroCalibration.calibrationDone) {
-            vTaskDelay(pdMS_TO_TICKS(200));
-            GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN));
-        }
-        /* Calibrate GY-87 accelerometer sensor */
-        if (false == controlSystemValues.accCalibration.calibrationDone) {
-            vTaskDelay(pdMS_TO_TICKS(200));
-            GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN));
-        }
         /* Check that both sensors are calibrated */
         if (controlSystemValues.gyroCalibration.calibrationDone && controlSystemValues.accCalibration.calibrationDone && false == FlightController_isInitialized) {
             /* Beep to indicate that the system is ready */
@@ -572,7 +707,9 @@ void Task_ControlSystem(void *ptr) {
         } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
 
             /* Check if radio controller is connected */
-            CS_CheckRadioControllerStatus(&controlSystemValues);
+            if (false == controlSystemValues.radioController_startedConnected) {
+                CS_CheckRadioControllerStatus(&controlSystemValues);
+            }
 
             /* Read FS-A8S channels */
             for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
@@ -681,10 +818,10 @@ void Task_ControlSystem(void *ptr) {
                         controlSystemValues.ESC4_speed = controlSystemValues.motor4_speed;
 
                         /* Set motors speed */
-                        // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
-                        // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
-                        // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
-                        // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
+                        ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
+                        ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
+                        ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
+                        ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
                     }
                 }
             }
@@ -745,7 +882,7 @@ void Task_USB_Communication(void *ptr) {
     uint8_t *logDebuggingString   = NULL;
 
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod  = pdMS_TO_TICKS(10);
+    const TickType_t xTaskPeriod  = pdMS_TO_TICKS(8);
 
     /* Get initial tick count */
     TickType_t xLastWakeTime      = xTaskGetTickCount();
@@ -785,7 +922,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(10);
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(8);
     /* Get initial tick count */
     TickType_t xLastWakeTime     = xTaskGetTickCount();
 
@@ -794,14 +931,14 @@ void Task_Debugging(void *ptr) {
     uint16_t               written_chars = 0;
 
     float    FlightController_batteryLevel;
-    uint8_t  debuggingStr_ESC_state[4]                   = {0};
-    uint8_t  debuggingStr_ESC_startedOff[4]              = {0};
-    uint8_t  debuggingStr_radioController_isConnected[4] = {0};
-    uint8_t  debuggingStr_throttleStick_startedDown[4]   = {0};
-    uint8_t  debuggingStr_flightLightsState[4]           = {0};
-    uint8_t  debuggingStr_flightLightsType[4]            = {0};
-    uint16_t debuggingValue_flightLightsSpeed            = 0;
-    uint8_t  debuggingStr_safeStart[4]                   = {0};
+    uint8_t  debuggingStr_ESC_state[4]                        = {0};
+    uint8_t  debuggingStr_ESC_startedOff[4]                   = {0};
+    uint8_t  debuggingStr_radioController_startedConnected[4] = {0};
+    uint8_t  debuggingStr_throttleStick_startedDown[4]        = {0};
+    uint8_t  debuggingStr_flightLightsState[4]                = {0};
+    uint8_t  debuggingStr_flightLightsType[4]                 = {0};
+    uint16_t debuggingValue_flightLightsSpeed                 = 0;
+    uint8_t  debuggingStr_safeStart[4]                        = {0};
 
     while (1) {
 
@@ -921,8 +1058,8 @@ void Task_Debugging(void *ptr) {
                 /* Read flight controller battery level */
                 xQueuePeek(Queue_Handle_BatteryLevel, &FlightController_batteryLevel, 0);
                 /* Log flight controller battery level */
-                snprintf((char *)debuggingStr_BatteryLevel, 10 * sizeof(uint8_t), (const char *)"/%d_%.2f",
-                         DEBUG_FLIGHT_CONTROLLER_BATTERY_LEVEL, (double)FlightController_batteryLevel);
+                snprintf((char *)debuggingStr_BatteryLevel, 20 * sizeof(uint8_t), (const char *)"/%d_%.2f",
+                         DEBUG_FLIGHT_CONTROLLER_BATTERY_LEVEL, FlightController_batteryLevel);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES == 1)
@@ -1007,10 +1144,10 @@ void Task_Debugging(void *ptr) {
                 } else {
                     snprintf((char *)debuggingStr_ESC_startedOff, 4 * sizeof(uint8_t), "NO");
                 }
-                if (logControlSystemValues->radioController_isConnected == true) {
-                    snprintf((char *)debuggingStr_radioController_isConnected, 4 * sizeof(uint8_t), "YES");
+                if (logControlSystemValues->radioController_startedConnected == true) {
+                    snprintf((char *)debuggingStr_radioController_startedConnected, 4 * sizeof(uint8_t), "YES");
                 } else {
-                    snprintf((char *)debuggingStr_radioController_isConnected, 4 * sizeof(uint8_t), "NO");
+                    snprintf((char *)debuggingStr_radioController_startedConnected, 4 * sizeof(uint8_t), "NO");
                 }
                 if (logControlSystemValues->throttleStick_startedDown == true) {
                     snprintf((char *)debuggingStr_throttleStick_startedDown, 4 * sizeof(uint8_t), "YES");
@@ -1028,7 +1165,7 @@ void Task_Debugging(void *ptr) {
                          DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME, (logControlSystemValues->taskExecutionTime * 1000 / configTICK_RATE_HZ),
                          DEBUG_CONTROLSYSTEM_ESCS_ENABLED, debuggingStr_ESC_state,
                          DEBUG_CONTROLSYSTEM_ESCS_STARTED_OFF, debuggingStr_ESC_startedOff,
-                         DEBUG_CONTROLSYSTEM_RADIOCONTROLLER_IS_CONNECTED, debuggingStr_radioController_isConnected,
+                         DEBUG_CONTROLSYSTEM_RADIOCONTROLLER_STARTED_CONNECTED, debuggingStr_radioController_startedConnected,
                          DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN, debuggingStr_throttleStick_startedDown,
                          DEBUG_CONTROLSYSTEM_SAFE_START, debuggingStr_safeStart);
 #endif
@@ -1044,8 +1181,10 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK)
                 /* Log tasks stack high watermark */
-                snprintf((char *)debuggingStr_TasksStackHighWatermark, 80 * sizeof(uint8_t), (const char *)"/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld",
+                snprintf((char *)debuggingStr_TasksStackHighWatermark, 80 * sizeof(uint8_t), (const char *)"/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld",
                          DEBUG_TASK_STACK_WATERMARK_ONOFFBUTTON, Task_StackHighWatermark_OnOffButton,
+                         DEBUG_TASK_STACK_WATERMARK_STARTUP, Task_StackHighWatermark_StartUp,
+                         DEBUG_TASK_STACK_WATERMARK_IMU_CALIBRATION, Task_StackHighWatermark_IMU_Calibration,
                          DEBUG_TASK_STACK_WATERMARK_CONTROLSYSTEM, Task_StackHighWatermark_ControlSystem,
                          DEBUG_TASK_STACK_WATERMARK_USBCOMMUNICATION, Task_StackHighWatermark_USB_Communication,
                          DEBUG_TASK_STACK_WATERMARK_DEBUGGING, Task_StackHighWatermark_Debugging,
@@ -1111,103 +1250,6 @@ void Task_Debugging(void *ptr) {
 #endif
 }
 
-void Task_OnOffButton(void *ptr) {
-    (void)ptr;
-
-    /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-    /* Get initial tick count */
-    TickType_t xLastWakeTime     = xTaskGetTickCount();
-
-    while (1) {
-
-        /* Check On/Off Button status */
-        if (!HAL_GPIO_ReadPin(PW_ON_OFF_DRIVER_INPUT_GPIO_Port, PW_ON_OFF_DRIVER_INPUT_Pin)) {
-            /* User is trying to turn it on or off */
-            if (!Timer_Flag_OnOffButton) {
-
-                xTimerStart(Timer_Handle_OnOffButton, 0);
-                Timer_Flag_OnOffButton = true;
-            }
-        }
-
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
-        /* Get stack watermark */
-        Task_StackHighWatermark_OnOffButton = uxTaskGetStackHighWaterMark(NULL);
-#endif
-
-        /* Set task time delay */
-        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
-    }
-}
-
-void Task_StartUp(void *ptr) {
-    (void)ptr;
-
-    /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod = pdMS_TO_TICKS(DEFAULT_TASK_DELAY);
-    /* Get initial tick count */
-    TickType_t xLastWakeTime     = xTaskGetTickCount();
-
-    while (1) {
-        /* Check if flight controller is already running */
-        if (FlightController_isRunning) {
-
-            /* Turn on-board LED off */
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-
-            /* Initialize drivers */
-            rc_controller = FSA8S_Init(&huart2);
-            if (NULL == rc_controller) {
-                /* Error */
-                ErrorLED_Start(FSA8S_InitializationError);
-            }
-            hgy87 = GY87_Init(&hi2c1);
-            if (NULL == hgy87) {
-                /* Error */
-                ErrorLED_Start(GY87_InitializationError);
-            }
-            hesc = ESC_Init(&htim3);
-            if (NULL == hesc) {
-                /* Error */
-                ErrorLED_Start(ESC_InitializationError);
-            }
-
-            /* Create system timers, queues, semaphores and tasks */
-            if (FreeRTOS_CreateTimers() == false) {
-                /* Error */
-                ErrorLED_Start(FreeRTOS_TimersCreationError);
-            }
-            if (FreeRTOS_CreateQueues() == false) {
-                /* Error */
-                ErrorLED_Start(FreeRTOS_QueuesCreationError);
-            }
-            if (FreeRTOS_CreateSemaphores() == false) {
-                /* Error */
-                ErrorLED_Start(FreeRTOS_SemaphoresCreationError);
-            }
-            if (FreeRTOS_CreateTasks() == false) {
-                /* Error */
-                ErrorLED_Start(FreeRTOS_TasksCreationError);
-            }
-
-/* Initialize buffer structures */
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
-            memset(&controlSystemValues_A, 0, sizeof(ControlSystemValues_t));
-            memset(&controlSystemValues_B, 0, sizeof(ControlSystemValues_t));
-            memset(debuggingStr_A, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
-            memset(debuggingStr_B, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
-#endif
-
-            /* Suspend this task, as initialization must happen only once */
-            vTaskSuspend(Task_Handle_StartUp);
-        }
-
-        /* Set task time delay */
-        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
-    }
-}
-
 void Task_BatteryLevel(void *ptr) {
     (void)ptr;
 
@@ -1224,23 +1266,24 @@ void Task_BatteryLevel(void *ptr) {
             /* Start ADC Conversion */
             HAL_ADC_Start(&hadc1);
 
-            /* Poll ADC peripheral */
-            HAL_ADC_PollForConversion(&hadc1, 1);
+            /* Poll ADC peripheral with a longer timeout */
+            if (HAL_ADC_PollForConversion(&hadc1, 10) == HAL_OK) {
 
-            /* Read ADC value */
-            adcValue                      = HAL_ADC_GetValue(&hadc1);
+                /* Read ADC value */
+                adcValue                      = HAL_ADC_GetValue(&hadc1);
 
-            /* Convert ADC value to real value */
-            FlightController_batteryLevel = (adcValue * 3.3) / 4096;
+                /* Convert ADC value to real value */
+                FlightController_batteryLevel = (adcValue * 3.3) / 4096;
 
-            /* Correct real value, as when battery full, ADC input is not 3.3V */
-            FlightController_batteryLevel = FlightController_batteryLevel * 1.046046;
+                /* Correct real value, as when battery full, ADC input is not 3.3V */
+                FlightController_batteryLevel = FlightController_batteryLevel * 1.046046;
 
-            /* Map real value to battery levels */
-            FlightController_batteryLevel = FlightController_batteryLevel * 3.363636 + BATTERY_LEVEL_CALIBRATION_OFFSET;
+                /* Map real value to battery levels */
+                FlightController_batteryLevel = FlightController_batteryLevel * 3.363636 + BATTERY_LEVEL_CALIBRATION_OFFSET;
 
-            /* Send to queue, overwriting old value */
-            xQueueOverwrite(Queue_Handle_BatteryLevel, &FlightController_batteryLevel);
+                /* Send to queue, overwriting old value */
+                xQueueOverwrite(Queue_Handle_BatteryLevel, &FlightController_batteryLevel);
+            }
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
             /* Get stack watermark */
@@ -1322,13 +1365,9 @@ void Task_HeartbeatLight(void *ptr) {
 
     while (1) {
 
-        if (FlightController_isInitialized) {
-            /* Toggle LED and update state */
-            ledState = (ledState == GPIO_PIN_RESET) ? GPIO_PIN_SET : GPIO_PIN_RESET;
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
-        } else {
-            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
-        }
+        /* Toggle LED and update state */
+        ledState = (ledState == GPIO_PIN_RESET) ? GPIO_PIN_SET : GPIO_PIN_RESET;
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
 
 #if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
@@ -1521,19 +1560,25 @@ void HAL_WWDG_EarlyWakeupCallback(WWDG_HandleTypeDef *hwwdg) {
     } else {
         /* Emergency shutdown - Stop all motors */
         if (hesc != NULL) {
-            // ESC_SetSpeed(hesc, hesc->esc1, 0);
-            // ESC_SetSpeed(hesc, hesc->esc2, 0);
-            // ESC_SetSpeed(hesc, hesc->esc3, 0);
-            // ESC_SetSpeed(hesc, hesc->esc4, 0);
+            ESC_SetSpeed(hesc, hesc->esc1, 0);
+            ESC_SetSpeed(hesc, hesc->esc2, 0);
+            ESC_SetSpeed(hesc, hesc->esc3, 0);
+            ESC_SetSpeed(hesc, hesc->esc4, 0);
         }
 
-        /* Don't refresh - let system reset */
+        /* Reset system */
     }
 }
 
 /* --- Public function implementation ---------------------------------------------------------- */
 void FlightController_Init(void) {
 
+    /* Initialize IMU */
+    hgy87 = GY87_Init(&hi2c1);
+    if (NULL == hgy87) {
+        /* Error */
+        ErrorLED_Start(GY87_InitializationError);
+    }
     /* Task 1: OnOffButton */
     xTaskCreate(Task_OnOffButton, "Task_OnOffButton", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_ONOFFBUTTON_PRIORITY), &Task_Handle_OnOffButton);
     if (Task_Handle_OnOffButton == NULL) {
@@ -1542,8 +1587,15 @@ void FlightController_Init(void) {
     }
 
     /* Task 2: StartUp */
-    xTaskCreate(Task_StartUp, "Task_StartUp", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_STARTUP_PRIORITY), &Task_Handle_StartUp);
+    xTaskCreate(Task_StartUp, "Task_StartUp", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_STARTUP_PRIORITY), &Task_Handle_StartUp);
     if (Task_Handle_StartUp == NULL) {
+        /* Error */
+        ErrorLED_Start(FreeRTOS_TasksCreationError);
+    }
+
+    /* Task 3: IMU Calibration */
+    xTaskCreate(Task_IMU_Calibration, "Task_IMU_Calibration", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_IMU_CALIBRATION_PRIORITY), &Task_Handle_IMU_Calibration);
+    if (Task_Handle_IMU_Calibration == NULL) {
         /* Error */
         ErrorLED_Start(FreeRTOS_TasksCreationError);
     }

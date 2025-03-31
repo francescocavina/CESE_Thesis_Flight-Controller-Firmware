@@ -64,7 +64,7 @@ typedef struct {
     /* General */
     bool_t ESC_isEnabled;
     bool_t ESC_startedOff;
-    bool_t radioController_isConnected;
+    bool_t radioController_startedConnected;
     bool_t throttleStick_startedDown;
     bool_t safeStart;
     /* Radio Controller Readings */

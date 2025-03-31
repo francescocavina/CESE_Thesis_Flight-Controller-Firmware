@@ -46,6 +46,7 @@
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Drivers Handles */
 extern IBUS_HandleTypeDef_t *rc_controller;
+extern ESC_HandleTypeDef_t  *hesc;
 
 /* --- Private function declarations ----------------------------------------------------------- */
 
@@ -65,10 +66,10 @@ void CS_Reset(ControlSystemValues_t *controlSystemValues) {
     controlSystemValues->ESC4_speed = 0;
 
     /* Turn motors off */
-    // ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues->ESC4_speed);
-    // ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues->ESC2_speed);
-    // ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues->ESC3_speed);
-    // ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues->ESC1_speed);
+    ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues->ESC4_speed);
+    ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues->ESC2_speed);
+    ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues->ESC3_speed);
+    ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues->ESC1_speed);
 
     /* Reset PID variables */
     CSM_ResetPID();
@@ -81,19 +82,19 @@ void CS_CheckRadioControllerStatus(ControlSystemValues_t *controlSystemValues) {
     /* Read radio controller channel */
     bool_t radioController_Status = FSA8S_ReadChannel(rc_controller, CHANNEL_1, &channelValue);
 
-    /* Check if the radio controller is connected */
+    /* Check if the radio controller started connected */
     if (radioController_Status == false) {
-        controlSystemValues->radioController_isConnected = false;
+        controlSystemValues->radioController_startedConnected = false;
     } else {
-        controlSystemValues->radioController_isConnected = true;
+        controlSystemValues->radioController_startedConnected = true;
     }
 }
 
 void CS_CheckForUncontrolledMotorsStart(ControlSystemValues_t *controlSystemValues) {
 
     /* Check if the ESCs are started off and the throttle stick is started down */
-    controlSystemValues->ESC_startedOff            = controlSystemValues->radioController_isConnected && (controlSystemValues->radioController_channelValues[5] <= 500);
-    controlSystemValues->throttleStick_startedDown = controlSystemValues->radioController_isConnected && (controlSystemValues->radioController_channelValues[2] <= 15);
+    controlSystemValues->ESC_startedOff            = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[5] <= 500);
+    controlSystemValues->throttleStick_startedDown = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[2] <= 15);
 
     if (controlSystemValues->ESC_startedOff == true && controlSystemValues->throttleStick_startedDown == true) {
         controlSystemValues->safeStart = true;
