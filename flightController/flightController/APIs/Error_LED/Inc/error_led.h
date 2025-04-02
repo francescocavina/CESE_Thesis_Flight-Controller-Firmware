@@ -51,13 +51,14 @@ extern "C" {
  * @brief Error codes enumeration.
  */
 typedef enum {
-    FSA8S_InitializationError,
-    GY87_InitializationError,
-    ESC_InitializationError,
-    FreeRTOS_TimersCreationError,
-    FreeRTOS_QueuesCreationError,
-    FreeRTOS_SemaphoresCreationError,
-    FreeRTOS_TasksCreationError,
+    FSA8S_INITIALIZATION_ERROR,
+    GY87_INITIALIZATION_ERROR,
+    ESC_INITIALIZATION_ERROR,
+    FREERTOS_TIMERS_CREATION_ERROR,
+    FREERTOS_QUEUES_CREATION_ERROR,
+    FREERTOS_SEMAPHORES_CREATION_ERROR,
+    FREERTOS_TASKS_CREATION_ERROR,
+    CONTROLSYSTEM_STATE_MACHINE_ERROR,
 } ErrorLED_types_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */

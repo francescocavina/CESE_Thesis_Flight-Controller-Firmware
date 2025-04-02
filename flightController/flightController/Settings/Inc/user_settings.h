@@ -63,7 +63,7 @@ extern "C" {
 #define HEARTBEAT_PERIOD (500) // Heartbeat period in [ms] (duty cycle is 50%)
 
 /* --- OTHER FUNCTIONALITIES --------------------------------------------------------------------*/
-#define INITIALIZATION_READY_BEEPING (1) // Beep when the flight controller is ready to fly
+#define INITIALIZATION_READY_BEEPING (0) // Beep when the flight controller is ready to fly
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

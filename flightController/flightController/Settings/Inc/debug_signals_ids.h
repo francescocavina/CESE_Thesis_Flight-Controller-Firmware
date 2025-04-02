@@ -117,33 +117,35 @@ typedef enum {
     DEBUG_CONTROLSYSTEM_MOTOR_SPEED_3                     = 69, /* 5; Control System Variables; Motors Speeds;        Motor 3;  [-]; */
     DEBUG_CONTROLSYSTEM_MOTOR_SPEED_4                     = 70, /* 5; Control System Variables; Motors Speeds;        Motor 4;  [-]; */
 
-    DEBUG_CONST_CONTROLSYSTEM_MODE                        = 71, /* 7; Control System Auxiliar; Mode;         Mode (0: Inputs Reading, 1: Full);  [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_LOOP_PERIOD_MS              = 72, /* 7; Control System Auxiliar; Control Loop; Period (Configured);                [ms]; */
-    DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED              = 73, /* 7; Control System Auxiliar; Control Loop; Period (Measured);                  [ms]; */
-    DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME               = 74, /* 7; Control System Auxiliar; Task;         Execution Time;                     [ms]; */
-    DEBUG_CONTROLSYSTEM_ESCS_ENABLED                      = 75, /* 7; Control System Auxiliar; Safety;       ESCs State;                         [-]; */
-    DEBUG_CONTROLSYSTEM_ESCS_STARTED_OFF                  = 76, /* 7; Control System Auxiliar; Safety;       ESCs Started Off;                   [-]; */
-    DEBUG_CONTROLSYSTEM_RADIOCONTROLLER_STARTED_CONNECTED = 77, /* 7; Control System Auxiliar; Safety;       Radio Controller Started Connected; [-]; */
-    DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN       = 78, /* 7; Control System Auxiliar; Safety;       Throttle Stick Started Down;        [-]; */
-    DEBUG_CONTROLSYSTEM_SAFE_START                        = 79, /* 7; Control System Auxiliar; Safety;       Safe Start;                         [-]; */
+    DEBUG_CONST_CONTROLSYSTEM_MODE                        = 71, /* 7; Control System Auxiliar; Mode;          Mode (0: Inputs Reading, 1: Full);  [-]; */
+    DEBUG_CONST_CONTROLSYSTEM_LOOP_PERIOD_MS              = 72, /* 7; Control System Auxiliar; Control Loop;  Period (Configured);                [ms]; */
+    DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED              = 73, /* 7; Control System Auxiliar; Control Loop;  Period (Measured);                  [ms]; */
+    DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME               = 74, /* 7; Control System Auxiliar; Task;          Execution Time;                     [ms]; */
+    DEBUG_CONTROLSYSTEM_ESCS_ENABLED                      = 75, /* 7; Control System Auxiliar; Safety;        ESCs State;                         [-]; */
+    DEBUG_CONTROLSYSTEM_ESCS_STARTED_OFF                  = 76, /* 7; Control System Auxiliar; Safety;        ESCs Started Off;                   [-]; */
+    DEBUG_CONTROLSYSTEM_RADIOCONTROLLER_STARTED_CONNECTED = 77, /* 7; Control System Auxiliar; Safety;        Radio Controller Started Connected; [-]; */
+    DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN       = 78, /* 7; Control System Auxiliar; Safety;        Throttle Stick Started Down;        [-]; */
+    DEBUG_CONTROLSYSTEM_SAFE_START                        = 79, /* 7; Control System Auxiliar; Safety;        Safe Start;                         [-]; */
+    DEBUG_CONTROLSYSTEM_SAFE_RESTART                      = 80, /* 7; Control System Auxiliar; Safety;        Safe Restart;                       [-]; */
+    DEBUG_CONTROLSYSTEM_STATE_MACHINE_STATE               = 81, /* 7; Control System Auxiliar; State Machine; State;                              [-]; */
 
-    DEBUG_CONST_ESC_MINIMUM_SPEED                         = 80, /* 7; ESCs; Speed Limit; Minimum; [-]; */
-    DEBUG_CONST_ESC_MAXIMUM_SPEED                         = 81, /* 7; ESCs; Speed Limit; Maximum; [-]; */
-    DEBUG_ESC_1                                           = 82, /* 7; ESCs; ESC; Motor 1; [-]; */
-    DEBUG_ESC_2                                           = 83, /* 7; ESCs; ESC; Motor 2; [-]; */
-    DEBUG_ESC_3                                           = 84, /* 7; ESCs; ESC; Motor 3; [-]; */
-    DEBUG_ESC_4                                           = 85, /* 7; ESCs; ESC; Motor 4; [-]; */
+    DEBUG_CONST_ESC_MINIMUM_SPEED                         = 82, /* 7; ESCs; Speed Limit; Minimum; [-]; */
+    DEBUG_CONST_ESC_MAXIMUM_SPEED                         = 83, /* 7; ESCs; Speed Limit; Maximum; [-]; */
+    DEBUG_ESC_1                                           = 84, /* 7; ESCs; ESC; Motor 1; [-]; */
+    DEBUG_ESC_2                                           = 85, /* 7; ESCs; ESC; Motor 2; [-]; */
+    DEBUG_ESC_3                                           = 86, /* 7; ESCs; ESC; Motor 3; [-]; */
+    DEBUG_ESC_4                                           = 87, /* 7; ESCs; ESC; Motor 4; [-]; */
 
-    DEBUG_TASK_STACK_WATERMARK_ONOFFBUTTON                = 86, /* 2; System Stack; Stack High Watermark; Task: OnOffButton      ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_STARTUP                    = 87, /* 2; System Stack; Stack High Watermark; Task: Startup          ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_IMU_CALIBRATION            = 88, /* 2; System Stack; Stack High Watermark; Task: IMU_Calibration  ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_CONTROLSYSTEM              = 89, /* 2; System Stack; Stack High Watermark; Task: ControlSystem    ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_USBCOMMUNICATION           = 90, /* 2; System Stack; Stack High Watermark; Task: USB_Communication; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_DEBUGGING                  = 91, /* 2; System Stack; Stack High Watermark; Task: Debugging        ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_BATTERYLEVEL               = 92, /* 2; System Stack; Stack High Watermark; Task: BatteryLevel     ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_BATTERYALARM               = 93, /* 2; System Stack; Stack High Watermark; Task: BatteryAlarm     ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_HEARTBEATLIGHT             = 94, /* 2; System Stack; Stack High Watermark; Task: HeartbeatLight   ; [words]; */
-    DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS               = 95, /* 2; System Stack; Stack High Watermark; Task: FlightLights     ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_ONOFFBUTTON                = 88, /* 2; System Stack; Stack High Watermark; Task: OnOffButton      ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_STARTUP                    = 89, /* 2; System Stack; Stack High Watermark; Task: Startup          ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_IMU_CALIBRATION            = 90, /* 2; System Stack; Stack High Watermark; Task: IMU_Calibration  ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_CONTROLSYSTEM              = 91, /* 2; System Stack; Stack High Watermark; Task: ControlSystem    ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_USBCOMMUNICATION           = 92, /* 2; System Stack; Stack High Watermark; Task: USB_Communication; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_DEBUGGING                  = 93, /* 2; System Stack; Stack High Watermark; Task: Debugging        ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_BATTERYLEVEL               = 94, /* 2; System Stack; Stack High Watermark; Task: BatteryLevel     ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_BATTERYALARM               = 95, /* 2; System Stack; Stack High Watermark; Task: BatteryAlarm     ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_HEARTBEATLIGHT             = 96, /* 2; System Stack; Stack High Watermark; Task: HeartbeatLight   ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS               = 97, /* 2; System Stack; Stack High Watermark; Task: FlightLights     ; [words]; */
 } DebugSignalsIds_t;
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */

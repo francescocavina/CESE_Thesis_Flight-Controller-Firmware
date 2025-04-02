@@ -23,9 +23,9 @@
 
 /*
  * @file:    control_system_support.h
- * @date:    03/04/2025
+ * @date:    04/01/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
  * @brief:
  *
@@ -67,6 +67,7 @@ typedef struct {
     bool_t radioController_startedConnected;
     bool_t throttleStick_startedDown;
     bool_t safeStart;
+    bool_t safeRestart;
     /* Radio Controller Readings */
     uint16_t radioController_channelValues[FSA8S_CHANNELS];
     /* References (Values) */
@@ -142,43 +143,63 @@ typedef struct {
     /* Task Execution Time */
     uint32_t taskExecutionTime;
 } ControlSystemValues_t;
+
+/*
+ * @brief Control System State Machine states.
+ */
+typedef enum {
+    CONTROL_SYSTEM_STATE_INIT,
+    CONTROL_SYSTEM_STATE_SAFE_START_CHECK,
+    CONTROL_SYSTEM_STATE_RUNNING,
+    CONTROL_SYSTEM_STATE_RESTART,
+    CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK,
+} ControlSystem_StateMachine_t;
+
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+
 /*
- * @brief  Turn motors off and reset control system variables.
+ * @brief  Initializes the state machine variables.
+ * @param  None
+ * @retval None
+ */
+void CS_StateMachine_Init(ControlSystemValues_t *controlSystemValues);
+
+/*
+ * @brief  Checks that control system starts with ESCs disabled and throttle stick down.
  * @param  controlSystemValues: Pointer to the Control System Values structure.
  * @retval None
  */
-void CS_Reset(ControlSystemValues_t *controlSystemValues);
+void CS_StateMachine_SafeStartCheck(ControlSystemValues_t *controlSystemValues);
 
 /*
- * @brief  Checks the radio controller status.
+ * @brief  Runs the control system state machine.
  * @param  controlSystemValues: Pointer to the Control System Values structure.
  * @retval None
  */
-void CS_CheckRadioControllerStatus(ControlSystemValues_t *controlSystemValues);
+void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues);
 
 /*
- * @brief Checks if the ESCs are started off and the throttle stick is started down.
- * @param controlSystemValues: Pointer to the Control System Values structure.
- * @retval None
- */
-void CS_CheckForUncontrolledMotorsStart(ControlSystemValues_t *controlSystemValues);
-
-/*
- * @brief  Limit motors speed.
+ * @brief  Restarts the control system state machine.
  * @param  controlSystemValues: Pointer to the Control System Values structure.
  * @retval None
  */
-void CS_CheckForMotorsSpeedLimits(ControlSystemValues_t *controlSystemValues);
+void CS_StateMachine_Restart(ControlSystemValues_t *controlSystemValues);
+
+/*
+ * @brief  Checks that control system restarts with throttle stick down.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
+ * @retval None
+ */
+void CS_StateMachine_SafeRestartCheck(ControlSystemValues_t *controlSystemValues);
 
 /*
  * @brief  Calculates an angle using a Kalman filter.
  * @param  TODO
  * @retval None
  */
-void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
+void CS_Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
 
 /*
  * @brief  Calculates the PID controller output.
@@ -191,14 +212,21 @@ void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float k
  *         kD:                 Derivative gain.
  * @retval None
  */
-void CSM_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD);
+void CS_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD);
 
 /*
- * @brief  Resets the PID controller errors and integral terms values.
- * @param  None
+ * @brief  Resets the PID controller errors, integral terms and output values.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
  * @retval None
  */
-void CSM_ResetPID(void);
+void CS_ResetPID(ControlSystemValues_t *controlSystemValues);
+
+/*
+ * @brief  Limits motors speed.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
+ * @retval None
+ */
+void CS_CheckForMotorsSpeedLimits(ControlSystemValues_t *controlSystemValues);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

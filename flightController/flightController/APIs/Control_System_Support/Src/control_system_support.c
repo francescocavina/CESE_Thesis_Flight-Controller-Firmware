@@ -23,9 +23,9 @@
 
 /*
  * @file:    CONTROLSYSTEM_support.c
- * @date:    03/04/2025
+ * @date:    04/01/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
- * @version: v1.0.0
+ * @version: v2.0.0
  *
  * @brief:
  *
@@ -38,6 +38,7 @@
 
 #include "ESC_UAI.h"
 #include "FSA8S_driver_UAI.h"
+#include "MPU6050_driver_UAI.h"
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
 
@@ -46,6 +47,7 @@
 /* --- Private variable declarations ----------------------------------------------------------- */
 /* Drivers Handles */
 extern IBUS_HandleTypeDef_t *rc_controller;
+extern GY87_HandleTypeDef_t *hgy87;
 extern ESC_HandleTypeDef_t  *hesc;
 
 /* --- Private function declarations ----------------------------------------------------------- */
@@ -57,7 +59,7 @@ extern ESC_HandleTypeDef_t  *hesc;
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-void CS_Reset(ControlSystemValues_t *controlSystemValues) {
+void CS_StateMachine_Init(ControlSystemValues_t *controlSystemValues) {
 
     /* Save motors speed */
     controlSystemValues->ESC1_speed = 0;
@@ -72,10 +74,10 @@ void CS_Reset(ControlSystemValues_t *controlSystemValues) {
     ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues->ESC1_speed);
 
     /* Reset PID variables */
-    CSM_ResetPID();
+    CS_ResetPID(controlSystemValues);
 }
 
-void CS_CheckRadioControllerStatus(ControlSystemValues_t *controlSystemValues) {
+void CS_StateMachine_SafeStartCheck(ControlSystemValues_t *controlSystemValues) {
 
     uint16_t channelValue         = 0;
 
@@ -88,45 +90,119 @@ void CS_CheckRadioControllerStatus(ControlSystemValues_t *controlSystemValues) {
     } else {
         controlSystemValues->radioController_startedConnected = true;
     }
-}
-
-void CS_CheckForUncontrolledMotorsStart(ControlSystemValues_t *controlSystemValues) {
 
     /* Check if the ESCs are started off and the throttle stick is started down */
     controlSystemValues->ESC_startedOff            = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[5] <= 500);
     controlSystemValues->throttleStick_startedDown = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[2] <= 15);
 
     if (controlSystemValues->ESC_startedOff == true && controlSystemValues->throttleStick_startedDown == true) {
-        controlSystemValues->safeStart = true;
+        controlSystemValues->safeStart   = true;
+        controlSystemValues->safeRestart = true;
     } else {
-        controlSystemValues->safeStart = false;
+        controlSystemValues->safeStart   = false;
+        controlSystemValues->safeRestart = false;
     }
 }
 
-void CS_CheckForMotorsSpeedLimits(ControlSystemValues_t *controlSystemValues) {
+void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues) {
 
-    /* Adjust and limit motors minimum speed */
-    if (ESC_MINIMUM_SPEED > controlSystemValues->motor1_speed)
-        controlSystemValues->motor1_speed = ESC_MINIMUM_SPEED;
-    if (ESC_MINIMUM_SPEED > controlSystemValues->motor2_speed)
-        controlSystemValues->motor2_speed = ESC_MINIMUM_SPEED;
-    if (ESC_MINIMUM_SPEED > controlSystemValues->motor3_speed)
-        controlSystemValues->motor3_speed = ESC_MINIMUM_SPEED;
-    if (ESC_MINIMUM_SPEED > controlSystemValues->motor4_speed)
-        controlSystemValues->motor4_speed = ESC_MINIMUM_SPEED;
+    /* Read GY-87 gyroscope sensor */
+    GY87_ReadGyroscope(hgy87, &controlSystemValues->gyroMeasurement, &controlSystemValues->gyroCalibration);
+    /* Read GY-87 accelerometer sensor */
+    GY87_ReadAccelerometer(hgy87, &controlSystemValues->accMeasurement, &controlSystemValues->accCalibration);
 
-    /* Adjust and limit motors maximum speed */
-    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor1_speed)
-        controlSystemValues->motor1_speed = ESC_MAXIMUM_SPEED;
-    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor2_speed)
-        controlSystemValues->motor2_speed = ESC_MAXIMUM_SPEED;
-    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor3_speed)
-        controlSystemValues->motor3_speed = ESC_MAXIMUM_SPEED;
-    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor4_speed)
-        controlSystemValues->motor4_speed = ESC_MAXIMUM_SPEED;
+    /* Calculate Kalman angles */
+    CS_Kalman_CalculateAngle(&controlSystemValues->KalmanPrediction_rollAngle, &controlSystemValues->KalmanUncertainty_rollAngle, controlSystemValues->gyroMeasurement.rotationRateRoll, controlSystemValues->accMeasurement.angleRoll);
+    CS_Kalman_CalculateAngle(&controlSystemValues->KalmanPrediction_pitchAngle, &controlSystemValues->KalmanUncertainty_pitchAngle, controlSystemValues->gyroMeasurement.rotationRatePitch, controlSystemValues->accMeasurement.anglePitch);
+
+    /* Read inputs from radio controller */
+    controlSystemValues->reference_throttle   = (float)controlSystemValues->radioController_channelValues[2];
+    controlSystemValues->reference_rollValue  = (float)controlSystemValues->radioController_channelValues[0];
+    controlSystemValues->reference_pitchValue = (float)controlSystemValues->radioController_channelValues[1];
+    controlSystemValues->reference_yawValue   = (float)controlSystemValues->radioController_channelValues[3];
+
+    /* Adjust and limit throttle input */
+    if (CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE < controlSystemValues->reference_throttle) {
+        controlSystemValues->reference_throttle = CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE;
+    }
+
+    /* Calculate desired angles by mapping radio controller values to angles */
+    controlSystemValues->reference_rollAngle  = 0.03 * (controlSystemValues->reference_rollValue - 500);
+    controlSystemValues->reference_pitchAngle = 0.03 * (controlSystemValues->reference_pitchValue - 500);
+
+    /* Calculate angles errors */
+    controlSystemValues->error_rollAngle      = controlSystemValues->reference_rollAngle - controlSystemValues->KalmanPrediction_rollAngle;
+    controlSystemValues->error_pitchAngle     = controlSystemValues->reference_pitchAngle - controlSystemValues->KalmanPrediction_pitchAngle;
+
+    /* Calculate PID for roll angle */
+    CS_CalculatePID(&controlSystemValues->PID_Output_rollAngle, &controlSystemValues->PID_previousIterm_rollAngle, &controlSystemValues->PID_previousError_rollAngle, controlSystemValues->error_rollAngle, CONTROLSYSTEM_KP_ROLL_ANGLE, CONTROLSYSTEM_KI_ROLL_ANGLE, CONTROLSYSTEM_KD_ROLL_ANGLE);
+    /* Calculate PID for pitch angle */
+    CS_CalculatePID(&controlSystemValues->PID_Output_pitchAngle, &controlSystemValues->PID_previousIterm_pitchAngle, &controlSystemValues->PID_previousError_pitchAngle, controlSystemValues->error_pitchAngle, CONTROLSYSTEM_KP_PITCH_ANGLE, CONTROLSYSTEM_KI_PITCH_ANGLE, CONTROLSYSTEM_KD_PITCH_ANGLE);
+
+    /* Calculate desired rates */
+    controlSystemValues->reference_rollRate  = controlSystemValues->PID_Output_rollAngle;
+    controlSystemValues->reference_pitchRate = controlSystemValues->PID_Output_pitchAngle;
+    controlSystemValues->reference_yawRate   = 0.03 * (controlSystemValues->reference_yawValue - 500);
+
+    /* Calculate rates errors */
+    controlSystemValues->error_rollRate      = controlSystemValues->reference_rollRate - controlSystemValues->gyroMeasurement.rotationRateRoll;
+    controlSystemValues->error_pitchRate     = controlSystemValues->reference_pitchRate - controlSystemValues->gyroMeasurement.rotationRatePitch;
+    controlSystemValues->error_yawRate       = controlSystemValues->reference_yawRate - controlSystemValues->gyroMeasurement.rotationRateYaw;
+
+    /* Calculate PID for roll rate */
+    CS_CalculatePID(&controlSystemValues->PID_Output_rollRate, &controlSystemValues->PID_previousIterm_rollRate, &controlSystemValues->PID_previousError_rollRate, controlSystemValues->error_rollRate, CONTROLSYSTEM_KP_ROLL_RATE, CONTROLSYSTEM_KI_ROLL_RATE, CONTROLSYSTEM_KD_ROLL_RATE);
+    /* Calculate PID for pitch rate */
+    CS_CalculatePID(&controlSystemValues->PID_Output_pitchRate, &controlSystemValues->PID_previousIterm_pitchRate, &controlSystemValues->PID_previousError_pitchRate, controlSystemValues->error_pitchRate, CONTROLSYSTEM_KP_PITCH_RATE, CONTROLSYSTEM_KI_PITCH_RATE, CONTROLSYSTEM_KD_PITCH_RATE);
+    /* Calculate PID for yaw rate */
+    CS_CalculatePID(&controlSystemValues->PID_Output_yawRate, &controlSystemValues->PID_previousIterm_yawRate, &controlSystemValues->PID_previousError_yawRate, controlSystemValues->error_yawRate, CONTROLSYSTEM_KP_YAW_RATE, CONTROLSYSTEM_KI_YAW_RATE, CONTROLSYSTEM_KD_YAW_RATE);
+
+    /* Calculate motors speed */
+    controlSystemValues->motor1_speed = (controlSystemValues->reference_throttle - controlSystemValues->PID_Output_rollRate - controlSystemValues->PID_Output_pitchRate - controlSystemValues->PID_Output_yawRate) / 10;
+    controlSystemValues->motor2_speed = (controlSystemValues->reference_throttle + controlSystemValues->PID_Output_rollRate + controlSystemValues->PID_Output_pitchRate - controlSystemValues->PID_Output_yawRate) / 10;
+    controlSystemValues->motor3_speed = (controlSystemValues->reference_throttle + controlSystemValues->PID_Output_rollRate - controlSystemValues->PID_Output_pitchRate + controlSystemValues->PID_Output_yawRate) / 10;
+    controlSystemValues->motor4_speed = (controlSystemValues->reference_throttle - controlSystemValues->PID_Output_rollRate + controlSystemValues->PID_Output_pitchRate + controlSystemValues->PID_Output_yawRate) / 10;
+
+    /* Limit motors speed */
+    CS_CheckForMotorsSpeedLimits(controlSystemValues);
+
+    /* Save motors speed */
+    controlSystemValues->ESC1_speed = controlSystemValues->motor1_speed;
+    controlSystemValues->ESC2_speed = controlSystemValues->motor2_speed;
+    controlSystemValues->ESC3_speed = controlSystemValues->motor3_speed;
+    controlSystemValues->ESC4_speed = controlSystemValues->motor4_speed;
+
+    /* Set motors speed */
+    ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues->ESC4_speed);
+    ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues->ESC2_speed);
+    ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues->ESC3_speed);
+    ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues->ESC1_speed);
 }
 
-void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
+void CS_StateMachine_Restart(ControlSystemValues_t *controlSystemValues) {
+    /* Save motors speed */
+    controlSystemValues->ESC1_speed = 0;
+    controlSystemValues->ESC2_speed = 0;
+    controlSystemValues->ESC3_speed = 0;
+    controlSystemValues->ESC4_speed = 0;
+
+    /* Turn motors off */
+    ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues->ESC4_speed);
+    ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues->ESC2_speed);
+    ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues->ESC3_speed);
+    ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues->ESC1_speed);
+
+    /* Reset PID variables */
+    CS_ResetPID(controlSystemValues);
+}
+
+void CS_StateMachine_SafeRestartCheck(ControlSystemValues_t *controlSystemValues) {
+
+    /* Check if the throttle stick is started down */
+    controlSystemValues->throttleStick_startedDown = (controlSystemValues->radioController_channelValues[2] <= 15);
+    controlSystemValues->safeRestart               = controlSystemValues->throttleStick_startedDown;
+}
+
+void CS_Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
 
     // float kalmanGain;
 
@@ -169,7 +245,7 @@ void Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float k
     *kalmanUncertainty = (1.0f - kalmanGain) * *kalmanUncertainty;
 }
 
-void CSM_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD) {
+void CS_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD) {
 
     float Pterm;
     float Iterm;
@@ -206,21 +282,53 @@ void CSM_CalculatePID(float *PID_Output, float *previousIterm, float *previousEr
     *previousIterm      = Iterm;
 }
 
-void CSM_ResetPID(void) {
+void CS_ResetPID(ControlSystemValues_t *controlSystemValues) {
 
-    // /* Reset previously stored PID errors and terms values: Angles */
-    // previousErrorValue_rollAngle = 0;
-    // previousErrorValue_pitchAngle = 0;
-    // previousIterm_rollAngle = 0;
-    // previousIterm_pitchAngle = 0;
+    /* Reset PID (Angles): Previous Errors */
+    controlSystemValues->PID_previousError_rollAngle  = 0;
+    controlSystemValues->PID_previousError_pitchAngle = 0;
+    /* Reset PID (Angles): Previous Integral Terms */
+    controlSystemValues->PID_previousIterm_rollAngle  = 0;
+    controlSystemValues->PID_previousIterm_pitchAngle = 0;
+    /* Reset PID Outputs: Angles */
+    controlSystemValues->PID_Output_rollAngle         = 0;
+    controlSystemValues->PID_Output_pitchAngle        = 0;
 
-    // /* Reset previously stored PID errors and terms values: Rates */
-    // previousErrorValue_rollRate = 0;
-    // previousErrorValue_pitchRate = 0;
-    // previousErrorValue_yawRate = 0;
-    // previousIterm_rollRate = 0;
-    // previousIterm_pitchRate = 0;
-    // previousIterm_yawRate = 0;
+    /* Reset PID (Rates): Previous Errors */
+    controlSystemValues->PID_previousError_rollRate   = 0;
+    controlSystemValues->PID_previousError_pitchRate  = 0;
+    controlSystemValues->PID_previousError_yawRate    = 0;
+    /* Reset PID (Rates): Previous Integral Terms */
+    controlSystemValues->PID_previousIterm_rollRate   = 0;
+    controlSystemValues->PID_previousIterm_pitchRate  = 0;
+    controlSystemValues->PID_previousIterm_yawRate    = 0;
+    /* Reset PID Outputs: Rates */
+    controlSystemValues->PID_Output_rollRate          = 0;
+    controlSystemValues->PID_Output_pitchRate         = 0;
+    controlSystemValues->PID_Output_yawRate           = 0;
+}
+
+void CS_CheckForMotorsSpeedLimits(ControlSystemValues_t *controlSystemValues) {
+
+    /* Adjust and limit motors minimum speed */
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor1_speed)
+        controlSystemValues->motor1_speed = ESC_MINIMUM_SPEED;
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor2_speed)
+        controlSystemValues->motor2_speed = ESC_MINIMUM_SPEED;
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor3_speed)
+        controlSystemValues->motor3_speed = ESC_MINIMUM_SPEED;
+    if (ESC_MINIMUM_SPEED > controlSystemValues->motor4_speed)
+        controlSystemValues->motor4_speed = ESC_MINIMUM_SPEED;
+
+    /* Adjust and limit motors maximum speed */
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor1_speed)
+        controlSystemValues->motor1_speed = ESC_MAXIMUM_SPEED;
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor2_speed)
+        controlSystemValues->motor2_speed = ESC_MAXIMUM_SPEED;
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor3_speed)
+        controlSystemValues->motor3_speed = ESC_MAXIMUM_SPEED;
+    if (ESC_MAXIMUM_SPEED < controlSystemValues->motor4_speed)
+        controlSystemValues->motor4_speed = ESC_MAXIMUM_SPEED;
 }
 
 /* --- End of file ----------------------------------------------------------------------------- */

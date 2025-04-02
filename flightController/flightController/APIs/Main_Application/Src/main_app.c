@@ -188,17 +188,18 @@ static uint8_t  debuggingStr_ControlSystem_referenceRates[50]        = {0};     
 static uint8_t  debuggingStr_ControlSystem_ratesErrors[50]           = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_ratesPID[50]              = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[50]          = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_Auxiliar[70]              = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_Auxiliar[100]             = {0};            // Size checked
 static uint8_t  debuggingStr_ESCs[40]                                = {0};            // Size checked
 static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0};            // Size checked
 #endif
 
 /* Task: On/Off Button */
-static bool_t OnOffButton_ReleaseRequired = false;
+static bool_t OnOffButton_ReleaseRequired                                   = false;
 
 /* Task: Control System */
-static ControlSystemValues_t controlSystemValues;
-static FSA8S_CHANNEL_t       channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
+static ControlSystem_StateMachine_t controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_INIT;
+static ControlSystemValues_t        controlSystemValues;
+static FSA8S_CHANNEL_t              channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -343,6 +344,7 @@ void Initialize_SystemVariables(void) {
     controlSystemValues.radioController_startedConnected              = false;
     controlSystemValues.throttleStick_startedDown                     = false;
     controlSystemValues.safeStart                                     = false;
+    controlSystemValues.safeRestart                                   = false;
 
     controlSystemValues.gyroCalibration.calibrationDone               = false;
     controlSystemValues.gyroCalibration.fixedCalibration_en           = true;
@@ -538,31 +540,31 @@ void Task_StartUp(void *ptr) {
             rc_controller = FSA8S_Init(&huart2);
             if (NULL == rc_controller) {
                 /* Error */
-                ErrorLED_Start(FSA8S_InitializationError);
+                ErrorLED_Start(FSA8S_INITIALIZATION_ERROR);
             }
             /* Initialize ESCs */
             hesc = ESC_Init(&htim3);
             if (NULL == hesc) {
                 /* Error */
-                ErrorLED_Start(ESC_InitializationError);
+                ErrorLED_Start(ESC_INITIALIZATION_ERROR);
             }
 
             /* Create system timers, queues, semaphores and tasks */
             if (FreeRTOS_CreateTimers() == false) {
                 /* Error */
-                ErrorLED_Start(FreeRTOS_TimersCreationError);
+                ErrorLED_Start(FREERTOS_TIMERS_CREATION_ERROR);
             }
             if (FreeRTOS_CreateQueues() == false) {
                 /* Error */
-                ErrorLED_Start(FreeRTOS_QueuesCreationError);
+                ErrorLED_Start(FREERTOS_QUEUES_CREATION_ERROR);
             }
             if (FreeRTOS_CreateSemaphores() == false) {
                 /* Error */
-                ErrorLED_Start(FreeRTOS_SemaphoresCreationError);
+                ErrorLED_Start(FREERTOS_SEMAPHORES_CREATION_ERROR);
             }
             if (FreeRTOS_CreateTasks() == false) {
                 /* Error */
-                ErrorLED_Start(FreeRTOS_TasksCreationError);
+                ErrorLED_Start(FREERTOS_TASKS_CREATION_ERROR);
             }
 
 /* Initialize buffer structures */
@@ -706,129 +708,97 @@ void Task_ControlSystem(void *ptr) {
 #endif
 
             /* Calculate Kalman angles */
-            Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
-            Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
+            CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
+            CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
 
         } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
-
-            /* Check if radio controller is connected */
-            if (false == controlSystemValues.radioController_startedConnected) {
-                CS_CheckRadioControllerStatus(&controlSystemValues);
-            }
 
             /* Read FS-A8S channels */
             for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
                 FSA8S_ReadChannel(rc_controller, channels[i], &controlSystemValues.radioController_channelValues[i]);
             }
 
-            /* Read GY-87 temperature sensor */
-#if (MAIN_APP_DEBUGGING_GY87_TEMPERATURE == 1)
-            controlSystemValues.temperature = GY87_ReadTemperatureSensor(hgy87);
-#endif
-
-            /* Avoid uncontrolled motors start */
-            if (controlSystemValues.safeStart == false) {
-                CS_CheckForUncontrolledMotorsStart(&controlSystemValues);
+            /* Check if ESC is enabled */
+            if (500 <= controlSystemValues.radioController_channelValues[5]) {
+                controlSystemValues.ESC_isEnabled = true;
+            } else {
+                controlSystemValues.ESC_isEnabled = false;
             }
 
-            /* Process data */
-            if (controlSystemValues.safeStart == true) {
+            switch (controlSystem_StateMachine_currentState) {
+            case CONTROL_SYSTEM_STATE_INIT:
+                CS_StateMachine_Init(&controlSystemValues);
 
-                /* Check if ESCs are enabled (Switch B on radio controller) */
-                if (500 <= controlSystemValues.radioController_channelValues[5]) {
-                    controlSystemValues.ESC_isEnabled = true;
+                /* Change state to SAFE_START_CHECK */
+                controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_START_CHECK;
+                break;
+
+            case CONTROL_SYSTEM_STATE_SAFE_START_CHECK:
+                CS_StateMachine_SafeStartCheck(&controlSystemValues);
+
+                if (controlSystemValues.safeStart == true) {
+                    /* Change state to RESTART */
+                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
                 } else {
-                    controlSystemValues.ESC_isEnabled = false;
+                    /* Remain in the same state */
+                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_START_CHECK;
                 }
+                break;
 
-                /* Turn off motors in case ESCs are disabled */
-                if (false == controlSystemValues.ESC_isEnabled) {
-                    /* Reset control system */
-                    CS_Reset(&controlSystemValues);
+            case CONTROL_SYSTEM_STATE_RUNNING:
+                CS_StateMachine_Running(&controlSystemValues);
 
+                if (controlSystemValues.ESC_isEnabled == false || CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE > controlSystemValues.radioController_channelValues[2]) {
+                    /* Change state to RESTART */
+                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
                 } else {
+                    /* Remain in the same state */
+                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RUNNING;
+                }
+                break;
 
-                    /* Read input throttle from radio controller */
-                    controlSystemValues.reference_throttle = controlSystemValues.radioController_channelValues[2];
+            case CONTROL_SYSTEM_STATE_RESTART:
+                CS_StateMachine_Restart(&controlSystemValues);
 
-                    /* Check if throttle stick is low */
-                    if (CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE > controlSystemValues.reference_throttle) {
-                        /* Reset control system */
-                        CS_Reset(&controlSystemValues);
-
+                if (controlSystemValues.ESC_isEnabled == false) {
+                    /* ESC was disabled - Safe restart check is needed */
+                    /* Change state to SAFE_RESTART_CHECK */
+                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
+                    controlSystemValues.safeRestart         = false;
+                } else {
+                    /* ESC was enabled - No need for safe restart check */
+                    if (CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE <= controlSystemValues.radioController_channelValues[2]) {
+                        /* Change state to RUNNING */
+                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RUNNING;
                     } else {
-                        /* Read GY-87 gyroscope sensor */
-                        GY87_ReadGyroscope(hgy87, &controlSystemValues.gyroMeasurement, &controlSystemValues.gyroCalibration);
-                        /* Read GY-87 accelerometer sensor */
-                        GY87_ReadAccelerometer(hgy87, &controlSystemValues.accMeasurement, &controlSystemValues.accCalibration);
-
-                        /* Calculate Kalman angles */
-                        Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
-                        Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
-
-                        /* Read inputs from radio controller */
-                        controlSystemValues.reference_throttle   = (float)controlSystemValues.radioController_channelValues[2];
-                        controlSystemValues.reference_rollValue  = (float)controlSystemValues.radioController_channelValues[0];
-                        controlSystemValues.reference_pitchValue = (float)controlSystemValues.radioController_channelValues[1];
-                        controlSystemValues.reference_yawValue   = (float)controlSystemValues.radioController_channelValues[3];
-
-                        /* Adjust and limit throttle input */
-                        if (CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE < controlSystemValues.reference_throttle) {
-                            controlSystemValues.reference_throttle = CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE;
-                        }
-
-                        /* Calculate desired angles by mapping radio controller values to angles */
-                        controlSystemValues.reference_rollAngle  = 0.03 * (controlSystemValues.reference_rollValue - 500);
-                        controlSystemValues.reference_pitchAngle = 0.03 * (controlSystemValues.reference_pitchValue - 500);
-
-                        /* Calculate angles errors */
-                        controlSystemValues.error_rollAngle      = controlSystemValues.reference_rollAngle - controlSystemValues.KalmanPrediction_rollAngle;
-                        controlSystemValues.error_pitchAngle     = controlSystemValues.reference_pitchAngle - controlSystemValues.KalmanPrediction_pitchAngle;
-
-                        /* Calculate PID for roll angle */
-                        CSM_CalculatePID(&controlSystemValues.PID_Output_rollAngle, &controlSystemValues.PID_previousIterm_rollAngle, &controlSystemValues.PID_previousError_rollAngle, controlSystemValues.error_rollAngle, CONTROLSYSTEM_KP_ROLL_ANGLE, CONTROLSYSTEM_KI_ROLL_ANGLE, CONTROLSYSTEM_KD_ROLL_ANGLE);
-                        /* Calculate PID for pitch angle */
-                        CSM_CalculatePID(&controlSystemValues.PID_Output_pitchAngle, &controlSystemValues.PID_previousIterm_pitchAngle, &controlSystemValues.PID_previousError_pitchAngle, controlSystemValues.error_pitchAngle, CONTROLSYSTEM_KP_PITCH_ANGLE, CONTROLSYSTEM_KI_PITCH_ANGLE, CONTROLSYSTEM_KD_PITCH_ANGLE);
-
-                        /* Calculate desired rates */
-                        controlSystemValues.reference_rollRate  = controlSystemValues.PID_Output_rollAngle;
-                        controlSystemValues.reference_pitchRate = controlSystemValues.PID_Output_pitchAngle;
-                        controlSystemValues.reference_yawRate   = 0.03 * (controlSystemValues.reference_yawValue - 500);
-
-                        /* Calculate rates errors */
-                        controlSystemValues.error_rollRate      = controlSystemValues.reference_rollRate - controlSystemValues.gyroMeasurement.rotationRateRoll;
-                        controlSystemValues.error_pitchRate     = controlSystemValues.reference_pitchRate - controlSystemValues.gyroMeasurement.rotationRatePitch;
-                        controlSystemValues.error_yawRate       = controlSystemValues.reference_yawRate - controlSystemValues.gyroMeasurement.rotationRateYaw;
-
-                        /* Calculate PID for roll rate */
-                        CSM_CalculatePID(&controlSystemValues.PID_Output_rollRate, &controlSystemValues.PID_previousIterm_rollRate, &controlSystemValues.PID_previousError_rollRate, controlSystemValues.error_rollRate, CONTROLSYSTEM_KP_ROLL_RATE, CONTROLSYSTEM_KI_ROLL_RATE, CONTROLSYSTEM_KD_ROLL_RATE);
-                        /* Calculate PID for pitch rate */
-                        CSM_CalculatePID(&controlSystemValues.PID_Output_pitchRate, &controlSystemValues.PID_previousIterm_pitchRate, &controlSystemValues.PID_previousError_pitchRate, controlSystemValues.error_pitchRate, CONTROLSYSTEM_KP_PITCH_RATE, CONTROLSYSTEM_KI_PITCH_RATE, CONTROLSYSTEM_KD_PITCH_RATE);
-                        /* Calculate PID for yaw rate */
-                        CSM_CalculatePID(&controlSystemValues.PID_Output_yawRate, &controlSystemValues.PID_previousIterm_yawRate, &controlSystemValues.PID_previousError_yawRate, controlSystemValues.error_yawRate, CONTROLSYSTEM_KP_YAW_RATE, CONTROLSYSTEM_KI_YAW_RATE, CONTROLSYSTEM_KD_YAW_RATE);
-
-                        /* Calculate motors speed */
-                        controlSystemValues.motor1_speed = (controlSystemValues.reference_throttle - controlSystemValues.PID_Output_rollRate - controlSystemValues.PID_Output_pitchRate - controlSystemValues.PID_Output_yawRate) / 10;
-                        controlSystemValues.motor2_speed = (controlSystemValues.reference_throttle + controlSystemValues.PID_Output_rollRate + controlSystemValues.PID_Output_pitchRate - controlSystemValues.PID_Output_yawRate) / 10;
-                        controlSystemValues.motor3_speed = (controlSystemValues.reference_throttle + controlSystemValues.PID_Output_rollRate - controlSystemValues.PID_Output_pitchRate + controlSystemValues.PID_Output_yawRate) / 10;
-                        controlSystemValues.motor4_speed = (controlSystemValues.reference_throttle - controlSystemValues.PID_Output_rollRate + controlSystemValues.PID_Output_pitchRate + controlSystemValues.PID_Output_yawRate) / 10;
-
-                        /* Limit motors speed */
-                        CS_CheckForMotorsSpeedLimits(&controlSystemValues);
-
-                        /* Save motors speed */
-                        controlSystemValues.ESC1_speed = controlSystemValues.motor1_speed;
-                        controlSystemValues.ESC2_speed = controlSystemValues.motor2_speed;
-                        controlSystemValues.ESC3_speed = controlSystemValues.motor3_speed;
-                        controlSystemValues.ESC4_speed = controlSystemValues.motor4_speed;
-
-                        /* Set motors speed */
-                        ESC_SetSpeed(hesc, hesc->esc1, controlSystemValues.ESC4_speed);
-                        ESC_SetSpeed(hesc, hesc->esc2, controlSystemValues.ESC2_speed);
-                        ESC_SetSpeed(hesc, hesc->esc3, controlSystemValues.ESC3_speed);
-                        ESC_SetSpeed(hesc, hesc->esc4, controlSystemValues.ESC1_speed);
+                        /* Remain in the same state */
+                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
                     }
                 }
+                break;
+
+            case CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK:
+                CS_StateMachine_SafeRestartCheck(&controlSystemValues);
+
+                if (controlSystemValues.safeRestart == true) {
+                    /* Throttle stick is down */
+                    if (controlSystemValues.ESC_isEnabled == true) {
+                        /* Change state to RESTART */
+                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
+                    } else {
+                        /* Remain in the same state */
+                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
+                    }
+                } else {
+                    /* Remain in the same state */
+                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
+                }
+                break;
+
+            default:
+                /* Error */
+                ErrorLED_Start(CONTROLSYSTEM_STATE_MACHINE_ERROR);
+                break;
             }
         }
 
@@ -944,6 +914,7 @@ void Task_Debugging(void *ptr) {
     uint8_t  debuggingStr_flightLightsType[4]                 = {0};
     uint16_t debuggingValue_flightLightsSpeed                 = 0;
     uint8_t  debuggingStr_safeStart[4]                        = {0};
+    uint8_t  debuggingStr_safeRestart[4]                      = {0};
 
     while (1) {
 
@@ -961,17 +932,17 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_FSA8S_MAIN == 1)
                 /* Log channel values */
-                if (logControlSystemValues->radioController_channelValues[5] >= 500) {
-                    snprintf((char *)debuggingStr_ESC_startedOff, 4 * sizeof(uint8_t), "ON");
+                if (logControlSystemValues->ESC_isEnabled == true) {
+                    snprintf((char *)debuggingStr_ESC_state, 4 * sizeof(uint8_t), "ON");
                 } else {
-                    snprintf((char *)debuggingStr_ESC_startedOff, 4 * sizeof(uint8_t), "OFF");
+                    snprintf((char *)debuggingStr_ESC_state, 4 * sizeof(uint8_t), "OFF");
                 }
                 snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%s",
                          DEBUG_FSA8S_CHANNEL_VALUES_3, logControlSystemValues->radioController_channelValues[2],
                          DEBUG_FSA8S_CHANNEL_VALUES_1, logControlSystemValues->radioController_channelValues[0],
                          DEBUG_FSA8S_CHANNEL_VALUES_2, logControlSystemValues->radioController_channelValues[1],
                          DEBUG_FSA8S_CHANNEL_VALUES_4, logControlSystemValues->radioController_channelValues[3],
-                         DEBUG_FSA8S_CHANNEL_VALUES_6, debuggingStr_ESC_startedOff);
+                         DEBUG_FSA8S_CHANNEL_VALUES_6, debuggingStr_ESC_state);
 #endif
 
 #if (MAIN_APP_DEBUGGING_FSA8S_AUX == 1)
@@ -1164,15 +1135,22 @@ void Task_Debugging(void *ptr) {
                 } else {
                     snprintf((char *)debuggingStr_safeStart, 4 * sizeof(uint8_t), "NO");
                 }
+                if (logControlSystemValues->safeRestart == true) {
+                    snprintf((char *)debuggingStr_safeRestart, 4 * sizeof(uint8_t), "YES");
+                } else {
+                    snprintf((char *)debuggingStr_safeRestart, 4 * sizeof(uint8_t), "NO");
+                }
 
-                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 70 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu/%d_%s/%d_%s/%d_%s/%d_%s/%d_%s",
+                snprintf((char *)debuggingStr_ControlSystem_Auxiliar, 100 * sizeof(uint8_t), (const char *)"/%d_%lu/%d_%lu/%d_%s/%d_%s/%d_%s/%d_%s/%d_%s/%d_%s/%d_%d",
                          DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED, (logControlSystemValues->controlLoopPeriod * 1000 / configTICK_RATE_HZ),
                          DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME, (logControlSystemValues->taskExecutionTime * 1000 / configTICK_RATE_HZ),
                          DEBUG_CONTROLSYSTEM_ESCS_ENABLED, debuggingStr_ESC_state,
                          DEBUG_CONTROLSYSTEM_ESCS_STARTED_OFF, debuggingStr_ESC_startedOff,
                          DEBUG_CONTROLSYSTEM_RADIOCONTROLLER_STARTED_CONNECTED, debuggingStr_radioController_startedConnected,
                          DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN, debuggingStr_throttleStick_startedDown,
-                         DEBUG_CONTROLSYSTEM_SAFE_START, debuggingStr_safeStart);
+                         DEBUG_CONTROLSYSTEM_SAFE_START, debuggingStr_safeStart,
+                         DEBUG_CONTROLSYSTEM_SAFE_RESTART, debuggingStr_safeRestart,
+                         DEBUG_CONTROLSYSTEM_STATE_MACHINE_STATE, controlSystem_StateMachine_currentState);
 #endif
 
 #if (MAIN_APP_DEBUGGING_ESCS == 1)
@@ -1588,34 +1566,34 @@ void FlightController_Init(void) {
     hgy87 = GY87_Init(&hi2c1);
     if (NULL == hgy87) {
         /* Error */
-        ErrorLED_Start(GY87_InitializationError);
+        ErrorLED_Start(GY87_INITIALIZATION_ERROR);
     }
     /* Task 1: OnOffButton */
     xTaskCreate(Task_OnOffButton, "Task_OnOffButton", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_ONOFFBUTTON_PRIORITY), &Task_Handle_OnOffButton);
     if (Task_Handle_OnOffButton == NULL) {
         /* Error */
-        ErrorLED_Start(FreeRTOS_TasksCreationError);
+        ErrorLED_Start(FREERTOS_TASKS_CREATION_ERROR);
     }
 
     /* Task 2: StartUp */
     xTaskCreate(Task_StartUp, "Task_StartUp", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_STARTUP_PRIORITY), &Task_Handle_StartUp);
     if (Task_Handle_StartUp == NULL) {
         /* Error */
-        ErrorLED_Start(FreeRTOS_TasksCreationError);
+        ErrorLED_Start(FREERTOS_TASKS_CREATION_ERROR);
     }
 
     /* Task 3: IMU Calibration */
     xTaskCreate(Task_IMU_Calibration, "Task_IMU_Calibration", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_IMU_CALIBRATION_PRIORITY), &Task_Handle_IMU_Calibration);
     if (Task_Handle_IMU_Calibration == NULL) {
         /* Error */
-        ErrorLED_Start(FreeRTOS_TasksCreationError);
+        ErrorLED_Start(FREERTOS_TASKS_CREATION_ERROR);
     }
 
     /* Timer1: OnOffButton */
     Timer_Handle_OnOffButton = xTimerCreate("Timer_OnOffButton", pdMS_TO_TICKS(100), pdTRUE, (void *)0, Timer_Callback_OnOffButton);
     if (Timer_Handle_OnOffButton == NULL) {
         /* Error */
-        ErrorLED_Start(FreeRTOS_TimersCreationError);
+        ErrorLED_Start(FREERTOS_TIMERS_CREATION_ERROR);
     }
 }
 
