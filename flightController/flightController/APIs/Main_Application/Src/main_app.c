@@ -194,12 +194,11 @@ static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0};     
 #endif
 
 /* Task: On/Off Button */
-static bool_t OnOffButton_ReleaseRequired                                   = false;
+static bool_t OnOffButton_ReleaseRequired = false;
 
 /* Task: Control System */
-static ControlSystem_StateMachine_t controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_INIT;
-static ControlSystemValues_t        controlSystemValues;
-static FSA8S_CHANNEL_t              channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
+static ControlSystemValues_t controlSystemValues;
+static const FSA8S_CHANNEL_t channels[FSA8S_CHANNELS] = {CHANNEL_1, CHANNEL_2, CHANNEL_3, CHANNEL_4, CHANNEL_5, CHANNEL_6, CHANNEL_7, CHANNEL_8, CHANNEL_9, CHANNEL_10};
 
 /* --- Private function declarations ----------------------------------------------------------- */
 /*
@@ -339,25 +338,32 @@ extern WWDG_HandleTypeDef hwwdg;
 
 /* --- Private function implementation --------------------------------------------------------- */
 void Initialize_SystemVariables(void) {
-    /* Control System Variables */
+
+    /* Control System: Safety */
     controlSystemValues.ESC_startedOff                                = false;
     controlSystemValues.radioController_startedConnected              = false;
     controlSystemValues.throttleStick_startedDown                     = false;
     controlSystemValues.safeStart                                     = false;
     controlSystemValues.safeRestart                                   = false;
 
+    /* Control System: State Machine */
+    controlSystemValues.stateMachine_currentState                     = CONTROL_SYSTEM_STATE_INIT;
+
+    /* GY87: Gyroscope Calibration */
     controlSystemValues.gyroCalibration.calibrationDone               = false;
     controlSystemValues.gyroCalibration.fixedCalibration_en           = true;
     controlSystemValues.gyroCalibration.calibrationRateRoll           = 0.0;
     controlSystemValues.gyroCalibration.calibrationRatePitch          = 0.0;
     controlSystemValues.gyroCalibration.calibrationRateYaw            = 0.0;
 
+    /* GY87: Accelerometer Calibration */
     controlSystemValues.accCalibration.calibrationDone                = false;
     controlSystemValues.accCalibration.fixedCalibration_en            = true;
     controlSystemValues.accCalibration.calibrationLinearAccelerationX = 0.0;
     controlSystemValues.accCalibration.calibrationLinearAccelerationY = 0.0;
     controlSystemValues.accCalibration.calibrationLinearAccelerationZ = 0.0;
 
+    /* Control System: Kalman Values */
     controlSystemValues.KalmanPrediction_rollAngle                    = 0;
     controlSystemValues.KalmanPrediction_pitchAngle                   = 0;
     controlSystemValues.KalmanUncertainty_rollAngle                   = 2 * 2;
@@ -607,12 +613,12 @@ void Task_IMU_Calibration(void *ptr) {
         /* Calibrate GY-87 gyroscope sensor */
         if (false == controlSystemValues.gyroCalibration.calibrationDone) {
             vTaskDelay(pdMS_TO_TICKS(200));
-            GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN));
+            GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN), 4000);
         }
         /* Calibrate GY-87 accelerometer sensor */
         if (false == controlSystemValues.accCalibration.calibrationDone) {
             vTaskDelay(pdMS_TO_TICKS(200));
-            GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN));
+            GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN), 4000);
         }
 
         if (controlSystemValues.gyroCalibration.calibrationDone && controlSystemValues.accCalibration.calibrationDone) {
@@ -674,8 +680,8 @@ void Task_ControlSystem(void *ptr) {
 
 /* System Failure Simulation */
 #if (TEST_SYSTEM_FAILURE_PROCEDURE == 1)
-        FSA8S_ReadChannel(rc_controller, CHANNEL_5, &controlSystemValues.radioController_channelValues[4]);
-        Test_SystemFailureProcedure(controlSystemValues.radioController_channelValues[4]);
+        FSA8S_ReadChannel(rc_controller, CHANNEL_5, &controlSystemValues.radioController_channelValues[RC_CHANNEL_SAFETY_SYSTEM_FAILURE_TEST]);
+        Test_SystemFailureProcedure(controlSystemValues.radioController_channelValues[RC_CHANNEL_SAFETY_SYSTEM_FAILURE_TEST]);
 #endif
 
         /* Control system processing */
@@ -719,18 +725,18 @@ void Task_ControlSystem(void *ptr) {
             }
 
             /* Check if ESC is enabled */
-            if (500 <= controlSystemValues.radioController_channelValues[5]) {
+            if (500 <= controlSystemValues.radioController_channelValues[RC_CHANNEL_SAFETY_ESC_ON_OFF]) {
                 controlSystemValues.ESC_isEnabled = true;
             } else {
                 controlSystemValues.ESC_isEnabled = false;
             }
 
-            switch (controlSystem_StateMachine_currentState) {
+            switch (controlSystemValues.stateMachine_currentState) {
             case CONTROL_SYSTEM_STATE_INIT:
                 CS_StateMachine_Init(&controlSystemValues);
 
                 /* Change state to SAFE_START_CHECK */
-                controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_START_CHECK;
+                controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_START_CHECK;
                 break;
 
             case CONTROL_SYSTEM_STATE_SAFE_START_CHECK:
@@ -738,22 +744,22 @@ void Task_ControlSystem(void *ptr) {
 
                 if (controlSystemValues.safeStart == true) {
                     /* Change state to RESTART */
-                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
+                    controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
                 } else {
                     /* Remain in the same state */
-                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_START_CHECK;
+                    controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_START_CHECK;
                 }
                 break;
 
             case CONTROL_SYSTEM_STATE_RUNNING:
                 CS_StateMachine_Running(&controlSystemValues);
 
-                if (controlSystemValues.ESC_isEnabled == false || CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE > controlSystemValues.radioController_channelValues[2]) {
+                if (controlSystemValues.ESC_isEnabled == false || CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE > controlSystemValues.radioController_channelValues[RC_CHANNEL_MOVEMENT_THROTTLE]) {
                     /* Change state to RESTART */
-                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
+                    controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
                 } else {
                     /* Remain in the same state */
-                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RUNNING;
+                    controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_RUNNING;
                 }
                 break;
 
@@ -763,16 +769,16 @@ void Task_ControlSystem(void *ptr) {
                 if (controlSystemValues.ESC_isEnabled == false) {
                     /* ESC was disabled - Safe restart check is needed */
                     /* Change state to SAFE_RESTART_CHECK */
-                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
-                    controlSystemValues.safeRestart         = false;
+                    controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
+                    controlSystemValues.safeRestart               = false;
                 } else {
                     /* ESC was enabled - No need for safe restart check */
-                    if (CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE <= controlSystemValues.radioController_channelValues[2]) {
+                    if (CONTROLSYSTEM_MINIMUM_INPUT_THROTTLE <= controlSystemValues.radioController_channelValues[RC_CHANNEL_MOVEMENT_THROTTLE]) {
                         /* Change state to RUNNING */
-                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RUNNING;
+                        controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_RUNNING;
                     } else {
                         /* Remain in the same state */
-                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
+                        controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
                     }
                 }
                 break;
@@ -784,14 +790,14 @@ void Task_ControlSystem(void *ptr) {
                     /* Throttle stick is down */
                     if (controlSystemValues.ESC_isEnabled == true) {
                         /* Change state to RESTART */
-                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
+                        controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_RESTART;
                     } else {
                         /* Remain in the same state */
-                        controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
+                        controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
                     }
                 } else {
                     /* Remain in the same state */
-                    controlSystem_StateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
+                    controlSystemValues.stateMachine_currentState = CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK;
                 }
                 break;
 
@@ -826,9 +832,9 @@ void Task_ControlSystem(void *ptr) {
         /* Clear buffer */
         memset(FlightLightsActiveBuffer_TaskControlSystem, 0, sizeof(FlightLights_Buffer_A));
         /* Load radio controller values into the buffer */
-        FlightLightsActiveBuffer_TaskControlSystem[0] = controlSystemValues.radioController_channelValues[7];
-        FlightLightsActiveBuffer_TaskControlSystem[1] = controlSystemValues.radioController_channelValues[8];
-        FlightLightsActiveBuffer_TaskControlSystem[2] = controlSystemValues.radioController_channelValues[9];
+        FlightLightsActiveBuffer_TaskControlSystem[0] = controlSystemValues.radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SPEED];
+        FlightLightsActiveBuffer_TaskControlSystem[1] = controlSystemValues.radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE];
+        FlightLightsActiveBuffer_TaskControlSystem[2] = controlSystemValues.radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_ON_OFF];
         /* Flight Lights buffer swap implementation */
         if (xSemaphoreTake(Semaphore_Handle_flightLightsBufferSwap, 0) == pdTRUE) {
             /* Swap buffers for Flight Lights */
@@ -938,34 +944,34 @@ void Task_Debugging(void *ptr) {
                     snprintf((char *)debuggingStr_ESC_state, 4 * sizeof(uint8_t), "OFF");
                 }
                 snprintf((char *)debuggingStr_FSA8S_main, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%d/%d_%d/%d_%s",
-                         DEBUG_FSA8S_CHANNEL_VALUES_3, logControlSystemValues->radioController_channelValues[2],
-                         DEBUG_FSA8S_CHANNEL_VALUES_1, logControlSystemValues->radioController_channelValues[0],
-                         DEBUG_FSA8S_CHANNEL_VALUES_2, logControlSystemValues->radioController_channelValues[1],
-                         DEBUG_FSA8S_CHANNEL_VALUES_4, logControlSystemValues->radioController_channelValues[3],
+                         DEBUG_FSA8S_CHANNEL_VALUES_3, logControlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_THROTTLE],
+                         DEBUG_FSA8S_CHANNEL_VALUES_1, logControlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_ROLL],
+                         DEBUG_FSA8S_CHANNEL_VALUES_2, logControlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_PITCH],
+                         DEBUG_FSA8S_CHANNEL_VALUES_4, logControlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_YAW],
                          DEBUG_FSA8S_CHANNEL_VALUES_6, debuggingStr_ESC_state);
 #endif
 
 #if (MAIN_APP_DEBUGGING_FSA8S_AUX == 1)
                 /* Log channel values */
-                if (logControlSystemValues->radioController_channelValues[9] >= 500) {
+                if (logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_ON_OFF] >= 500) {
                     snprintf((char *)debuggingStr_flightLightsState, 4 * sizeof(uint8_t), "ON");
                 } else {
                     snprintf((char *)debuggingStr_flightLightsState, 4 * sizeof(uint8_t), "OFF");
                 }
-                if (logControlSystemValues->radioController_channelValues[8] <= 250) {
+                if (logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE] <= 250) {
                     snprintf((char *)debuggingStr_flightLightsType, 4 * sizeof(uint8_t), "C");
-                } else if (logControlSystemValues->radioController_channelValues[8] > 250 && logControlSystemValues->radioController_channelValues[8] <= 750) {
+                } else if (logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE] > 250 && logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE] <= 750) {
                     snprintf((char *)debuggingStr_flightLightsType, 4 * sizeof(uint8_t), "B");
-                } else if (logControlSystemValues->radioController_channelValues[8] > 750 && logControlSystemValues->radioController_channelValues[8] <= 1000) {
+                } else if (logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE] > 750 && logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE] <= 1000) {
                     snprintf((char *)debuggingStr_flightLightsType, 4 * sizeof(uint8_t), "A");
                 }
-                debuggingValue_flightLightsSpeed = 100 - logControlSystemValues->radioController_channelValues[7] / 10;
+                debuggingValue_flightLightsSpeed = 100 - logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_SPEED] / 10;
                 if (debuggingValue_flightLightsSpeed == 0) {
                     debuggingValue_flightLightsSpeed = 1;
                 }
                 snprintf((char *)debuggingStr_FSA8S_aux, 50 * sizeof(uint8_t), "/%d_%d/%d_%d/%d_%s/%d_%s/%d_%d",
-                         DEBUG_FSA8S_CHANNEL_VALUES_5, logControlSystemValues->radioController_channelValues[4],
-                         DEBUG_FSA8S_CHANNEL_VALUES_7, logControlSystemValues->radioController_channelValues[6],
+                         DEBUG_FSA8S_CHANNEL_VALUES_5, logControlSystemValues->radioController_channelValues[RC_CHANNEL_SAFETY_SYSTEM_FAILURE_TEST],
+                         DEBUG_FSA8S_CHANNEL_VALUES_7, logControlSystemValues->radioController_channelValues[RC_CHANNEL_TBD_1],
                          DEBUG_FSA8S_CHANNEL_VALUES_10, debuggingStr_flightLightsState,
                          DEBUG_FSA8S_CHANNEL_VALUES_9, debuggingStr_flightLightsType,
                          DEBUG_FSA8S_CHANNEL_VALUES_8, debuggingValue_flightLightsSpeed);
@@ -1150,7 +1156,7 @@ void Task_Debugging(void *ptr) {
                          DEBUG_CONTROLSYSTEM_THROTTLE_STICK_STARTED_DOWN, debuggingStr_throttleStick_startedDown,
                          DEBUG_CONTROLSYSTEM_SAFE_START, debuggingStr_safeStart,
                          DEBUG_CONTROLSYSTEM_SAFE_RESTART, debuggingStr_safeRestart,
-                         DEBUG_CONTROLSYSTEM_STATE_MACHINE_STATE, controlSystem_StateMachine_currentState);
+                         DEBUG_CONTROLSYSTEM_STATE_MACHINE_STATE, logControlSystemValues->stateMachine_currentState);
 #endif
 
 #if (MAIN_APP_DEBUGGING_ESCS == 1)

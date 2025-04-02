@@ -50,13 +50,11 @@
 #define USE_FREERTOS // Remove comment when using FreeRTOS
 // #define GY87_USE_LOGGING            // Remove comment to allow driver info logging
 
-#define GY87_MAX_NUMBER_INSTANCES                 (2)    // Maximum number of possible IMUs connected to the i2c bus
-#define GY87_GYROSCOPE_CALIBRATION_ITERATIONS     (3000) // No. of readings to get a calibration value
-#define GY87_ACCELEROMETER_CALIBRATION_ITERATIONS (3000) // No. of readings to get a calibration value
-#define MPU6050_SET_BIT                           (1)
-#define MPU6050_CLEAR_BIT                         (0)
-#define QMC5883L_SET_BIT                          (1)
-#define QMC5883L_CLEAR_BIT                        (0)
+#define GY87_MAX_NUMBER_INSTANCES (2) // Maximum number of possible IMUs connected to the i2c bus
+#define MPU6050_SET_BIT           (1)
+#define MPU6050_CLEAR_BIT         (0)
+#define QMC5883L_SET_BIT          (1)
+#define QMC5883L_CLEAR_BIT        (0)
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846264338327950288
@@ -620,7 +618,7 @@ void GY87_Reset(GY87_HandleTypeDef_t *hgy87) {
     }
 }
 
-void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues, bool_t fixedCalibration_en) {
+void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues, bool_t fixedCalibration_en, uint16_t calibrationIterations) {
 
     /* Declare structure to read the gyroscope values */
     GY87_gyroscopeValues_t gyroscopeValues;
@@ -640,7 +638,7 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrat
             gyroscopeCalibrationValues->calibrationRateYaw   = 0;
         } else {
             /* Calibrate gyroscope measurements */
-            for (int i = 0; i < GY87_GYROSCOPE_CALIBRATION_ITERATIONS; i++) {
+            for (int i = 0; i < calibrationIterations; i++) {
 
                 /* Read gyroscope values */
                 GY87_ReadGyroscope(hgy87, &gyroscopeValues, gyroscopeCalibrationValues);
@@ -659,9 +657,9 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrat
 
             gyroscopeCalibrationValues->calibrationDone      = true;
             gyroscopeCalibrationValues->fixedCalibration_en  = false;
-            gyroscopeCalibrationValues->calibrationRateRoll  = ratesRoll / GY87_GYROSCOPE_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationValues->calibrationRatePitch = ratesPitch / GY87_GYROSCOPE_CALIBRATION_ITERATIONS;
-            gyroscopeCalibrationValues->calibrationRateYaw   = ratesYaw / GY87_GYROSCOPE_CALIBRATION_ITERATIONS;
+            gyroscopeCalibrationValues->calibrationRateRoll  = ratesRoll / calibrationIterations;
+            gyroscopeCalibrationValues->calibrationRatePitch = ratesPitch / calibrationIterations;
+            gyroscopeCalibrationValues->calibrationRateYaw   = ratesYaw / calibrationIterations;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
@@ -720,7 +718,7 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeValues_t *gyr
     }
 }
 
-void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues, bool_t fixedCalibration_en) {
+void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues, bool_t fixedCalibration_en, uint16_t calibrationIterations) {
 
     /* Declare structure to read the accelerometer values */
     GY87_accelerometerValues_t accelerometerValues;
@@ -740,7 +738,7 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometer
             accelerometerCalibrationValues->calibrationLinearAccelerationZ = 0;
         } else {
             /* Calibrate accelerometer measurements */
-            for (int i = 0; i < GY87_ACCELEROMETER_CALIBRATION_ITERATIONS; i++) {
+            for (int i = 0; i < calibrationIterations; i++) {
 
                 /* Read accelerometer values */
                 GY87_ReadAccelerometer(hgy87, &accelerometerValues, accelerometerCalibrationValues);
@@ -759,9 +757,9 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometer
 
             accelerometerCalibrationValues->calibrationDone                = true;
             accelerometerCalibrationValues->fixedCalibration_en            = false;
-            accelerometerCalibrationValues->calibrationLinearAccelerationX = linearAccelerationsX / GY87_ACCELEROMETER_CALIBRATION_ITERATIONS;
-            accelerometerCalibrationValues->calibrationLinearAccelerationY = linearAccelerationsY / GY87_ACCELEROMETER_CALIBRATION_ITERATIONS;
-            accelerometerCalibrationValues->calibrationLinearAccelerationZ = linearAccelerationsZ / GY87_ACCELEROMETER_CALIBRATION_ITERATIONS;
+            accelerometerCalibrationValues->calibrationLinearAccelerationX = linearAccelerationsX / calibrationIterations;
+            accelerometerCalibrationValues->calibrationLinearAccelerationY = linearAccelerationsY / calibrationIterations;
+            accelerometerCalibrationValues->calibrationLinearAccelerationZ = linearAccelerationsZ / calibrationIterations;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};

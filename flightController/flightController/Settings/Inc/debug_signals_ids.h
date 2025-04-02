@@ -119,7 +119,7 @@ typedef enum {
 
     DEBUG_CONST_CONTROLSYSTEM_MODE                        = 71, /* 7; Control System Auxiliar; Mode;          Mode (0: Inputs Reading, 1: Full);  [-]; */
     DEBUG_CONST_CONTROLSYSTEM_LOOP_PERIOD_MS              = 72, /* 7; Control System Auxiliar; Control Loop;  Period (Configured);                [ms]; */
-    DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED              = 73, /* 7; Control System Auxiliar; Control Loop;  Period (Measured);                  [ms]; */
+    DEBUG_CONTROLSYSTEM_LOOP_PERIOD_MEASURED              = 73, /* 7; Control System Auxiliar; Control Loop;  Period (Measured);                  [ms]; PLOT */
     DEBUG_CONTROLSYSTEM_TASK_EXECUTION_TIME               = 74, /* 7; Control System Auxiliar; Task;          Execution Time;                     [ms]; */
     DEBUG_CONTROLSYSTEM_ESCS_ENABLED                      = 75, /* 7; Control System Auxiliar; Safety;        ESCs State;                         [-]; */
     DEBUG_CONTROLSYSTEM_ESCS_STARTED_OFF                  = 76, /* 7; Control System Auxiliar; Safety;        ESCs Started Off;                   [-]; */

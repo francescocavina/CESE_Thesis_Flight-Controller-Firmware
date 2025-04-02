@@ -125,10 +125,13 @@ void GY87_Reset(GY87_HandleTypeDef_t *hgy87);
  * @brief  Calibrates gyroscope measurement.
  * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
  *                the configuration information for the GY87 device.
+ *         gyroscopeCalibrationValues: Pointer to a GY87_gyroscopeCalibrationValues_t structure that stores the gyroscope calibration values.
+ *         fixedCalibration_en:        Enables fixed calibration.
+ *         calibrationIterations:      Number of iterations for calibration.
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues, bool_t fixedCalibration_en);
+void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues, bool_t fixedCalibration_en, uint16_t calibrationIterations);
 
 /*
  * @brief  Reads gyroscope values.
@@ -143,10 +146,13 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeValues_t *gyr
  * @brief  Calibrates accelerometer measurement.
  * @param  hgy87: Pointer to a GY87_HandleTypeDef_t structure that contains
  *                the configuration information for the GY87 device.
+ *         accelerometerCalibrationValues: Pointer to a GY87_accelerometerCalibrationValues_t structure that stores the accelerometer calibration values.
+ *         fixedCalibration_en:            Enables fixed calibration.
+ *         calibrationIterations:          Number of iterations for calibration.
  * @retval true:  Calibration was successful.
  *         false: Calibrations was not successful.
  */
-void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues, bool_t fixedCalibration_en);
+void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues, bool_t fixedCalibration_en, uint16_t calibrationIterations);
 
 /*
  * @brief  Reads accelerometer values.

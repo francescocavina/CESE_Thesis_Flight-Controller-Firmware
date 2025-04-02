@@ -92,8 +92,8 @@ void CS_StateMachine_SafeStartCheck(ControlSystemValues_t *controlSystemValues) 
     }
 
     /* Check if the ESCs are started off and the throttle stick is started down */
-    controlSystemValues->ESC_startedOff            = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[5] <= 500);
-    controlSystemValues->throttleStick_startedDown = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[2] <= 15);
+    controlSystemValues->ESC_startedOff            = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[RC_CHANNEL_SAFETY_ESC_ON_OFF] <= 500);
+    controlSystemValues->throttleStick_startedDown = controlSystemValues->radioController_startedConnected && (controlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_THROTTLE] <= 15);
 
     if (controlSystemValues->ESC_startedOff == true && controlSystemValues->throttleStick_startedDown == true) {
         controlSystemValues->safeStart   = true;
@@ -116,10 +116,10 @@ void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues) {
     CS_Kalman_CalculateAngle(&controlSystemValues->KalmanPrediction_pitchAngle, &controlSystemValues->KalmanUncertainty_pitchAngle, controlSystemValues->gyroMeasurement.rotationRatePitch, controlSystemValues->accMeasurement.anglePitch);
 
     /* Read inputs from radio controller */
-    controlSystemValues->reference_throttle   = (float)controlSystemValues->radioController_channelValues[2];
-    controlSystemValues->reference_rollValue  = (float)controlSystemValues->radioController_channelValues[0];
-    controlSystemValues->reference_pitchValue = (float)controlSystemValues->radioController_channelValues[1];
-    controlSystemValues->reference_yawValue   = (float)controlSystemValues->radioController_channelValues[3];
+    controlSystemValues->reference_throttle   = (float)controlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_THROTTLE];
+    controlSystemValues->reference_rollValue  = (float)controlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_ROLL];
+    controlSystemValues->reference_pitchValue = (float)controlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_PITCH];
+    controlSystemValues->reference_yawValue   = (float)controlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_YAW];
 
     /* Adjust and limit throttle input */
     if (CONTROLSYSTEM_MAXIMUM_INPUT_THROTTLE < controlSystemValues->reference_throttle) {
@@ -198,7 +198,7 @@ void CS_StateMachine_Restart(ControlSystemValues_t *controlSystemValues) {
 void CS_StateMachine_SafeRestartCheck(ControlSystemValues_t *controlSystemValues) {
 
     /* Check if the throttle stick is started down */
-    controlSystemValues->throttleStick_startedDown = (controlSystemValues->radioController_channelValues[2] <= 15);
+    controlSystemValues->throttleStick_startedDown = (controlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_THROTTLE] <= 15);
     controlSystemValues->safeRestart               = controlSystemValues->throttleStick_startedDown;
 }
 

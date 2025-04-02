@@ -58,16 +58,42 @@ extern "C" {
 typedef bool bool_t;
 
 /*
+ * @brief Control System State Machine states.
+ */
+typedef enum {
+    CONTROL_SYSTEM_STATE_INIT,
+    CONTROL_SYSTEM_STATE_SAFE_START_CHECK,
+    CONTROL_SYSTEM_STATE_RUNNING,
+    CONTROL_SYSTEM_STATE_RESTART,
+    CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK,
+} ControlSystem_StateMachine_t;
+
+typedef enum {
+    RC_CHANNEL_MOVEMENT_ROLL              = 0,
+    RC_CHANNEL_MOVEMENT_PITCH             = 1,
+    RC_CHANNEL_MOVEMENT_THROTTLE          = 2,
+    RC_CHANNEL_MOVEMENT_YAW               = 3,
+    RC_CHANNEL_SAFETY_SYSTEM_FAILURE_TEST = 4,
+    RC_CHANNEL_SAFETY_ESC_ON_OFF          = 5,
+    RC_CHANNEL_TBD_1                      = 6,
+    RC_CHANNEL_FLIGHT_LIGHTS_SPEED        = 7,
+    RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE     = 8,
+    RC_CHANNEL_FLIGHT_LIGHTS_ON_OFF       = 9,
+} RadioController_Channels_t;
+
+/*
  * @brief Control System Values structure.
  */
 typedef struct {
-    /* General */
+    /* Safety */
     bool_t ESC_isEnabled;
     bool_t ESC_startedOff;
     bool_t radioController_startedConnected;
     bool_t throttleStick_startedDown;
     bool_t safeStart;
     bool_t safeRestart;
+    /* State Machine */
+    ControlSystem_StateMachine_t stateMachine_currentState;
     /* Radio Controller Readings */
     uint16_t radioController_channelValues[FSA8S_CHANNELS];
     /* References (Values) */
@@ -143,17 +169,6 @@ typedef struct {
     /* Task Execution Time */
     uint32_t taskExecutionTime;
 } ControlSystemValues_t;
-
-/*
- * @brief Control System State Machine states.
- */
-typedef enum {
-    CONTROL_SYSTEM_STATE_INIT,
-    CONTROL_SYSTEM_STATE_SAFE_START_CHECK,
-    CONTROL_SYSTEM_STATE_RUNNING,
-    CONTROL_SYSTEM_STATE_RESTART,
-    CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK,
-} ControlSystem_StateMachine_t;
 
 /* --- Public variable declarations ------------------------------------------------------------ */
 
