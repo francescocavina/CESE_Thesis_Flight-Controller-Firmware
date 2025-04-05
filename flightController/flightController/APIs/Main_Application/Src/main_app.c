@@ -613,12 +613,12 @@ void Task_IMU_Calibration(void *ptr) {
         /* Calibrate GY-87 gyroscope sensor */
         if (false == controlSystemValues.gyroCalibration.calibrationDone) {
             vTaskDelay(pdMS_TO_TICKS(200));
-            GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN), 4000);
+            GY87_CalibrateGyroscope(hgy87, &controlSystemValues.gyroCalibration, !((bool_t)GY87_CALIBRATION_EN), 2000);
         }
         /* Calibrate GY-87 accelerometer sensor */
         if (false == controlSystemValues.accCalibration.calibrationDone) {
             vTaskDelay(pdMS_TO_TICKS(200));
-            GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN), 4000);
+            GY87_CalibrateAccelerometer(hgy87, &controlSystemValues.accCalibration, !((bool_t)GY87_CALIBRATION_EN), 2000);
         }
 
         if (controlSystemValues.gyroCalibration.calibrationDone && controlSystemValues.accCalibration.calibrationDone) {
@@ -1589,7 +1589,7 @@ void FlightController_Init(void) {
     }
 
     /* Task 3: IMU Calibration */
-    xTaskCreate(Task_IMU_Calibration, "Task_IMU_Calibration", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_IMU_CALIBRATION_PRIORITY), &Task_Handle_IMU_Calibration);
+    xTaskCreate(Task_IMU_Calibration, "Task_IMU_Calibration", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_IMU_CALIBRATION_PRIORITY), &Task_Handle_IMU_Calibration);
     if (Task_Handle_IMU_Calibration == NULL) {
         /* Error */
         ErrorLED_Start(FREERTOS_TASKS_CREATION_ERROR);

@@ -620,13 +620,35 @@ void GY87_Reset(GY87_HandleTypeDef_t *hgy87) {
 
 void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrationValues_t *gyroscopeCalibrationValues, bool_t fixedCalibration_en, uint16_t calibrationIterations) {
 
+#define OUTLIER_THRESHOLD 2.0 // Threshold = ±2σ
+
     /* Declare structure to read the gyroscope values */
     GY87_gyroscopeValues_t gyroscopeValues;
 
-    /* Declare variables to accumulate measurements */
-    float ratesRoll  = 0;
-    float ratesPitch = 0;
-    float ratesYaw   = 0;
+    /* Declare variables to calculate means */
+    float mean_rateRoll            = 0;
+    float mean_ratePitch           = 0;
+    float mean_rateYaw             = 0;
+    /* Declare variables to calculate deltas */
+    float delta_rateRoll           = 0;
+    float delta_ratePitch          = 0;
+    float delta_rateYaw            = 0;
+    /* Declare variables to calculate variances */
+    float var_rateRoll             = 0;
+    float var_ratePitch            = 0;
+    float var_rateYaw              = 0;
+    /* Declare variables to calculate standard deviations */
+    float std_rateRoll             = 0;
+    float std_ratePitch            = 0;
+    float std_rateYaw              = 0;
+    /* Declare variables for measurement accumulations */
+    float accum_rateRoll           = 0;
+    float accum_ratePitch          = 0;
+    float accum_rateYaw            = 0;
+    /* Declare variable for number of used samples */
+    uint16_t samplesUsed_rateRoll  = 0;
+    uint16_t samplesUsed_ratePitch = 0;
+    uint16_t samplesUsed_rateYaw   = 0;
 
     /* Check parameter and calculate calibration value */
     if (NULL != hgy87 && NULL != gyroscopeCalibrationValues) {
@@ -637,16 +659,58 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrat
             gyroscopeCalibrationValues->calibrationRatePitch = 0;
             gyroscopeCalibrationValues->calibrationRateYaw   = 0;
         } else {
-            /* Calibrate gyroscope measurements */
+            /* First pass */
             for (int i = 0; i < calibrationIterations; i++) {
 
                 /* Read gyroscope values */
                 GY87_ReadGyroscope(hgy87, &gyroscopeValues, gyroscopeCalibrationValues);
 
-                /* Accumulate measurements */
-                ratesRoll += gyroscopeValues.rotationRateRoll;
-                ratesPitch += gyroscopeValues.rotationRatePitch;
-                ratesYaw += gyroscopeValues.rotationRateYaw;
+                /* Calculate deltas */
+                delta_rateRoll  = gyroscopeValues.rotationRateRoll - mean_rateRoll;
+                delta_ratePitch = gyroscopeValues.rotationRatePitch - mean_ratePitch;
+                delta_rateYaw   = gyroscopeValues.rotationRateYaw - mean_rateYaw;
+
+                /* Calculate means */
+                mean_rateRoll += delta_rateRoll / (i + 1);
+                mean_ratePitch += delta_ratePitch / (i + 1);
+                mean_rateYaw += delta_rateYaw / (i + 1);
+
+                /* Calculate variances */
+                var_rateRoll += delta_rateRoll * (gyroscopeValues.rotationRateRoll - mean_rateRoll);
+                var_ratePitch += delta_ratePitch * (gyroscopeValues.rotationRatePitch - mean_ratePitch);
+                var_rateYaw += delta_rateYaw * (gyroscopeValues.rotationRateYaw - mean_rateYaw);
+
+#ifdef USE_FREERTOS
+                vTaskDelay(pdMS_TO_TICKS(1));
+#else
+                HAL_Delay(1);
+#endif
+            }
+
+            /* Calculate standard deviations */
+            std_rateRoll  = sqrt(var_rateRoll / calibrationIterations);
+            std_ratePitch = sqrt(var_ratePitch / calibrationIterations);
+            std_rateYaw   = sqrt(var_rateYaw / calibrationIterations);
+
+            /* Second pass */
+            for (int i = 0; i < calibrationIterations; i++) {
+
+                /* Read gyroscope values */
+                GY87_ReadGyroscope(hgy87, &gyroscopeValues, gyroscopeCalibrationValues);
+
+                /* Only keep values withn the outlier threshold */
+                if (fabs(gyroscopeValues.rotationRateRoll - mean_rateRoll) < OUTLIER_THRESHOLD * std_rateRoll) {
+                    accum_rateRoll += gyroscopeValues.rotationRateRoll;
+                    samplesUsed_rateRoll++;
+                }
+                if (fabs(gyroscopeValues.rotationRatePitch - mean_ratePitch) < OUTLIER_THRESHOLD * std_ratePitch) {
+                    accum_ratePitch += gyroscopeValues.rotationRatePitch;
+                    samplesUsed_ratePitch++;
+                }
+                if (fabs(gyroscopeValues.rotationRateYaw - mean_rateYaw) < OUTLIER_THRESHOLD * std_rateYaw) {
+                    accum_rateYaw += gyroscopeValues.rotationRateYaw;
+                    samplesUsed_rateYaw++;
+                }
 
 #ifdef USE_FREERTOS
                 vTaskDelay(pdMS_TO_TICKS(1));
@@ -657,9 +721,9 @@ void GY87_CalibrateGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeCalibrat
 
             gyroscopeCalibrationValues->calibrationDone      = true;
             gyroscopeCalibrationValues->fixedCalibration_en  = false;
-            gyroscopeCalibrationValues->calibrationRateRoll  = ratesRoll / calibrationIterations;
-            gyroscopeCalibrationValues->calibrationRatePitch = ratesPitch / calibrationIterations;
-            gyroscopeCalibrationValues->calibrationRateYaw   = ratesYaw / calibrationIterations;
+            gyroscopeCalibrationValues->calibrationRateRoll  = (samplesUsed_rateRoll > 0) ? (accum_rateRoll / samplesUsed_rateRoll) : mean_rateRoll;
+            gyroscopeCalibrationValues->calibrationRatePitch = (samplesUsed_ratePitch > 0) ? (accum_ratePitch / samplesUsed_ratePitch) : mean_ratePitch;
+            gyroscopeCalibrationValues->calibrationRateYaw   = (samplesUsed_rateYaw > 0) ? (accum_rateYaw / samplesUsed_rateYaw) : mean_rateYaw;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
@@ -720,13 +784,35 @@ void GY87_ReadGyroscope(GY87_HandleTypeDef_t *hgy87, GY87_gyroscopeValues_t *gyr
 
 void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerCalibrationValues_t *accelerometerCalibrationValues, bool_t fixedCalibration_en, uint16_t calibrationIterations) {
 
+#define OUTLIER_THRESHOLD 2.0 // Threshold = ±2σ
+
     /* Declare structure to read the accelerometer values */
     GY87_accelerometerValues_t accelerometerValues;
 
-    /* Declare variables to accumulate measurements */
-    float linearAccelerationsX = 0;
-    float linearAccelerationsY = 0;
-    float linearAccelerationsZ = 0;
+    /* Declare variables to calculate means */
+    float mean_linearAccelerationX           = 0;
+    float mean_linearAccelerationY           = 0;
+    float mean_linearAccelerationZ           = 0;
+    /* Declare variables to calculate deltas */
+    float delta_linearAccelerationX          = 0;
+    float delta_linearAccelerationY          = 0;
+    float delta_linearAccelerationZ          = 0;
+    /* Declare variables to calculate variances */
+    float var_linearAccelerationX            = 0;
+    float var_linearAccelerationY            = 0;
+    float var_linearAccelerationZ            = 0;
+    /* Declare variables to calculate standard deviations */
+    float std_linearAccelerationX            = 0;
+    float std_linearAccelerationY            = 0;
+    float std_linearAccelerationZ            = 0;
+    /* Declare variables for measurement accumulations */
+    float accum_linearAccelerationX          = 0;
+    float accum_linearAccelerationY          = 0;
+    float accum_linearAccelerationZ          = 0;
+    /* Declare variable for number of used samples */
+    uint16_t samplesUsed_linearAccelerationX = 0;
+    uint16_t samplesUsed_linearAccelerationY = 0;
+    uint16_t samplesUsed_linearAccelerationZ = 0;
 
     /* Check parameter and calculate calibration value */
     if (NULL != hgy87 && NULL != accelerometerCalibrationValues) {
@@ -743,10 +829,52 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometer
                 /* Read accelerometer values */
                 GY87_ReadAccelerometer(hgy87, &accelerometerValues, accelerometerCalibrationValues);
 
-                /* Accumulate measurements */
-                linearAccelerationsX += accelerometerValues.linearAccelerationX;
-                linearAccelerationsY += accelerometerValues.linearAccelerationY;
-                linearAccelerationsZ += (accelerometerValues.linearAccelerationZ - 1);
+                /* Calculate deltas */
+                delta_linearAccelerationX = accelerometerValues.linearAccelerationX - mean_linearAccelerationX;
+                delta_linearAccelerationY = accelerometerValues.linearAccelerationY - mean_linearAccelerationY;
+                delta_linearAccelerationZ = accelerometerValues.linearAccelerationZ - mean_linearAccelerationZ;
+
+                /* Calculate means */
+                mean_linearAccelerationX += delta_linearAccelerationX / (i + 1);
+                mean_linearAccelerationY += delta_linearAccelerationY / (i + 1);
+                mean_linearAccelerationZ += delta_linearAccelerationZ / (i + 1);
+
+                /* Calculate variances */
+                var_linearAccelerationX += delta_linearAccelerationX * (accelerometerValues.linearAccelerationX - mean_linearAccelerationX);
+                var_linearAccelerationY += delta_linearAccelerationY * (accelerometerValues.linearAccelerationY - mean_linearAccelerationY);
+                var_linearAccelerationZ += delta_linearAccelerationZ * (accelerometerValues.linearAccelerationZ - mean_linearAccelerationZ);
+
+#ifdef USE_FREERTOS
+                vTaskDelay(pdMS_TO_TICKS(1));
+#else
+                HAL_Delay(1);
+#endif
+            }
+
+            /* Calculate standard deviations */
+            std_linearAccelerationX = sqrt(var_linearAccelerationX / calibrationIterations);
+            std_linearAccelerationY = sqrt(var_linearAccelerationY / calibrationIterations);
+            std_linearAccelerationZ = sqrt(var_linearAccelerationZ / calibrationIterations);
+
+            /* Second pass */
+            for (int i = 0; i < calibrationIterations; i++) {
+
+                /* Read accelerometer values */
+                GY87_ReadAccelerometer(hgy87, &accelerometerValues, accelerometerCalibrationValues);
+
+                /* Only keep values withn the outlier threshold */
+                if (fabs(accelerometerValues.linearAccelerationX - mean_linearAccelerationX) < OUTLIER_THRESHOLD * std_linearAccelerationX) {
+                    accum_linearAccelerationX += accelerometerValues.linearAccelerationX;
+                    samplesUsed_linearAccelerationX++;
+                }
+                if (fabs(accelerometerValues.linearAccelerationY - mean_linearAccelerationY) < OUTLIER_THRESHOLD * std_linearAccelerationY) {
+                    accum_linearAccelerationY += accelerometerValues.linearAccelerationY;
+                    samplesUsed_linearAccelerationY++;
+                }
+                if (fabs(accelerometerValues.linearAccelerationZ - mean_linearAccelerationZ) < OUTLIER_THRESHOLD * std_linearAccelerationZ) {
+                    accum_linearAccelerationZ += accelerometerValues.linearAccelerationZ;
+                    samplesUsed_linearAccelerationZ++;
+                }
 
 #ifdef USE_FREERTOS
                 vTaskDelay(pdMS_TO_TICKS(1));
@@ -757,9 +885,9 @@ void GY87_CalibrateAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometer
 
             accelerometerCalibrationValues->calibrationDone                = true;
             accelerometerCalibrationValues->fixedCalibration_en            = false;
-            accelerometerCalibrationValues->calibrationLinearAccelerationX = linearAccelerationsX / calibrationIterations;
-            accelerometerCalibrationValues->calibrationLinearAccelerationY = linearAccelerationsY / calibrationIterations;
-            accelerometerCalibrationValues->calibrationLinearAccelerationZ = linearAccelerationsZ / calibrationIterations;
+            accelerometerCalibrationValues->calibrationLinearAccelerationX = (samplesUsed_linearAccelerationX > 0) ? (accum_linearAccelerationX / samplesUsed_linearAccelerationX) : mean_linearAccelerationX;
+            accelerometerCalibrationValues->calibrationLinearAccelerationY = (samplesUsed_linearAccelerationY > 0) ? (accum_linearAccelerationY / samplesUsed_linearAccelerationY) : mean_linearAccelerationY;
+            accelerometerCalibrationValues->calibrationLinearAccelerationZ = (samplesUsed_linearAccelerationZ > 0) ? (accum_linearAccelerationZ / samplesUsed_linearAccelerationZ - 1) : mean_linearAccelerationZ;
 
 #ifdef GY87_USE_LOGGING
             uint8_t loggingStr[120] = {0};
