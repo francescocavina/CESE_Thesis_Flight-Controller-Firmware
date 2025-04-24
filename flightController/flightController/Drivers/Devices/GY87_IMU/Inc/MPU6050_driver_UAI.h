@@ -61,6 +61,9 @@ typedef struct gyroscopeCalibrationValues {
     float  calibrationRateRoll;
     float  calibrationRatePitch;
     float  calibrationRateYaw;
+    float  stdRateRoll;
+    float  stdRatePitch;
+    float  stdRateYaw;
 
 } GY87_gyroscopeCalibrationValues_t;
 
@@ -79,6 +82,11 @@ typedef struct accelerometerCalibrationValues {
     float  calibrationLinearAccelerationX;
     float  calibrationLinearAccelerationY;
     float  calibrationLinearAccelerationZ;
+    float  stdLinearAccelerationX;
+    float  stdLinearAccelerationY;
+    float  stdLinearAccelerationZ;
+    float  stdAngleRoll;
+    float  stdAnglePitch;
 } GY87_accelerometerCalibrationValues_t;
 
 typedef struct accelerometerValues {
