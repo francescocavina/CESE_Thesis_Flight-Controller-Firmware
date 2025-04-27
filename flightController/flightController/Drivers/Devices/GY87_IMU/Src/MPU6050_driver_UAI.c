@@ -942,21 +942,8 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerValue
         accZ = accelerometerValues->linearAccelerationZ = ((float)accelerometerValues->rawValueZ / scaleFactor) - accelerometerCalibrationValues->calibrationLinearAccelerationZ;
 
         /* Calculate roll and pitch angles using an approximation with linear accelerations */
-        denomRoll                                       = sqrt(accX * accX + accZ * accZ);
-        denomPitch                                      = sqrt(accY * accY + accZ * accZ);
-
-        /* Prevent division by zero */
-        if (denomRoll > 0.0001f) {
-            accelerometerValues->angleRoll = atan(accY / denomRoll) * RADIANS_TO_DEGREES_CONST;
-        } else {
-            accelerometerValues->angleRoll = (accY >= 0) ? 90.0f : -90.0f;
-        }
-
-        if (denomPitch > 0.0001f) {
-            accelerometerValues->anglePitch = -atan(accX / denomPitch) * RADIANS_TO_DEGREES_CONST;
-        } else {
-            accelerometerValues->anglePitch = (accX >= 0) ? -90.0f : 90.0f;
-        }
+        accelerometerValues->angleRoll                  = atan2(accY, sqrt(accX * accX + accZ * accZ)) * RADIANS_TO_DEGREES_CONST;
+        accelerometerValues->anglePitch                 = -atan2(accX, sqrt(accY * accY + accZ * accZ)) * RADIANS_TO_DEGREES_CONST;
 
     } else {
         /* Wrong parameters */
