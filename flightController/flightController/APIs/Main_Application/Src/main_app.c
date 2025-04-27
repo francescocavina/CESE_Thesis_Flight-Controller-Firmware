@@ -44,6 +44,7 @@
 #include "LoggingSystem_UAI.h"
 #include "MPU6050_driver_UAI.h"
 
+#include <math.h>
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
@@ -66,31 +67,35 @@
 #define USB_COMMUNICATION_INFO_QUEUE_SIZE  (32)
 #define USB_COMMUNICATION_DEBUG_QUEUE_SIZE (1)
 /* Logging and Debugging Settings */
-#define MAIN_APP_LOGGING_DEBUGGING                               (1)
-#define MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE                   (1000)
-#define MAIN_APP_DEBUGGING_FSA8S_MAIN                            (1)
-#define MAIN_APP_DEBUGGING_FSA8S_AUX                             (1)
-#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES     (1)
-#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES                 (1)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES (1)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES             (1)
-#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES             (1)
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES              (0) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING             (0) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                      (1) // Not necessary for control system
-#define MAIN_APP_DEBUGGING_ESCS                                  (1)
-#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL       (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES        (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES        (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES           (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS           (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID_OUTPUT       (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE          (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS            (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT        (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS           (1)
-#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR                (1)
-#define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK             (1)
+#define MAIN_APP_LOGGING_DEBUGGING                                   (1)
+#define MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE                       (1000)
+#define MAIN_APP_DEBUGGING_FSA8S_MAIN                                (1)
+#define MAIN_APP_DEBUGGING_FSA8S_AUX                                 (1)
+#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES         (1)
+#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES_AUX     (1)
+#define MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES                     (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES     (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES_AUX (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_VALUES                 (1)
+#define MAIN_APP_DEBUGGING_GY87_CORRECTED_ACCELEROMETER_VALUES       (1)
+#define MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES                 (1)
+#define MAIN_APP_DEBUGGING_GY87_CORRECTED_ACCELEROMETER_ANGLES       (1)
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES                  (0) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_HEADING                 (0) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                          (1) // Not necessary for control system
+#define MAIN_APP_DEBUGGING_ESCS                                      (1)
+#define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL           (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES            (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES            (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_FILTER               (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS               (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_PID_OUTPUT           (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_RATE              (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_ERRORS                (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_RATES_PID_OUTPUT            (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_MOTORS_SPEEDS               (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR                    (1)
+#define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK                 (1)
 /* Battery Level Settings */
 #define BATTERY_LEVEL_CALIBRATION_OFFSET (-0.13)
 
@@ -165,32 +170,36 @@ static UBaseType_t Task_StackHighWatermark_FlightLights      = 0;
 #if (MAIN_APP_LOGGING_DEBUGGING == 1)
 static uint8_t  debuggingStr_A[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
 static uint8_t  debuggingStr_B[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
-static uint8_t *debuggingActiveBuffer_TaskDebugging                  = debuggingStr_A; // Task_Debugging writes here
-static uint8_t *debuggingActiveBuffer_TaskUSBCommunication           = debuggingStr_B; // Task_USB_Communication reads from here
-static uint8_t  debuggingStr_SystemTime[16]                          = {0};            // Size checked
-static uint8_t  debuggingStr_FSA8S_main[50]                          = {0};            // Size checked
-static uint8_t  debuggingStr_FSA8S_aux[50]                           = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_gyroscopeCalibrationValues[40]     = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_gyroscopeValues[50]                = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_accelerometerCalibrationValues[40] = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_accelerometerValues[40]            = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_accelerometerAngles[40]            = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_magnetometerValues[40]             = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]       = {0};            // Size checked
-static uint8_t  debuggingStr_GY87_temperature[16]                    = {0};            // Size checked
-static uint8_t  debuggingStr_BatteryLevel[20]                        = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_referenceValues[40]       = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]       = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_KalmanAngles[40]          = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_anglesErrors[40]          = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_anglesPID[40]             = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_referenceRates[50]        = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_ratesErrors[50]           = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_ratesPID[50]              = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[50]          = {0};            // Size checked
-static uint8_t  debuggingStr_ControlSystem_Auxiliar[100]             = {0};            // Size checked
-static uint8_t  debuggingStr_ESCs[40]                                = {0};            // Size checked
-static uint8_t  debuggingStr_TasksStackHighWatermark[80]             = {0};            // Size checked
+static uint8_t *debuggingActiveBuffer_TaskDebugging                      = debuggingStr_A; // Task_Debugging writes here
+static uint8_t *debuggingActiveBuffer_TaskUSBCommunication               = debuggingStr_B; // Task_USB_Communication reads from here
+static uint8_t  debuggingStr_SystemTime[16]                              = {0};            // Size checked
+static uint8_t  debuggingStr_FSA8S_main[50]                              = {0};            // Size checked
+static uint8_t  debuggingStr_FSA8S_aux[50]                               = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_gyroscopeCalibrationValues[40]         = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_gyroscopeCalibrationValues_aux[40]     = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_gyroscopeValues[50]                    = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_accelerometerCalibrationValues[40]     = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_accelerometerCalibrationValues_aux[80] = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_accelerometerValues[40]                = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_correctedAccelerometerValues[40]       = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_accelerometerAngles[40]                = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_correctedAccelerometerAngles[40]       = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_magnetometerValues[40]                 = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]           = {0};            // Size checked
+static uint8_t  debuggingStr_GY87_temperature[16]                        = {0};            // Size checked
+static uint8_t  debuggingStr_BatteryLevel[20]                            = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_referenceValues[40]           = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]           = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_KalmanFilter[80]              = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_anglesErrors[40]              = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_anglesPID[40]                 = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_referenceRates[50]            = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_ratesErrors[50]               = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_ratesPID[50]                  = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[50]              = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_Auxiliar[100]                 = {0};            // Size checked
+static uint8_t  debuggingStr_ESCs[40]                                    = {0};            // Size checked
+static uint8_t  debuggingStr_TasksStackHighWatermark[80]                 = {0};            // Size checked
 #endif
 
 /* Task: On/Off Button */
@@ -340,34 +349,20 @@ extern WWDG_HandleTypeDef hwwdg;
 void Initialize_SystemVariables(void) {
 
     /* Control System: Safety */
-    controlSystemValues.ESC_startedOff                                = false;
-    controlSystemValues.radioController_startedConnected              = false;
-    controlSystemValues.throttleStick_startedDown                     = false;
-    controlSystemValues.safeStart                                     = false;
-    controlSystemValues.safeRestart                                   = false;
+    controlSystemValues.ESC_startedOff                   = false;
+    controlSystemValues.radioController_startedConnected = false;
+    controlSystemValues.throttleStick_startedDown        = false;
+    controlSystemValues.safeStart                        = false;
+    controlSystemValues.safeRestart                      = false;
 
     /* Control System: State Machine */
-    controlSystemValues.stateMachine_currentState                     = CONTROL_SYSTEM_STATE_INIT;
-
-    /* GY87: Gyroscope Calibration */
-    controlSystemValues.gyroCalibration.calibrationDone               = false;
-    controlSystemValues.gyroCalibration.fixedCalibration_en           = true;
-    controlSystemValues.gyroCalibration.calibrationRateRoll           = 0.0;
-    controlSystemValues.gyroCalibration.calibrationRatePitch          = 0.0;
-    controlSystemValues.gyroCalibration.calibrationRateYaw            = 0.0;
-
-    /* GY87: Accelerometer Calibration */
-    controlSystemValues.accCalibration.calibrationDone                = false;
-    controlSystemValues.accCalibration.fixedCalibration_en            = true;
-    controlSystemValues.accCalibration.calibrationLinearAccelerationX = 0.0;
-    controlSystemValues.accCalibration.calibrationLinearAccelerationY = 0.0;
-    controlSystemValues.accCalibration.calibrationLinearAccelerationZ = 0.0;
+    controlSystemValues.stateMachine_currentState        = CONTROL_SYSTEM_STATE_INIT;
 
     /* Control System: Kalman Values */
-    controlSystemValues.KalmanPrediction_rollAngle                    = 0;
-    controlSystemValues.KalmanPrediction_pitchAngle                   = 0;
-    controlSystemValues.KalmanUncertainty_rollAngle                   = 2 * 2;
-    controlSystemValues.KalmanUncertainty_pitchAngle                  = 2 * 2;
+    controlSystemValues.KalmanPrediction_rollAngle       = 0;
+    controlSystemValues.KalmanPrediction_pitchAngle      = 0;
+    controlSystemValues.KalmanUncertainty_rollAngle      = 2 * 2;
+    controlSystemValues.KalmanUncertainty_pitchAngle     = 2 * 2;
 }
 
 bool_t FreeRTOS_CreateTimers(void) {
@@ -635,7 +630,7 @@ void Task_ControlSystem(void *ptr) {
     (void)ptr;
 
     /* Change delay from time in [ms] to ticks */
-    const TickType_t xTaskPeriod     = pdMS_TO_TICKS(4);
+    const TickType_t xTaskPeriod     = pdMS_TO_TICKS(CONTROLSYSTEM_LOOP_PERIOD_MS);
     /* Get initial tick count */
     TickType_t xLastWakeTime         = xTaskGetTickCount();
     /* Variables to measure control loop period */
@@ -673,6 +668,9 @@ void Task_ControlSystem(void *ptr) {
 #endif
             /* Set global flags */
             FlightController_isInitialized = true;
+
+            /* Initialize variables */
+            Initialize_SystemVariables();
         }
 
         /* Refresh the WWDG */
@@ -714,8 +712,10 @@ void Task_ControlSystem(void *ptr) {
 #endif
 
             /* Calculate Kalman angles */
-            CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
-            CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
+            // CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
+            // CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
+
+            Kalman_Update(&controlSystemValues);
 
         } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
 
@@ -937,7 +937,7 @@ void Task_Debugging(void *ptr) {
                 snprintf((char *)debuggingStr_SystemTime, 16 * sizeof(uint8_t), "T_%lu", (system_tick * 1000 / configTICK_RATE_HZ));
 
 #if (MAIN_APP_DEBUGGING_FSA8S_MAIN == 1)
-                /* Log channel values */
+                /* Log main channel values */
                 if (logControlSystemValues->ESC_isEnabled == true) {
                     snprintf((char *)debuggingStr_ESC_state, 4 * sizeof(uint8_t), "ON");
                 } else {
@@ -952,7 +952,7 @@ void Task_Debugging(void *ptr) {
 #endif
 
 #if (MAIN_APP_DEBUGGING_FSA8S_AUX == 1)
-                /* Log channel values */
+                /* Log auxiliar channel values */
                 if (logControlSystemValues->radioController_channelValues[RC_CHANNEL_FLIGHT_LIGHTS_ON_OFF] >= 500) {
                     snprintf((char *)debuggingStr_flightLightsState, 4 * sizeof(uint8_t), "ON");
                 } else {
@@ -985,12 +985,30 @@ void Task_Debugging(void *ptr) {
                          DEBUG_GY87_GYRO_CALIBRATION_VALUES_ROT_RATE_YAW, logControlSystemValues->gyroCalibration.calibrationRateYaw);
 #endif
 
+#if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_CALIBRATION_VALUES_AUX)
+                /* Log GY87 gyroscope auxiliar calibration values */
+                snprintf((char *)debuggingStr_GY87_gyroscopeCalibrationValues_aux, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/",
+                         DEBUG_GY87_GYRO_CALIBRATION_STD_DEV_ROT_RATE_ROLL, logControlSystemValues->gyroCalibration.stdRateRoll,
+                         DEBUG_GY87_GYRO_CALIBRATION_STD_DEV_ROT_RATE_PITCH, logControlSystemValues->gyroCalibration.stdRatePitch,
+                         DEBUG_GY87_GYRO_CALIBRATION_STD_DEV_ROT_RATE_YAW, logControlSystemValues->gyroCalibration.stdRateYaw);
+#endif
+
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES)
                 /* Log GY87 accelerometer calibration values */
                 snprintf((char *)debuggingStr_GY87_accelerometerCalibrationValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
                          DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_X, logControlSystemValues->accCalibration.calibrationLinearAccelerationX,
                          DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Y, logControlSystemValues->accCalibration.calibrationLinearAccelerationY,
                          DEBUG_GY87_ACC_CALIBRATION_VALUES_LINEAR_Z, logControlSystemValues->accCalibration.calibrationLinearAccelerationZ);
+#endif
+
+#if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_CALIBRATION_VALUES_AUX)
+                /* Log GY87 accelerometer auxiliar calibration values */
+                snprintf((char *)debuggingStr_GY87_accelerometerCalibrationValues_aux, 80 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f/%d_%.2f/%d_%.2f",
+                         DEBUG_GY87_ACC_CALIBRATION_STD_DEV_LINEAR_X, logControlSystemValues->accCalibration.stdLinearAccelerationX,
+                         DEBUG_GY87_ACC_CALIBRATION_STD_DEV_LINEAR_Y, logControlSystemValues->accCalibration.stdLinearAccelerationY,
+                         DEBUG_GY87_ACC_CALIBRATION_STD_DEV_LINEAR_Z, logControlSystemValues->accCalibration.stdLinearAccelerationZ,
+                         DEBUG_GY87_ACC_CALIBRATION_STD_DEV_ANGLE_ROLL, logControlSystemValues->accCalibration.stdAngleRoll,
+                         DEBUG_GY87_ACC_CALIBRATION_STD_DEV_ANGLE_PITCH, logControlSystemValues->accCalibration.stdAnglePitch);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_GYROSCOPE_VALUES == 1)
@@ -1009,11 +1027,26 @@ void Task_Debugging(void *ptr) {
                          DEBUG_GY87_ACC_VALUES_LINEAR_Z, logControlSystemValues->accMeasurement.linearAccelerationZ);
 #endif
 
+#if (MAIN_APP_DEBUGGING_GY87_CORRECTED_ACCELEROMETER_VALUES == 1)
+                /* Log GY87 accelerometer values */
+                snprintf((char *)debuggingStr_GY87_correctedAccelerometerValues, 40 * sizeof(uint8_t), (const char *)"/%d_%.3f/%d_%.3f/%d_%.3f",
+                         DEBUG_GY87_ACC_CORRECTED_VALUES_LINEAR_X, logControlSystemValues->correctedLinearAccelerationX,
+                         DEBUG_GY87_ACC_CORRECTED_VALUES_LINEAR_Y, logControlSystemValues->correctedLinearAccelerationY,
+                         DEBUG_GY87_ACC_CORRECTED_VALUES_LINEAR_Z, logControlSystemValues->correctedLinearAccelerationZ);
+#endif
+
 #if (MAIN_APP_DEBUGGING_GY87_ACCELEROMETER_ANGLES == 1)
                 /* Log GY87 accelerometer angles */
                 snprintf((char *)debuggingStr_GY87_accelerometerAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
                          DEBUG_GY87_ACC_VALUES_ANGLE_ROLL, logControlSystemValues->accMeasurement.angleRoll,
                          DEBUG_GY87_ACC_VALUES_ANGLE_PITCH, logControlSystemValues->accMeasurement.anglePitch);
+#endif
+
+#if (MAIN_APP_DEBUGGING_GY87_CORRECTED_ACCELEROMETER_ANGLES == 1)
+                /* Log GY87 accelerometer angles */
+                snprintf((char *)debuggingStr_GY87_correctedAccelerometerAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
+                         DEBUG_GY87_ACC_CORRECTED_VALUES_ANGLE_ROLL, logControlSystemValues->correctedRollAngle,
+                         DEBUG_GY87_ACC_CORRECTED_VALUES_ANGLE_PITCH, logControlSystemValues->correctedPitchAngle);
 #endif
 
 #if (MAIN_APP_DEBUGGING_GY87_MAGNETOMETER_VALUES == 1)
@@ -1060,11 +1093,15 @@ void Task_Debugging(void *ptr) {
                          DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_ANGLE, logControlSystemValues->reference_pitchAngle);
 #endif
 
-#if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_ANGLES == 1)
+#if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_FILTER == 1)
                 /* Log control system angles */
-                snprintf((char *)debuggingStr_ControlSystem_KalmanAngles, 40 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f",
+                snprintf((char *)debuggingStr_ControlSystem_KalmanFilter, 80 * sizeof(uint8_t), (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
                          DEBUG_CONTROLSYSTEM_KALMAN_ROLL_ANGLE, logControlSystemValues->KalmanPrediction_rollAngle,
-                         DEBUG_CONTROLSYSTEM_KALMAN_PITCH_ANGLE, logControlSystemValues->KalmanPrediction_pitchAngle);
+                         DEBUG_CONTROLSYSTEM_KALMAN_PITCH_ANGLE, logControlSystemValues->KalmanPrediction_pitchAngle,
+                         DEBUG_CONTROLSYSTEM_KALMAN_UNCERTAINTY_ROLL_ANGLE, logControlSystemValues->KalmanUncertainty_rollAngle,
+                         DEBUG_CONTROLSYSTEM_KALMAN_UNCERTAINTY_PITCH_ANGLE, logControlSystemValues->KalmanUncertainty_pitchAngle,
+                         DEBUG_CONTROLSYSTEM_KALMAN_GAIN_ROLL_ANGLE, logControlSystemValues->KalmanGain_rollAngle,
+                         DEBUG_CONTROLSYSTEM_KALMAN_GAIN_PITCH_ANGLE, logControlSystemValues->KalmanGain_pitchAngle);
 #endif
 
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_ANGLES_ERRORS == 1)
@@ -1195,17 +1232,21 @@ void Task_Debugging(void *ptr) {
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_FSA8S_main);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_FSA8S_aux);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_gyroscopeCalibrationValues);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_gyroscopeCalibrationValues_aux);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_gyroscopeValues);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_accelerometerCalibrationValues);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_accelerometerCalibrationValues_aux);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_accelerometerValues);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_correctedAccelerometerValues);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_accelerometerAngles);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_correctedAccelerometerAngles);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_magnetometerValues);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_magnetometerHeadingValue);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_temperature);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_BatteryLevel);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceValues);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceAngles);
-        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_KalmanAngles);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_KalmanFilter);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_anglesErrors);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_anglesPID);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceRates);

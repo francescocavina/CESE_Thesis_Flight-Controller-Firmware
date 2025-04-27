@@ -40,7 +40,14 @@
 #include "FSA8S_driver_UAI.h"
 #include "MPU6050_driver_UAI.h"
 
+#include <math.h>
+
 /* --- Macros definitions ---------------------------------------------------------------------- */
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
+#define RADIANS_TO_DEGREES_CONST (180.0f / M_PI)
+#define DEGREES_TO_RADIANS_CONST (M_PI / 180.0f)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -111,9 +118,14 @@ void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues) {
     /* Read GY-87 accelerometer sensor */
     GY87_ReadAccelerometer(hgy87, &controlSystemValues->accMeasurement, &controlSystemValues->accCalibration);
 
+    /* Correct acceleration */
+    CS_CorrectAcceleration(controlSystemValues, true);
+    /* Calculate angles using accelerations */
+    CS_CalculateAnglesFromAccelerations(controlSystemValues);
+
     /* Calculate Kalman angles */
-    CS_Kalman_CalculateAngle(&controlSystemValues->KalmanPrediction_rollAngle, &controlSystemValues->KalmanUncertainty_rollAngle, controlSystemValues->gyroMeasurement.rotationRateRoll, controlSystemValues->accMeasurement.angleRoll);
-    CS_Kalman_CalculateAngle(&controlSystemValues->KalmanPrediction_pitchAngle, &controlSystemValues->KalmanUncertainty_pitchAngle, controlSystemValues->gyroMeasurement.rotationRatePitch, controlSystemValues->accMeasurement.anglePitch);
+    CS_Kalman_CalculateAngle(&controlSystemValues->KalmanPrediction_rollAngle, &controlSystemValues->KalmanUncertainty_rollAngle, &controlSystemValues->KalmanGain_rollAngle, controlSystemValues->gyroMeasurement.rotationRateRoll, controlSystemValues->correctedRollAngle);
+    CS_Kalman_CalculateAngle(&controlSystemValues->KalmanPrediction_pitchAngle, &controlSystemValues->KalmanUncertainty_pitchAngle, &controlSystemValues->KalmanGain_pitchAngle, controlSystemValues->gyroMeasurement.rotationRatePitch, controlSystemValues->correctedPitchAngle);
 
     /* Read inputs from radio controller */
     controlSystemValues->reference_throttle   = (float)controlSystemValues->radioController_channelValues[RC_CHANNEL_MOVEMENT_THROTTLE];
@@ -202,47 +214,83 @@ void CS_StateMachine_SafeRestartCheck(ControlSystemValues_t *controlSystemValues
     controlSystemValues->safeRestart               = controlSystemValues->throttleStick_startedDown;
 }
 
-void CS_Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement) {
+void CS_CorrectAcceleration(ControlSystemValues_t *controlSystemValues, bool_t correctionEnabled) {
+    if (correctionEnabled) {
+        controlSystemValues->IMU_Offset[0] = 0.035f; // X-axis offset (meters)
+        controlSystemValues->IMU_Offset[1] = 0.00f;  // Y-axis offset (meters)
+        controlSystemValues->IMU_Offset[2] = 0.00f;  // Z-axis offset (meters)
 
-    // float kalmanGain;
+        /* Convert gyro from degrees/s to radians/s */
+        float gyro[3];
+        gyro[0] = controlSystemValues->gyroMeasurement.rotationRateRoll * DEGREES_TO_RADIANS_CONST;
+        gyro[1] = controlSystemValues->gyroMeasurement.rotationRatePitch * DEGREES_TO_RADIANS_CONST;
+        gyro[2] = controlSystemValues->gyroMeasurement.rotationRateYaw * DEGREES_TO_RADIANS_CONST;
 
-    // *kalmanState = *kalmanState + CONTROLSYSTEM_LOOP_PERIOD_S * kalmanInput;
-    // *kalmanUncertainty = *kalmanUncertainty + CONTROLSYSTEM_LOOP_PERIOD_S * CONTROLSYSTEM_LOOP_PERIOD_S * 4 * 4;
-    // kalmanGain = *kalmanUncertainty * 1 / (1 * *kalmanUncertainty + 3 * 3);
-    // *kalmanState = *kalmanState + kalmanGain * (kalmanMeasurement - *kalmanState);
-    // *kalmanUncertainty = (1 - kalmanGain) * *kalmanUncertainty;
+        /* Compute omega × r */
+        float omega_cross_r[3];
+        omega_cross_r[0] = gyro[1] * controlSystemValues->IMU_Offset[2] - gyro[2] * controlSystemValues->IMU_Offset[1];
+        omega_cross_r[1] = gyro[2] * controlSystemValues->IMU_Offset[0] - gyro[0] * controlSystemValues->IMU_Offset[2];
+        omega_cross_r[2] = gyro[0] * controlSystemValues->IMU_Offset[1] - gyro[1] * controlSystemValues->IMU_Offset[0];
 
-    /* Process noise variance (Q) - how much we trust the gyro */
-    const float processNoise     = 16.0f; // 4^2
-    /* Measurement noise variance (R) - how much we trust the accelerometer */
-    const float measurementNoise = 9.0f; // 3^2
-    float       kalmanGain;
+        /* Compute centrifugal acceleration: omega × (omega × r) */
+        float centrifugal[3];
+        centrifugal[0]                                    = gyro[1] * omega_cross_r[2] - gyro[2] * omega_cross_r[1];
+        centrifugal[1]                                    = gyro[2] * omega_cross_r[0] - gyro[0] * omega_cross_r[2];
+        centrifugal[2]                                    = gyro[0] * omega_cross_r[1] - gyro[1] * omega_cross_r[0];
 
-    /* Prediction step - Project the state ahead using gyro data */
-    *kalmanState       = *kalmanState + CONTROLSYSTEM_LOOP_PERIOD_S * kalmanInput;
+        /* Subtract centrifugal acceleration from measured acceleration */
+        controlSystemValues->correctedLinearAccelerationX = controlSystemValues->accMeasurement.linearAccelerationX - centrifugal[0];
+        controlSystemValues->correctedLinearAccelerationY = controlSystemValues->accMeasurement.linearAccelerationY - centrifugal[1];
+        controlSystemValues->correctedLinearAccelerationZ = controlSystemValues->accMeasurement.linearAccelerationZ - centrifugal[2];
+    } else {
+        /* If correction is disabled, use raw accelerometer values */
+        controlSystemValues->correctedLinearAccelerationX = controlSystemValues->accMeasurement.linearAccelerationX;
+        controlSystemValues->correctedLinearAccelerationY = controlSystemValues->accMeasurement.linearAccelerationY;
+        controlSystemValues->correctedLinearAccelerationZ = controlSystemValues->accMeasurement.linearAccelerationZ;
+    }
+}
 
-    /* Project the error covariance ahead */
-    *kalmanUncertainty = *kalmanUncertainty + (CONTROLSYSTEM_LOOP_PERIOD_S * CONTROLSYSTEM_LOOP_PERIOD_S * processNoise);
+void CS_CalculateAnglesFromAccelerations(ControlSystemValues_t *controlSystemValues) {
 
-    /* Ensure uncertainty doesn't become negative due to numerical errors */
-    if (*kalmanUncertainty < 0.0f) {
-        *kalmanUncertainty = 0.001f;
+    /* Calculate roll angle */
+    controlSystemValues->correctedRollAngle  = atan2f(controlSystemValues->correctedLinearAccelerationY, controlSystemValues->correctedLinearAccelerationZ) * RADIANS_TO_DEGREES_CONST;
+
+    /* Calculate pitch angle */
+    controlSystemValues->correctedPitchAngle = atan2f(-controlSystemValues->correctedLinearAccelerationX, sqrtf(controlSystemValues->correctedLinearAccelerationY * controlSystemValues->correctedLinearAccelerationY + controlSystemValues->correctedLinearAccelerationZ * controlSystemValues->correctedLinearAccelerationZ)) * RADIANS_TO_DEGREES_CONST;
+}
+
+void CS_Kalman_CalculateAngle(float *predictedAngle, float *predictedAngleUncertainty, float *gain, float gyro_rotationRate, float acc_calculatedAngle) {
+
+    /* Process noise variance (Q) (How much the gyro can be trusted: std = 4.0 degrees/s) */
+    const float processNoise     = 16.0f;
+    /* Measurement noise variance (R) (How much the accelerometer can be trusted: std = 3.0 degrees) */
+    const float measurementNoise = 9.0f;
+
+    /* Predict the angle with the last prediction and gyroscope rotation rate integration */
+    *predictedAngle              = *predictedAngle + CONTROLSYSTEM_LOOP_PERIOD_S * gyro_rotationRate;
+
+    /* Estimate uncertainy of the predicted angle with the gyroscope error */
+    *predictedAngleUncertainty   = *predictedAngleUncertainty + (CONTROLSYSTEM_LOOP_PERIOD_S * CONTROLSYSTEM_LOOP_PERIOD_S * processNoise);
+
+    /* Ensure the uncertainty doesn't become negative*/
+    if (*predictedAngleUncertainty < 0.0f) {
+        *predictedAngleUncertainty = 0.001f;
     }
 
-    /* Update step - Compute the Kalman gain */
-    kalmanGain = *kalmanUncertainty / (*kalmanUncertainty + measurementNoise);
+    /* Calculate the Kalman Gain with the estimated uncertainty and the accelerometer error */
+    *gain = *predictedAngleUncertainty / (*predictedAngleUncertainty + measurementNoise);
 
-    /* Clamp Kalman gain to valid range */
-    if (kalmanGain < 0.0f)
-        kalmanGain = 0.0f;
-    if (kalmanGain > 1.0f)
-        kalmanGain = 1.0f;
+    /* Clamp Kalman Gain to a valid range */
+    if (*gain < 0.0f)
+        *gain = 0.0f;
+    if (*gain > 1.0f)
+        *gain = 1.0f;
 
-    /* Update estimate with measurement */
-    *kalmanState       = *kalmanState + kalmanGain * (kalmanMeasurement - *kalmanState);
+    /* Update predicted angle with the calculated angle using the accelerometer measurements */
+    *predictedAngle            = *predictedAngle + *gain * (acc_calculatedAngle - *predictedAngle);
 
-    /* Update the error covariance */
-    *kalmanUncertainty = (1.0f - kalmanGain) * *kalmanUncertainty;
+    /* Reestimate the uncertainy of the predicted angle */
+    *predictedAngleUncertainty = (1.0f - *gain) * *predictedAngleUncertainty;
 }
 
 void CS_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD) {

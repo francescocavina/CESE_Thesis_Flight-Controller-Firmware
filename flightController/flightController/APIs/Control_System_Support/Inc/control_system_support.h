@@ -117,11 +117,23 @@ typedef struct {
     float                     magMeasurement_magneticHeading;
     /* IMU Measurements (Temperature Sensor) */
     float temperature;
+    /* IMU Correction */
+    float previousRotationRateRoll;
+    float previousRotationRatePitch;
+    float previousRotationRateYaw;
+    float IMU_Offset[3];
+    float correctedLinearAccelerationX;
+    float correctedLinearAccelerationY;
+    float correctedLinearAccelerationZ;
+    float correctedRollAngle;
+    float correctedPitchAngle;
     /* Kalman Filter Variables */
     float KalmanPrediction_rollAngle;
     float KalmanPrediction_pitchAngle;
     float KalmanUncertainty_rollAngle;
     float KalmanUncertainty_pitchAngle;
+    float KalmanGain_rollAngle;
+    float KalmanGain_pitchAngle;
     /* Errors: Angles */
     float error_rollAngle;
     float error_pitchAngle;
@@ -210,11 +222,26 @@ void CS_StateMachine_Restart(ControlSystemValues_t *controlSystemValues);
 void CS_StateMachine_SafeRestartCheck(ControlSystemValues_t *controlSystemValues);
 
 /*
+ * @brief  Corrects the acceleration measurements using the gyroscope measurements.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
+ *         correctionEnabled:   Flag to enable or disable the correction.
+ * @retval None
+ */
+void CS_CorrectAcceleration(ControlSystemValues_t *controlSystemValues, bool_t correctionEnabled);
+
+/*
+ * @brief  Calculates the angle using the acceleration measurements.
+ * @param  controlSystemValues: Pointer to the Control System Values structure.
+ * @retval None
+ */
+void CS_CalculateAnglesFromAccelerations(ControlSystemValues_t *controlSystemValues);
+
+/*
  * @brief  Calculates an angle using a Kalman filter.
  * @param  TODO
  * @retval None
  */
-void CS_Kalman_CalculateAngle(float *kalmanState, float *kalmanUncertainty, float kalmanInput, float kalmanMeasurement);
+void CS_Kalman_CalculateAngle(float *predictedAngle, float *predictedAngleUncertainty, float *gain, float gyro_rotationRate, float acc_calculatedAngle);
 
 /*
  * @brief  Calculates the PID controller output.
