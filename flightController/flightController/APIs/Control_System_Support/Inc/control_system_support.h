@@ -118,9 +118,6 @@ typedef struct {
     /* IMU Measurements (Temperature Sensor) */
     float temperature;
     /* IMU Correction */
-    float previousRotationRateRoll;
-    float previousRotationRatePitch;
-    float previousRotationRateYaw;
     float IMU_Offset[3];
     float correctedLinearAccelerationX;
     float correctedLinearAccelerationY;
@@ -137,6 +134,13 @@ typedef struct {
     /* Errors: Angles */
     float error_rollAngle;
     float error_pitchAngle;
+    /* PID Gains: Angles */
+    float PID_kP_rollAngle;
+    float PID_kI_rollAngle;
+    float PID_kD_rollAngle;
+    float PID_kP_pitchAngle;
+    float PID_kI_pitchAngle;
+    float PID_kD_pitchAngle;
     /* PID (Angles): Previous Errors */
     float PID_previousError_rollAngle;
     float PID_previousError_pitchAngle;
@@ -154,6 +158,16 @@ typedef struct {
     float error_rollRate;
     float error_pitchRate;
     float error_yawRate;
+    /* PID Gains: Rates */
+    float PID_kP_rollRate;
+    float PID_kI_rollRate;
+    float PID_kD_rollRate;
+    float PID_kP_pitchRate;
+    float PID_kI_pitchRate;
+    float PID_kD_pitchRate;
+    float PID_kP_yawRate;
+    float PID_kI_yawRate;
+    float PID_kD_yawRate;
     /* PID (Rates): Previous Errors */
     float PID_previousError_rollRate;
     float PID_previousError_pitchRate;
@@ -220,55 +234,6 @@ void CS_StateMachine_Restart(ControlSystemValues_t *controlSystemValues);
  * @retval None
  */
 void CS_StateMachine_SafeRestartCheck(ControlSystemValues_t *controlSystemValues);
-
-/*
- * @brief  Corrects the acceleration measurements using the gyroscope measurements.
- * @param  controlSystemValues: Pointer to the Control System Values structure.
- *         correctionEnabled:   Flag to enable or disable the correction.
- * @retval None
- */
-void CS_CorrectAcceleration(ControlSystemValues_t *controlSystemValues, bool_t correctionEnabled);
-
-/*
- * @brief  Calculates the angle using the acceleration measurements.
- * @param  controlSystemValues: Pointer to the Control System Values structure.
- * @retval None
- */
-void CS_CalculateAnglesFromAccelerations(ControlSystemValues_t *controlSystemValues);
-
-/*
- * @brief  Calculates an angle using a Kalman filter.
- * @param  TODO
- * @retval None
- */
-void CS_Kalman_CalculateAngle(float *predictedAngle, float *predictedAngleUncertainty, float *gain, float gyro_rotationRate, float acc_calculatedAngle);
-
-/*
- * @brief  Calculates the PID controller output.
- * @param  PID_Output:         Pointer to a variable that hold the PID controller output value.
- *         previousIterm:      Value of the integral term of a previous control loop iteration.
- *         previousErrorValue: Value of the error of a previous control loop iteration.
- *         errorValue:         Value of the current system error.
- *         kP:				   Proportional gain.
- *         kI:                 Integral gain.
- *         kD:                 Derivative gain.
- * @retval None
- */
-void CS_CalculatePID(float *PID_Output, float *previousIterm, float *previousErrorValue, float errorValue, float kP, float kI, float kD);
-
-/*
- * @brief  Resets the PID controller errors, integral terms and output values.
- * @param  controlSystemValues: Pointer to the Control System Values structure.
- * @retval None
- */
-void CS_ResetPID(ControlSystemValues_t *controlSystemValues);
-
-/*
- * @brief  Limits motors speed.
- * @param  controlSystemValues: Pointer to the Control System Values structure.
- * @retval None
- */
-void CS_CheckForMotorsSpeedLimits(ControlSystemValues_t *controlSystemValues);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

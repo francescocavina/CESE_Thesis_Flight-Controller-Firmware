@@ -918,7 +918,6 @@ void GY87_ReadAccelerometer(GY87_HandleTypeDef_t *hgy87, GY87_accelerometerValue
     int16_t scaleFactor = MPU_6050_AUX_VAL_ACCEL_FS_08;
 
     float accX, accY, accZ;
-    float denomRoll, denomPitch;
 
     /* Check parameters */
     if (NULL != hgy87 && NULL != accelerometerValues && NULL != accelerometerCalibrationValues) {
