@@ -31,6 +31,9 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+uint8_t usb_rx_buffer[USB_RX_BUFFER_SIZE];
+volatile uint32_t usb_rx_length = 0;
+volatile bool usb_rx_ready = false;
 
 /* USER CODE END PV */
 
@@ -260,9 +263,15 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-    USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-    USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-    return (USBD_OK);
+  uint32_t len = (*Len > USB_RX_BUFFER_SIZE) ? USB_RX_BUFFER_SIZE : *Len;
+  memcpy(usb_rx_buffer, Buf, len);
+  usb_rx_length = len;
+  usb_rx_ready = 1;
+
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &UserRxBufferFS[0]);
+  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+  return (USBD_OK);
   /* USER CODE END 6 */
 }
 

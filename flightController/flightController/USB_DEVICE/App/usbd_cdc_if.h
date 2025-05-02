@@ -30,7 +30,7 @@
 #include "usbd_cdc.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+ #include <stdbool.h>
 /* USER CODE END INCLUDE */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -64,7 +64,10 @@
   */
 
 /* USER CODE BEGIN EXPORTED_TYPES */
-
+ /**
+  * @brief bool_t type definition
+  */
+ typedef bool bool_t;
 /* USER CODE END EXPORTED_TYPES */
 
 /**
@@ -77,7 +80,7 @@
   */
 
 /* USER CODE BEGIN EXPORTED_MACRO */
-
+#define USB_RX_BUFFER_SIZE 64
 /* USER CODE END EXPORTED_MACRO */
 
 /**
@@ -93,7 +96,9 @@
 extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
-
+extern uint8_t usb_rx_buffer[USB_RX_BUFFER_SIZE];
+extern volatile uint32_t usb_rx_length;
+extern volatile bool usb_rx_ready;
 /* USER CODE END EXPORTED_VARIABLES */
 
 /**
