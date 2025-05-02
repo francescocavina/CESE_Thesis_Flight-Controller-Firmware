@@ -109,6 +109,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ./Drivers/Devices/GY87_IMU/Src/MPU6050_driver_HWI.c
     ./Drivers/Devices/LoggingSystem/Src/LoggingSystem_UAI.c
     ./Drivers/Devices/LoggingSystem/Src/LoggingSystem_HWI.c
+    ./Drivers/Devices/LiveTuningSystem/Src/LiveTuningSystem_UAI.c
+    ./Drivers/Devices/LiveTuningSystem/Src/LiveTuningSystem_HWI.c
 )
 
 # Add include paths
@@ -134,6 +136,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     ./Drivers/Devices/FSA8S_FlySky_RadioControlReceiver/Inc
     ./Drivers/Devices/GY87_IMU/Inc
     ./Drivers/Devices/LoggingSystem/Inc
+    ./Drivers/Devices/LiveTuningSystem/Inc
     ./Settings/Inc
 )
 
