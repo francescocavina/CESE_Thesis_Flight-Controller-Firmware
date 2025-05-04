@@ -88,21 +88,21 @@ typedef enum {
     DEBUG_GY87_MAG_VALUES_MAG_FIELD_Z                     = 42,  /* 6; IMU; Magnetometer Meas.;  Magnetic Field Z;                [G]; */
     DEBUG_GY87_MAG_HEADING                                = 43,  /* 6; IMU; Magnetometer Meas.;  Magnetic Heading;                [°]; */
 
-    DEBUG_CONST_CONTROLSYSTEM_KP_ROLL_ANGLE               = 44,  /* 4; Control System PID Constants; PID Gains (Angle); kP Roll;  [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KI_ROLL_ANGLE               = 45,  /* 4; Control System PID Constants; PID Gains (Angle); kI Roll;  [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KD_ROLL_ANGLE               = 46,  /* 4; Control System PID Constants; PID Gains (Angle); kD Roll;  [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KP_PITCH_ANGLE              = 47,  /* 4; Control System PID Constants; PID Gains (Angle); kP Pitch; [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KI_PITCH_ANGLE              = 48,  /* 4; Control System PID Constants; PID Gains (Angle); kI Pitch; [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KD_PITCH_ANGLE              = 49,  /* 4; Control System PID Constants; PID Gains (Angle); kD Pitch; [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KP_ROLL_RATE                = 50,  /* 4; Control System PID Constants; PID Gains (Rate);  kP Roll;  [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KI_ROLL_RATE                = 51,  /* 4; Control System PID Constants; PID Gains (Rate);  kI Roll;  [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KD_ROLL_RATE                = 52,  /* 4; Control System PID Constants; PID Gains (Rate);  kD Roll;  [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KP_PITCH_RATE               = 53,  /* 4; Control System PID Constants; PID Gains (Rate);  kP Pitch; [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KI_PITCH_RATE               = 54,  /* 4; Control System PID Constants; PID Gains (Rate);  kI Pitch; [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KD_PITCH_RATE               = 55,  /* 4; Control System PID Constants; PID Gains (Rate);  kD Pitch; [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KP_YAW_RATE                 = 56,  /* 4; Control System PID Constants; PID Gains (Rate);  kP Yaw;   [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KI_YAW_RATE                 = 57,  /* 4; Control System PID Constants; PID Gains (Rate);  kI Yaw;   [-]; */
-    DEBUG_CONST_CONTROLSYSTEM_KD_YAW_RATE                 = 58,  /* 4; Control System PID Constants; PID Gains (Rate);  kD Yaw;   [-]; */
+    DEBUG_CONTROLSYSTEM_KP_ROLL_ANGLE                     = 44,  /* 4; Control System PID Gains; PID Gains (Angle); kP Roll;  [-]; LIVETUNING [0,0] */
+    DEBUG_CONTROLSYSTEM_KI_ROLL_ANGLE                     = 45,  /* 4; Control System PID Gains; PID Gains (Angle); kI Roll;  [-]; LIVETUNING [1,0] */
+    DEBUG_CONTROLSYSTEM_KD_ROLL_ANGLE                     = 46,  /* 4; Control System PID Gains; PID Gains (Angle); kD Roll;  [-]; LIVETUNING [2,0] */
+    DEBUG_CONTROLSYSTEM_KP_PITCH_ANGLE                    = 47,  /* 4; Control System PID Gains; PID Gains (Angle); kP Pitch; [-]; LIVETUNING [0,1] */
+    DEBUG_CONTROLSYSTEM_KI_PITCH_ANGLE                    = 48,  /* 4; Control System PID Gains; PID Gains (Angle); kI Pitch; [-]; LIVETUNING [1,1] */
+    DEBUG_CONTROLSYSTEM_KD_PITCH_ANGLE                    = 49,  /* 4; Control System PID Gains; PID Gains (Angle); kD Pitch; [-]; LIVETUNING [2,1] */
+    DEBUG_CONTROLSYSTEM_KP_ROLL_RATE                      = 50,  /* 4; Control System PID Gains; PID Gains (Rate);  kP Roll;  [-]; LIVETUNING [0,2] */
+    DEBUG_CONTROLSYSTEM_KI_ROLL_RATE                      = 51,  /* 4; Control System PID Gains; PID Gains (Rate);  kI Roll;  [-]; LIVETUNING [1,2] */
+    DEBUG_CONTROLSYSTEM_KD_ROLL_RATE                      = 52,  /* 4; Control System PID Gains; PID Gains (Rate);  kD Roll;  [-]; LIVETUNING [2,2] */
+    DEBUG_CONTROLSYSTEM_KP_PITCH_RATE                     = 53,  /* 4; Control System PID Gains; PID Gains (Rate);  kP Pitch; [-]; LIVETUNING [0,3] */
+    DEBUG_CONTROLSYSTEM_KI_PITCH_RATE                     = 54,  /* 4; Control System PID Gains; PID Gains (Rate);  kI Pitch; [-]; LIVETUNING [1,3] */
+    DEBUG_CONTROLSYSTEM_KD_PITCH_RATE                     = 55,  /* 4; Control System PID Gains; PID Gains (Rate);  kD Pitch; [-]; LIVETUNING [2,3] */
+    DEBUG_CONTROLSYSTEM_KP_YAW_RATE                       = 56,  /* 4; Control System PID Gains; PID Gains (Rate);  kP Yaw;   [-]; LIVETUNING [0,4] */
+    DEBUG_CONTROLSYSTEM_KI_YAW_RATE                       = 57,  /* 4; Control System PID Gains; PID Gains (Rate);  kI Yaw;   [-]; LIVETUNING [1,4] */
+    DEBUG_CONTROLSYSTEM_KD_YAW_RATE                       = 58,  /* 4; Control System PID Gains; PID Gains (Rate);  kD Yaw;   [-]; LIVETUNING [2,4] */
 
     DEBUG_CONTROLSYSTEM_REFERENCE_THROTTLE                = 59,  /* 5; Control System Variables; References (Values);       Throttle; [-]; */
     DEBUG_CONTROLSYSTEM_REFERENCE_ROLL_VALUE              = 60,  /* 5; Control System Variables; References (Values);       Roll;     [-]; */
@@ -112,10 +112,10 @@ typedef enum {
     DEBUG_CONTROLSYSTEM_REFERENCE_PITCH_ANGLE             = 64,  /* 5; Control System Variables; References (Angles);       Pitch;    [°]; */
     DEBUG_CONTROLSYSTEM_KALMAN_ROLL_ANGLE                 = 65,  /* 5; Control System Variables; Kalman Angles Prediction;  Roll;     [°]; PLOT [3,0] */
     DEBUG_CONTROLSYSTEM_KALMAN_PITCH_ANGLE                = 66,  /* 5; Control System Variables; Kalman Angles Prediction;  Pitch;    [°]; PLOT [3,1] */
-    DEBUG_CONTROLSYSTEM_KALMAN_UNCERTAINTY_ROLL_ANGLE     = 67,  /* 5; Control System Variables; Kalman Angles Uncertainty; Roll;     [°]; PLOT [4,0] */
-    DEBUG_CONTROLSYSTEM_KALMAN_UNCERTAINTY_PITCH_ANGLE    = 68,  /* 5; Control System Variables; Kalman Angles Uncertainty; Pitch;    [°]; PLOT [4,1] */
-    DEBUG_CONTROLSYSTEM_KALMAN_GAIN_ROLL_ANGLE            = 69,  /* 5; Control System Variables; Kalman Gains;              Roll;     [-]; PLOT [5,0] */
-    DEBUG_CONTROLSYSTEM_KALMAN_GAIN_PITCH_ANGLE           = 70,  /* 5; Control System Variables; Kalman Gains;              Pitch;    [-]; PLOT [5,1] */
+    DEBUG_CONTROLSYSTEM_KALMAN_UNCERTAINTY_ROLL_ANGLE     = 67,  /* 5; Control System Variables; Kalman Angles Uncertainty; Roll;     [°]; */
+    DEBUG_CONTROLSYSTEM_KALMAN_UNCERTAINTY_PITCH_ANGLE    = 68,  /* 5; Control System Variables; Kalman Angles Uncertainty; Pitch;    [°]; */
+    DEBUG_CONTROLSYSTEM_KALMAN_GAIN_ROLL_ANGLE            = 69,  /* 5; Control System Variables; Kalman Gains;              Roll;     [-]; */
+    DEBUG_CONTROLSYSTEM_KALMAN_GAIN_PITCH_ANGLE           = 70,  /* 5; Control System Variables; Kalman Gains;              Pitch;    [-]; */
     DEBUG_CONTROLSYSTEM_ERROR_ROLL_ANGLE                  = 71,  /* 5; Control System Variables; Errors (Angles);           Roll;     [°]; */
     DEBUG_CONTROLSYSTEM_ERROR_PITCH_ANGLE                 = 72,  /* 5; Control System Variables; Errors (Angles);           Pitch;    [°]; */
     DEBUG_CONTROLSYSTEM_PID_OUTPUT_ROLL_ANGLE             = 73,  /* 5; Control System Variables; PID Outputs (Angles);      Roll;     [°]; */
@@ -163,6 +163,7 @@ typedef enum {
     DEBUG_TASK_STACK_WATERMARK_BATTERYALARM               = 112, /* 2; System Stack; Stack High Watermark; Task: BatteryAlarm     ; [words]; */
     DEBUG_TASK_STACK_WATERMARK_HEARTBEATLIGHT             = 113, /* 2; System Stack; Stack High Watermark; Task: HeartbeatLight   ; [words]; */
     DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS               = 114, /* 2; System Stack; Stack High Watermark; Task: FlightLights     ; [words]; */
+    DEBUG_TASK_STACK_WATERMARK_LIVETUNINGSYSTEM           = 115, /* 2; System Stack; Stack High Watermark; Task: LiveTuningSystem ; [words]; */
 } DebugSignalsIds_t;
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */

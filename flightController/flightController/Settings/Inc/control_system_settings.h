@@ -36,6 +36,8 @@
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 /* Drivers Settings */
 #define FSA8S_CHANNELS (10)
+/* Radio Controller Settings */
+#define CONTROLSYSTEM_RC_DEADBAND (4) // Roll, pitch and yaw deadbands: 3/1000 points
 /* Control System Settings */
 #define CONTROLSYSTEM_MODE                   (1)
 #define CONTROLSYSTEM_LOOP_PERIOD_S          (0.004) // Loop period in [s]
@@ -55,9 +57,9 @@
 #define CONTROLSYSTEM_KD_PITCH_ANGLE (0.0)
 /* PID gains: Rates */
 #define CONTROLSYSTEM_KP_ROLL_RATE  (1.404)
-#define CONTROLSYSTEM_KP_PITCH_RATE (0.0)
+#define CONTROLSYSTEM_KP_PITCH_RATE (1.404)
 #define CONTROLSYSTEM_KP_YAW_RATE   (0.0)
-#define CONTROLSYSTEM_KI_ROLL_RATE  (0.596)
+#define CONTROLSYSTEM_KI_ROLL_RATE  (0.0)
 #define CONTROLSYSTEM_KI_PITCH_RATE (0.0)
 #define CONTROLSYSTEM_KI_YAW_RATE   (0.0)
 #define CONTROLSYSTEM_KD_ROLL_RATE  (0.0)

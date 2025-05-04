@@ -16,7 +16,7 @@
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAS PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY. WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE
  */
@@ -41,6 +41,7 @@
 
 #include "ESC_UAI.h"
 #include "FSA8S_driver_UAI.h"
+#include "LiveTuningSystem_UAI.h"
 #include "LoggingSystem_UAI.h"
 #include "MPU6050_driver_UAI.h"
 
@@ -63,6 +64,7 @@
 #define TASK_BATTERYALARM_PRIORITY     (2)
 #define TASK_HEARTBEATLIGHT_PRIORITY   (2)
 #define TASK_FLIGHTLIGHTS_PRIORITY     (2)
+#define TASK_LIVETUNINGSYSTEM_PRIORITY (2)
 /* FreeRTOS Queues Sizes */
 #define USB_COMMUNICATION_INFO_QUEUE_SIZE  (32)
 #define USB_COMMUNICATION_DEBUG_QUEUE_SIZE (1)
@@ -85,6 +87,7 @@
 #define MAIN_APP_DEBUGGING_GY87_TEMPERATURE                          (1) // Not necessary for control system
 #define MAIN_APP_DEBUGGING_ESCS                                      (1)
 #define MAIN_APP_DEBUGGING_FLIGHT_CONTROLLER_BATTERY_LEVEL           (1)
+#define MAIN_APP_DEBUGGING_CONTROLSYSTEM_PID_GAINS                   (1)
 #define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES            (1)
 #define MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_ANGLES            (1)
 #define MAIN_APP_DEBUGGING_CONTROLSYSTEM_KALMAN_FILTER               (1)
@@ -134,6 +137,7 @@ static TaskHandle_t Task_Handle_BatteryLevel                      = NULL;
 static TaskHandle_t Task_Handle_BatteryAlarm                      = NULL;
 static TaskHandle_t Task_Handle_HeartbeatLight                    = NULL;
 static TaskHandle_t Task_Handle_FlightLights                      = NULL;
+static TaskHandle_t Task_Handle_LiveTuningSystem                  = NULL;
 /* Timers Variables */
 static bool_t   Timer_Flag_OnOffButton                            = false;
 static uint16_t Timer_AutoReloadTime_OnOffButton                  = PW_ON_OFF_DRIVER_TIME;
@@ -164,6 +168,7 @@ static UBaseType_t Task_StackHighWatermark_BatteryLevel      = 0;
 static UBaseType_t Task_StackHighWatermark_BatteryAlarm      = 0;
 static UBaseType_t Task_StackHighWatermark_HeartbeatLight    = 0;
 static UBaseType_t Task_StackHighWatermark_FlightLights      = 0;
+static UBaseType_t Task_StackHighWatermark_LiveTuningSystem  = 0;
 #endif
 
 /* Debugging Variables */
@@ -188,6 +193,7 @@ static uint8_t  debuggingStr_GY87_magnetometerValues[40]                 = {0}; 
 static uint8_t  debuggingStr_GY87_magnetometerHeadingValue[16]           = {0};            // Size checked
 static uint8_t  debuggingStr_GY87_temperature[16]                        = {0};            // Size checked
 static uint8_t  debuggingStr_BatteryLevel[20]                            = {0};            // Size checked
+static uint8_t  debuggingStr_ControlSystem_PID_Gains[160]                = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_referenceValues[40]           = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_referenceAngles[40]           = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_KalmanFilter[80]              = {0};            // Size checked
@@ -199,7 +205,7 @@ static uint8_t  debuggingStr_ControlSystem_ratesPID[50]                  = {0}; 
 static uint8_t  debuggingStr_ControlSystem_motorsSpeeds[50]              = {0};            // Size checked
 static uint8_t  debuggingStr_ControlSystem_Auxiliar[100]                 = {0};            // Size checked
 static uint8_t  debuggingStr_ESCs[40]                                    = {0};            // Size checked
-static uint8_t  debuggingStr_TasksStackHighWatermark[80]                 = {0};            // Size checked
+static uint8_t  debuggingStr_TasksStackHighWatermark[100]                = {0};            // Size checked
 #endif
 
 /* Task: On/Off Button */
@@ -318,6 +324,13 @@ void Task_HeartbeatLight(void *ptr);
  */
 void Task_FlightLights(void *ptr);
 
+/*
+ * @brief  Task: Live tuning system for flight controller control system.
+ * @param  Task pointer: not used.
+ * @retval None
+ */
+void Task_LiveTuningSystem(void *ptr);
+
 /* --- Private function callback declarations ---------------------------------------------------*/
 /*
  * @brief  Timer Callback: Reads the on-board on/off button and turns on/off the flight controller
@@ -363,6 +376,23 @@ void Initialize_SystemVariables(void) {
     controlSystemValues.KalmanPrediction_pitchAngle      = 0;
     controlSystemValues.KalmanUncertainty_rollAngle      = 2 * 2;
     controlSystemValues.KalmanUncertainty_pitchAngle     = 2 * 2;
+
+    /* Control System: PID Gains */
+    controlSystemValues.PID_Gains.kP_rollAngle           = CONTROLSYSTEM_KP_ROLL_ANGLE;
+    controlSystemValues.PID_Gains.kI_rollAngle           = CONTROLSYSTEM_KI_ROLL_ANGLE;
+    controlSystemValues.PID_Gains.kD_rollAngle           = CONTROLSYSTEM_KD_ROLL_ANGLE;
+    controlSystemValues.PID_Gains.kP_pitchAngle          = CONTROLSYSTEM_KP_PITCH_ANGLE;
+    controlSystemValues.PID_Gains.kI_pitchAngle          = CONTROLSYSTEM_KI_PITCH_ANGLE;
+    controlSystemValues.PID_Gains.kD_pitchAngle          = CONTROLSYSTEM_KD_PITCH_ANGLE;
+    controlSystemValues.PID_Gains.kP_rollRate            = CONTROLSYSTEM_KP_ROLL_RATE;
+    controlSystemValues.PID_Gains.kI_rollRate            = CONTROLSYSTEM_KI_ROLL_RATE;
+    controlSystemValues.PID_Gains.kD_rollRate            = CONTROLSYSTEM_KD_ROLL_RATE;
+    controlSystemValues.PID_Gains.kP_pitchRate           = CONTROLSYSTEM_KP_PITCH_RATE;
+    controlSystemValues.PID_Gains.kI_pitchRate           = CONTROLSYSTEM_KI_PITCH_RATE;
+    controlSystemValues.PID_Gains.kD_pitchRate           = CONTROLSYSTEM_KD_PITCH_RATE;
+    controlSystemValues.PID_Gains.kP_yawRate             = CONTROLSYSTEM_KP_YAW_RATE;
+    controlSystemValues.PID_Gains.kI_yawRate             = CONTROLSYSTEM_KI_YAW_RATE;
+    controlSystemValues.PID_Gains.kD_yawRate             = CONTROLSYSTEM_KD_YAW_RATE;
 }
 
 bool_t FreeRTOS_CreateTimers(void) {
@@ -483,6 +513,12 @@ bool_t FreeRTOS_CreateTasks(void) {
     /* Task 10: FlightLights */
     xTaskCreate(Task_FlightLights, "Task_FlightLights", (1 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_FLIGHTLIGHTS_PRIORITY), &Task_Handle_FlightLights);
     if (Task_Handle_FlightLights == NULL) {
+        return false;
+    }
+
+    /* Task 11: LiveTuningSystem */
+    xTaskCreate(Task_LiveTuningSystem, "Task_LiveTuningSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_LIVETUNINGSYSTEM_PRIORITY), &Task_Handle_LiveTuningSystem);
+    if (Task_Handle_LiveTuningSystem == NULL) {
         return false;
     }
 
@@ -666,11 +702,12 @@ void Task_ControlSystem(void *ptr) {
             vTaskDelay(pdMS_TO_TICKS(150));
             HAL_GPIO_WritePin(BUZZER_GPIO_Port, BUZZER_Pin, 0);
 #endif
-            /* Set global flags */
-            FlightController_isInitialized = true;
 
             /* Initialize variables */
             Initialize_SystemVariables();
+
+            /* Set global flags */
+            FlightController_isInitialized = true;
         }
 
         /* Refresh the WWDG */
@@ -710,12 +747,6 @@ void Task_ControlSystem(void *ptr) {
 #if (MAIN_APP_DEBUGGING_GY87_TEMPERATURE == 1)
             controlSystemValues.temperature = GY87_ReadTemperatureSensor(hgy87);
 #endif
-
-            /* Calculate Kalman angles */
-            // CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_rollAngle, &controlSystemValues.KalmanUncertainty_rollAngle, controlSystemValues.gyroMeasurement.rotationRateRoll, controlSystemValues.accMeasurement.angleRoll);
-            // CS_Kalman_CalculateAngle(&controlSystemValues.KalmanPrediction_pitchAngle, &controlSystemValues.KalmanUncertainty_pitchAngle, controlSystemValues.gyroMeasurement.rotationRatePitch, controlSystemValues.accMeasurement.anglePitch);
-
-            Kalman_Update(&controlSystemValues);
 
         } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
 
@@ -1077,6 +1108,27 @@ void Task_Debugging(void *ptr) {
                          DEBUG_FLIGHT_CONTROLLER_BATTERY_LEVEL, FlightController_batteryLevel);
 #endif
 
+#if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_PID_GAINS == 1)
+                /* Log control system PID gains */
+                snprintf((char *)debuggingStr_ControlSystem_PID_Gains, 160 * sizeof(uint8_t),
+                         (const char *)"/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f/%d_%.2f",
+                         DEBUG_CONTROLSYSTEM_KP_ROLL_ANGLE, logControlSystemValues->PID_Gains.kP_rollAngle,
+                         DEBUG_CONTROLSYSTEM_KI_ROLL_ANGLE, logControlSystemValues->PID_Gains.kI_rollAngle,
+                         DEBUG_CONTROLSYSTEM_KD_ROLL_ANGLE, logControlSystemValues->PID_Gains.kD_rollAngle,
+                         DEBUG_CONTROLSYSTEM_KP_PITCH_ANGLE, logControlSystemValues->PID_Gains.kP_pitchAngle,
+                         DEBUG_CONTROLSYSTEM_KI_PITCH_ANGLE, logControlSystemValues->PID_Gains.kI_pitchAngle,
+                         DEBUG_CONTROLSYSTEM_KD_PITCH_ANGLE, logControlSystemValues->PID_Gains.kD_pitchAngle,
+                         DEBUG_CONTROLSYSTEM_KP_ROLL_RATE, logControlSystemValues->PID_Gains.kP_rollRate,
+                         DEBUG_CONTROLSYSTEM_KI_ROLL_RATE, logControlSystemValues->PID_Gains.kI_rollRate,
+                         DEBUG_CONTROLSYSTEM_KD_ROLL_RATE, logControlSystemValues->PID_Gains.kD_rollRate,
+                         DEBUG_CONTROLSYSTEM_KP_PITCH_RATE, logControlSystemValues->PID_Gains.kP_pitchRate,
+                         DEBUG_CONTROLSYSTEM_KI_PITCH_RATE, logControlSystemValues->PID_Gains.kI_pitchRate,
+                         DEBUG_CONTROLSYSTEM_KD_PITCH_RATE, logControlSystemValues->PID_Gains.kD_pitchRate,
+                         DEBUG_CONTROLSYSTEM_KP_YAW_RATE, logControlSystemValues->PID_Gains.kP_yawRate,
+                         DEBUG_CONTROLSYSTEM_KI_YAW_RATE, logControlSystemValues->PID_Gains.kI_yawRate,
+                         DEBUG_CONTROLSYSTEM_KD_YAW_RATE, logControlSystemValues->PID_Gains.kD_yawRate);
+#endif
+
 #if (MAIN_APP_DEBUGGING_CONTROLSYSTEM_REFERENCE_VALUES == 1)
                 /* Log control system reference values */
                 snprintf((char *)debuggingStr_ControlSystem_referenceValues, 40 * sizeof(uint8_t), (const char *)"/%d_%d/%d_%d/%d_%d/%d_%d",
@@ -1207,7 +1259,7 @@ void Task_Debugging(void *ptr) {
 
 #if (MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK)
                 /* Log tasks stack high watermark */
-                snprintf((char *)debuggingStr_TasksStackHighWatermark, 80 * sizeof(uint8_t), (const char *)"/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld",
+                snprintf((char *)debuggingStr_TasksStackHighWatermark, 100 * sizeof(uint8_t), (const char *)"/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld/%d_%ld",
                          DEBUG_TASK_STACK_WATERMARK_ONOFFBUTTON, Task_StackHighWatermark_OnOffButton,
                          DEBUG_TASK_STACK_WATERMARK_STARTUP, Task_StackHighWatermark_StartUp,
                          DEBUG_TASK_STACK_WATERMARK_IMU_CALIBRATION, Task_StackHighWatermark_IMU_Calibration,
@@ -1217,7 +1269,8 @@ void Task_Debugging(void *ptr) {
                          DEBUG_TASK_STACK_WATERMARK_BATTERYLEVEL, Task_StackHighWatermark_BatteryLevel,
                          DEBUG_TASK_STACK_WATERMARK_BATTERYALARM, Task_StackHighWatermark_BatteryAlarm,
                          DEBUG_TASK_STACK_WATERMARK_HEARTBEATLIGHT, Task_StackHighWatermark_HeartbeatLight,
-                         DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS, Task_StackHighWatermark_FlightLights);
+                         DEBUG_TASK_STACK_WATERMARK_FLIGHTLIGHTS, Task_StackHighWatermark_FlightLights,
+                         DEBUG_TASK_STACK_WATERMARK_LIVETUNINGSYSTEM, Task_StackHighWatermark_LiveTuningSystem);
 #endif
             }
 
@@ -1244,6 +1297,7 @@ void Task_Debugging(void *ptr) {
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_magnetometerHeadingValue);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_GY87_temperature);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_BatteryLevel);
+        written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_PID_Gains);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceValues);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_referenceAngles);
         written_chars += snprintf((char *)debuggingActiveBuffer_TaskDebugging + written_chars, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE - written_chars, "%s", debuggingStr_ControlSystem_KalmanFilter);
@@ -1524,6 +1578,34 @@ void Task_FlightLights(void *ptr) {
 #if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_FlightLights = uxTaskGetStackHighWaterMark(NULL);
+#endif
+
+        /* Set task time delay */
+        vTaskDelayUntil(&xLastWakeTime, xTaskPeriod);
+    }
+}
+
+void Task_LiveTuningSystem(void *ptr) {
+    (void)ptr;
+
+    /* Change delay from time in [ms] to ticks */
+    const TickType_t xTaskPeriod = pdMS_TO_TICKS(500);
+    /* Get initial tick count */
+    TickType_t xLastWakeTime     = xTaskGetTickCount();
+
+    ControlSystem_PID_Gains_t PID_Gains;
+
+    while (1) {
+
+        if (FlightController_isInitialized) {
+            PID_Gains = controlSystemValues.PID_Gains;
+            LiveTune_PID_Gains(&PID_Gains);
+            controlSystemValues.PID_Gains = PID_Gains;
+        }
+
+#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+        /* Get stack watermark */
+        Task_StackHighWatermark_LiveTuningSystem = uxTaskGetStackHighWaterMark(NULL);
 #endif
 
         /* Set task time delay */

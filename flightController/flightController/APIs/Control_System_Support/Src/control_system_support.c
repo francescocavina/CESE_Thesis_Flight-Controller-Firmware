@@ -380,9 +380,9 @@ void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues) {
     controlSystemValues->error_pitchAngle     = controlSystemValues->reference_pitchAngle - controlSystemValues->KalmanPrediction_pitchAngle;
 
     /* Calculate PID for roll angle */
-    CS_CalculatePID(&controlSystemValues->PID_Output_rollAngle, &controlSystemValues->PID_previousIterm_rollAngle, &controlSystemValues->PID_previousError_rollAngle, controlSystemValues->error_rollAngle, CONTROLSYSTEM_KP_ROLL_ANGLE, CONTROLSYSTEM_KI_ROLL_ANGLE, CONTROLSYSTEM_KD_ROLL_ANGLE);
+    CS_CalculatePID(&controlSystemValues->PID_Output_rollAngle, &controlSystemValues->PID_previousIterm_rollAngle, &controlSystemValues->PID_previousError_rollAngle, controlSystemValues->error_rollAngle, controlSystemValues->PID_Gains.kP_rollAngle, controlSystemValues->PID_Gains.kI_rollAngle, controlSystemValues->PID_Gains.kD_rollAngle);
     /* Calculate PID for pitch angle */
-    CS_CalculatePID(&controlSystemValues->PID_Output_pitchAngle, &controlSystemValues->PID_previousIterm_pitchAngle, &controlSystemValues->PID_previousError_pitchAngle, controlSystemValues->error_pitchAngle, CONTROLSYSTEM_KP_PITCH_ANGLE, CONTROLSYSTEM_KI_PITCH_ANGLE, CONTROLSYSTEM_KD_PITCH_ANGLE);
+    CS_CalculatePID(&controlSystemValues->PID_Output_pitchAngle, &controlSystemValues->PID_previousIterm_pitchAngle, &controlSystemValues->PID_previousError_pitchAngle, controlSystemValues->error_pitchAngle, controlSystemValues->PID_Gains.kP_pitchAngle, controlSystemValues->PID_Gains.kI_pitchAngle, controlSystemValues->PID_Gains.kD_pitchAngle);
 
     /* Calculate desired rates */
     controlSystemValues->reference_rollRate  = controlSystemValues->PID_Output_rollAngle;
@@ -395,11 +395,11 @@ void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues) {
     controlSystemValues->error_yawRate       = controlSystemValues->reference_yawRate - controlSystemValues->gyroMeasurement.rotationRateYaw;
 
     /* Calculate PID for roll rate */
-    CS_CalculatePID(&controlSystemValues->PID_Output_rollRate, &controlSystemValues->PID_previousIterm_rollRate, &controlSystemValues->PID_previousError_rollRate, controlSystemValues->error_rollRate, CONTROLSYSTEM_KP_ROLL_RATE, CONTROLSYSTEM_KI_ROLL_RATE, CONTROLSYSTEM_KD_ROLL_RATE);
+    CS_CalculatePID(&controlSystemValues->PID_Output_rollRate, &controlSystemValues->PID_previousIterm_rollRate, &controlSystemValues->PID_previousError_rollRate, controlSystemValues->error_rollRate, controlSystemValues->PID_Gains.kP_rollRate, controlSystemValues->PID_Gains.kI_rollRate, controlSystemValues->PID_Gains.kD_rollRate);
     /* Calculate PID for pitch rate */
-    CS_CalculatePID(&controlSystemValues->PID_Output_pitchRate, &controlSystemValues->PID_previousIterm_pitchRate, &controlSystemValues->PID_previousError_pitchRate, controlSystemValues->error_pitchRate, CONTROLSYSTEM_KP_PITCH_RATE, CONTROLSYSTEM_KI_PITCH_RATE, CONTROLSYSTEM_KD_PITCH_RATE);
+    CS_CalculatePID(&controlSystemValues->PID_Output_pitchRate, &controlSystemValues->PID_previousIterm_pitchRate, &controlSystemValues->PID_previousError_pitchRate, controlSystemValues->error_pitchRate, controlSystemValues->PID_Gains.kP_pitchRate, controlSystemValues->PID_Gains.kI_pitchRate, controlSystemValues->PID_Gains.kD_pitchRate);
     /* Calculate PID for yaw rate */
-    CS_CalculatePID(&controlSystemValues->PID_Output_yawRate, &controlSystemValues->PID_previousIterm_yawRate, &controlSystemValues->PID_previousError_yawRate, controlSystemValues->error_yawRate, CONTROLSYSTEM_KP_YAW_RATE, CONTROLSYSTEM_KI_YAW_RATE, CONTROLSYSTEM_KD_YAW_RATE);
+    CS_CalculatePID(&controlSystemValues->PID_Output_yawRate, &controlSystemValues->PID_previousIterm_yawRate, &controlSystemValues->PID_previousError_yawRate, controlSystemValues->error_yawRate, controlSystemValues->PID_Gains.kP_yawRate, controlSystemValues->PID_Gains.kI_yawRate, controlSystemValues->PID_Gains.kD_yawRate);
 
     /* Calculate motors speed */
     controlSystemValues->motor1_speed = (controlSystemValues->reference_throttle - controlSystemValues->PID_Output_rollRate - controlSystemValues->PID_Output_pitchRate - controlSystemValues->PID_Output_yawRate) / 10;

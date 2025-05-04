@@ -23,11 +23,18 @@
 
 /*
  * @file:    LiveTuningSystem_UAI.c
- * @date:    05/02/2025
+ * @date:    05/04/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   TODO.
+ * @brief:   This is a driver for live-tuning the flight controller control system via USB.
+ *           It is divided in two parts: One high level abstraction layer
+ *           (LiveTuningSystem_UAI.c and LiveTuningSystem_UAI.h) for interface with the
+ *           user application and one low level abstraction layer
+ *           (LiveTuningSystem_HWI.c and LiveTuningSystem_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver
+ *           to another platform, please only modify the low layer abstraction
+ *           layer files where the labels indicate it.
  */
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
@@ -36,7 +43,6 @@
 #include <string.h>
 
 /* --- Macros definitions ---------------------------------------------------------------------- */
-#define LOG_MESSAGE_MAX_LENGTH 1024
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -51,5 +57,95 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
+void LiveTune_PID_Gains(ControlSystem_PID_Gains_t *PID_Gains) {
+
+    uint8_t  buffer[160];
+    uint32_t buffer_length = sizeof(buffer);
+
+    if (USB_Read(buffer, &buffer_length)) {
+        /* Ensure buffer is null-terminated */
+        if (buffer_length < sizeof(buffer)) {
+            buffer[buffer_length] = '\0';
+        } else {
+            buffer[sizeof(buffer) - 1] = '\0';
+        }
+
+        /* Pointers to decode input string */
+        char *token;
+        char *saveptr1;
+        char *saveptr2;
+
+        /* Convert buffer to char* */
+        char *str = (char *)buffer;
+
+        /* Split string by slashes */
+        token     = strtok_r(str, "/", &saveptr1);
+        while (token != NULL) {
+            /* Split string by underscores */
+            char *id_str    = strtok_r(token, "_", &saveptr2);
+            char *value_str = strtok_r(NULL, "_", &saveptr2);
+
+            if (id_str && value_str) {
+                /* Convert extracted id and value */
+                int   signal_id    = atoi(id_str);
+                float signal_value = atof(value_str);
+
+                /* Update variables */
+                switch (signal_id) {
+                case 1:
+                    PID_Gains->kP_rollAngle = signal_value;
+                    break;
+                case 2:
+                    PID_Gains->kI_rollAngle = signal_value;
+                    break;
+                case 3:
+                    PID_Gains->kD_rollAngle = signal_value;
+                    break;
+                case 4:
+                    PID_Gains->kP_pitchAngle = signal_value;
+                    break;
+                case 5:
+                    PID_Gains->kI_pitchAngle = signal_value;
+                    break;
+                case 6:
+                    PID_Gains->kD_pitchAngle = signal_value;
+                    break;
+                case 7:
+                    PID_Gains->kP_rollRate = signal_value;
+                    break;
+                case 8:
+                    PID_Gains->kI_rollRate = signal_value;
+                    break;
+                case 9:
+                    PID_Gains->kD_rollRate = signal_value;
+                    break;
+                case 10:
+                    PID_Gains->kP_pitchRate = signal_value;
+                    break;
+                case 11:
+                    PID_Gains->kI_pitchRate = signal_value;
+                    break;
+                case 12:
+                    PID_Gains->kD_pitchRate = signal_value;
+                    break;
+                case 13:
+                    PID_Gains->kP_yawRate = signal_value;
+                    break;
+                case 14:
+                    PID_Gains->kI_yawRate = signal_value;
+                    break;
+                case 15:
+                    PID_Gains->kD_yawRate = signal_value;
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            /* Get next token */
+            token = strtok_r(NULL, "/", &saveptr1);
+        }
+    }
+}
 
 /* --- End of file ----------------------------------------------------------------------------- */

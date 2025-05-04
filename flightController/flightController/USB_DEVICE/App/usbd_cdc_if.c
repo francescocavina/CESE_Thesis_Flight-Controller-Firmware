@@ -260,13 +260,26 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   * @param  Len: Number of data received (in bytes)
   * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
-static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
-{
+ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len) {
   /* USER CODE BEGIN 6 */
-  uint32_t len = (*Len > USB_RX_BUFFER_SIZE) ? USB_RX_BUFFER_SIZE : *Len;
-  memcpy(usb_rx_buffer, Buf, len);
-  usb_rx_length = len;
-  usb_rx_ready = 1;
+  uint32_t len = *Len;
+
+  /* Ensure buffer size is not exceeded */
+  if (usb_rx_length + len > USB_RX_BUFFER_SIZE) {
+      len = USB_RX_BUFFER_SIZE - usb_rx_length;
+  }
+
+  /* Append new data to buffer */
+  memcpy(&usb_rx_buffer[usb_rx_length], Buf, len);
+  usb_rx_length += len;
+
+  /* Check for end of message */
+  for (uint32_t i = 0; i < usb_rx_length; i++) {
+      if (usb_rx_buffer[i] == '\n') {
+          usb_rx_ready = true;
+          break;
+      }
+  }
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &UserRxBufferFS[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);

@@ -68,6 +68,9 @@ typedef enum {
     CONTROL_SYSTEM_STATE_SAFE_RESTART_CHECK,
 } ControlSystem_StateMachine_t;
 
+/*
+ * @brief Radio Controller Channels.
+ */
 typedef enum {
     RC_CHANNEL_MOVEMENT_ROLL              = 0,
     RC_CHANNEL_MOVEMENT_PITCH             = 1,
@@ -80,6 +83,26 @@ typedef enum {
     RC_CHANNEL_FLIGHT_LIGHTS_SEQUENCE     = 8,
     RC_CHANNEL_FLIGHT_LIGHTS_ON_OFF       = 9,
 } RadioController_Channels_t;
+
+typedef struct {
+    /* PID Gains: Angles */
+    float kP_rollAngle;
+    float kI_rollAngle;
+    float kD_rollAngle;
+    float kP_pitchAngle;
+    float kI_pitchAngle;
+    float kD_pitchAngle;
+    /* PID Gains: Rates */
+    float kP_rollRate;
+    float kI_rollRate;
+    float kD_rollRate;
+    float kP_pitchRate;
+    float kI_pitchRate;
+    float kD_pitchRate;
+    float kP_yawRate;
+    float kI_yawRate;
+    float kD_yawRate;
+} ControlSystem_PID_Gains_t;
 
 /*
  * @brief Control System Values structure.
@@ -134,13 +157,8 @@ typedef struct {
     /* Errors: Angles */
     float error_rollAngle;
     float error_pitchAngle;
-    /* PID Gains: Angles */
-    float PID_kP_rollAngle;
-    float PID_kI_rollAngle;
-    float PID_kD_rollAngle;
-    float PID_kP_pitchAngle;
-    float PID_kI_pitchAngle;
-    float PID_kD_pitchAngle;
+    /* PID Gains */
+    ControlSystem_PID_Gains_t PID_Gains;
     /* PID (Angles): Previous Errors */
     float PID_previousError_rollAngle;
     float PID_previousError_pitchAngle;
@@ -158,16 +176,6 @@ typedef struct {
     float error_rollRate;
     float error_pitchRate;
     float error_yawRate;
-    /* PID Gains: Rates */
-    float PID_kP_rollRate;
-    float PID_kI_rollRate;
-    float PID_kD_rollRate;
-    float PID_kP_pitchRate;
-    float PID_kI_pitchRate;
-    float PID_kD_pitchRate;
-    float PID_kP_yawRate;
-    float PID_kI_yawRate;
-    float PID_kD_yawRate;
     /* PID (Rates): Previous Errors */
     float PID_previousError_rollRate;
     float PID_previousError_pitchRate;

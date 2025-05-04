@@ -23,11 +23,18 @@
 
 /*
  * @file:    LiveTuningSystem_UAI.h
- * @date:    05/02/2025
+ * @date:    05/04/2025
  * @author:  Francesco Cavina <francescocavina98@gmail.com>
  * @version: v1.0.0
  *
- * @brief:   TODO.
+ * @brief:   This is a driver for live-tuning the flight controller control system via USB.
+ *           It is divided in two parts: One high level abstraction layer
+ *           (LiveTuningSystem_UAI.c and LiveTuningSystem_UAI.h) for interface with the
+ *           user application and one low level abstraction layer
+ *           (LiveTuningSystem_HWI.c and LiveTuningSystem_HWI.h) for interface with the
+ *           hardware (also known as port). In case of need to port this driver
+ *           to another platform, please only modify the low layer abstraction
+ *           layer files where the labels indicate it.
  */
 
 #ifndef INC_LIVE_TUNING_SYSTEM_UAI_H
@@ -35,6 +42,7 @@
 
 /* --- Headers files inclusions ---------------------------------------------------------------- */
 #include "LiveTuningSystem_HWI.h"
+#include "control_system_support.h"
 
 /* --- C++ guard ------------------------------------------------------------------------------- */
 #ifdef __cplusplus
@@ -48,6 +56,12 @@ extern "C" {
 /* --- Public variable declarations ------------------------------------------------------------ */
 
 /* --- Public function declarations ------------------------------------------------------------ */
+/*
+ * @brief  Live-tunes the PID gains of the flight controller control system.
+ * @param  PID_Gains: Pointer to the structure containing the PID gains to be tuned.
+ * @retval None
+ */
+void LiveTune_PID_Gains(ControlSystem_PID_Gains_t *PID_Gains);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus
