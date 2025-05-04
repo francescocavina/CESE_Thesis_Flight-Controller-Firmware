@@ -75,7 +75,11 @@ void CS_CalculateAnglesFromAccelerations(ControlSystemValues_t *controlSystemVal
 
 /*
  * @brief  Calculates an angle using a Kalman filter.
- * @param  TODO
+ * @param  predictedAngle:            Pointer to the predicted angle.
+ *         predictedAngleUncertainty: Pointer to the predicted angle uncertainty.
+ *         gain:                      Pointer to the Kalman gain.
+ *         gyro_rotationRate:         Gyroscope rotation rate.
+ *         acc_calculatedAngle:       Accelerometer calculated angle.
  * @retval None
  */
 void CS_Kalman_CalculateAngle(float *predictedAngle, float *predictedAngleUncertainty, float *gain, float gyro_rotationRate, float acc_calculatedAngle);

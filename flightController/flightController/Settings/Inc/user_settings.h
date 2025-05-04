@@ -62,8 +62,12 @@ extern "C" {
 /* --- ON-BOARD HEARTEAT LIGHT ----------------------------------------------------------------- */
 #define HEARTBEAT_PERIOD (500) // Heartbeat period in [ms] (duty cycle is 50%)
 
-/* --- OTHER FUNCTIONALITIES --------------------------------------------------------------------*/
+/* --- OTHER FUNCTIONALITIES ------------------------------------------------------------------- */
 #define INITIALIZATION_READY_BEEPING (0) // Beep when the flight controller is ready to fly
+
+/* --- DEVELOPER TOOLS ------------------------------------------------------------------------- */
+#define MAIN_APP_LOGGING_DEBUGGING_ENABLED  (1) // Enable Logging and Debugging System
+#define MAIN_APP_LIVE_TUNING_SYSTEM_ENABLED (1) // Enable Live Tuning System
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

@@ -57,7 +57,7 @@
 /* --- Private function implementation --------------------------------------------------------- */
 
 /* --- Public function implementation ---------------------------------------------------------- */
-void LiveTune_PID_Gains(ControlSystem_PID_Gains_t *PID_Gains) {
+bool_t LiveTune_CS_PID_Gains(ControlSystem_PID_Gains_t *PID_Gains) {
 
     uint8_t  buffer[160];
     uint32_t buffer_length = sizeof(buffer);
@@ -145,6 +145,10 @@ void LiveTune_PID_Gains(ControlSystem_PID_Gains_t *PID_Gains) {
             /* Get next token */
             token = strtok_r(NULL, "/", &saveptr1);
         }
+
+        return true;
+    } else {
+        return false;
     }
 }
 

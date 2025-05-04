@@ -59,9 +59,9 @@ extern "C" {
 /*
  * @brief  Live-tunes the PID gains of the flight controller control system.
  * @param  PID_Gains: Pointer to the structure containing the PID gains to be tuned.
- * @retval None
+ * @retval true if the PID gains were updated, false otherwise.
  */
-void LiveTune_PID_Gains(ControlSystem_PID_Gains_t *PID_Gains);
+bool_t LiveTune_CS_PID_Gains(ControlSystem_PID_Gains_t *PID_Gains);
 
 /* --- End of C++ guard ------------------------------------------------------------------------ */
 #ifdef __cplusplus

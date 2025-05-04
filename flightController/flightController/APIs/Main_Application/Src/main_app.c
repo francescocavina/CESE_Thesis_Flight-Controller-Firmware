@@ -69,7 +69,6 @@
 #define USB_COMMUNICATION_INFO_QUEUE_SIZE  (32)
 #define USB_COMMUNICATION_DEBUG_QUEUE_SIZE (1)
 /* Logging and Debugging Settings */
-#define MAIN_APP_LOGGING_DEBUGGING                                   (1)
 #define MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE                       (1000)
 #define MAIN_APP_DEBUGGING_FSA8S_MAIN                                (1)
 #define MAIN_APP_DEBUGGING_FSA8S_AUX                                 (1)
@@ -100,7 +99,7 @@
 #define MAIN_APP_DEBUGGING_CONTROLSYSTEM_AUXILIAR                    (1)
 #define MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK                 (1)
 /* Battery Level Settings */
-#define BATTERY_LEVEL_CALIBRATION_OFFSET (-0.13)
+#define BATTERY_LEVEL_CALIBRATION_OFFSET (0.27f)
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -122,6 +121,7 @@ static QueueHandle_t Queue_Handle_USB_Communication_Info          = NULL; // Que
 static QueueHandle_t Queue_Handle_USB_Communication_Debug         = NULL; // Queue to send pointers to Task_USB_Communication with debugging strings
 static QueueHandle_t Queue_Handle_FlightLights_Commands           = NULL; // Queue to send pointers to Task_FlightLights with flight lights radio controller commands
 static QueueHandle_t Queue_Handle_BatteryLevel                    = NULL; // Queue to send battery level from Task_BatteryLevel to Task_BatteryAlarm
+static QueueHandle_t Queue_Handle_LiveTuningSystem_PID_Gains      = NULL; // Queue to send PID gains from Task_LiveTuningSystem to Task_ControlSystem
 /* Semaphores Handles */
 static SemaphoreHandle_t Semaphore_Handle_controlSystemValuesSwap = NULL;
 static SemaphoreHandle_t Semaphore_Handle_debuggingBufferSwap     = NULL;
@@ -143,7 +143,7 @@ static bool_t   Timer_Flag_OnOffButton                            = false;
 static uint16_t Timer_AutoReloadTime_OnOffButton                  = PW_ON_OFF_DRIVER_TIME;
 
 /* Control System Variables Debugging */
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
 static ControlSystemValues_t  controlSystemValues_A;
 static ControlSystemValues_t  controlSystemValues_B;
 static ControlSystemValues_t *controlSystemActiveValues_TaskControlSystem = &controlSystemValues_A; // Task_ControlSystem writes here
@@ -157,7 +157,7 @@ static uint16_t *FlightLightsActiveBuffer_TaskControlSystem = FlightLights_Buffe
 static uint16_t *FlightLightsActiveBuffer_TaskFlightLights  = FlightLights_Buffer_B; // Task_FlightLights reads from here here
 
 /* Stack High Watermarks Variables */
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
 static UBaseType_t Task_StackHighWatermark_OnOffButton       = 0;
 static UBaseType_t Task_StackHighWatermark_StartUp           = 0;
 static UBaseType_t Task_StackHighWatermark_IMU_Calibration   = 0;
@@ -172,7 +172,7 @@ static UBaseType_t Task_StackHighWatermark_LiveTuningSystem  = 0;
 #endif
 
 /* Debugging Variables */
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
 static uint8_t  debuggingStr_A[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
 static uint8_t  debuggingStr_B[MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE];
 static uint8_t *debuggingActiveBuffer_TaskDebugging                      = debuggingStr_A; // Task_Debugging writes here
@@ -415,7 +415,7 @@ bool_t FreeRTOS_CreateQueues(void) {
         return false;
     }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
     /* Queue 3: USB Communication - Debugging */
     Queue_Handle_USB_Communication_Debug = xQueueCreate(USB_COMMUNICATION_DEBUG_QUEUE_SIZE, sizeof(uint8_t *));
     if (Queue_Handle_USB_Communication_Debug == NULL) {
@@ -435,13 +435,19 @@ bool_t FreeRTOS_CreateQueues(void) {
         return false;
     }
 
+    /* Queue 6: Live Tuning System - Control System PID Gains */
+    Queue_Handle_LiveTuningSystem_PID_Gains = xQueueCreate(1, sizeof(ControlSystem_PID_Gains_t));
+    if (Queue_Handle_LiveTuningSystem_PID_Gains == NULL) {
+        return false;
+    }
+
     /* Successfully created all queues */
     return true;
 }
 
 bool_t FreeRTOS_CreateSemaphores(void) {
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
     /* Semaphore 1: Control System Values */
     Semaphore_Handle_controlSystemValuesSwap = xSemaphoreCreateBinary();
     if (Semaphore_Handle_controlSystemValuesSwap == NULL) {
@@ -478,7 +484,7 @@ bool_t FreeRTOS_CreateTasks(void) {
         return false;
     }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
     /* Task 5: USB_Communication */
     xTaskCreate(Task_USB_Communication, "Task_USB_Communication", (4 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_USBCOMMUNICATION_PRIORITY), &Task_Handle_USB_Communication);
     if (Task_Handle_USB_Communication == NULL) {
@@ -516,11 +522,13 @@ bool_t FreeRTOS_CreateTasks(void) {
         return false;
     }
 
+#if (MAIN_APP_LIVE_TUNING_SYSTEM_ENABLED == 1)
     /* Task 11: LiveTuningSystem */
     xTaskCreate(Task_LiveTuningSystem, "Task_LiveTuningSystem", (2 * configMINIMAL_STACK_SIZE), NULL, (tskIDLE_PRIORITY + (uint32_t)TASK_LIVETUNINGSYSTEM_PRIORITY), &Task_Handle_LiveTuningSystem);
     if (Task_Handle_LiveTuningSystem == NULL) {
         return false;
     }
+#endif
 
     /* Successfully created all tasks */
     return true;
@@ -548,7 +556,7 @@ void Task_OnOffButton(void *ptr) {
             OnOffButton_ReleaseRequired = false;
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_OnOffButton = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -605,7 +613,7 @@ void Task_StartUp(void *ptr) {
             }
 
 /* Initialize buffer structures */
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
             memset(&controlSystemValues_A, 0, sizeof(ControlSystemValues_t));
             memset(&controlSystemValues_B, 0, sizeof(ControlSystemValues_t));
             memset(debuggingStr_A, 0, MAIN_APP_LOGGING_DEBUGGING_BUFFER_SIZE);
@@ -616,7 +624,7 @@ void Task_StartUp(void *ptr) {
             vTaskSuspend(Task_Handle_StartUp);
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_StartUp = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -636,7 +644,7 @@ void Task_IMU_Calibration(void *ptr) {
 
     while (1) {
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_IMU_Calibration = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -675,6 +683,9 @@ void Task_ControlSystem(void *ptr) {
     TickType_t xControlLoopPeriod    = 0;
     /* Variables to measure the execution time of the task */
     TickType_t xTaskStartTime;
+
+    /* Live Tuning System variables */
+    ControlSystem_PID_Gains_t PIDGains;
 
     while (1) {
         /* Record task start time for execution measurement */
@@ -749,6 +760,14 @@ void Task_ControlSystem(void *ptr) {
 #endif
 
         } else if (FlightController_isInitialized && 1 == CONTROLSYSTEM_MODE) {
+
+#if (MAIN_APP_LIVE_TUNING_SYSTEM_ENABLED == 1)
+            /* Read PID gains from Live Tuning System */
+            if (xQueuePeek(Queue_Handle_LiveTuningSystem_PID_Gains, &PIDGains, 0)) {
+                /* Save new PID Gains */
+                controlSystemValues.PID_Gains = PIDGains;
+            }
+#endif
 
             /* Read FS-A8S channels */
             for (uint8_t i = 0; i < FSA8S_CHANNELS; i++) {
@@ -839,7 +858,7 @@ void Task_ControlSystem(void *ptr) {
             }
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
         /* Control Loop Period */
         controlSystemValues.controlLoopPeriod = xControlLoopPeriod;
         /* Task Execution Time */
@@ -876,7 +895,7 @@ void Task_ControlSystem(void *ptr) {
             xQueueSend(Queue_Handle_FlightLights_Commands, &FlightLightsActiveBuffer_TaskFlightLights, 0);
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_ControlSystem = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -919,7 +938,7 @@ void Task_USB_Communication(void *ptr) {
             }
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_USB_Communication = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -932,7 +951,7 @@ void Task_USB_Communication(void *ptr) {
 void Task_Debugging(void *ptr) {
     (void)ptr;
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1)
     /* Change delay from time in [ms] to ticks */
     const TickType_t xTaskPeriod = pdMS_TO_TICKS(8);
     /* Get initial tick count */
@@ -1323,7 +1342,7 @@ void Task_Debugging(void *ptr) {
             xQueueSend(Queue_Handle_USB_Communication_Debug, &logDebuggingString, 0);
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_Debugging = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1357,19 +1376,20 @@ void Task_BatteryLevel(void *ptr) {
                 adcValue                      = HAL_ADC_GetValue(&hadc1);
 
                 /* Convert ADC value to real value */
-                FlightController_batteryLevel = (adcValue * 3.3) / 4096;
-
-                /* Correct real value, as when battery full, ADC input is not 3.3V */
-                FlightController_batteryLevel = FlightController_batteryLevel * 1.046046;
+                FlightController_batteryLevel = (adcValue * 3.3f) / 4096;
 
                 /* Map real value to battery levels */
-                FlightController_batteryLevel = FlightController_batteryLevel * 3.363636 + BATTERY_LEVEL_CALIBRATION_OFFSET;
+                FlightController_batteryLevel = FlightController_batteryLevel * ((68.0f + 27.0f) / 27.0f) + BATTERY_LEVEL_CALIBRATION_OFFSET;
 
-                /* Send to queue, overwriting old value */
-                xQueueOverwrite(Queue_Handle_BatteryLevel, &FlightController_batteryLevel);
+            } else {
+                /* Error in ADC conversion */
+                FlightController_batteryLevel = -1.0f;
             }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+            /* Send to queue, overwriting old value */
+            xQueueOverwrite(Queue_Handle_BatteryLevel, &FlightController_batteryLevel);
+
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
             /* Get stack watermark */
             Task_StackHighWatermark_BatteryLevel = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1427,7 +1447,7 @@ void Task_BatteryAlarm(void *ptr) {
                 }
             }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
             /* Get stack watermark */
             Task_StackHighWatermark_BatteryAlarm = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1453,7 +1473,7 @@ void Task_HeartbeatLight(void *ptr) {
         ledState = (ledState == GPIO_PIN_RESET) ? GPIO_PIN_SET : GPIO_PIN_RESET;
         HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, ledState);
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_HeartbeatLight = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1575,7 +1595,7 @@ void Task_FlightLights(void *ptr) {
             xSequenceLastWakeTime = xTaskGetTickCount();
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_FlightLights = uxTaskGetStackHighWaterMark(NULL);
 #endif
@@ -1598,12 +1618,16 @@ void Task_LiveTuningSystem(void *ptr) {
     while (1) {
 
         if (FlightController_isInitialized) {
-            PID_Gains = controlSystemValues.PID_Gains;
-            LiveTune_PID_Gains(&PID_Gains);
-            controlSystemValues.PID_Gains = PID_Gains;
+
+            /* Read PID gains from Live Tuning System */
+            if (LiveTune_CS_PID_Gains(&PID_Gains)) {
+
+                /* Send to queue, overwriting old values */
+                xQueueOverwrite(Queue_Handle_LiveTuningSystem_PID_Gains, &PID_Gains);
+            }
         }
 
-#if (MAIN_APP_LOGGING_DEBUGGING == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
+#if (MAIN_APP_LOGGING_DEBUGGING_ENABLED == 1 && MAIN_APP_DEBUGGING_TASK_STACK_HIGH_WATERMARK == 1)
         /* Get stack watermark */
         Task_StackHighWatermark_LiveTuningSystem = uxTaskGetStackHighWaterMark(NULL);
 #endif
