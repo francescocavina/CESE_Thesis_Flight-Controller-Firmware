@@ -52,7 +52,6 @@
 #define IBUS_BUFFER_LENGTH         (0X20) // 32 bytes of data for every transaction in iBus protocol
 #define IBUS_COMMAND               (0x40) // 40 is default value for second data byte
 #define IBUS_CHANNELS              (0x0E) // 14 channels allows iBus protocol
-#define IBUS_CHANNEL_MAX_VALUE     (1000) // This value MUST be between 100 and 65535
 #define IBUS_CHANNEL_MIN_RAW_VALUE (1000) // Minimum raw value received from receiver
 #define IBUS_CHANNEL_MAX_RAW_VALUE (2000) // Maximum raw value received from receiver
 #define IBUS_CHANNEL_NUM_OFFSET    (1)    // Offset because Channel_1 has value 0 in enumeration

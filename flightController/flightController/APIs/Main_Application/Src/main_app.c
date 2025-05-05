@@ -371,28 +371,42 @@ void Initialize_SystemVariables(void) {
     /* Control System: State Machine */
     controlSystemValues.stateMachine_currentState        = CONTROL_SYSTEM_STATE_INIT;
 
+    /* GY87 IMU - Fixed Calibration Values (Gyroscope) */
+    if (GY87_CALIBRATION_EN == 0) {
+        controlSystemValues.gyroCalibration.calibrationRateRoll  = -1.87f;
+        controlSystemValues.gyroCalibration.calibrationRatePitch = 2.22f;
+        controlSystemValues.gyroCalibration.calibrationRateYaw   = 1.42f;
+    }
+
+    /* GY87 IMU - Fixed Calibration Values (Accelerometer)*/
+    if (GY87_CALIBRATION_EN == 0) {
+        controlSystemValues.accCalibration.calibrationLinearAccelerationX = -0.001f;
+        controlSystemValues.accCalibration.calibrationLinearAccelerationY = 0.044f;
+        controlSystemValues.accCalibration.calibrationLinearAccelerationZ = -0.012f;
+    }
+
     /* Control System: Kalman Values */
-    controlSystemValues.KalmanPrediction_rollAngle       = 0;
-    controlSystemValues.KalmanPrediction_pitchAngle      = 0;
-    controlSystemValues.KalmanUncertainty_rollAngle      = 2 * 2;
-    controlSystemValues.KalmanUncertainty_pitchAngle     = 2 * 2;
+    controlSystemValues.KalmanPrediction_rollAngle   = 0;
+    controlSystemValues.KalmanPrediction_pitchAngle  = 0;
+    controlSystemValues.KalmanUncertainty_rollAngle  = 2 * 2;
+    controlSystemValues.KalmanUncertainty_pitchAngle = 2 * 2;
 
     /* Control System: PID Gains */
-    controlSystemValues.PID_Gains.kP_rollAngle           = CONTROLSYSTEM_KP_ROLL_ANGLE;
-    controlSystemValues.PID_Gains.kI_rollAngle           = CONTROLSYSTEM_KI_ROLL_ANGLE;
-    controlSystemValues.PID_Gains.kD_rollAngle           = CONTROLSYSTEM_KD_ROLL_ANGLE;
-    controlSystemValues.PID_Gains.kP_pitchAngle          = CONTROLSYSTEM_KP_PITCH_ANGLE;
-    controlSystemValues.PID_Gains.kI_pitchAngle          = CONTROLSYSTEM_KI_PITCH_ANGLE;
-    controlSystemValues.PID_Gains.kD_pitchAngle          = CONTROLSYSTEM_KD_PITCH_ANGLE;
-    controlSystemValues.PID_Gains.kP_rollRate            = CONTROLSYSTEM_KP_ROLL_RATE;
-    controlSystemValues.PID_Gains.kI_rollRate            = CONTROLSYSTEM_KI_ROLL_RATE;
-    controlSystemValues.PID_Gains.kD_rollRate            = CONTROLSYSTEM_KD_ROLL_RATE;
-    controlSystemValues.PID_Gains.kP_pitchRate           = CONTROLSYSTEM_KP_PITCH_RATE;
-    controlSystemValues.PID_Gains.kI_pitchRate           = CONTROLSYSTEM_KI_PITCH_RATE;
-    controlSystemValues.PID_Gains.kD_pitchRate           = CONTROLSYSTEM_KD_PITCH_RATE;
-    controlSystemValues.PID_Gains.kP_yawRate             = CONTROLSYSTEM_KP_YAW_RATE;
-    controlSystemValues.PID_Gains.kI_yawRate             = CONTROLSYSTEM_KI_YAW_RATE;
-    controlSystemValues.PID_Gains.kD_yawRate             = CONTROLSYSTEM_KD_YAW_RATE;
+    controlSystemValues.PID_Gains.kP_rollAngle       = CONTROLSYSTEM_KP_ROLL_ANGLE;
+    controlSystemValues.PID_Gains.kI_rollAngle       = CONTROLSYSTEM_KI_ROLL_ANGLE;
+    controlSystemValues.PID_Gains.kD_rollAngle       = CONTROLSYSTEM_KD_ROLL_ANGLE;
+    controlSystemValues.PID_Gains.kP_pitchAngle      = CONTROLSYSTEM_KP_PITCH_ANGLE;
+    controlSystemValues.PID_Gains.kI_pitchAngle      = CONTROLSYSTEM_KI_PITCH_ANGLE;
+    controlSystemValues.PID_Gains.kD_pitchAngle      = CONTROLSYSTEM_KD_PITCH_ANGLE;
+    controlSystemValues.PID_Gains.kP_rollRate        = CONTROLSYSTEM_KP_ROLL_RATE;
+    controlSystemValues.PID_Gains.kI_rollRate        = CONTROLSYSTEM_KI_ROLL_RATE;
+    controlSystemValues.PID_Gains.kD_rollRate        = CONTROLSYSTEM_KD_ROLL_RATE;
+    controlSystemValues.PID_Gains.kP_pitchRate       = CONTROLSYSTEM_KP_PITCH_RATE;
+    controlSystemValues.PID_Gains.kI_pitchRate       = CONTROLSYSTEM_KI_PITCH_RATE;
+    controlSystemValues.PID_Gains.kD_pitchRate       = CONTROLSYSTEM_KD_PITCH_RATE;
+    controlSystemValues.PID_Gains.kP_yawRate         = CONTROLSYSTEM_KP_YAW_RATE;
+    controlSystemValues.PID_Gains.kI_yawRate         = CONTROLSYSTEM_KI_YAW_RATE;
+    controlSystemValues.PID_Gains.kD_yawRate         = CONTROLSYSTEM_KD_YAW_RATE;
 }
 
 bool_t FreeRTOS_CreateTimers(void) {

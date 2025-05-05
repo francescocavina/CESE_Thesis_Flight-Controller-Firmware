@@ -48,6 +48,8 @@
 #endif
 #define RADIANS_TO_DEGREES_CONST (180.0f / M_PI)
 #define DEGREES_TO_RADIANS_CONST (M_PI / 180.0f)
+#define MAX_ANGLE_REFERENCE      (40.0f) // Maximum angle reference in degrees
+#define MAX_RATE_REFERENCE       (30.0f) // Maximum rate reference in degrees/s
 
 /* --- Private data type declarations ---------------------------------------------------------- */
 
@@ -376,8 +378,8 @@ void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues) {
     CS_ApplyRadioControllerDeadBand(&controlSystemValues->reference_yawValue);
 
     /* Calculate desired angles by mapping radio controller values to angles */
-    controlSystemValues->reference_rollAngle  = 0.03 * (controlSystemValues->reference_rollValue - 500);
-    controlSystemValues->reference_pitchAngle = 0.03 * (controlSystemValues->reference_pitchValue - 500);
+    controlSystemValues->reference_rollAngle  = (MAX_ANGLE_REFERENCE / (IBUS_CHANNEL_MAX_VALUE / 2)) * (controlSystemValues->reference_rollValue - (IBUS_CHANNEL_MAX_VALUE / 2));
+    controlSystemValues->reference_pitchAngle = (MAX_ANGLE_REFERENCE / (IBUS_CHANNEL_MAX_VALUE / 2)) * (controlSystemValues->reference_pitchValue - (IBUS_CHANNEL_MAX_VALUE / 2));
 
     /* Calculate angles errors */
     controlSystemValues->error_rollAngle      = controlSystemValues->reference_rollAngle - controlSystemValues->KalmanPrediction_rollAngle;
@@ -391,7 +393,7 @@ void CS_StateMachine_Running(ControlSystemValues_t *controlSystemValues) {
     /* Calculate desired rates */
     controlSystemValues->reference_rollRate  = controlSystemValues->PID_Output_rollAngle;
     controlSystemValues->reference_pitchRate = controlSystemValues->PID_Output_pitchAngle;
-    controlSystemValues->reference_yawRate   = 0.03 * (controlSystemValues->reference_yawValue - 500);
+    controlSystemValues->reference_yawRate   = (MAX_RATE_REFERENCE / (IBUS_CHANNEL_MAX_VALUE / 2)) * (controlSystemValues->reference_yawValue - (IBUS_CHANNEL_MAX_VALUE / 2));
 
     /* Calculate rates errors */
     controlSystemValues->error_rollRate      = controlSystemValues->reference_rollRate - controlSystemValues->gyroMeasurement.rotationRateRoll;

@@ -56,6 +56,7 @@ extern "C" {
 #endif
 
 /* --- Public macros definitions --------------------------------------------------------------- */
+#define IBUS_CHANNEL_MAX_VALUE (1000) // This value MUST be between 100 and 65535
 
 /* --- Public data type declarations ----------------------------------------------------------- */
 /*
